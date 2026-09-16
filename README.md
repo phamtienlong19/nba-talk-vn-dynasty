@@ -24,6 +24,27 @@ Sanitizes (strips local Yahoo `@font-face`/`.woff` refs, rejects
 `/mnt/data`, `file://`, `localhost`), validates, and — if valid — commits
 and pushes as the new `index.html`.
 
+## Report a correction / start work on an issue
+
+GitHub Issues are the canonical task inbox (use the "Correction / feedback"
+template, or a blank issue). To implement one:
+
+```bash
+./work-issue.sh <issue-number>
+```
+
+Prepares a task branch + `tasks/ACTIVE.md` pointer and launches Claude
+Code to implement it, validate, and open a PR (`Closes #N`, never
+auto-merged). After a human merges the PR on GitHub:
+
+```bash
+./sync-after-merge.sh <PR-number>
+```
+
+Normalizes local/repo state (archives the completed task pointer, resets
+`tasks/ACTIVE.md`, refreshes `ai_exchange/CURRENT_STATE.json` and the
+deployment-freshness marker). See `CLAUDE.md` for the full workflow.
+
 ## Refresh Yahoo player/cap data (read-only, does not touch the board)
 
 ```bash

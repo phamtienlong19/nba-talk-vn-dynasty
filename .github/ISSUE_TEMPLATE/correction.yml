@@ -1,0 +1,51 @@
+name: Correction / feedback
+description: Something on the board or in the workflow is wrong.
+title: ""
+labels: []
+body:
+  - type: textarea
+    id: whats-wrong
+    attributes:
+      label: What is wrong?
+      description: Plain language is fine.
+    validations:
+      required: true
+  - type: textarea
+    id: what-should-it-be
+    attributes:
+      label: What should it be?
+    validations:
+      required: false
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where did you notice it?
+      options:
+        - Public board
+        - Roster
+        - Cap
+        - Draft order
+        - FA pool
+        - Workflow/automation
+        - Other
+    validations:
+      required: false
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence/source (optional)
+      description: A link, screenshot, or anything backing this up.
+    validations:
+      required: false
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot/link (optional)
+    validations:
+      required: false
+  - type: textarea
+    id: must-not-change
+    attributes:
+      label: Anything that must NOT change? (optional)
+    validations:
+      required: false
