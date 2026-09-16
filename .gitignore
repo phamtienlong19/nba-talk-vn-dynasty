@@ -1,0 +1,8 @@
+/local_sources/
+/local_data/
+/incoming/*
+!/incoming/README.md
+
+.DS_Store
+__pycache__/
+*.pyc
