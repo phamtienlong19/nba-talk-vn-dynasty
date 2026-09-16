@@ -64,6 +64,18 @@ MINIMAL_VALIDATE_SH = """#!/usr/bin/env bash
 exit 0
 """
 
+# Injected via DEPLOYMENT_FRESHNESS_FETCH_CMD (see sync-after-merge.sh /
+# scripts/deployment_freshness.py --fetch-cmd) so that any test exercising
+# the deployment-freshness step gets an instant, offline "Pages is fresh"
+# response -- echoing back the very build.json the script just wrote --
+# instead of a real HTTP poll against a live GitHub Pages site.
+FAKE_DEPLOYMENT_FETCH = """#!/usr/bin/env python3
+import sys
+
+with open("build.json", encoding="utf-8") as f:
+    sys.stdout.write(f.read())
+"""
+
 
 def _chmod_x(path: Path) -> None:
     path.chmod(path.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
@@ -78,6 +90,9 @@ def make_fake_bin(tmp_dir: Path) -> Path:
     claude_path = bin_dir / "claude"
     claude_path.write_text(FAKE_CLAUDE)
     _chmod_x(claude_path)
+    fetch_path = bin_dir / "fake-deployment-fetch"
+    fetch_path.write_text(FAKE_DEPLOYMENT_FETCH)
+    _chmod_x(fetch_path)
     return bin_dir
 
 
@@ -171,6 +186,10 @@ def run_script(
 ) -> subprocess.CompletedProcess:
     env = dict(os.environ)
     env["PATH"] = f"{fake_bin}:{env['PATH']}"
+    # Default test-mode seam for sync-after-merge.sh's deployment-freshness
+    # step (no-op unless a test actually configures a non-empty publicUrl).
+    # Callers can override via env_extra.
+    env["DEPLOYMENT_FRESHNESS_FETCH_CMD"] = str(fake_bin / "fake-deployment-fetch")
     if env_extra:
         env.update(env_extra)
     return subprocess.run(

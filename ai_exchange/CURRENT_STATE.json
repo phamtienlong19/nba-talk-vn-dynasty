@@ -12,10 +12,10 @@
     "liveContentCheck": "PASS"
   },
   "working": {
-    "branch": "chore/final-workflow-optimization",
-    "commit": "2f9eaf7ecfe49d9659f17e064faa366d857a461f",
-    "issue": null,
-    "prUrl": "https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/4",
+    "branch": "claude/issue-11-20260916-0824",
+    "commit": null,
+    "issue": 11,
+    "prUrl": null,
     "status": "READY_FOR_REVIEW"
   },
   "canonicalState": {

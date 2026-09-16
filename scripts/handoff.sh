@@ -44,6 +44,9 @@ DIRTY="$(git status --porcelain 2>/dev/null)"
 WORKING_TREE="$([ -z "$DIRTY" ] && echo clean || echo dirty)"
 REPO_URL="$(git remote get-url origin 2>/dev/null || echo none)"
 REPO_URL="${REPO_URL%.git}"
+# Strip any embedded credentials (e.g. CI's x-access-token:<token>@) --
+# this packet gets committed, so it must never carry a live secret.
+REPO_URL="$(echo "$REPO_URL" | sed -E 's#(://)[^/@]*@#\1#')"
 
 DIFF_STAT="(no diff against ${BASE_BRANCH})"
 CHANGED_FILES="(none)"

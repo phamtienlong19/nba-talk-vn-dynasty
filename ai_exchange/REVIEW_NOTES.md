@@ -6,21 +6,22 @@ file isn't meant to accumulate history (Git already has that).
 
 ## Issues
 
-(none)
+- Could not reproduce the reported 30s timeout in this sandbox (network
+  calls require explicit approval here and `PUBLIC_URL` is empty in the
+  test fixture, so `deployment_freshness.py check` was never reached).
+  The fix removes the dependency on that incidental empty-URL skip
+  regardless: `sync-after-merge.sh` now threads a
+  `DEPLOYMENT_FRESHNESS_FETCH_CMD` override into
+  `scripts/deployment_freshness.py check --fetch-cmd`, defaulting to the
+  real HTTP fetch in production and to an injected offline fetcher in
+  tests. A new test
+  (`test_deployment_freshness_check_is_deterministic_when_public_url_set`)
+  configures a non-empty `publicUrl` and asserts the check actually runs
+  and returns `FRESH` fast via the injected fetcher, proving the seam
+  works end-to-end rather than merely being skipped.
 
 ## Decisions Required
 
-- `work-issue.sh` launches Claude Code with `claude -p --permission-mode
-  auto`. `auto` mirrors this repo's normal interactive working mode
-  (proceed without stopping for routine tool approvals, but still able
-  to decline/stop on a genuinely blocking decision) rather than
-  `bypassPermissions`/`--dangerously-skip-permissions`, which Claude
-  Code's own `--help` discourages for anything touching the network
-  (this invocation does: `git push`, `gh pr create`). If a different
-  permission posture is wanted for unattended runs, that's a one-line
-  change in `work-issue.sh`.
-- `ai_exchange/ARTIFACT_MANIFEST.json` was left untouched: there's no
-  established regeneration tooling for it (it wasn't produced by any
-  script in this bootstrap), and hand-maintaining hashes for every file
-  this pass touched risked getting it wrong. Flagging in case it's
-  expected to stay in sync.
+- Please confirm this addresses the timeout as observed in your
+  environment (e.g. re-run CI on this branch) since it could not be
+  reproduced locally.
