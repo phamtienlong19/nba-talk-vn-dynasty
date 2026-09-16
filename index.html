@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1f42"><title>NBA Talk VN Dynasty — Compact Announcement Board</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1f42"><title>NBA Talk VN Dynasty — Compact Announcement Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
 
 :root{
   --y-purple:#6001d2;
@@ -25,11 +29,12 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;background:var(--canvas)}
-body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
+body{font-family:"Inter","Helvetica Neue",Arial,sans-serif;
   margin:0;color:var(--ink);background:
   radial-gradient(circle at 10% 0%,rgba(96,1,210,.08),transparent 28rem),
   linear-gradient(180deg,#f5f7fb 0%,var(--canvas) 100%);
-  font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
+  font-family:"Inter","Helvetica Neue",Arial,sans-serif;
+  font-weight:400;
   -webkit-font-smoothing:antialiased;
 }
 .yicon{width:15px;height:15px;fill:currentColor;display:inline-block;vertical-align:-2px;flex:0 0 auto}
@@ -45,8 +50,8 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 }
 .topbar-inner::-webkit-scrollbar{display:none}
 .brand{
-  display:flex;align-items:center;gap:9px;font-weight:900;white-space:nowrap;
-  font-family:"Yahoo Sans Cond","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  display:flex;align-items:center;gap:9px;font-weight:800;white-space:nowrap;
+  font-family:"Inter","Helvetica Neue",Arial,sans-serif;
   letter-spacing:.02em;font-size:16px;margin-right:auto;
 }
 .brand-mark{
@@ -56,7 +61,7 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 }
 .navlink{
   color:#dae2f2;text-decoration:none;white-space:nowrap;
-  font-weight:750;font-size:12px;padding:7px 9px;border-radius:7px;
+  font-weight:600;font-size:12px;padding:7px 9px;border-radius:7px;
 }
 .navlink:hover{background:#ffffff12;color:white}
 .page{
@@ -68,16 +73,16 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 }
 .page-kicker{
   color:var(--y-purple);text-transform:uppercase;letter-spacing:.11em;
-  font-size:11px;font-weight:900;text-align:center;margin-bottom:4px
+  font-size:11px;font-weight:600;text-align:center;margin-bottom:4px
 }
 .title{
-  font-family:"Yahoo Sans Cond","Arial Narrow","Helvetica Neue",Arial,sans-serif;
-  font-size:46px;line-height:.98;font-weight:950;letter-spacing:-.025em;
+  font-family:"Inter","Helvetica Neue",Arial,sans-serif;
+  font-size:46px;line-height:.98;font-weight:800;letter-spacing:-.025em;
   color:var(--navy);text-align:center
 }
 .subtitle{
   font-size:20px;line-height:1.25;text-align:center;color:#555f70;
-  margin:8px auto 16px;font-weight:650
+  margin:8px auto 16px;font-weight:400
 }
 .meta-strip{
   display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px
@@ -106,36 +111,36 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 .team-index{
   width:42px;height:42px;border-radius:10px;display:grid;place-items:center;
   color:#fff;background:var(--navy);
-  font-family:"Yahoo Sans Cond","Arial Narrow",Arial,sans-serif;
-  font-size:24px;font-weight:950;letter-spacing:-.02em;
+  font-family:"Roboto Mono",ui-monospace,Menlo,monospace;
+  font-size:24px;font-weight:700;letter-spacing:-.02em;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)
 }
 .team-name{
-  font-family:"Yahoo Sans Cond","Arial Narrow","Helvetica Neue",Arial,sans-serif;
-  font-size:21px;line-height:1.02;font-weight:950;color:#121b2e;
+  font-family:"Inter","Helvetica Neue",Arial,sans-serif;
+  font-size:21px;line-height:1.02;font-weight:800;color:#121b2e;
   overflow:hidden;text-overflow:ellipsis
 }
 .team-meta{display:flex;align-items:center;gap:6px;margin-top:6px;min-height:18px}
 .short-tag{
   display:inline-flex;align-items:center;min-height:20px;padding:2px 7px;
   border-radius:999px;background:#eef1f6;color:#43516a;
-  font-size:10.5px;font-weight:900;letter-spacing:.015em
+  font-size:10.5px;font-weight:600;letter-spacing:.015em
 }
-.health-summary{font-size:9.5px;color:#8e4944;font-weight:750}
+.health-summary{font-size:9.5px;color:#8e4944;font-weight:500}
 .cap-box{text-align:right;line-height:1}
 .cap-total{
-  font-family:"Yahoo Sans Cond","Arial Narrow",Arial,sans-serif;
-  font-size:26px;font-weight:950;color:#122344
+  font-family:"Roboto Mono",ui-monospace,Menlo,monospace;
+  font-size:26px;font-weight:700;color:#122344
 }
-.cap-total span{font-family:"Yahoo Sans",Arial,sans-serif;font-size:11px;margin-left:2px}
-.cap-status{font-size:8.5px;font-weight:950;letter-spacing:.065em;margin-top:5px}
+.cap-total span{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-weight:500;font-size:11px;margin-left:2px}
+.cap-status{font-size:8.5px;font-weight:600;letter-spacing:.065em;margin-top:5px}
 .cap-delta{font-size:9.5px;color:#68748a;margin-top:4px}
 .table-head,.player-row{
   display:grid;grid-template-columns:64px minmax(0,1fr) 48px 38px;align-items:center
 }
 .table-head{
   height:31px;background:linear-gradient(90deg,#eff3f8,#f7f9fb);
-  color:#34455f;font-size:10px;font-weight:950;letter-spacing:.065em;
+  color:#34455f;font-size:10px;font-weight:600;letter-spacing:.065em;
   border-bottom:1px solid #d8e0e9
 }
 .table-head span:first-child,.player-row .pos{padding-left:10px}
@@ -145,14 +150,15 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 }
 .player-row:hover{background:#fafcff}
 .pname{
-  font-weight:720;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   padding-right:4px
 }
-.pos,.nba,.cap{font-size:11.2px}.nba,.cap{text-align:center}.cap{font-weight:900}
+.pos,.nba,.cap{font-size:11.2px}.nba,.cap{text-align:center}
+.cap{font-weight:600;font-family:"Roboto Mono",ui-monospace,Menlo,monospace}
 .health-badge{
   display:inline-flex;align-items:center;justify-content:center;
   min-width:27px;height:16px;padding:0 4px;border-radius:5px;
-  margin-left:5px;font-size:8px;font-weight:950;letter-spacing:.045em;
+  margin-left:5px;font-size:8px;font-weight:600;letter-spacing:.045em;
   vertical-align:1px
 }
 .health-badge.inj{background:#f1c1be;color:#862723;border:1px solid #e8a7a2}
@@ -165,13 +171,13 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 }
 .cuts-label{
   display:flex;align-items:center;gap:5px;color:#a6322d;
-  font-size:9px;font-weight:950;letter-spacing:.085em;margin-bottom:6px
+  font-size:9px;font-weight:600;letter-spacing:.085em;margin-bottom:6px
 }
 .cuts-list{display:flex;flex-wrap:wrap;gap:4px}
 .cut-chip{
   display:inline-flex;align-items:center;min-height:22px;gap:2px;
   padding:2px 6px;border-radius:6px;background:#fff1f0;
-  border:1px solid #f2d1ce;color:#9e332e;font-size:9.7px;font-weight:700
+  border:1px solid #f2d1ce;color:#9e332e;font-size:9.7px;font-weight:500
 }
 .cut-chip .health-badge{margin-left:2px;height:14px;min-width:25px;font-size:7px}
 .team-card.normal{border-color:#5f9a7b}.team-card.normal .team-index{background:#19724c}.team-card.normal .cap-status{color:#19724c}
@@ -192,21 +198,22 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 }
 .pool-head{
   height:34px;background:linear-gradient(90deg,var(--navy),#173a72);
-  color:#fff;font-size:9.5px;font-weight:950;letter-spacing:.06em;text-align:center
+  color:#fff;font-size:9.5px;font-weight:600;letter-spacing:.06em;text-align:center
 }
 .pool-row{min-height:39px;border-bottom:1px solid #e6eaf0;font-size:12px}
 .pool-row>div{padding:0 5px}
 .pool-rank,.yahoo-rank,.pool-pos,.pool-nba,.pool-cap,.pool-src{text-align:center}
-.pool-rank{font-size:14px;font-weight:950;color:#12264d}
-.yahoo-rank{font-size:10.5px;color:#5c6b81;font-weight:850}
-.pool-player{font-weight:760;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pool-cap{font-weight:950}
+.pool-rank,.yahoo-rank,.pool-cap{font-family:"Roboto Mono",ui-monospace,Menlo,monospace}
+.pool-rank{font-size:14px;font-weight:700;color:#12264d}
+.yahoo-rank{font-size:10.5px;color:#5c6b81;font-weight:600}
+.pool-player{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pool-cap{font-weight:700}
 .rookie-row{background:linear-gradient(90deg,#fff,#faf6ff)}
 .rookie-row .pool-player{color:#5d2796}
 .src{
   display:inline-flex;align-items:center;justify-content:center;
   min-width:28px;padding:2px 5px;border-radius:5px;
-  font-size:7.5px;font-weight:950;letter-spacing:.03em
+  font-size:7.5px;font-weight:600;letter-spacing:.03em
 }
 .src-r{background:#eadffa;color:#5e2c91}
 .src-cut{background:#ffe6e0;color:#9d392f}
@@ -229,15 +236,15 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 }
 .matrix-head{
   height:36px;background:linear-gradient(90deg,var(--navy),#173a72);
-  color:#fff;font-size:9.5px;font-weight:950;letter-spacing:.055em
+  color:#fff;font-size:9.5px;font-weight:600;letter-spacing:.055em
 }
 .matrix-row{min-height:47px;border-bottom:1px solid #e6ebf1;font-size:11.5px}
 .matrix-head>div,.matrix-row>div{padding:0 9px}
 .matrix-row small{
   display:inline-flex;margin-left:7px;padding:2px 6px;border-radius:999px;
-  background:#eef2f7;color:#59667b;font-size:8.5px;font-weight:850
+  background:#eef2f7;color:#59667b;font-size:8.5px;font-weight:600
 }
-.matrix-row .mcap{font-family:"Yahoo Sans Cond","Arial Narrow",Arial,sans-serif;font-size:18px;font-weight:950}
+.matrix-row .mcap{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-size:18px;font-weight:700}
 .matrix-row.floor-low{background:#faf5ff}.matrix-row.floor-edge{background:#fffaf0}
 .matrix-row.ceiling-watch{background:#fff9f0}.matrix-row.ceiling-tight{background:#fff5ed}
 .matrix-row.ceiling-critical{background:#fff0ef}
@@ -313,7 +320,7 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
   .matrix-row>div{padding:0;font-size:11px}
   .matrix-row>div:before{
     content:attr(data-label);display:block;text-transform:uppercase;
-    font-size:7.5px;font-weight:950;letter-spacing:.06em;color:#7a8598;margin-bottom:2px
+    font-size:7.5px;font-weight:600;letter-spacing:.06em;color:#7a8598;margin-bottom:2px
   }
   .matrix-row>div:nth-child(2){grid-column:1/-1}
   .matrix-row small{margin-left:5px}
@@ -336,7 +343,7 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 .team-name{font-size:22px}
 .identity-tag,.status-tag,.picks-tag{
   display:inline-flex;align-items:center;min-height:21px;padding:3px 7px;border-radius:999px;
-  font-size:10px;font-weight:900;letter-spacing:.02em
+  font-size:10px;font-weight:600;letter-spacing:.02em
 }
 .identity-tag{background:var(--team-color);color:var(--team-text)}
 .status-tag{background:#eef2f7;color:#45556e}
@@ -353,13 +360,13 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 .order-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .order-panel{background:#fff;border:1px solid #dce2ea;border-radius:16px;overflow:hidden;box-shadow:0 5px 18px rgba(28,45,72,.06)}
 .order-tabs{display:flex;gap:10px;padding:16px 16px 12px}
-.tab{display:inline-flex;padding:10px 18px;border-radius:14px;border:1px solid #cfd6df;background:#fff;font-weight:950;font-size:16px;color:#1d1d22}
+.tab{display:inline-flex;padding:10px 18px;border-radius:14px;border:1px solid #cfd6df;background:#fff;font-weight:700;font-size:16px;color:#1d1d22}
 .tab.active{background:#1f5c9c;color:#fff;border-color:#1f5c9c}
 .pick-row{display:grid;grid-template-columns:90px 1fr 160px;align-items:center;border-top:1px solid #e7ebf0;min-height:60px;padding:0 16px}
-.pick-slot{font-family:"Yahoo Sans Cond","Arial Narrow",Arial,sans-serif;font-size:24px;font-weight:950;color:#1c2027}
-.pick-chip{display:inline-flex;align-items:center;padding:8px 18px;border-radius:999px;background:var(--team-color);color:var(--team-text);font-weight:950;font-size:18px}
+.pick-slot{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-size:24px;font-weight:700;color:#1c2027}
+.pick-chip{display:inline-flex;align-items:center;padding:8px 18px;border-radius:999px;background:var(--team-color);color:var(--team-text);font-weight:700;font-size:18px}
 .pick-note{display:flex;justify-content:flex-end}
-.pick-extra{display:inline-flex;padding:6px 12px;border-radius:999px;background:#eef2fb;color:#4b78d1;font-weight:950;font-size:14px;letter-spacing:.04em}
+.pick-extra{display:inline-flex;padding:6px 12px;border-radius:999px;background:#eef2fb;color:#4b78d1;font-weight:600;font-size:14px;letter-spacing:.04em}
 #draft-pool .legend,#commissioner .legend,#commissioner .rule-grid{display:none}
 @media (max-width:1250px){.order-grid{grid-template-columns:1fr}}
 @media (max-width:680px){
@@ -386,7 +393,7 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 .picks-tag{background:#fff!important;color:var(--team-color)!important;border:1.5px solid var(--team-color)!important;font-size:10px}
 .cap-box{padding:6px 8px;border-radius:10px}
 .cap-total{font-size:27px}
-.gap-big{font-family:"Yahoo Sans Cond","Arial Narrow",Arial,sans-serif;font-size:17px;font-weight:950;line-height:1.05;margin-top:7px;letter-spacing:.01em;white-space:nowrap}
+.gap-big{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-size:17px;font-weight:700;line-height:1.05;margin-top:7px;letter-spacing:-.02em;white-space:nowrap}
 .gap-floor{background:#fff0ef}.gap-floor .gap-big{color:#a62f29}
 .gap-near{background:#fff5e9}.gap-near .gap-big{color:#b76005}
 .gap-zero{background:#ffe9e7}.gap-zero .gap-big{color:#9e2923}
@@ -396,17 +403,17 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
 .pool-head,.pool-row{grid-template-columns:38px 62px minmax(0,1fr) 44px 38px 64px}
 .pool-head{height:34px}
 .pool-row{min-height:40px}
-.pool-rank{font-size:14px;font-weight:950;color:#12264d;text-align:center}
+.pool-rank{font-size:14px;font-weight:700;color:#12264d;text-align:center}
 .pool-pos,.pool-nba,.pool-cap,.pool-src{text-align:center}
-.pool-player{font-weight:780;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pool-cap{font-weight:950}
+.pool-player{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pool-cap{font-weight:700}
 .cap-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
 .cap-card{display:grid;grid-template-columns:minmax(0,1fr) 76px 116px;align-items:center;gap:8px;padding:11px 12px;border:1px solid #dce3ec;border-radius:12px;background:#fff}
 .cap-team{display:flex;align-items:center;gap:7px;min-width:0}
 .cap-team small{color:#69758a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cap-dot{width:11px;height:11px;border-radius:50%;background:var(--team-color);flex:0 0 auto}
-.cap-num{font-family:"Yahoo Sans Cond","Arial Narrow",Arial,sans-serif;font-size:24px;font-weight:950;text-align:right}.cap-num span{font-family:"Yahoo Sans",Arial,sans-serif;font-size:9px}
-.cap-gap{font-family:"Yahoo Sans Cond","Arial Narrow",Arial,sans-serif;font-size:17px;font-weight:950;text-align:right;white-space:nowrap}
+.cap-num{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-size:24px;font-weight:700;text-align:right}.cap-num span{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-weight:500;font-size:9px}
+.cap-gap{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-size:17px;font-weight:700;text-align:right;white-space:nowrap;letter-spacing:-.02em}
 .cap-card.gap-floor .cap-gap{color:#a62f29}.cap-card.gap-near .cap-gap{color:#b76005}.cap-card.gap-zero .cap-gap{color:#9e2923}.cap-card.gap-room .cap-gap{color:#31435e}
 #draft-order .title{text-align:left;font-size:38px;margin:0 0 12px}
 #draft-order .order-grid{margin-top:0}
@@ -424,12 +431,15 @@ body{font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
   .cap-gap{font-size:17px}
 }
 
-/* Yahoo type application */
-.title,.brand,.team-name,.team-index,.pick-slot,.cap-total,.gap-big,.cap-num,.cap-gap{
-  font-family:"Yahoo Sans Cond","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+/* type application */
+.title,.brand,.team-name{
+  font-family:"Inter","Helvetica Neue",Arial,sans-serif;
+}
+.team-index,.pick-slot,.cap-total,.gap-big,.cap-num,.cap-gap{
+  font-family:"Roboto Mono",ui-monospace,Menlo,monospace;
 }
 .player-row,.pool-row,.meta-pill,.navlink,.identity-tag,.picks-tag,.cut-chip,.src{
-  font-family:"Yahoo Sans","Helvetica Neue",Arial,sans-serif;
+  font-family:"Inter","Helvetica Neue",Arial,sans-serif;
 }
 
 </style></head><body>

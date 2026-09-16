@@ -12,9 +12,9 @@
     "liveContentCheck": "PASS"
   },
   "working": {
-    "branch": "claude/issue-11-20260916-0935",
+    "branch": "claude/issue-5-20260916-1043",
     "commit": null,
-    "issue": 11,
+    "issue": 5,
     "prUrl": null,
     "status": "READY_FOR_REVIEW"
   },
