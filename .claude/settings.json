@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./validate.sh)",
+      "Bash(python3 -m unittest discover -s tests)",
+      "Bash(./handoff.sh)",
+      "Bash(./status.sh)"
+    ]
+  }
+}
