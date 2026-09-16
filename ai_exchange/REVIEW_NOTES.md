@@ -6,44 +6,45 @@ file isn't meant to accumulate history (Git already has that).
 
 ## Issues
 
-- Confirmed root cause (per issue #11's macOS follow-up): the prior fix's
-  `tests/_workflow_test_utils.py:run_script()` never set `stdin=` on its
-  `subprocess.run(...)` call, so the child process inherited whatever
-  stdin the test runner itself was started with. `sync-after-merge.sh`'s
-  branch-deletion step probes `[ -t 0 ]` and, when true, blocks on an
-  interactive `read` prompt. GitHub Actions Ubuntu runners invoke
-  `python3 -m unittest discover -s tests` with non-tty stdin, so the
-  prompt was always skipped there; running the same suite from an
-  interactive terminal (e.g. Terminal.app on macOS, or any local
-  Linux/macOS terminal) gives it a real tty and the prompt blocks until
-  the test harness's own 30s subprocess timeout fires. This is a
-  test-isolation defect, not an OS-specific one — it reproduces reliably
-  on macOS because local test runs there are typically interactive.
-- Fix: `run_script()` now pins `stdin=subprocess.DEVNULL` by default
-  (overridable per-call), making the script's own non-interactive
-  fallback deterministic regardless of the invoking environment's tty.
-  Production behavior (interactive prompt when a human runs the script
-  from a real terminal) is unchanged — the seam only affects the test
-  harness.
-- Added `sync-after-merge.sh` `stage()` markers (`SYNC-STAGE: <name>` to
-  stderr before each numbered step, plus one inside the interactive-read
-  branch specifically) so any future stall is diagnosable from captured
-  stderr without raising the timeout. `run_script()` now catches
-  `subprocess.TimeoutExpired` and re-raises with the last `SYNC-STAGE`
-  marker plus captured stdout/stderr.
-- Added `test_stdin_tty_dependence_is_the_root_cause_of_the_reported_hang`
-  (`tests/test_sync_after_merge.py`): hands the script a real pty as
-  stdin with a pre-queued "decline" answer, proving the script takes the
-  interactive branch when stdin is a tty (confirming the mechanism)
-  while completing quickly itself (input is already queued, so it never
-  blocks).
-- **Not done**: adding a `macos-latest` GitHub Actions test lane was
-  requested but is out of scope for this agent — GitHub App permissions
-  used here do not allow modifying `.github/workflows/*`. The exact diff
-  to add is included in the PR description for a human to apply.
+- Issue #5 asks to apply the Samsung Sans font (attached as
+  `samsung-sans-4.zip`) to `index.html`, with real `@font-face` webfont
+  loading rather than a cosmetic `font-family` name swap.
+- The attachment (verified via `.issue-context/manifest.json`, sha256
+  `b4cd9bc6...9d8b09a`, three re-uploads all identical) contains exactly
+  five files: `SamsungSans-{Thin,Light,Regular,Medium,Bold}.ttf`. No
+  condensed weight, no italic, no README, no LICENSE file.
+- Font `name`-table metadata (extracted from all 5 files) shows
+  copyright `© 2013 Samsung Electronics Co., Ltd.`, typeface produced by
+  Dalton Maag Ltd, no license description, no license URL, no SIL Open
+  Font License or comparable grant anywhere in the binaries or the
+  archive.
+- Samsung Sans is Samsung's proprietary corporate/brand typeface. With
+  no license text shipped in the attachment and no embedded license
+  grant, there is no basis to conclude public redistribution or
+  web-embedding (committing the `.ttf` files into a public repo /
+  serving them from GitHub Pages) is permitted.
+- Per the issue's own instruction and `CLAUDE.md`'s human-decision
+  boundary, this session did **not** commit the font binaries and did
+  **not** wire up `@font-face` against them. `index.html` is unchanged
+  from `main` (still `"Yahoo Sans"` / `"Yahoo Sans Cond"`) — a
+  name-only rename was explicitly rejected in the issue as insufficient,
+  and implementing real `@font-face` requires binaries this session is
+  not authorized to publish.
 
 ## Decisions Required
 
-- Human: apply the `macos-latest` matrix lane to
-  `.github/workflows/validate.yml` (diff provided in the PR description)
-  so this regression is caught in CI going forward, not just locally.
+- Human: confirm whether Samsung Sans may be legally redistributed and
+  served from this repo's public GitHub Pages site (e.g. an internal
+  Samsung font license, a purchased web-font license, or written
+  permission). If confirmed, re-open/re-trigger with that confirmation
+  and, ideally, any accompanying license file so it can be committed
+  alongside the fonts for provenance.
+- If licensing cannot be confirmed, decide whether to source a
+  similarly-styled font under a redistributable license (e.g. an
+  SIL-OFL geometric sans) instead of Samsung Sans, or drop this issue.
+- Separately, note the attachment has no condensed-weight font — any
+  future implementation should map the five available weights
+  (Thin/Light/Regular/Medium/Bold) directly onto both the current
+  regular and condensed usage sites in `index.html`, rather than
+  inventing a "Samsung Sans Cond" family that doesn't exist in the
+  attachment.
