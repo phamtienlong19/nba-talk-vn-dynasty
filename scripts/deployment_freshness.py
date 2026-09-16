@@ -19,12 +19,20 @@ needs no prediction of a not-yet-created commit hash.
 
 CLI:
     python3 scripts/deployment_freshness.py write <commit-sha> [path]
-    python3 scripts/deployment_freshness.py check <public-url> [--local-path build.json] [--attempts 6] [--delay 10]
+    python3 scripts/deployment_freshness.py check <public-url> [--local-path build.json] [--attempts 6] [--delay 10] [--fetch-cmd <executable>]
+
+`--fetch-cmd` swaps the real HTTP fetch for `<executable> <marker-url>`
+(stdout must be the JSON marker body, non-zero exit == unreachable). It
+exists so callers like sync-after-merge.sh can inject a deterministic,
+offline verifier in tests instead of polling a real site -- see
+DEPLOYMENT_FRESHNESS_FETCH_CMD in sync-after-merge.sh. Production runs
+never set it, so the real network check below is unchanged.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import time
 import urllib.error
@@ -70,6 +78,27 @@ def markers_match(live: Optional[dict], local: Optional[dict]) -> bool:
 
 
 FetchFn = Callable[[str], Optional[dict]]
+
+
+def fetch_via_cmd(cmd: str) -> FetchFn:
+    """Build a fetch function that shells out to `cmd <url>` instead of
+    making a real HTTP request -- the injectable test-mode seam."""
+
+    def _fetch(url: str) -> Optional[dict]:
+        try:
+            result = subprocess.run(
+                [cmd, url], capture_output=True, text=True, timeout=15
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        if result.returncode != 0:
+            return None
+        try:
+            return json.loads(result.stdout)
+        except json.JSONDecodeError:
+            return None
+
+    return _fetch
 
 
 def default_fetch(url: str, timeout: int = 15) -> Optional[dict]:
@@ -119,6 +148,12 @@ def _main(argv: list[str]) -> int:
     p_check.add_argument("--local-path", default=DEFAULT_MARKER_PATH)
     p_check.add_argument("--attempts", type=int, default=6)
     p_check.add_argument("--delay", type=int, default=10)
+    p_check.add_argument(
+        "--fetch-cmd",
+        default=None,
+        help="Executable invoked as `<cmd> <marker-url>` instead of a real "
+        "HTTP fetch (injectable test-mode verifier).",
+    )
 
     args = parser.parse_args(argv[1:])
 
@@ -132,8 +167,9 @@ def _main(argv: list[str]) -> int:
         if local is None:
             print(f"ERROR: no local marker at {args.local_path}", file=sys.stderr)
             return 2
+        fetch = fetch_via_cmd(args.fetch_cmd) if args.fetch_cmd else default_fetch
         matched, live = check_freshness(
-            args.public_url, local, attempts=args.attempts, delay=args.delay
+            args.public_url, local, attempts=args.attempts, delay=args.delay, fetch=fetch
         )
         if matched:
             print(f"FRESH: live build.json commit {live.get('commit')} matches local")

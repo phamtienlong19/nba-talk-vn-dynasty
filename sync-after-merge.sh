@@ -176,8 +176,17 @@ fi
 
 PUBLIC_URL="$(python3 -c "import json; print(json.load(open('$STATE_FILE')).get('publicUrl',''))" 2>/dev/null || true)"
 FRESHNESS="unknown"
+# DEPLOYMENT_FRESHNESS_FETCH_CMD is the injectable test-mode seam: unit
+# tests run this script end-to-end (tests/test_sync_after_merge.py) and
+# must not poll/sleep against a real GitHub Pages site. Production runs
+# never set this, so the real network check (default_fetch, 6 attempts x
+# 10s delay) below is unchanged. See scripts/deployment_freshness.py.
+FETCH_CMD_ARGS=()
+if [ -n "${DEPLOYMENT_FRESHNESS_FETCH_CMD:-}" ]; then
+  FETCH_CMD_ARGS=(--fetch-cmd "$DEPLOYMENT_FRESHNESS_FETCH_CMD")
+fi
 if [ -n "$PUBLIC_URL" ]; then
-  if python3 scripts/deployment_freshness.py check "$PUBLIC_URL" --local-path build.json --attempts 6 --delay 10; then
+  if python3 scripts/deployment_freshness.py check "$PUBLIC_URL" --local-path build.json --attempts 6 --delay 10 "${FETCH_CMD_ARGS[@]}"; then
     FRESHNESS="FRESH"
   else
     FRESHNESS="STALE (Pages has not caught up yet; safe to re-run this script later)"

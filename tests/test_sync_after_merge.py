@@ -165,6 +165,38 @@ class TestMergedPrSyncsMain(SyncAfterMergeTestCase):
         build_json = json.loads((self.repo / "build.json").read_text())
         self.assertEqual(build_json["commit"], merge_sha)
 
+    def test_deployment_freshness_check_is_deterministic_when_public_url_set(self):
+        """When a real publicUrl is configured, the merged-PR path must run
+        the deployment-freshness check -- but through the injected
+        DEPLOYMENT_FRESHNESS_FETCH_CMD (see _workflow_test_utils.py), not a
+        real HTTP poll. This proves the check itself is exercised and stays
+        fast/offline rather than merely being skipped."""
+        state_path = self.repo / "ai_exchange" / "CURRENT_STATE.json"
+        state = json.loads(state_path.read_text())
+        state["publicUrl"] = "https://example.test/site/"
+        state_path.write_text(json.dumps(state, indent=2) + "\n")
+        git(self.repo, "add", "-A")
+        git(self.repo, "commit", "-m", "configure publicUrl")
+        git(self.repo, "push", "origin", "main")
+
+        merge_sha, branch = self._simulate_merged_pr(issue_number=42, title="Freshness check")
+        fixture = write_fixture(
+            self.tmp_dir,
+            "pr.json",
+            {
+                "number": 42,
+                "url": "https://github.com/example/test-project/pull/42",
+                "state": "MERGED",
+                "mergeCommit": {"oid": merge_sha},
+                "headRefName": branch,
+                "closingIssuesReferences": [],
+                "title": "Freshness check",
+            },
+        )
+        result = self.run_sync(["42"], env_extra={"FAKE_GH_PR_FIXTURE": str(fixture)})
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+        self.assertIn("Deployment:    FRESH", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
