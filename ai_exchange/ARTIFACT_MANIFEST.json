@@ -16,8 +16,36 @@
     "size": 107
   },
   "status.sh": {
-    "sha256": "67713596aba0ee8f8a1631aaea90e8152d0ef7ccd19cd960844663423f8e98b8",
-    "size": 1738
+    "sha256": "49d45270f9423e4aaef9450910349b9ac3f2a9b0949df07cc627f1591087f9cc",
+    "size": 2481
+  },
+  "CLAUDE.md": {
+    "sha256": "c22db98f1dd63dc9fa9d792af8b01ce17f935d02741de49be46e18c1a3aba323",
+    "size": 3524
+  },
+  "handoff.sh": {
+    "sha256": "f4619f79ecc689c31562f6f83d62cae118cff4ab7ebac64d9fa6b8d7f8e6adf5",
+    "size": 142
+  },
+  "scripts/handoff.sh": {
+    "sha256": "39cbd5acecbb6457cc57894ec0c7ec8a5bcb42f9ab92bd39b3ea3cfe8574bb41",
+    "size": 5962
+  },
+  "tasks/README.md": {
+    "sha256": "45f4d1f6653336f784392cf077e67b3147b0cf90d0643c9b0f890c4de82c01f2",
+    "size": 1132
+  },
+  "tasks/ACTIVE.md": {
+    "sha256": "a468a4337996decac8085be5a1ba06e12f54bcce910896168f59cfe6dfa1e30c",
+    "size": 3551
+  },
+  "ai_exchange/CURRENT_STATE.json": {
+    "sha256": "8c9a53fa5d23b0400b823737ab302ca338a4bb244c605b0d83d4d0208dbff85f",
+    "size": 1523
+  },
+  "ai_exchange/IMPLEMENTATION_REPORT.md": {
+    "sha256": "eacdff18cb4d6b4736c912e958a48f285e69c23dd7728556a9840a1154c991a8",
+    "size": 7466
   },
   "refresh-yahoo.sh": {
     "sha256": "06acc8460192a1e43604fca7abb2b262fd000b1a7dfd1943846318411caa7e30",
