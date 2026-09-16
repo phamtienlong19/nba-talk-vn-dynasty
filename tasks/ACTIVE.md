@@ -1,90 +1,60 @@
-# Task — V1 Post-Bootstrap Acceptance Audit
+# Task — Double Check Team Name and Rosters' Cap Numbers (Issue #2)
 
 ## Objective
 
-Verify that the deployed V1 public league board and its automation
-foundation are trustworthy enough to freeze before any V2
-generated-board or transaction work begins. Do not add features.
+Verify and correct clear, confirmable errors in the published board
+(`index.html`): player cap-dollar values and rookie-status flags in the
+draft pool. Surface anything ambiguous for human decision instead of
+guessing.
 
 ## Why
 
-The initial bootstrap created the public site, canonical roster
-baseline, Yahoo adapter, cap model, validation, CI, and update
-automation. Before expanding scope, prove that these pieces work and
-that source-of-truth boundaries were respected.
+GitHub Issue #2: John Collins is shown with a nonzero cap but likely
+has none; Nique Clifford, Tre Johnson, and Dylan Cardwell are flagged
+`rookie-row`/`R` in the draft pool but are 2025 draft class (second
+season by 2026-27), no longer rookies.
 
 ## Inputs
 
-Read: `CLAUDE.md`, `ai_exchange/CURRENT_STATE.json`,
-`ai_exchange/IMPLEMENTATION_REPORT.md`,
-`ai_exchange/ARTIFACT_MANIFEST.json`,
-`data/2026-27/franchises.json`, `data/2026-27/prekeeper_rosters.json`,
-`docs/`, `config/yahoo_source.json`, `publish.sh`, `refresh-yahoo.sh`,
-`validate.sh`, `status.sh`, `scripts/`, `tests/`.
+`index.html`, `local_data/yahoo/players_normalized.json` (live Yahoo
+refresh via `./refresh-yahoo.sh`), `docs/YAHOO_DATA_SOURCE.md`,
+`data/2026-27/franchises.json`.
 
 ## Constraints
 
-Do not redesign the board; change league rules; change canonical
-ownership without proven bootstrap corruption; promote a changed
-Yahoo cap snapshot automatically; implement trades; implement
-generated-board V2; add a database/backend; touch
-`nba-talk-vn-lottery`.
+Do not bulk-repromote every player's cap number from a fresh Yahoo
+pull (normal day-to-day market drift, not an error) — only fix the
+specifically-confirmed defect. Do not resolve team
+identity-tag/name discrepancies between `data/2026-27/franchises.json`
+and `index.html` autonomously; report them.
 
 ## Acceptance Criteria
 
-- **Deployment**: repo public, `main` pushed, Pages enabled, live URL
-  returns success and contains `NBA TALK VN DYNASTY` plus the four
-  section anchors, no local filesystem/font dependencies.
-- **Source separation**: forensic snapshot supplied
-  Team/order/pre-keeper ownership only; old forensic `178` cap not
-  authoritative; projected keeper tables not imported as canonical
-  ownership; Yahoo supplies current metadata/cap fields; raw
-  DOCX/XLSX/forensic Markdown not public-tracked.
-- **Roster baseline**: 16 franchises, canonical order,
-  `franchise-01`..`franchise-16`, 232 assignments, no duplicate
-  ownership, per-team counts
-  `15,15,14,15,13,14,13,15,13,15,15,15,15,15,15,15`; anchor
-  spot-checks (Wembanyama→franchise-01, Giannis→franchise-03,
-  Towns→franchise-04, Dončić→franchise-09, Jokić→franchise-11,
-  Flagg→franchise-12, SGA→franchise-13, Mitchell→franchise-16).
-- **Yahoo adapter**: refresh runs, normalized samples contain
-  id/name/team/positions/O-Rank/cap $, raw response gitignored, CI
-  does not depend on live Yahoo network.
-- **Cap model**: regression tests pass against the published snapshot
-  (R1 51.0625 … R9 0.0000, benchmark 152.5625, raw floor 129.678125,
-  raw ceiling 175.446875, rounded 130/175). If live Yahoo differs,
-  report separately — do not auto-promote.
-- **Publish automation**: `./publish.sh` sanitizes, validates before
-  replacement, fails without corrupting `index.html`, commits/pushes
-  only valid state.
-- **Repo hygiene**: no tracked proprietary fonts, raw Yahoo snapshots,
-  raw DOCX/XLSX/forensic Markdown, secrets/tokens, `/mnt/data`,
-  `file://`, or machine-specific absolute paths in runtime files.
-- **CI**: latest validation passes (site validation, roster-baseline,
-  cap, Yahoo normalization fixture tests).
+- John Collins' cap corrected to match live Yahoo
+  `projected_auction_value` (0), including team cap-total/ROOM in both
+  the team card and the CAP page summary card.
+- Nique Clifford, Tre Johnson, Dylan Cardwell no longer flagged as
+  rookies in the draft pool (verified 2025 draft class via web
+  search — second-year players for the 2026-27 season).
+- `./validate.sh` and `python3 -m unittest discover -s tests` pass.
+- Findings not auto-fixed (minor cap drift on other players; team
+  identity-tag mismatches for franchise-01, 07, 09) are written up for
+  human review, not silently changed.
 
 ## Validation
 
 ```bash
 ./validate.sh
 python3 -m unittest discover -s tests
-./status.sh
-git status
-git log --oneline -5
-git remote -v
 ```
-
-Also inspect GitHub Pages / CI with `gh` if available.
 
 ## Delivery
 
-Do not deploy feature changes. Fix only proven bootstrap defects
-required for acceptance. Update `ai_exchange/CURRENT_STATE.json`,
-`ai_exchange/IMPLEMENTATION_REPORT.md`,
-`ai_exchange/ARTIFACT_MANIFEST.json`, `ai_exchange/REVIEW_PACKET.md`.
-Open/update a PR from the task branch if appropriate.
+Branch off `main`, PR with `Closes #2`, not merged.
 
 ## Decision Required
 
-Final verdict: `V1_ACCEPTED` / `V1_ACCEPTED_WITH_MINOR_ISSUES` /
-`BLOCKED`.
+Which source wins for franchise-01 identity ("Hai" vs board's "Bsy"),
+franchise-07's missing team name in canonical data ("Maxfixe" vs
+board's "Maxfixe | Poop for Coop"), and franchise-09 identity
+("M. Jordat" vs board's "Đạt").
