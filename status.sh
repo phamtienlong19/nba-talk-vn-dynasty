@@ -1,74 +1,97 @@
 #!/usr/bin/env bash
+# Single quick health view. Should fit in one terminal screen.
+# Uses cached/current state and lightweight checks -- no expensive
+# network work beyond one HTTP fetch for reachability/fingerprint.
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 echo "NBA TALK VN DYNASTY"
 echo ""
 
-BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")"
-COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")"
-DIRTY="$(git status --porcelain 2>/dev/null)"
-REMOTE="$(git remote get-url origin 2>/dev/null || echo "none")"
+STATE_FILE="ai_exchange/CURRENT_STATE.json"
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
 
-echo "Branch:        $BRANCH"
-echo "Commit:        $COMMIT"
-echo "Working tree:  $([ -z "$DIRTY" ] && echo clean || echo dirty)"
-echo "Repository:    $REMOTE"
+get_state() {
+  # get_state <python-expr-on-d> <default>
+  python3 -c "
+import json
+try:
+    d = json.load(open('$STATE_FILE'))
+    v = $1
+    print(v if v not in (None, '') else '$2')
+except Exception:
+    print('$2')
+" 2>/dev/null || echo "$2"
+}
 
-PUBLIC_URL="unknown"
-if [ -f ai_exchange/CURRENT_STATE.json ]; then
-  PUBLIC_URL="$(python3 -c "import json; print(json.load(open('ai_exchange/CURRENT_STATE.json')).get('publicUrl','unknown'))" 2>/dev/null || echo unknown)"
+DEPLOYED_BRANCH="$(get_state "d.get('deployed',{}).get('branch')" unknown)"
+DEPLOYED_COMMIT="$(get_state "d.get('deployed',{}).get('commit','')[:7]" unknown)"
+PUBLIC_URL="$(get_state "d.get('publicUrl')" unknown)"
+CAP_FLOOR="$(get_state "d.get('canonicalState',{}).get('capFloor')" '?')"
+CAP_CEILING="$(get_state "d.get('canonicalState',{}).get('capCeiling')" '?')"
+YAHOO_TS="$(get_state "d.get('canonicalState',{}).get('lastYahooRefresh',{}).get('timestamp')" unknown)"
+
+echo "Deployed main:   ${DEPLOYED_BRANCH}@${DEPLOYED_COMMIT}"
+
+LIVE_FINGERPRINT="unknown"
+if [ "$PUBLIC_URL" != "unknown" ] && [ -f build.json ]; then
+  if python3 scripts/deployment_freshness.py check "$PUBLIC_URL" --local-path build.json --attempts 1 >/tmp/dynasty_status_fp.log 2>&1; then
+    LIVE_FINGERPRINT="FRESH"
+  else
+    LIVE_FINGERPRINT="STALE"
+  fi
+elif [ ! -f build.json ]; then
+  LIVE_FINGERPRINT="no local build.json"
 fi
-echo "Public URL:    $PUBLIC_URL"
+echo "Live fingerprint: ${LIVE_FINGERPRINT}"
+
+echo "Working branch:  ${BRANCH}"
+
+ACTIVE_ISSUE="none"
+if [ -f tasks/ACTIVE.md ]; then
+  ISSUE_LINE="$(grep -m1 '^Issue: ' tasks/ACTIVE.md 2>/dev/null | sed 's/^Issue: //')"
+  [ -n "$ISSUE_LINE" ] && ACTIVE_ISSUE="$ISSUE_LINE"
+fi
+echo "Active Issue:    ${ACTIVE_ISSUE}"
+
+PR_LINE="unknown (gh unavailable)"
+CI_LINE="unknown (gh unavailable)"
+if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  PR_LINE="$(gh pr view "$BRANCH" --json url,state -q '"\(.url) (\(.state))"' 2>/dev/null || echo none)"
+  [ -z "$PR_LINE" ] && PR_LINE="none"
+  CI_JSON="$(gh run list --branch "$BRANCH" --limit 1 --json status,conclusion 2>/dev/null || echo '[]')"
+  if [ -n "$CI_JSON" ] && [ "$CI_JSON" != "[]" ]; then
+    CI_LINE="$(python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+r=d[0]
+print(f\"{r['status']}/{r['conclusion']}\")
+" <<<"$CI_JSON" 2>/dev/null || echo unknown)"
+  else
+    CI_LINE="no runs found"
+  fi
+fi
+echo "PR:              ${PR_LINE}"
+echo "CI:              ${CI_LINE}"
 
 if ./validate.sh >/tmp/dynasty_validate.log 2>&1; then
-  echo "Validation:    PASS"
+  echo "Validation:      PASS"
 else
-  echo "Validation:    FAIL (see ./validate.sh)"
+  echo "Validation:      FAIL (see ./validate.sh)"
 fi
 
-if [ "$PUBLIC_URL" != "unknown" ] && [ -n "$PUBLIC_URL" ]; then
-  if curl --fail --silent --max-time 10 --location "$PUBLIC_URL" >/dev/null 2>&1; then
-    echo "Live HTTP:     OK"
-  else
-    echo "Live HTTP:     FAIL or not yet propagated"
-  fi
-else
-  echo "Live HTTP:     unknown (no public URL recorded)"
+echo "Yahoo snapshot:  ${YAHOO_TS}"
+echo "Published cap:   ${CAP_FLOOR}-${CAP_CEILING}"
+
+ROSTER_LINE="unknown"
+if [ -f data/2026-27/franchises.json ] && [ -f data/2026-27/prekeeper_rosters.json ]; then
+  ROSTER_LINE="$(python3 -c "
+import json
+f = json.load(open('data/2026-27/franchises.json'))
+r = json.load(open('data/2026-27/prekeeper_rosters.json'))
+print(f\"{len(f['franchises'])} franchises, {len(r['assignments'])} assignments\")
+" 2>/dev/null || echo "unknown")"
 fi
+echo "Roster baseline: ${ROSTER_LINE}"
 
-if [ -f index.html ]; then
-  HASH="$(shasum -a 256 index.html | cut -d' ' -f1)"
-  echo "Board hash:    $HASH"
-fi
-
-echo "Published cap: 130-175"
-
-LAST_YAHOO="$(ls -t local_data/yahoo/draft_analysis_*.json 2>/dev/null | head -1)"
-if [ -n "$LAST_YAHOO" ]; then
-  echo "Last Yahoo refresh: $(basename "$LAST_YAHOO")"
-else
-  echo "Last Yahoo refresh: none recorded locally"
-fi
-
-LAST_COMMIT_DATE="$(git log -1 --format=%cd --date=iso 2>/dev/null || echo unknown)"
-echo "Last update:   $LAST_COMMIT_DATE"
-
-ACTIVE_TASK="none"
-if [ -f tasks/ACTIVE.md ]; then
-  ACTIVE_TASK="$(grep -m1 '^# ' tasks/ACTIVE.md | sed 's/^# //')"
-fi
-echo ""
-echo "Active task:   $ACTIVE_TASK"
-echo "Task branch:   $BRANCH"
-
-if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  PR_URL="$(gh pr view "$BRANCH" --json url -q .url 2>/dev/null || echo none)"
-  echo "PR:            ${PR_URL:-none}"
-  CI_STATE="$(gh run list --branch "$BRANCH" --limit 1 --json conclusion -q '.[0].conclusion' 2>/dev/null || echo unknown)"
-  echo "CI:            ${CI_STATE:-unknown}"
-else
-  echo "PR:            unknown (gh unavailable)"
-  echo "CI:            unknown (gh unavailable)"
-fi
-echo "Review packet: ai_exchange/REVIEW_PACKET.md (run ./handoff.sh to refresh)"
+echo "Public URL:      ${PUBLIC_URL}"

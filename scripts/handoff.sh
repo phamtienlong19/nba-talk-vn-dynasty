@@ -7,6 +7,12 @@
 # data/, index.html, or docs/. Only writes ai_exchange/REVIEW_PACKET.md.
 # Does not commit. Degrades gracefully if `gh` is unavailable or no PR
 # exists yet.
+#
+# Optional: if ai_exchange/REVIEW_NOTES.md exists with "## Issues" and/or
+# "## Decisions Required" sections, their content is spliced into the
+# packet verbatim (this script still owns REVIEW_PACKET.md itself --
+# REVIEW_NOTES.md is just a place to leave real findings for it to pick
+# up, per CLAUDE.md's "regenerated, not hand-authored" rule).
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
@@ -14,11 +20,21 @@ OUT="ai_exchange/REVIEW_PACKET.md"
 BASE_BRANCH="main"
 
 # --- task ---------------------------------------------------------------
-TASK_TITLE="none"
+TASK_TITLE="No active task"
 TASK_FILE="tasks/ACTIVE.md"
 if [ -f "$TASK_FILE" ]; then
-  TASK_TITLE="$(grep -m1 '^# ' "$TASK_FILE" | sed 's/^# //')"
-  [ -z "$TASK_TITLE" ] && TASK_TITLE="(untitled)"
+  ISSUE_LINE="$(grep -m1 '^Issue: ' "$TASK_FILE" 2>/dev/null | sed 's/^Issue: //')"
+  TITLE_LINE="$(grep -m1 '^Title: ' "$TASK_FILE" 2>/dev/null | sed 's/^Title: //')"
+  if [ -n "$TITLE_LINE" ]; then
+    if [[ "$ISSUE_LINE" =~ ^#?[0-9]+$ ]]; then
+      TASK_TITLE="Issue ${ISSUE_LINE#\#}: ${TITLE_LINE}"
+    else
+      TASK_TITLE="${TITLE_LINE}"
+    fi
+  else
+    HEADING="$(grep -m1 '^# ' "$TASK_FILE" | sed 's/^# //')"
+    [ -n "$HEADING" ] && TASK_TITLE="$HEADING"
+  fi
 fi
 
 # --- git ------------------------------------------------------------------
@@ -77,6 +93,16 @@ if [ "$PUBLIC_URL" != "unknown" ] && [ -n "$PUBLIC_URL" ]; then
     LIVE_HTTP="FAIL or not yet propagated"
   fi
 fi
+FINGERPRINT="unknown"
+if [ "$LIVE_HTTP" = "OK" ] && [ -f build.json ]; then
+  if python3 scripts/deployment_freshness.py check "$PUBLIC_URL" --local-path build.json --attempts 1 >/tmp/dynasty_fingerprint.log 2>&1; then
+    FINGERPRINT="FRESH"
+  else
+    FINGERPRINT="STALE (live build.json does not match local -- see docs/DEPLOYMENT_FRESHNESS.md)"
+  fi
+elif [ ! -f build.json ]; then
+  FINGERPRINT="no local build.json"
+fi
 
 # --- validation ---------------------------------------------------------
 SITE_VALIDATION="FAIL"
@@ -111,21 +137,45 @@ print(f\"{len(f['franchises'])} franchises, {len(r['assignments'])} assignments\
 fi
 
 CAP_SNAPSHOT="unknown"
+YAHOO_SOURCE_TS="unknown"
 if [ -f ai_exchange/CURRENT_STATE.json ]; then
   CAP_SNAPSHOT="$(python3 -c "
 import json
-d = json.load(open('ai_exchange/CURRENT_STATE.json'))
-print(f\"{d.get('currentPublishedCapFloor','?')}-{d.get('currentPublishedCapCeiling','?')}\")
+d = json.load(open('ai_exchange/CURRENT_STATE.json')).get('canonicalState', {})
+print(f\"{d.get('capFloor','?')}-{d.get('capCeiling','?')}\")
+" 2>/dev/null || echo "unknown")"
+  YAHOO_SOURCE_TS="$(python3 -c "
+import json
+d = json.load(open('ai_exchange/CURRENT_STATE.json')).get('canonicalState', {})
+print(d.get('lastYahooRefresh', {}).get('timestamp', 'unknown'))
 " 2>/dev/null || echo "unknown")"
 fi
 
-YAHOO_SOURCE_TS="unknown"
-if [ -f ai_exchange/CURRENT_STATE.json ]; then
-  YAHOO_SOURCE_TS="$(python3 -c "
-import json
-d = json.load(open('ai_exchange/CURRENT_STATE.json'))
-print(d.get('lastYahooRefresh', {}).get('timestamp', 'unknown'))
-" 2>/dev/null || echo "unknown")"
+# --- optional hand-off notes (issues / decisions required) -----------------
+NOTES_FILE="ai_exchange/REVIEW_NOTES.md"
+ISSUES_BLOCK="(none)"
+DECISIONS_BLOCK="(none)"
+if [ -f "$NOTES_FILE" ]; then
+  EXTRACTED="$(python3 -c "
+import re
+text = open('$NOTES_FILE', encoding='utf-8').read()
+def section(name):
+    m = re.search(rf'^## {name}\s*\n(.*?)(?=\n## |\Z)', text, re.S | re.M)
+    if not m:
+        return '(none)'
+    body = m.group(1).strip()
+    return body if body else '(none)'
+print(section('Issues'))
+print('---REVIEW-NOTES-SPLIT---')
+print(section('Decisions Required'))
+" 2>/dev/null || true)"
+  if [ -n "$EXTRACTED" ]; then
+    ISSUES_BLOCK="${EXTRACTED%%---REVIEW-NOTES-SPLIT---*}"
+    DECISIONS_BLOCK="${EXTRACTED#*---REVIEW-NOTES-SPLIT---}"
+    ISSUES_BLOCK="$(echo "$ISSUES_BLOCK" | sed '$d')"
+    [ -z "$ISSUES_BLOCK" ] && ISSUES_BLOCK="(none)"
+    [ -z "$DECISIONS_BLOCK" ] && DECISIONS_BLOCK="(none)"
+  fi
 fi
 
 GENERATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
@@ -160,6 +210,7 @@ CI: ${CI_LINE}
 ## Deployment
 Public URL: ${PUBLIC_URL}
 HTTP: ${LIVE_HTTP}
+Fingerprint: ${FINGERPRINT}
 
 ## Changes
 \`\`\`
@@ -181,10 +232,10 @@ Yahoo source timestamp: ${YAHOO_SOURCE_TS}
 ${CHANGED_FILES}
 
 ## Issues
-(none)
+${ISSUES_BLOCK}
 
 ## Decisions Required
-(none)
+${DECISIONS_BLOCK}
 
 ## Suggested Next Step
 Open/update the PR from \`${BRANCH}\` if not already done, then request human/ChatGPT review of this packet.
