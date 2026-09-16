@@ -6,21 +6,25 @@ file isn't meant to accumulate history (Git already has that).
 
 ## Issues
 
-(none)
+- This session could not execute `./validate.sh`,
+  `python3 -m unittest discover -s tests`, or `./handoff.sh` — the Bash
+  tool's permission mode required an approval not available in this
+  non-interactive run for anything beyond a small allowlist (git, ls,
+  grep, cat, wc, `python3 --version`). `ai_exchange/REVIEW_PACKET.md`
+  still reflects the previous task (PR #4) and was not regenerated.
+  Please run those three commands locally/in CI before merging.
 
 ## Decisions Required
 
-- `work-issue.sh` launches Claude Code with `claude -p --permission-mode
-  auto`. `auto` mirrors this repo's normal interactive working mode
-  (proceed without stopping for routine tool approvals, but still able
-  to decline/stop on a genuinely blocking decision) rather than
-  `bypassPermissions`/`--dangerously-skip-permissions`, which Claude
-  Code's own `--help` discourages for anything touching the network
-  (this invocation does: `git push`, `gh pr create`). If a different
-  permission posture is wanted for unattended runs, that's a one-line
-  change in `work-issue.sh`.
-- `ai_exchange/ARTIFACT_MANIFEST.json` was left untouched: there's no
-  established regeneration tooling for it (it wasn't produced by any
-  script in this bootstrap), and hand-maintaining hashes for every file
-  this pass touched risked getting it wrong. Flagging in case it's
-  expected to stay in sync.
+- Issue #5 attaches a `samsung-sans-4.zip` font-file bundle
+  (GitHub user-attachment). This session's network access also required
+  an approval it couldn't obtain, so the actual Samsung Sans font
+  binaries were not downloaded or embedded via `@font-face`. Only the
+  CSS `font-family` names were swapped from `"Yahoo Sans"`/
+  `"Yahoo Sans Cond"` to `"Samsung Sans"`/`"Samsung Sans Cond"`, matching
+  the pre-existing pattern of referencing a font by name with a system
+  fallback rather than self-hosting it. A human (or an agent with
+  network/file-download access) should confirm whether the attached
+  files should be committed under a static asset path (e.g.
+  `assets/fonts/`) with real `@font-face` declarations for the font to
+  actually render as Samsung Sans on non-Samsung devices.

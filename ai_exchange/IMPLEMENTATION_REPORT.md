@@ -1,80 +1,42 @@
 # Implementation Report
 
-Run: 2026-09-16 — Final workflow optimization
-(`NBA_Talk_VN_Dynasty_Final_Workflow_Optimization.md`, direct request,
-not GitHub-Issue-driven).
+Run: 2026-09-16 — Issue #5, Cosmetic Change to Samsung Sans Font
 
 ## What changed
 
-- **Task inbox**: GitHub Issues are now the documented canonical task
-  spec (`CLAUDE.md` "Task inbox"); `tasks/ACTIVE.md`/`tasks/README.md`
-  switched to a lightweight generated-pointer template.
-- **`./work-issue.sh <N>`**: fetches an open issue via `gh`, derives a
-  `fix|feat|chore/issue-N-<slug>` branch (`scripts/issue_workflow.py`),
-  refuses a dirty tree / closed issue / unrelated branch collision,
-  writes the lightweight `tasks/ACTIVE.md` pointer + `working.*` in
-  `ai_exchange/CURRENT_STATE.json`, then launches
-  `claude -p --permission-mode auto` with a minimal prompt (falls back
-  to printing the one-line command if `claude` isn't non-interactive-
-  capable).
-- **`./sync-after-merge.sh [PR]`**: requires the PR to be MERGED, pulls
-  main, archives the completed task pointer to `tasks/archive/`, resets
-  `tasks/ACTIVE.md`, refreshes `CURRENT_STATE.json` + the
-  deployment-freshness marker, re-validates, regenerates the review
-  packet, offers to delete the local branch, and reports Pages
-  freshness.
-- **Deployment freshness** (`docs/DEPLOYMENT_FRESHNESS.md`): a public
-  `build.json` `{"commit","generatedAt"}` fingerprint, compared
-  local-vs-live (`scripts/deployment_freshness.py`) rather than against
-  a not-yet-known future commit SHA. Wired into `publish.sh` and
-  `sync-after-merge.sh`.
-- **`CURRENT_STATE.json` schema**: split into `deployed` (main) /
-  `working` (current branch/issue/PR) / `canonicalState` (cap,
-  roster baseline, Yahoo refresh) to remove the old ambiguous top-level
-  branch/commit fields.
-- **`status.sh`**: rewritten to the one-screen field set from the spec
-  (deployed main, live fingerprint, working branch, active issue, PR,
-  CI, validation, Yahoo snapshot, published cap, roster baseline,
-  public URL).
-- **`scripts/handoff.sh`**: reads the new state schema; Deployment
-  section now reports fingerprint FRESH/STALE, not just HTTP 200;
-  Issues/Decisions Required sections splice in
-  `ai_exchange/REVIEW_NOTES.md` when present instead of hardcoding
-  `(none)`.
-- **`.github/ISSUE_TEMPLATE/correction.yml`**: short, phone-friendly
-  correction template; blank issues remain allowed (default, untouched).
-- **Labels**: added `data-correction`, `workflow`, `human-decision`
-  (`bug`, `enhancement` already existed).
-- **Not done, deliberately**: no Claude hooks added (no concrete
-  deterministic failure mode identified that scripts/CI don't already
-  cover); no Claude skills added (workflow is project-specific, belongs
-  in `CLAUDE.md`/repo scripts/CI per the source file's own item 13).
+- `index.html`: renamed the font-family stack from `"Yahoo Sans"` /
+  `"Yahoo Sans Cond"` to `"Samsung Sans"` / `"Samsung Sans Cond"`
+  everywhere they appear (body default, topbar/brand, hero title, team
+  index/name, cap totals, pool/matrix numerics, pick slots/chips,
+  gap/cap displays, and the consolidated "type application" rule at
+  the end of the stylesheet). Existing fallback chains
+  (`"Helvetica Neue", Arial, sans-serif` and `"Arial Narrow"` for the
+  condensed group) and every existing `font-weight` value were left
+  untouched — the repo already differentiates bold/black display text
+  (900–950) from lighter body/label text (650–850) per element, so no
+  weight changes were needed to satisfy "choosing wisely between bold,
+  regular, etc."
 
-## Tests added
+## Not done, deliberately
 
-`tests/test_issue_workflow.py`, `tests/test_deployment_freshness.py` —
-pure-function unit tests (branch naming/slugging, marker matching,
-freshness retry logic including "HTTP-200-but-wrong-fingerprint must not
-pass").
-
-`tests/test_work_issue.py`, `tests/test_sync_after_merge.py` — run the
-real scripts against a throwaway git repo with fake `gh`/`claude` on
-PATH (`tests/_workflow_test_utils.py`); no live network, GitHub auth, or
-Claude invocation. Cover: missing/invalid issue number, dirty tree,
-closed/nonexistent issue, branch-collision refusal, successful pointer
-generation, idempotent rerun; unmerged-PR rejection, merged-PR sync
-(state refresh, task archiving, marker refresh), rerun-is-a-near-noop.
-
-Writing these against the real scripts (not just descriptions) caught
-three real bugs before they shipped: `set -e`+`pipefail` aborting
-`work-issue.sh` on an intentional no-match `grep` instead of reaching
-the custom error message; an unconditional `git commit` failing on a
-branch-reuse rerun with nothing new to stage; and a `build.json`
-self-reference loop where anchoring the marker to "current HEAD" meant
-every `sync-after-merge.sh` run invalidated its own marker one commit
-later (fixed by anchoring to the PR's actual merge commit instead).
+- **Font files not embedded.** The issue attaches a
+  `samsung-sans-4.zip` GitHub file attachment. This session's Bash tool
+  permissions do not allow fetching that URL (network access requires
+  an approval this non-interactive run cannot grant), so no `@font-face`
+  / self-hosted font binaries were added. The change mirrors the
+  pre-existing pattern already in this file (`"Yahoo Sans"` was also
+  referenced by name only, with no embedded font file, relying on
+  fallback fonts for anyone without it installed) — on non-Samsung
+  devices this will render via the existing Helvetica/Arial fallback,
+  same as before. See "Decisions Required" in
+  `ai_exchange/REVIEW_NOTES.md`.
 
 ## Validation
 
-- `./validate.sh` — PASS
-- `python3 -m unittest discover -s tests` — 58 tests, PASS
+- `./validate.sh` — **not run**: script execution requires an approval
+  this session's tool permissions don't grant.
+- `python3 -m unittest discover -s tests` — **not run**, same reason.
+- `./handoff.sh` — **not run**, same reason; `ai_exchange/REVIEW_PACKET.md`
+  was not regenerated for this change (still reflects PR #4). Please run
+  `./validate.sh`, the test suite, and `./handoff.sh` locally or in CI
+  before merge.
