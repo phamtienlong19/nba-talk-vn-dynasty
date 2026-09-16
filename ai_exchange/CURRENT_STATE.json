@@ -30,11 +30,11 @@
   },
   "handoff": {
     "reviewPacket": "ai_exchange/REVIEW_PACKET.md",
-    "generatedAt": "2026-09-16T03:57:47Z"
+    "generatedAt": "2026-09-16T04:00:43Z"
   },
   "git": {
     "branch": "chore/repo-native-agent-handoff",
-    "commit": null,
-    "prUrl": null
+    "commit": "9d0e2945e153b07381fae9e67cd3a195f96575d8",
+    "prUrl": "https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/1"
   }
 }
