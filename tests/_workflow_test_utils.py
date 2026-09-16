@@ -76,6 +76,34 @@ with open("build.json", encoding="utf-8") as f:
     sys.stdout.write(f.read())
 """
 
+# Injected via SYNC_AFTER_MERGE_{VALIDATE,TEST,HANDOFF}_CMD (see
+# sync-after-merge.sh) so that end-to-end tests of that script don't
+# recursively re-run ./validate.sh, the full `python3 -m unittest discover
+# -s tests` suite (which is what's already executing this very test), or
+# ./handoff.sh (which internally runs that same full suite a second time,
+# see scripts/handoff.sh). Each fake just records that it ran -- one line
+# appended to $FAKE_CALL_LOG per invocation -- so tests can assert the sync
+# script actually invoked the step, without paying for or recursing into
+# the real thing. The log lives outside the throwaway git repo (see
+# run_script's FAKE_CALL_LOG default) so it never shows up as an untracked
+# file and trips the dirty-working-tree check on a second run.
+CALL_LOG_NAME = "fake-command-calls.log"
+
+FAKE_VALIDATE = """#!/usr/bin/env bash
+echo "validate" >> "$FAKE_CALL_LOG"
+exit 0
+"""
+
+FAKE_TEST_RUNNER = """#!/usr/bin/env bash
+echo "test" >> "$FAKE_CALL_LOG"
+exit 0
+"""
+
+FAKE_HANDOFF = """#!/usr/bin/env bash
+echo "handoff" >> "$FAKE_CALL_LOG"
+exit 0
+"""
+
 
 def _chmod_x(path: Path) -> None:
     path.chmod(path.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
@@ -93,6 +121,15 @@ def make_fake_bin(tmp_dir: Path) -> Path:
     fetch_path = bin_dir / "fake-deployment-fetch"
     fetch_path.write_text(FAKE_DEPLOYMENT_FETCH)
     _chmod_x(fetch_path)
+    validate_path = bin_dir / "fake-validate"
+    validate_path.write_text(FAKE_VALIDATE)
+    _chmod_x(validate_path)
+    test_runner_path = bin_dir / "fake-test-runner"
+    test_runner_path.write_text(FAKE_TEST_RUNNER)
+    _chmod_x(test_runner_path)
+    handoff_path = bin_dir / "fake-handoff"
+    handoff_path.write_text(FAKE_HANDOFF)
+    _chmod_x(handoff_path)
     return bin_dir
 
 
@@ -190,6 +227,18 @@ def run_script(
     # step (no-op unless a test actually configures a non-empty publicUrl).
     # Callers can override via env_extra.
     env["DEPLOYMENT_FRESHNESS_FETCH_CMD"] = str(fake_bin / "fake-deployment-fetch")
+    # Default test-mode seam for sync-after-merge.sh's re-validate step: swap
+    # the real ./validate.sh, full unit suite, and ./handoff.sh (which itself
+    # re-runs that same full suite) for fakes that just record their call --
+    # see FAKE_VALIDATE/FAKE_TEST_RUNNER/FAKE_HANDOFF above. A test that wants
+    # to exercise the real commands (e.g. to prove production's default
+    # behavior stays intact) can override these to "" via env_extra, which
+    # falls through to sync-after-merge.sh's own `${VAR:-<real command>}`
+    # default.
+    env["SYNC_AFTER_MERGE_VALIDATE_CMD"] = str(fake_bin / "fake-validate")
+    env["SYNC_AFTER_MERGE_TEST_CMD"] = str(fake_bin / "fake-test-runner")
+    env["SYNC_AFTER_MERGE_HANDOFF_CMD"] = str(fake_bin / "fake-handoff")
+    env["FAKE_CALL_LOG"] = str(fake_bin.parent / CALL_LOG_NAME)
     if env_extra:
         env.update(env_extra)
     return subprocess.run(
