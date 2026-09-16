@@ -40,6 +40,12 @@ jobs:
           additional_permissions: |
             actions: read
 
+          show_full_output: true
+            claude_args: |
+              --verbose
+              --allowedTools "Bash(./validate.sh),Bash(python3 -m unittest discover -s tests),Bash(./handoff.sh),Bash(./status.sh)"
+
+
           # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
           # prompt: 'Update the pull request description to include a summary of changes.'
 
