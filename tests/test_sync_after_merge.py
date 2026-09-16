@@ -2,6 +2,8 @@
 repo with a fake `gh` on PATH -- no live network or GitHub auth (see
 tests/_workflow_test_utils.py)."""
 import json
+import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +17,11 @@ from _workflow_test_utils import (
     write_fixture,
 )
 
+try:
+    import pty
+except ImportError:  # pragma: no cover - pty is Unix-only; this repo targets macOS/Linux
+    pty = None
+
 
 class SyncAfterMergeTestCase(unittest.TestCase):
     def setUp(self):
@@ -26,8 +33,8 @@ class SyncAfterMergeTestCase(unittest.TestCase):
     def tearDown(self):
         self._tmp.cleanup()
 
-    def run_sync(self, args, env_extra=None):
-        return run_script(self.repo, "sync-after-merge.sh", args, self.fake_bin, env_extra)
+    def run_sync(self, args, env_extra=None, stdin=subprocess.DEVNULL):
+        return run_script(self.repo, "sync-after-merge.sh", args, self.fake_bin, env_extra, stdin=stdin)
 
     def call_log_lines(self):
         """Lines recorded by the fake validate/test/handoff commands (see
@@ -264,6 +271,60 @@ class TestMergedPrSyncsMain(SyncAfterMergeTestCase):
         self.assertIn("Ran 1 test", test_log)
         self.assertNotIn("test_merged_pr_syncs_state_and_archives_task", test_log)
         self.assertNotIn("test_real_test_command_stays_scoped", test_log)
+
+    @unittest.skipUnless(pty, "pty module unavailable (Unix-only)")
+    def test_stdin_tty_dependence_is_the_root_cause_of_the_reported_hang(self):
+        """Regression test for the reported "intermittent 30s hang, macOS
+        only" bug (issue #11 follow-up). The real mechanism isn't OS-specific:
+        sync-after-merge.sh's branch-deletion step probes `[ -t 0 ]` and, if
+        stdin is a tty, blocks on an interactive `read` (see that step's
+        `stage "delete-local-branch:interactive-prompt"` marker). All other
+        tests in this file run with run_script()'s default stdin=DEVNULL,
+        which deterministically takes the non-interactive fallback no matter
+        what tty the invoking test runner itself has. This test proves the
+        *mechanism* directly by handing the script a real pty as stdin --
+        reproducing why running the suite from an interactive terminal
+        (common on macOS; uncommon in scripted CI) used to hang until the
+        30s subprocess timeout, while providing queued input here so this
+        test itself completes quickly instead of hanging.
+        """
+        merge_sha, branch = self._simulate_merged_pr(issue_number=123, title="tty regression")
+        fixture = write_fixture(
+            self.tmp_dir,
+            "pr.json",
+            {
+                "number": 123,
+                "url": "https://github.com/example/test-project/pull/123",
+                "state": "MERGED",
+                "mergeCommit": {"oid": merge_sha},
+                "headRefName": branch,
+                "closingIssuesReferences": [],
+                "title": "tty regression",
+            },
+        )
+
+        master_fd, slave_fd = pty.openpty()
+        try:
+            # Queue the "decline" answer before the script ever reads, so a
+            # real tty stdin still lets this test finish quickly -- an
+            # inherited tty with nothing queued (the actual reported bug) is
+            # exactly what would block on `read` until the 30s timeout.
+            os.write(master_fd, b"n\n")
+            result = self.run_sync(
+                ["123"],
+                env_extra={"FAKE_GH_PR_FIXTURE": str(fixture)},
+                stdin=slave_fd,
+            )
+        finally:
+            os.close(master_fd)
+            os.close(slave_fd)
+
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+        # Proves the script actually took the interactive branch (tty stdin
+        # -> reads our queued "n" -> declines deletion), not the
+        # non-interactive fallback every other test exercises.
+        self.assertIn("SYNC-STAGE: delete-local-branch:interactive-prompt", result.stderr)
+        self.assertIn("kept (declined)", result.stdout)
 
 
 if __name__ == "__main__":

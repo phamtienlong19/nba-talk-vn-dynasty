@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-09-16T09:12:09Z
+Generated: 2026-09-16T09:40:36Z
 
 ## Task
 Issue 11: Fix sync-after-merge tests timing out
@@ -9,8 +9,8 @@ Issue 11: Fix sync-after-merge tests timing out
 READY_FOR_REVIEW
 
 ## Git
-Branch: claude/issue-11-20260916-0903
-Commit: 1edac69
+Branch: claude/issue-11-20260916-0935
+Commit: 7fd247d
 Base: main
 Working tree: dirty
 
@@ -27,13 +27,7 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/CURRENT_STATE.json |  2 +-
- ai_exchange/REVIEW_NOTES.md    | 38 +++++++++++---------
- sync-after-merge.sh            | 23 ++++++++++--
- tasks/ACTIVE.md                |  4 +--
- tests/_workflow_test_utils.py  | 49 ++++++++++++++++++++++++++
- tests/test_sync_after_merge.py | 80 ++++++++++++++++++++++++++++++++++++++----
- 6 files changed, 168 insertions(+), 28 deletions(-)
+
 ```
 
 ## Validation
@@ -48,39 +42,50 @@ Cap snapshot: 130-175
 Yahoo source timestamp: 2026-09-16T03:20:25Z
 
 ## Files Changed
-- ai_exchange/CURRENT_STATE.json
-- ai_exchange/REVIEW_NOTES.md
-- sync-after-merge.sh
-- tasks/ACTIVE.md
-- tests/_workflow_test_utils.py
-- tests/test_sync_after_merge.py
+(none)
 
 ## Issues
-- Confirmed root cause (per issue #11 follow-up): `sync-after-merge.sh`
-  unconditionally ran `./validate.sh`, the full `python3 -m unittest
-  discover -s tests`, and `./handoff.sh` (which itself runs that same
-  `unittest discover` a second time, see `scripts/handoff.sh`) with no
-  test-mode seam. `tests/test_sync_after_merge.py` exercises
-  `sync-after-merge.sh` end-to-end as a subprocess, so this path was
-  liable to recursively re-run the outer suite that is already executing
-  the test.
-- Fix: `sync-after-merge.sh` now reads
-  `SYNC_AFTER_MERGE_VALIDATE_CMD` / `SYNC_AFTER_MERGE_TEST_CMD` /
-  `SYNC_AFTER_MERGE_HANDOFF_CMD` overrides (defaulting to the real
-  `./validate.sh`, `python3 -m unittest discover -s tests`, and
-  `./handoff.sh` in production — unchanged). `tests/_workflow_test_utils.py`
-  injects deterministic fakes for all three by default, logging each
-  invocation to `$FAKE_CALL_LOG` so tests can assert the step actually ran.
-  The two previously timing-out tests now assert the fakes were invoked.
-  A new regression test
-  (`test_real_test_command_stays_scoped_and_does_not_recurse`) runs with
-  the production defaults (no fakes) inside the isolated fixture repo and
-  asserts the internal test run discovers only its own single smoke test —
-  never the real outer suite.
+- Confirmed root cause (per issue #11's macOS follow-up): the prior fix's
+  `tests/_workflow_test_utils.py:run_script()` never set `stdin=` on its
+  `subprocess.run(...)` call, so the child process inherited whatever
+  stdin the test runner itself was started with. `sync-after-merge.sh`'s
+  branch-deletion step probes `[ -t 0 ]` and, when true, blocks on an
+  interactive `read` prompt. GitHub Actions Ubuntu runners invoke
+  `python3 -m unittest discover -s tests` with non-tty stdin, so the
+  prompt was always skipped there; running the same suite from an
+  interactive terminal (e.g. Terminal.app on macOS, or any local
+  Linux/macOS terminal) gives it a real tty and the prompt blocks until
+  the test harness's own 30s subprocess timeout fires. This is a
+  test-isolation defect, not an OS-specific one — it reproduces reliably
+  on macOS because local test runs there are typically interactive.
+- Fix: `run_script()` now pins `stdin=subprocess.DEVNULL` by default
+  (overridable per-call), making the script's own non-interactive
+  fallback deterministic regardless of the invoking environment's tty.
+  Production behavior (interactive prompt when a human runs the script
+  from a real terminal) is unchanged — the seam only affects the test
+  harness.
+- Added `sync-after-merge.sh` `stage()` markers (`SYNC-STAGE: <name>` to
+  stderr before each numbered step, plus one inside the interactive-read
+  branch specifically) so any future stall is diagnosable from captured
+  stderr without raising the timeout. `run_script()` now catches
+  `subprocess.TimeoutExpired` and re-raises with the last `SYNC-STAGE`
+  marker plus captured stdout/stderr.
+- Added `test_stdin_tty_dependence_is_the_root_cause_of_the_reported_hang`
+  (`tests/test_sync_after_merge.py`): hands the script a real pty as
+  stdin with a pre-queued "decline" answer, proving the script takes the
+  interactive branch when stdin is a tty (confirming the mechanism)
+  while completing quickly itself (input is already queued, so it never
+  blocks).
+- **Not done**: adding a `macos-latest` GitHub Actions test lane was
+  requested but is out of scope for this agent — GitHub App permissions
+  used here do not allow modifying `.github/workflows/*`. The exact diff
+  to add is included in the PR description for a human to apply.
 
 ## Decisions Required
 
-- (none)
+- Human: apply the `macos-latest` matrix lane to
+  `.github/workflows/validate.yml` (diff provided in the PR description)
+  so this regression is caught in CI going forward, not just locally.
 
 ## Suggested Next Step
-Open/update the PR from `claude/issue-11-20260916-0903` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `claude/issue-11-20260916-0935` if not already done, then request human/ChatGPT review of this packet.

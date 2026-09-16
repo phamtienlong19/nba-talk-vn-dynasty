@@ -220,6 +220,7 @@ def run_script(
     args: list[str],
     fake_bin: Path,
     env_extra: dict | None = None,
+    stdin: int | None = subprocess.DEVNULL,
 ) -> subprocess.CompletedProcess:
     env = dict(os.environ)
     env["PATH"] = f"{fake_bin}:{env['PATH']}"
@@ -241,14 +242,41 @@ def run_script(
     env["FAKE_CALL_LOG"] = str(fake_bin.parent / CALL_LOG_NAME)
     if env_extra:
         env.update(env_extra)
-    return subprocess.run(
-        [f"./{script}", *args],
-        cwd=repo,
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=30,
-    )
+    try:
+        return subprocess.run(
+            [f"./{script}", *args],
+            cwd=repo,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            # Root cause of the intermittent 30s hangs (reported as macOS-only,
+            # but really tty-vs-non-tty): without an explicit stdin, this
+            # subprocess inherits whatever stdin the *test runner itself* was
+            # started with. sync-after-merge.sh's branch-deletion step probes
+            # `[ -t 0 ]` and, when true, blocks on an interactive `read` (see
+            # that step in sync-after-merge.sh). Ubuntu CI happens to invoke
+            # `python3 -m unittest` with non-tty stdin, so the prompt was
+            # always skipped there; running the same suite from an interactive
+            # terminal (e.g. Terminal.app on macOS) gives it a real tty and
+            # the prompt blocks until this timeout fires. Pinning stdin to
+            # DEVNULL makes the script's own non-interactive fallback
+            # deterministic regardless of how/where the test is invoked --
+            # matching its real production behavior in CI/scripted use.
+            # Callers can override (see test_stdin_tty_dependence in
+            # tests/test_sync_after_merge.py) to directly demonstrate the
+            # mechanism this default protects against.
+            stdin=stdin,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = (exc.stdout or b"").decode(errors="replace") if isinstance(exc.stdout, bytes) else (exc.stdout or "")
+        stderr = (exc.stderr or b"").decode(errors="replace") if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+        stage_lines = [line for line in stderr.splitlines() if line.startswith("SYNC-STAGE:")]
+        last_stage = stage_lines[-1] if stage_lines else "(no SYNC-STAGE marker was reached)"
+        raise AssertionError(
+            f"{script} {args} timed out after {exc.timeout}s; last stage reached: {last_stage}\n"
+            f"--- captured stdout ---\n{stdout}\n--- captured stderr ---\n{stderr}"
+        ) from exc
 
 
 def write_fixture(tmp_dir: Path, name: str, data: dict) -> Path:
