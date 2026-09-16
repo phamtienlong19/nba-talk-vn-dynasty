@@ -35,10 +35,7 @@ jobs:
       - name: Materialize trusted Issue context
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          python3 scripts/materialize_issue_context.py \\
-            --event "$GITHUB_EVENT_PATH" \\
-            --output ".issue-context"
+        run: python3 scripts/materialize_issue_context.py --event "$GITHUB_EVENT_PATH" --output ".issue-context"
 
       - name: Run Claude Code
         id: claude
