@@ -53,3 +53,22 @@ fi
 
 LAST_COMMIT_DATE="$(git log -1 --format=%cd --date=iso 2>/dev/null || echo unknown)"
 echo "Last update:   $LAST_COMMIT_DATE"
+
+ACTIVE_TASK="none"
+if [ -f tasks/ACTIVE.md ]; then
+  ACTIVE_TASK="$(grep -m1 '^# ' tasks/ACTIVE.md | sed 's/^# //')"
+fi
+echo ""
+echo "Active task:   $ACTIVE_TASK"
+echo "Task branch:   $BRANCH"
+
+if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  PR_URL="$(gh pr view "$BRANCH" --json url -q .url 2>/dev/null || echo none)"
+  echo "PR:            ${PR_URL:-none}"
+  CI_STATE="$(gh run list --branch "$BRANCH" --limit 1 --json conclusion -q '.[0].conclusion' 2>/dev/null || echo unknown)"
+  echo "CI:            ${CI_STATE:-unknown}"
+else
+  echo "PR:            unknown (gh unavailable)"
+  echo "CI:            unknown (gh unavailable)"
+fi
+echo "Review packet: ai_exchange/REVIEW_PACKET.md (run ./handoff.sh to refresh)"

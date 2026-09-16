@@ -22,5 +22,19 @@
   "rosterBaseline": {
     "franchisesJson": "committed, 16/16 franchises, canonical order verified",
     "prekeeperRostersJson": "committed, 232/232 pre-keeper assignments across 16 franchises, imported from local_sources/nba_talk_vn_dynasty_forensic_state_2026-08-20.md via scripts/import_forensic_rosters.py; all roster-baseline regression tests pass"
+  },
+  "activeTask": {
+    "file": "tasks/ACTIVE.md",
+    "title": "V1 Post-Bootstrap Acceptance Audit",
+    "status": "V1_ACCEPTED"
+  },
+  "handoff": {
+    "reviewPacket": "ai_exchange/REVIEW_PACKET.md",
+    "generatedAt": "2026-09-16T04:00:43Z"
+  },
+  "git": {
+    "branch": "chore/repo-native-agent-handoff",
+    "commit": "9d0e2945e153b07381fae9e67cd3a195f96575d8",
+    "prUrl": "https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/1"
   }
 }
