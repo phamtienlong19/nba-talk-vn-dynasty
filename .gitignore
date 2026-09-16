@@ -6,3 +6,6 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+# GitHub Issue/PR materialized attachment context (temporary)
+/.issue-context/
