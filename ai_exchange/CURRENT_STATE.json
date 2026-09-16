@@ -25,16 +25,16 @@
   },
   "activeTask": {
     "file": "tasks/ACTIVE.md",
-    "title": "V1 Post-Bootstrap Acceptance Audit",
-    "status": "V1_ACCEPTED"
+    "title": "Double Check Team Name and Rosters' Cap Numbers (Issue #2)",
+    "status": "READY_FOR_REVIEW"
   },
   "handoff": {
     "reviewPacket": "ai_exchange/REVIEW_PACKET.md",
-    "generatedAt": "2026-09-16T04:00:43Z"
+    "generatedAt": "2026-09-16T04:58:51Z"
   },
   "git": {
-    "branch": "chore/repo-native-agent-handoff",
-    "commit": "9d0e2945e153b07381fae9e67cd3a195f96575d8",
-    "prUrl": "https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/1"
+    "branch": "fix/issue-2-roster-cap-rookie-audit",
+    "commit": "f7ef529",
+    "prUrl": null
   }
 }

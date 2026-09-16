@@ -1,147 +1,53 @@
 # Implementation Report
 
-Bootstrap run: 2026-09-16.
+Run: 2026-09-16 — Issue #2, "Double Check Team Name and Rosters' Cap Numbers".
 
-## Phase A — public board (complete)
+## Fixed
 
-- Canonical source: `nba_talk_vn_dynasty_announcement_compact_hybrid35_fonts.html`
-  (found in `~/Downloads`, no `(2)` suffix existed — see
-  `docs/SOURCE_MANIFEST.md`).
-- Sanitized (stripped 4 local Yahoo `@font-face`/`.woff2` declarations,
-  which were confirmed unused dead CSS — no `.yicon` class references
-  exist in the markup) and published as `index.html`.
-- Verified: valid UTF-8, `<!doctype html>`, viewport meta present, all 4
-  nav anchors (`draft-order`, `rosters-a`, `draft-pool`, `cap`) present,
-  no `/mnt/data`, `file://`, `localhost`, or `assets/fonts` references, no
-  `.woff`/`.woff2` references.
-- Repo `nba-talk-vn-dynasty` created public under `phamtienlong19`, pushed
-  to `main`, GitHub Pages enabled (branch `main`, folder `/`).
+- **John Collins cap.** Published board showed `1` (The Silver Seekers'
+  roster row and both cap-total displays); live Yahoo
+  `projected_auction_value` (verified via `./refresh-yahoo.sh`,
+  `local_data/yahoo/draft_analysis_2026-09-16T045439Z.json`) is `0`.
+  Corrected the player row and recomputed the team's cap total/ROOM in
+  both the team card and the CAP page summary card:
+  `153/175, 22 ROOM` → `152/175, 23 ROOM`.
+- **Outdated rookie flags.** Nique Clifford, Tre Johnson, and Dylan
+  Cardwell were shown `rookie-row`/`R` in the draft pool. Confirmed via
+  web search that all three are 2025 NBA draft class (Clifford: Kings
+  1st rd; Johnson: Wizards #6 overall; Cardwell: Kings UDFA
+  two-way/standard) — second-year players for the 2026-27 season the
+  board covers, not rookies. Reclassified as `FA` (no fantasy-league cut
+  source is recorded for them, so `src-cut` with a team code would be a
+  guess).
 
-## Phase B — lightweight foundation (mostly complete, one blocker)
+## Checked, not changed (surfaced for human review)
 
-### Yahoo source adapter — working, verified live
+- **Minor per-player cap drift.** A full audit script compared every
+  roster/pool cap value in `index.html` against a fresh
+  `./refresh-yahoo.sh` pull. Six other players (Jaime Jaquez Jr., Peyton
+  Watson, Josh Hart, Ayo Dosunmu, Kristaps Porziņģis, Andrew Wiggins)
+  differ by ±1 from today's live snapshot even though the aggregate
+  floor/ceiling still MATCH (130/175). This is ordinary day-to-day
+  market movement in Yahoo's `projected_auction_value`, not a baking
+  error, so it was not bulk-applied — CLAUDE.md reserves promoting a
+  changed Yahoo snapshot to a human decision.
+- **Team identity-tag/name mismatches** between the forensic-canonical
+  `data/2026-27/franchises.json` (authoritative for team
+  identities/order per `CLAUDE.md`) and the currently published
+  `index.html`:
+  - franchise-01: canonical `Hai` vs board `Bsy`.
+  - franchise-07: canonical has no team name at all (`Maxfixe`) vs
+    board `Maxfixe | Poop for Coop` — likely a gap in the forensic
+    source rather than a board error, but not resolved here.
+  - franchise-09: canonical `M. Jordat` vs board `Đạt`.
 
-- `scripts/fetch_yahoo_draft_analysis.py` fetched the live public
-  endpoint on 2026-09-16: HTTP 200, 300 players, all with unique O-Rank
-  1–300.
-- `scripts/normalize_yahoo_players.py` normalizes using field paths
-  **verified against the real response**, not guessed (see
-  `docs/YAHOO_DATA_SOURCE.md`).
-- Determined conclusively that `projected_auction_value` (not
-  `average_auction_cost`) is the authoritative cap-dollar field: it
-  reproduces the published R1–R9 (51.0625 ... 0.0), benchmark
-  (152.5625), and cap range (130/175) **exactly** when recomputed live.
-- `./refresh-yahoo.sh` runs the full fetch → normalize → cap-model →
-  compare pipeline and reported `Status: MATCH` on 2026-09-16.
+  These aren't verifiable from data already in the repo — the forensic
+  snapshot is dated 2026-08-20 and the public board 2026-09-16, so
+  either could be the stale one. Left both sources untouched; recorded
+  as `Decision Required` in `tasks/ACTIVE.md`.
 
-### Cap model — pure function, fully tested
+## Validation
 
-- `scripts/cap_model.py` has no hardcoded R1–R9; `tests/test_cap_model.py`
-  encodes the regression snapshot as a constructed fixture (16
-  identical-valued players per band). 6/6 tests pass, including
-  structural rejection tests (missing rank, duplicate rank, insufficient
-  count) and an order-independence check.
-
-### Roster baseline — RESOLVED, source file supplied by user
-
-`nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md` did not exist
-anywhere on this machine at bootstrap time (exhaustive search of
-`~/Downloads`, including nested/archived subfolders — see
-`docs/SOURCE_MANIFEST.md`). The user subsequently placed the file
-directly into `local_sources/` as
-`nba_talk_vn_dynasty_forensic_state_2026-08-20.md`.
-
-What was done:
-
-- `data/2026-27/franchises.json` — built directly from the canonical
-  16-team order given explicitly in the bootstrap spec. Verified: 16
-  franchises, exact canonical order, stable `franchise-01`..`franchise-16`
-  IDs.
-- `scripts/import_forensic_rosters.py` — run against the supplied file.
-  Parses only the Section-2 `teams.md` code block, hard-fails on wrong
-  team order, wrong per-team counts, wrong total (≠232), duplicate
-  ownership, or detected drift into projected-keeper/cut/FA-pool/
-  infographic sections. Output: 232 assignments across 16 franchises.
-- `data/2026-27/prekeeper_rosters.json` — generated and committed with
-  the full 232-assignment pre-keeper ownership baseline.
-- `tests/test_roster_baseline.py` — all 7 tests pass: franchise count,
-  canonical order, stable IDs, total assignment count (232), no
-  duplicate ownership, exact per-franchise counts
-  (`15,15,14,15,13,14,13,15,13,15,15,15,15,15,15,15`), and all 8 anchor
-  ownership facts (Wembanyama → franchise-01, Giannis → franchise-03,
-  Karl-Anthony Towns → franchise-04, Luka Dončić → franchise-09, Cooper
-  Flagg → franchise-12, Shai Gilgeous-Alexander → franchise-13, Nikola
-  Jokić → franchise-11, Donovan Mitchell → franchise-16).
-
-### Docs — complete
-
-All of `docs/SOURCE_MANIFEST.md`, `docs/OPEN_RULE_QUESTIONS.md`,
-`docs/LEAGUE_RULES_MODEL.md` (summarized from the full DOCX, read in
-its entirety), `docs/RULE_AUTOMATION_MATRIX.md`,
-`docs/LEGACY_XLSX_REPLACEMENT.md`, `docs/DATA_MODEL.md`,
-`docs/CAP_MODEL.md`, `docs/YAHOO_DATA_SOURCE.md`, and
-`docs/PRODUCT_SCOPE.md` were written. Historical named tank-violator
-enforcement records from the DOCX were deliberately not reproduced
-(local-only source, per Section 28).
-
-## Not done / out of scope (by design)
-
-- Lottery randomness, allocation protocol, ceremony — owned by
-  `nba-talk-vn-lottery`, never touched.
-- Any transaction ledger, generated-board pipeline, commissioner UI,
-  Yahoo OAuth, or rule-enforcement automation — explicitly future-phase
-  per `docs/PRODUCT_SCOPE.md` and Section 51 (do not overengineer).
-
-## Repo-native agent handoff (2026-09-16)
-
-Added `CLAUDE.md`, `tasks/` (`README.md`, `ACTIVE.md`,
-`archive/`), `scripts/handoff.sh` + root `handoff.sh` wrapper,
-`ai_exchange/REVIEW_PACKET.md` (regenerated by `./handoff.sh`, not
-hand-maintained), and task/PR/CI fields in `status.sh` and
-`CURRENT_STATE.json`. No league-data or public-board changes. See
-`ai_exchange/REVIEW_PACKET.md` for the current git/CI/deployment
-snapshot instead of restating it here.
-
-## V1 Post-Bootstrap Acceptance Audit (2026-09-16)
-
-Executed `tasks/ACTIVE.md`. Verdict: **V1_ACCEPTED** — no defects
-found, no fixes required.
-
-- Deployment: repo public, `main` pushed, Pages `built`, live URL
-  returns HTTP 200 with `NBA TALK VN DYNASTY` and all 4 section
-  anchors (`draft-order`, `rosters-a`, `draft-pool`, `cap`); no
-  `/mnt/data`, `file://`, or font-binary references tracked.
-- Source separation: confirmed against `docs/SOURCE_MANIFEST.md` —
-  the forensic snapshot's old 178-cap analysis and August keeper
-  projections were explicitly excluded from import; only the
-  Section-2 `teams.md` block (order + pre-keeper ownership) was used.
-- Roster baseline: `data/2026-27/franchises.json` has 16 franchises,
-  `prekeeper_rosters.json` has 232 assignments; all 7
-  `test_roster_baseline.py` cases pass (order, stable IDs, per-team
-  counts `15,15,14,15,13,14,13,15,13,15,15,15,15,15,15,15`, 8 anchor
-  ownership facts, no duplicate ownership).
-- Yahoo adapter: last refresh 2026-09-16T03:20:25Z returned `MATCH`
-  against the published 130/175 cap range; raw responses stay under
-  gitignored `local_data/`; CI (`.github/workflows/validate.yml`)
-  never calls the live Yahoo endpoint, only `validate.sh` + unit
-  tests + a font-binary check.
-- Cap model: `tests/test_cap_model.py` regression fixture reproduces
-  the exact published snapshot (R1 51.0625 … R9 0.0000, benchmark
-  152.5625, raw floor 129.678125, raw ceiling 175.446875, rounded
-  130/175); 6/6 cap tests pass.
-- Publish automation: `publish.sh` sanitizes (`@font-face` strip,
-  forbidden-token reject), validates the candidate in place of
-  `index.html` before committing, and restores the prior `index.html`
-  from a backup if validation fails.
-- Repo hygiene: `git ls-files` + grep for `/mnt/data`, `file://`,
-  absolute `/Users/...` paths, and token prefixes turned up only the
-  forbidden-token *definitions* inside `publish.sh` /
-  `validate_site.py` themselves — no actual violations. No fonts, raw
-  DOCX/XLSX, or raw forensic Markdown are tracked.
-- CI: latest run on `main` (`chore: point ai_exchange state at
-  roster-baseline-import commit`) is green; 19/19 unit tests pass
-  locally (`test_cap_model`, `test_roster_baseline`,
-  `test_yahoo_normalization`); `./validate.sh` passes.
-
-No proven bootstrap defects were found, so no corrective changes were
-made to `data/`, `index.html`, or `docs/` as part of this audit.
+- `./validate.sh` — PASS
+- `python3 -m unittest discover -s tests` — 19 tests, PASS
+- `./refresh-yahoo.sh` — live floor/ceiling MATCH (130/175)
