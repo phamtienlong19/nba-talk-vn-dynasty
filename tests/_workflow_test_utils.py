@@ -102,7 +102,19 @@ def make_repo(tmp_dir: Path) -> Path:
     (repo / "validate.sh").write_text(MINIMAL_VALIDATE_SH)
     _chmod_x(repo / "validate.sh")
 
+    (repo / ".gitignore").write_text("__pycache__/\n*.pyc\n")
+
     (repo / "tests").mkdir()
+    # A real, always-passing test rather than an empty dir: some
+    # `unittest discover` versions treat "zero tests collected" as a
+    # failure, which would make sync-after-merge.sh's internal test step
+    # spuriously fail regardless of what this fixture is meant to check.
+    (repo / "tests" / "test_smoke.py").write_text(
+        "import unittest\n\n"
+        "class TestSmoke(unittest.TestCase):\n"
+        "    def test_true(self):\n"
+        "        self.assertTrue(True)\n"
+    )
 
     (repo / "tasks").mkdir()
     (repo / "tasks" / "ACTIVE.md").write_text(
