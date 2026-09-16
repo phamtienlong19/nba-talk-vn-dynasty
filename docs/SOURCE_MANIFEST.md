@@ -38,6 +38,9 @@ that they exist and what role each one plays.
 ## 4. Forensic pre-keeper roster snapshot (Markdown)
 
 - **Original filename requested:** `nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md`
-- **Actual filename found:** **NOT FOUND.** An exhaustive search of `~/Downloads` (including nested `Downloads/Downloads` and archive subfolders) found no file matching `*forensic_state_2026-08-20*` in any form.
-- **Role (intended):** Canonical source for the 16-team order, display names, and the 232-assignment pre-keeper roster ownership baseline (Section 2 `teams.md` block).
-- **Status:** **BLOCKED.** See `docs/OPEN_RULE_QUESTIONS.md`. `data/2026-27/franchises.json` was still built directly from the canonical team order given explicitly in this project's bootstrap spec (no forensic file needed for that part). `data/2026-27/prekeeper_rosters.json` (the 232 player-to-team assignments) could **not** be built — fabricating player names would violate the source-fidelity requirement. `scripts/import_forensic_rosters.py` is complete and ready to run once the real file is supplied to `local_sources/`.
+- **Actual filename used:** `nba_talk_vn_dynasty_forensic_state_2026-08-20.md` (unsuffixed). Not found by the initial exhaustive `~/Downloads` search; the user subsequently placed it directly into `local_sources/`.
+- **SHA-256:** `659cb64244a52d106ddf6e281367e59987ca31244da2ea2b278d6154dcb77d0d`
+- **Size:** 58,890 bytes
+- **Role:** Canonical source for the 16-team order, display names, and the 232-assignment pre-keeper roster ownership baseline (Section 2 `teams.md` block). Also contains non-canonical historical/analytical sections (August keeper projections, old 178-cap analysis, draft-pool work) that are **not** used by this bootstrap.
+- **Source location:** placed by user directly into `local_sources/` (gitignored)
+- **Status:** local-only. Imported via `scripts/import_forensic_rosters.py` into the public derived files `data/2026-27/franchises.json` and `data/2026-27/prekeeper_rosters.json` (232/232 assignments, all regression tests passing). See `docs/OPEN_RULE_QUESTIONS.md` item 1 for resolution history.

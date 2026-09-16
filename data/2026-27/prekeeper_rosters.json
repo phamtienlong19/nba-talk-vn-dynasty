@@ -1,0 +1,1400 @@
+{
+  "season": "2026-27",
+  "sourceSnapshotDate": "2026-08-20",
+  "sourceArtifact": "nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md",
+  "stateType": "PRE_KEEPER_ROSTER_BASELINE",
+  "assignments": [
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Victor Wembanyama",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Jayson Tatum",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Stephon Castle",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Dylan Harper",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Rudy Gobert",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Ajay Mitchell",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Collin Sexton",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Jaylon Tyson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "RJ Barrett",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Ryan Kalkbrenner",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Jay Huff",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Dennis Schroder",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Cam Thomas",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Moses Moody",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-01",
+      "playerName": "Zach Collins",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Desmond Bane",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Keyonte George",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Kyrie Irving",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Immanuel Quickley",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Damian Lillard",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Fred VanVleet",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Dillon Brooks",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Zach LaVine",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Jaime Jaquez Jr",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Devin Vassell",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Brice Sensabaugh",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Carlton Carrington",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "DeAndre Ayton",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Jordan Poole",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-02",
+      "playerName": "Zaccharie Risacher",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Giannis Antetokounmpo",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Domantas Sabonis",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Nickeil Alexander-Walker",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Myles Turner",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Matas Buzelis",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Ausar Thompson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Keegan Murray",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Peyton Watson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Jalen Green",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Egor Demin",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Cameron Johnson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Daniel Gafford",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Donte DiVincenzo",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-03",
+      "playerName": "Mitchell Robinson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Karl-Anthony Towns",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Chet Holmgren",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Alperen Sengun",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Derrick White",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Donovan Clingan",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Darius Garland",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Day'Ron Sharpe",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Ty Jerome",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Aaron Gordon",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Jerami Grant",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Cason Wallace",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Dereck Lively II",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Draymond Green",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Brook Lopez",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-04",
+      "playerName": "Aaron Nesmith",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Anthony Edwards",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Jalen Johnson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Trae Young",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Mikal Bridges",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Zion Williamson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Derik Queen",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Brandin Podziemski",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Scoot Henderson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Jeremiah Fears",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Isaiah Collier",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Tre Johnson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Nique Clifford",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-05",
+      "playerName": "Olivier-Maxence Prosper",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Lauri Markkanen",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Jalen Brunson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Franz Wagner",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Michael Porter Jr.",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Naz Reid",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Jalen Suggs",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Josh Hart",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Andrew Nembhard",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Anthony Black",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Bennedict Mathurin",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Noah Clowney",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Pelle Larsson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Brandon Williams",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-06",
+      "playerName": "Nikola Topic",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "LaMelo Ball",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Deni Avdija",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Tyler Herro",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Joel Embiid",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Kel'el Ware",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Ivica Zubac",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Kevin Porter Jr",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Ayo Dosunmu",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Shaedon Sharpe",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Scotty Pippen Jr",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Nolan Traore",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Grayson Allen",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-07",
+      "playerName": "Grant Williams",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Cade Cunningham",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Kawhi Leonard",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Evan Mobley",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Trey Murphy III",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Norman Powell",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Jusuf Nurkic",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Jakob Poeltl",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Jabari Smith Jr.",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Ace Bailey",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Will Richard",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Taylor Hendricks",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Jonathan Kuminga",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Jamal Shead",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Bobby Portis",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-08",
+      "playerName": "Bilal Coulibaly",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Luka Dončić",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Josh Giddey",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Jaylen Brown",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Bam Adebayo",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "De'Aaron Fox",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "John Collins",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "CJ McCollum",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Collin Gillespie",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "DeMar DeRozan",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Yves Missi",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Luka Garza",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Ryan Dunn",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-09",
+      "playerName": "Jamir Watkins",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Devin Booker",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Kon Knueppel",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Paul George",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Pascal Siakam",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Brandon Ingram",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Zach Edey",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Ja Morant",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Nic Claxton",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Maxime Raynaud",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Moussa Diabate",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Precious Achiuwa",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Anfernee Simon",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Russell Westbrook",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Robert Williams III",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-10",
+      "playerName": "Nikola Vucevic",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Nikola Jokić",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Tyrese Haliburton",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Austin Reaves",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "OG Anunoby",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Jarrett Allen",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Kristaps Porziņģis",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Davion Mitchell",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Jimmy Butler III",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Sandro Mamukelashvili",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Royce O'Neale",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Walter Clayton Jr",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Kris Dunn",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Oso Ighodaro",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Isaiah Jackson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-11",
+      "playerName": "Justin Edwards",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Cooper Flagg",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Anthony Davis",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Amen Thompson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Jalen Williams",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Kyshawn George",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Collin Murray-Boyles (R)",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Reed Sheppard",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Khaman Maluach",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Joan Beringer",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Cedric Coward",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Tari Eason",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Ron Holland",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Leonard Miller",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "Kasparas Jakucionis",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-12",
+      "playerName": "De'Anthony Melton",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Shai Gilgeous-Alexander",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Tyrese Maxey",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Brandon Miller",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Paolo Banchero",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Miles Bridges",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Naji Marshall",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Saddiq Bey",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Santi Aldama",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Wendell Carter Jr",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Will Riley",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "GG Jackson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Gary Payton II",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Josh Minott",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Matisse Thybulle",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-13",
+      "playerName": "Chaney Johnson",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Stephen Curry",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Kevin Durant",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "LeBron James",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Ryan Rollins",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Jaden McDaniels",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Coby White",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Payton Pritchard",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "PJ Washington",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Kelly Oubre Jr",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Dylan Cardwell",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Kyle Kuzma",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Isaiah Joe",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Julian Champagnie",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Sam Hauser",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-14",
+      "playerName": "Max Christie",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Scottie Barnes",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Jamal Murray",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Jalen Duren",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Walker Kessler",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Dyson Daniels",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Julius Randle",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Mark Williams",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Toumani Camara",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Jrue Holiday",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Christian Braun",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Isaiah Stewart",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Jordan Goodwin",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Ziaire Williams",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Justin Champagnie",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-15",
+      "playerName": "Killian Hayes",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Donovan Mitchell",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "James Harden",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Jaren Jackson Jr.",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Onyeka Okongwu",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Alex Sarr",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Dejounte Murray",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "VJ Edgecombe",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Isaiah Hartenstein",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Andrew Wiggins",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Neemias Queta",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Tobias Harris",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Rob Dillingham",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Herb Jones",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Jarace Walker",
+      "sourceState": "PRE_KEEPER"
+    },
+    {
+      "season": "2026-27",
+      "franchiseId": "franchise-16",
+      "playerName": "Tristan da Silva",
+      "sourceState": "PRE_KEEPER"
+    }
+  ]
+}

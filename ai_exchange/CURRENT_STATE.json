@@ -21,6 +21,6 @@
   },
   "rosterBaseline": {
     "franchisesJson": "committed, 16/16 franchises, canonical order verified",
-    "prekeeperRostersJson": "BLOCKED — forensic source file nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md was not found on this machine; see docs/OPEN_RULE_QUESTIONS.md"
+    "prekeeperRostersJson": "committed, 232/232 pre-keeper assignments across 16 franchises, imported from local_sources/nba_talk_vn_dynasty_forensic_state_2026-08-20.md via scripts/import_forensic_rosters.py; all roster-baseline regression tests pass"
   }
 }

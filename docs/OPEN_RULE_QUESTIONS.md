@@ -4,32 +4,24 @@ Recorded per the source-precedence policy: unresolved conflicts or gaps are
 written down here rather than silently guessed. This does not block the
 Phase A public-board deployment.
 
-## 1. BLOCKED: forensic pre-keeper roster snapshot file not found
+## 1. RESOLVED: forensic pre-keeper roster snapshot file was supplied
 
-`nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md` does not exist
-anywhere on this machine (searched `~/Downloads` exhaustively, including
-nested/archived subfolders). Impact:
+The file was originally not found anywhere on this machine (searched
+`~/Downloads` exhaustively, including nested/archived subfolders). The
+user subsequently placed it directly into `local_sources/` as
+`nba_talk_vn_dynasty_forensic_state_2026-08-20.md` (unsuffixed — see
+item 2 below on filename suffixes generally).
 
-- `data/2026-27/franchises.json` **was still created** — the 16-team
-  canonical order and display names are given directly in this project's
-  bootstrap spec, independent of the forensic file.
-- `data/2026-27/prekeeper_rosters.json` (232 player-to-team pre-keeper
-  ownership assignments) **could not be created**. Only 8 anchor
-  ownership facts were given directly in the spec (Wembanyama →
-  franchise-01, Giannis → franchise-03, etc.) — not the other ~224
-  assignments. Fabricating them would violate source fidelity.
-- `scripts/import_forensic_rosters.py` and `tests/test_roster_baseline.py`
-  are both complete and correct; the roster-dependent test class skips
-  cleanly (not a CI failure) until the real file is supplied.
-
-**Resolution needed from the user:** supply the actual forensic markdown
-file (or the correct current filename/location for it) into
-`local_sources/`, then run:
-
-```bash
-python3 scripts/import_forensic_rosters.py "local_sources/<actual-filename>.md"
-python3 -m unittest tests.test_roster_baseline -v
-```
+- `python3 scripts/import_forensic_rosters.py "local_sources/nba_talk_vn_dynasty_forensic_state_2026-08-20.md"`
+  ran successfully: 232 pre-keeper assignments across 16 franchises,
+  parsed from the canonical Section 2 `teams.md` block only.
+- `data/2026-27/prekeeper_rosters.json` is now committed with the full
+  232-assignment baseline.
+- All roster-baseline regression tests pass, including the 16-franchise
+  canonical order, exact per-team counts
+  (`15,15,14,15,13,14,13,15,13,15,15,15,15,15,15,15`), no duplicate
+  ownership, and all 8 anchor ownership facts (Wembanyama →
+  franchise-01, Giannis → franchise-03, etc.).
 
 ## 2. Source filenames lacked the exact requested parenthetical suffixes
 

@@ -42,37 +42,36 @@ Bootstrap run: 2026-09-16.
   structural rejection tests (missing rank, duplicate rank, insufficient
   count) and an order-independence check.
 
-### Roster baseline — BLOCKED on a missing source file
+### Roster baseline — RESOLVED, source file supplied by user
 
-`nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md` does not exist
-anywhere on this machine (exhaustive search of `~/Downloads`, including
-nested/archived subfolders — see `docs/SOURCE_MANIFEST.md`). Per the
-"stop and report" instruction for a genuinely missing source file, this
-is called out rather than silently worked around.
+`nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md` did not exist
+anywhere on this machine at bootstrap time (exhaustive search of
+`~/Downloads`, including nested/archived subfolders — see
+`docs/SOURCE_MANIFEST.md`). The user subsequently placed the file
+directly into `local_sources/` as
+`nba_talk_vn_dynasty_forensic_state_2026-08-20.md`.
 
-What was still done:
+What was done:
 
 - `data/2026-27/franchises.json` — built directly from the canonical
-  16-team order given explicitly in the bootstrap spec (does not require
-  the forensic file). Verified: 16 franchises, exact canonical order,
-  stable `franchise-01`..`franchise-16` IDs.
-- `scripts/import_forensic_rosters.py` — complete, ready to run once the
-  real file is supplied. Parses only a Section-2 `teams.md`-style code
-  block, hard-fails on wrong team order, wrong per-team counts, wrong
-  total (≠232), duplicate ownership, or detected drift into
-  projected-keeper/cut/FA-pool/infographic sections.
-- `tests/test_roster_baseline.py` — franchise-order tests pass now;
-  roster-assignment tests (232 count, per-team counts, anchor ownership
-  facts) are written and correct but **skip cleanly** (not a CI failure)
-  because `data/2026-27/prekeeper_rosters.json` does not exist yet.
-- `data/2026-27/prekeeper_rosters.json` was **not fabricated** — only 8
-  anchor ownership facts were given directly in the spec, not the other
-  ~224 assignments, and inventing them would violate source fidelity.
-
-**Action needed from the user:** supply the real forensic markdown file
-into `local_sources/`, then run
-`python3 scripts/import_forensic_rosters.py "local_sources/<filename>.md"`
-followed by `python3 -m unittest tests.test_roster_baseline -v`.
+  16-team order given explicitly in the bootstrap spec. Verified: 16
+  franchises, exact canonical order, stable `franchise-01`..`franchise-16`
+  IDs.
+- `scripts/import_forensic_rosters.py` — run against the supplied file.
+  Parses only the Section-2 `teams.md` code block, hard-fails on wrong
+  team order, wrong per-team counts, wrong total (≠232), duplicate
+  ownership, or detected drift into projected-keeper/cut/FA-pool/
+  infographic sections. Output: 232 assignments across 16 franchises.
+- `data/2026-27/prekeeper_rosters.json` — generated and committed with
+  the full 232-assignment pre-keeper ownership baseline.
+- `tests/test_roster_baseline.py` — all 7 tests pass: franchise count,
+  canonical order, stable IDs, total assignment count (232), no
+  duplicate ownership, exact per-franchise counts
+  (`15,15,14,15,13,14,13,15,13,15,15,15,15,15,15,15`), and all 8 anchor
+  ownership facts (Wembanyama → franchise-01, Giannis → franchise-03,
+  Karl-Anthony Towns → franchise-04, Luka Dončić → franchise-09, Cooper
+  Flagg → franchise-12, Shai Gilgeous-Alexander → franchise-13, Nikola
+  Jokić → franchise-11, Donovan Mitchell → franchise-16).
 
 ### Docs — complete
 
