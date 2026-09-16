@@ -20,7 +20,18 @@ fail() {
   exit 1
 }
 
+# Emits a "SYNC-STAGE: <name>" marker to stderr before each numbered step
+# below. Purely diagnostic (no behavior change): if this script ever stalls
+# (e.g. a test harness invoking it with a live/inherited tty stdin, which
+# makes step 14/15's `read` block -- see that step's comment), the last
+# printed SYNC-STAGE marker in captured stderr pinpoints exactly which step
+# it stalled in without needing to raise the timeout to investigate.
+stage() {
+  echo "SYNC-STAGE: $1" >&2
+}
+
 # --- 1. require clean working tree or fail safely ---------------------------
+stage "clean-tree-check"
 if [ -n "$(git status --porcelain)" ]; then
   echo "ERROR: working tree is dirty; commit/stash before syncing" >&2
   git status --short >&2
@@ -31,6 +42,7 @@ command -v gh >/dev/null 2>&1 || fail "gh CLI not found on PATH"
 gh auth status >/dev/null 2>&1 || fail "gh is not authenticated (run: gh auth login)"
 
 # --- 2. determine PR from argument or current state --------------------------
+stage "determine-pr-number"
 PR_NUMBER="${1:-}"
 if [ -z "$PR_NUMBER" ]; then
   CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
@@ -43,15 +55,18 @@ fi
 [ -n "$PR_NUMBER" ] || fail "no PR number given and none could be determined; usage: $0 <PR-number>"
 
 # --- 3. query PR state with gh ----------------------------------------------
+stage "query-pr-state"
 PR_JSON="$(gh pr view "$PR_NUMBER" --json number,url,state,mergeCommit,headRefName,closingIssuesReferences,title 2>&1)" \
   || fail "could not fetch PR #${PR_NUMBER}: $PR_JSON"
 
 PR_STATE="$(python3 -c "import json,sys; print(json.loads(sys.argv[1])['state'])" "$PR_JSON")"
 
 # --- 4. require PR = MERGED --------------------------------------------------
+stage "require-merged"
 [ "$PR_STATE" = "MERGED" ] || fail "PR #${PR_NUMBER} is ${PR_STATE}, not MERGED"
 
 # --- 5. record linked Issue/PR before cleanup --------------------------------
+stage "record-linked-issue"
 PR_URL="$(python3 -c "import json,sys; print(json.loads(sys.argv[1])['url'])" "$PR_JSON")"
 MERGE_COMMIT="$(python3 -c "import json,sys; d=json.loads(sys.argv[1]); print((d.get('mergeCommit') or {}).get('oid',''))" "$PR_JSON")"
 HEAD_REF="$(python3 -c "import json,sys; print(json.loads(sys.argv[1])['headRefName'])" "$PR_JSON")"
@@ -73,10 +88,12 @@ echo "PR #${PR_NUMBER} (${PR_URL}) MERGED as ${MERGE_COMMIT:0:7}, branch ${HEAD_
 [ -n "$ISSUE_NUMBER" ] && echo "Linked issue: #${ISSUE_NUMBER} (${ISSUE_URL})"
 
 # --- 6/7. checkout main; pull --ff-only --------------------------------------
+stage "checkout-and-pull-main"
 git checkout main
 git pull --ff-only
 
 # --- 8. verify merged commit is present --------------------------------------
+stage "verify-merge-commit-ancestor"
 if [ -n "$MERGE_COMMIT" ] && ! git merge-base --is-ancestor "$MERGE_COMMIT" HEAD 2>/dev/null; then
   fail "merge commit ${MERGE_COMMIT} is not an ancestor of local main after pull -- refusing to proceed"
 fi
@@ -84,6 +101,7 @@ fi
 CURRENT_MAIN_SHA="$(git rev-parse HEAD)"
 
 # --- 9. archive the completed task pointer -----------------------------------
+stage "archive-active-task"
 if [ -f tasks/ACTIVE.md ] && grep -q '^Issue: #' tasks/ACTIVE.md; then
   DATE="$(date -u +"%Y-%m-%d")"
   ARCHIVE_NAME="$(python3 scripts/issue_workflow.py archive-name "${ISSUE_NUMBER:-0}" "$PR_TITLE" "$DATE")"
@@ -101,10 +119,12 @@ EOF
 fi
 
 # --- 10. reset tasks/ACTIVE.md to concise "No active task" state ------------
+stage "reset-active-task"
 python3 scripts/issue_workflow.py no-active-task-md > tasks/ACTIVE.md
 git add tasks/ACTIVE.md
 
 # --- 11. refresh CURRENT_STATE.json ------------------------------------------
+stage "refresh-current-state"
 python3 - "$CURRENT_MAIN_SHA" "$PR_URL" <<'PYEOF'
 import json
 import sys
@@ -136,6 +156,7 @@ PYEOF
 git add "$STATE_FILE"
 
 # --- 12. refresh + verify deployment-freshness marker ------------------------
+stage "refresh-freshness-marker"
 # Anchor to the PR's actual merge commit (MERGE_COMMIT), not the current
 # main tip: this run's own upcoming sync commit will advance HEAD past
 # whatever we write here, so comparing against a moving HEAD would flag
@@ -154,6 +175,7 @@ if [ "$LOCAL_MARKER_SHA" != "$MARKER_TARGET" ]; then
 fi
 
 # --- 13. re-validate (before committing, so the packet reflects the sync) ---
+stage "revalidate-and-commit"
 # SYNC_AFTER_MERGE_{VALIDATE,TEST,HANDOFF}_CMD are the injectable test-mode
 # seams for this step: production never sets them, so the real
 # ./validate.sh, full `python3 -m unittest discover -s tests`, and
@@ -198,6 +220,7 @@ FRESHNESS="unknown"
 # must not poll/sleep against a real GitHub Pages site. Production runs
 # never set this, so the real network check (default_fetch, 6 attempts x
 # 10s delay) below is unchanged. See scripts/deployment_freshness.py.
+stage "deployment-freshness-check"
 FETCH_CMD_ARGS=()
 if [ -n "${DEPLOYMENT_FRESHNESS_FETCH_CMD:-}" ]; then
   FETCH_CMD_ARGS=(--fetch-cmd "$DEPLOYMENT_FRESHNESS_FETCH_CMD")
@@ -211,9 +234,11 @@ if [ -n "$PUBLIC_URL" ]; then
 fi
 
 # --- 14/15. optionally delete the local merged branch ------------------------
+stage "delete-local-branch"
 BRANCH_DELETED="skipped"
 if [ -n "$HEAD_REF" ] && git show-ref --verify --quiet "refs/heads/${HEAD_REF}"; then
   if [ -t 0 ]; then
+    stage "delete-local-branch:interactive-prompt"
     read -r -p "Delete local branch '${HEAD_REF}'? [y/N] " REPLY
     if [[ "$REPLY" =~ ^[Yy]$ ]]; then
       git branch -d "$HEAD_REF" && BRANCH_DELETED="deleted"
@@ -229,6 +254,7 @@ if [ "${SYNC_DELETE_REMOTE_BRANCH:-0}" = "1" ]; then
 fi
 
 # --- 16. print concise final state -------------------------------------------
+stage "print-final-state"
 echo ""
 echo "SYNC-AFTER-MERGE"
 echo "PR:            #${PR_NUMBER} (${PR_STATE})"
