@@ -1,0 +1,30 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Validate site
+        run: ./validate.sh
+
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Check for proprietary font binaries
+        run: |
+          if find . -type f \( -name "*.woff" -o -name "*.woff2" \) | grep -q .; then
+            echo "Proprietary font binaries found in repo:"
+            find . -type f \( -name "*.woff" -o -name "*.woff2" \)
+            exit 1
+          fi
+          echo "No font binaries tracked."
