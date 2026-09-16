@@ -5,22 +5,19 @@
   "publicUrl": "https://phamtienlong19.github.io/nba-talk-vn-dynasty/",
   "siteArchitecture": "static GitHub Pages, no framework/backend/database",
   "currentCanonicalSource": "nba_talk_vn_dynasty_announcement_compact_hybrid35_fonts.html (sanitized into index.html)",
-
   "deployed": {
     "branch": "main",
     "commit": "7091462182a2b565fd0a48049e3a6615cc99568d",
     "verifiedAt": "2026-09-16T06:37:20Z",
     "liveContentCheck": "PASS"
   },
-
   "working": {
     "branch": "chore/final-workflow-optimization",
-    "commit": null,
+    "commit": "2f9eaf7ecfe49d9659f17e064faa366d857a461f",
     "issue": null,
     "prUrl": null,
-    "status": "IN_PROGRESS"
+    "status": "READY_FOR_REVIEW"
   },
-
   "canonicalState": {
     "capFloor": 130,
     "capCeiling": 175,
