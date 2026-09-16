@@ -1,0 +1,88 @@
+{
+  "season": "2026-27",
+  "sourceSnapshotDate": "2026-08-20",
+  "sourceArtifact": "nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md",
+  "stateType": "PRE_KEEPER_ROSTER_BASELINE",
+  "franchises": [
+    {
+      "franchiseId": "franchise-01",
+      "displayOrder": 1,
+      "displayName": "Hai | GTA San Antonio"
+    },
+    {
+      "franchiseId": "franchise-02",
+      "displayOrder": 2,
+      "displayName": "CrazyCat Damageee"
+    },
+    {
+      "franchiseId": "franchise-03",
+      "displayOrder": 3,
+      "displayName": "MeloBB"
+    },
+    {
+      "franchiseId": "franchise-04",
+      "displayOrder": 4,
+      "displayName": "Long con"
+    },
+    {
+      "franchiseId": "franchise-05",
+      "displayOrder": 5,
+      "displayName": "HCMC Kindergarten"
+    },
+    {
+      "franchiseId": "franchise-06",
+      "displayOrder": 6,
+      "displayName": "Dũng | Trader by Trade"
+    },
+    {
+      "franchiseId": "franchise-07",
+      "displayOrder": 7,
+      "displayName": "Maxfixe"
+    },
+    {
+      "franchiseId": "franchise-08",
+      "displayOrder": 8,
+      "displayName": "DHA | Đì troi pít tông"
+    },
+    {
+      "franchiseId": "franchise-09",
+      "displayOrder": 9,
+      "displayName": "M. Jordat | The Silver Seekers"
+    },
+    {
+      "franchiseId": "franchise-10",
+      "displayOrder": 10,
+      "displayName": "DonTrick DevilTeam"
+    },
+    {
+      "franchiseId": "franchise-11",
+      "displayOrder": 11,
+      "displayName": "Thịnh | Seattle SuperSonics"
+    },
+    {
+      "franchiseId": "franchise-12",
+      "displayOrder": 12,
+      "displayName": "sup fam | Bruised for Boozer"
+    },
+    {
+      "franchiseId": "franchise-13",
+      "displayOrder": 13,
+      "displayName": "Quan | Okay See Thunder"
+    },
+    {
+      "franchiseId": "franchise-14",
+      "displayOrder": 14,
+      "displayName": "TuLy | No Country for Old Men"
+    },
+    {
+      "franchiseId": "franchise-15",
+      "displayOrder": 15,
+      "displayName": "Bz | Putin the tank driver"
+    },
+    {
+      "franchiseId": "franchise-16",
+      "displayOrder": 16,
+      "displayName": "TT | Kratos Dynasty"
+    }
+  ]
+}
