@@ -6,7 +6,14 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from _workflow_test_utils import make_fake_bin, make_repo, git, run_script, write_fixture
+from _workflow_test_utils import (
+    CALL_LOG_NAME,
+    make_fake_bin,
+    make_repo,
+    git,
+    run_script,
+    write_fixture,
+)
 
 
 class SyncAfterMergeTestCase(unittest.TestCase):
@@ -21,6 +28,14 @@ class SyncAfterMergeTestCase(unittest.TestCase):
 
     def run_sync(self, args, env_extra=None):
         return run_script(self.repo, "sync-after-merge.sh", args, self.fake_bin, env_extra)
+
+    def call_log_lines(self):
+        """Lines recorded by the fake validate/test/handoff commands (see
+        _workflow_test_utils.FAKE_CALL_LOG) -- empty if none ran."""
+        log_path = self.fake_bin.parent / CALL_LOG_NAME
+        if not log_path.exists():
+            return []
+        return log_path.read_text().splitlines()
 
 
 class TestUnmergedPrRejected(SyncAfterMergeTestCase):
@@ -98,6 +113,12 @@ class TestMergedPrSyncsMain(SyncAfterMergeTestCase):
         result = self.run_sync(["9"], env_extra={"FAKE_GH_PR_FIXTURE": str(fixture)})
         self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
 
+        # The re-validate step ran the fake validate/test/handoff commands
+        # (injected via SYNC_AFTER_MERGE_{VALIDATE,TEST,HANDOFF}_CMD, see
+        # _workflow_test_utils.py) rather than being skipped or recursively
+        # re-running the real ./validate.sh / full unit suite / ./handoff.sh.
+        self.assertEqual(self.call_log_lines(), ["validate", "test", "handoff"])
+
         # ACTIVE task cleared...
         active_md = (self.repo / "tasks" / "ACTIVE.md").read_text()
         self.assertIn("No active task", active_md)
@@ -147,11 +168,9 @@ class TestMergedPrSyncsMain(SyncAfterMergeTestCase):
         first = self.run_sync(["11"], env_extra={"FAKE_GH_PR_FIXTURE": str(fixture)})
         self.assertEqual(first.returncode, 0, msg=first.stdout + first.stderr)
 
-        # A rerun for the same already-synced PR may still produce a tiny
-        # commit (./handoff.sh regenerates REVIEW_PACKET.md with a fresh
-        # timestamp every run, by design -- see CLAUDE.md). What must NOT
-        # happen is meaningful drift: no duplicate archive files, and the
-        # build.json / ACTIVE.md state stays anchored to the same PR.
+        # A rerun for the same already-synced PR is a clean no-op: no
+        # duplicate archive files, and the build.json / ACTIVE.md state
+        # stays anchored to the same PR.
         second = self.run_sync(["11"], env_extra={"FAKE_GH_PR_FIXTURE": str(fixture)})
         self.assertEqual(second.returncode, 0, msg=second.stdout + second.stderr)
 
@@ -164,6 +183,13 @@ class TestMergedPrSyncsMain(SyncAfterMergeTestCase):
 
         build_json = json.loads((self.repo / "build.json").read_text())
         self.assertEqual(build_json["commit"], merge_sha)
+
+        # The fake validate/test/handoff commands ran once per invocation
+        # (two runs -> six lines), never the real, self-recursing versions.
+        self.assertEqual(
+            self.call_log_lines(),
+            ["validate", "test", "handoff", "validate", "test", "handoff"],
+        )
 
     def test_deployment_freshness_check_is_deterministic_when_public_url_set(self):
         """When a real publicUrl is configured, the merged-PR path must run
@@ -196,6 +222,48 @@ class TestMergedPrSyncsMain(SyncAfterMergeTestCase):
         result = self.run_sync(["42"], env_extra={"FAKE_GH_PR_FIXTURE": str(fixture)})
         self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
         self.assertIn("Deployment:    FRESH", result.stdout)
+
+    def test_real_test_command_stays_scoped_and_does_not_recurse(self):
+        """Regression test for the reported root cause: with
+        SYNC_AFTER_MERGE_{VALIDATE,TEST,HANDOFF}_CMD left unset (production
+        defaults -- real ./validate.sh, real `python3 -m unittest discover
+        -s tests`, real ./handoff.sh, which internally runs that same
+        discovery again), the internal test run must only discover this
+        throwaway repo's own single smoke test. It must NOT reach back into
+        the real outer suite that is running this very test method -- that
+        would be this test recursively invoking itself."""
+        merge_sha, branch = self._simulate_merged_pr(issue_number=99, title="No recursion")
+        fixture = write_fixture(
+            self.tmp_dir,
+            "pr.json",
+            {
+                "number": 99,
+                "url": "https://github.com/example/test-project/pull/99",
+                "state": "MERGED",
+                "mergeCommit": {"oid": merge_sha},
+                "headRefName": branch,
+                "closingIssuesReferences": [],
+                "title": "No recursion",
+            },
+        )
+        result = self.run_sync(
+            ["99"],
+            env_extra={
+                "FAKE_GH_PR_FIXTURE": str(fixture),
+                "SYNC_AFTER_MERGE_VALIDATE_CMD": "",
+                "SYNC_AFTER_MERGE_TEST_CMD": "",
+                "SYNC_AFTER_MERGE_HANDOFF_CMD": "",
+            },
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+
+        # Nothing was faked for this run, so the call log stays untouched.
+        self.assertEqual(self.call_log_lines(), [])
+
+        test_log = Path("/tmp/dynasty_sync_tests.log").read_text()
+        self.assertIn("Ran 1 test", test_log)
+        self.assertNotIn("test_merged_pr_syncs_state_and_archives_task", test_log)
+        self.assertNotIn("test_real_test_command_stays_scoped", test_log)
 
 
 if __name__ == "__main__":

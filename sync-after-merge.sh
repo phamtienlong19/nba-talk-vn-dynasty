@@ -154,13 +154,30 @@ if [ "$LOCAL_MARKER_SHA" != "$MARKER_TARGET" ]; then
 fi
 
 # --- 13. re-validate (before committing, so the packet reflects the sync) ---
+# SYNC_AFTER_MERGE_{VALIDATE,TEST,HANDOFF}_CMD are the injectable test-mode
+# seams for this step: production never sets them, so the real
+# ./validate.sh, full `python3 -m unittest discover -s tests`, and
+# ./handoff.sh run unchanged below. Unit tests (tests/test_sync_after_merge.py)
+# run this script end-to-end via subprocess and must not re-enter the outer
+# `python3 -m unittest discover -s tests` invocation that is already running
+# them -- both this step's own test run and handoff.sh's internal test run
+# (see scripts/handoff.sh) would otherwise recursively re-execute the whole
+# suite, including this very test, from inside itself. Tests substitute
+# deterministic fakes here instead (see tests/_workflow_test_utils.py).
+VALIDATE_CMD="${SYNC_AFTER_MERGE_VALIDATE_CMD:-./validate.sh}"
+TEST_CMD="${SYNC_AFTER_MERGE_TEST_CMD:-python3 -m unittest discover -s tests}"
+HANDOFF_CMD="${SYNC_AFTER_MERGE_HANDOFF_CMD:-./handoff.sh}"
+
 VALIDATION="FAIL"
-./validate.sh >/tmp/dynasty_sync_validate.log 2>&1 && VALIDATION="PASS"
+# shellcheck disable=SC2086 # word-splitting is intentional: default is a multi-word command
+$VALIDATE_CMD >/tmp/dynasty_sync_validate.log 2>&1 && VALIDATION="PASS"
 
 TESTS="FAIL"
-python3 -m unittest discover -s tests >/tmp/dynasty_sync_tests.log 2>&1 && TESTS="PASS"
+# shellcheck disable=SC2086
+$TEST_CMD >/tmp/dynasty_sync_tests.log 2>&1 && TESTS="PASS"
 
-./handoff.sh >/tmp/dynasty_sync_handoff.log 2>&1 || true
+# shellcheck disable=SC2086
+$HANDOFF_CMD >/tmp/dynasty_sync_handoff.log 2>&1 || true
 if [ -f ai_exchange/REVIEW_PACKET.md ]; then
   git add ai_exchange/REVIEW_PACKET.md
 fi
