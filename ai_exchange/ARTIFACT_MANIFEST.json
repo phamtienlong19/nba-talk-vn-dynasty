@@ -1,0 +1,50 @@
+{
+  "index.html": {
+    "sha256": "a2ea5f3cde2db0eda004e7c548db9b53d822debad40a6936d884ca578eb8da56",
+    "size": 90932
+  },
+  "README.md": {
+    "sha256": "819e32e5896f467858c09a57f13942504912ad2aa27bbf1f2b45d24df34782a6",
+    "size": 3151
+  },
+  "publish.sh": {
+    "sha256": "23a0c2f8d4a2841a28845a59985534080cb3b396b7846184fd0b3da24dbb07fb",
+    "size": 2323
+  },
+  "validate.sh": {
+    "sha256": "9644e53b32830857b86074495bf1d8553365929be5042e87e4b69b48bb4da34d",
+    "size": 107
+  },
+  "status.sh": {
+    "sha256": "67713596aba0ee8f8a1631aaea90e8152d0ef7ccd19cd960844663423f8e98b8",
+    "size": 1738
+  },
+  "refresh-yahoo.sh": {
+    "sha256": "06acc8460192a1e43604fca7abb2b262fd000b1a7dfd1943846318411caa7e30",
+    "size": 2378
+  },
+  "scripts/cap_model.py": {
+    "sha256": "e10e880f9dc96a543b51db5632f99790345681d74dd2c05210d12b1bab2002b6",
+    "size": 3695
+  },
+  "scripts/fetch_yahoo_draft_analysis.py": {
+    "sha256": "0d1f6bf4bdabb8e32ac5705cc5f5117ebcd7de4114244c0bced8e30cf21f2039",
+    "size": 3386
+  },
+  "scripts/normalize_yahoo_players.py": {
+    "sha256": "7d72ca05209b7954a7f9d129daba52451a6df674daa9134c8444bd30ae23ec58",
+    "size": 5586
+  },
+  "scripts/import_forensic_rosters.py": {
+    "sha256": "1cf18ed5ba72f55d14bfd195ff06524d3cba2bcb8c375d6bbf981bce6e244158",
+    "size": 8895
+  },
+  "scripts/validate_site.py": {
+    "sha256": "93255206b2141b9e804af5e5174025a81f83df3ae683ff76b47ea212b795a505",
+    "size": 2912
+  },
+  "data/2026-27/franchises.json": {
+    "sha256": "94a0378827281a227ee2d711bb894efec94a106cbbc7c280f7c2aed0851fdd14",
+    "size": 2124
+  }
+}

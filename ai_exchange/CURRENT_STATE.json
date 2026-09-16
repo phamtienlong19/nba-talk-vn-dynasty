@@ -1,0 +1,26 @@
+{
+  "project": "nba-talk-vn-dynasty",
+  "branch": "main",
+  "commit": "PENDING_FIRST_COMMIT",
+  "status": "LIVE",
+  "repositoryUrl": "https://github.com/phamtienlong19/nba-talk-vn-dynasty",
+  "publicUrl": "https://phamtienlong19.github.io/nba-talk-vn-dynasty/",
+  "lastUpdated": "2026-09-16T00:00:00Z",
+  "validation": "PASS",
+  "siteArchitecture": "static GitHub Pages, no framework/backend/database",
+  "currentCanonicalSource": "nba_talk_vn_dynasty_announcement_compact_hybrid35_fonts.html (sanitized into index.html)",
+  "currentPublishedCapFloor": 130,
+  "currentPublishedCapCeiling": 175,
+  "lastYahooRefresh": {
+    "timestamp": "2026-09-16T03:20:25Z",
+    "leagueKey": "478.l.public",
+    "playersFetched": 300,
+    "result": "MATCH",
+    "liveFloor": 130,
+    "liveCeiling": 175
+  },
+  "rosterBaseline": {
+    "franchisesJson": "committed, 16/16 franchises, canonical order verified",
+    "prekeeperRostersJson": "BLOCKED — forensic source file nba_talk_vn_dynasty_forensic_state_2026-08-20(6).md was not found on this machine; see docs/OPEN_RULE_QUESTIONS.md"
+  }
+}
