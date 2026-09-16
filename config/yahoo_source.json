@@ -1,0 +1,4 @@
+{
+  "leagueKey": "478.l.public",
+  "draftAnalysisUrl": "https://pub-api-ro.fantasysports.yahoo.com/fantasy/v2/league/478.l.public;out=settings/players;position=ALL;start=0;count=300;sort=projected_cost;search=;out=auction_values,ranks;ranks=o-rank;out=expert_ranks;expert_ranks.rank_type=projected_season_remaining/draft_analysis;cut_types=diamond;slices=last7days?format=json_f"
+}
