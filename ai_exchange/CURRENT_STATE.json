@@ -12,22 +12,38 @@
     "liveContentCheck": "PASS"
   },
   "working": {
-    "branch": "claude/issue-5-20260916-1043",
+    "branch": "data/yahoo-keeper-board-2026-09-18",
     "commit": null,
-    "issue": 5,
+    "issue": null,
     "prUrl": null,
     "status": "READY_FOR_REVIEW"
   },
   "canonicalState": {
-    "capFloor": 130,
-    "capCeiling": 175,
+    "capFloor": 131,
+    "capCeiling": 177,
     "lastYahooRefresh": {
-      "timestamp": "2026-09-16T03:20:25Z",
+      "timestamp": "2026-09-18T01:43:50Z",
       "leagueKey": "478.l.public",
       "playersFetched": 300,
-      "result": "MATCH",
-      "liveFloor": 130,
-      "liveCeiling": 175
+      "result": "CHANGED",
+      "liveFloor": 131,
+      "liveCeiling": 177,
+      "promotedToBoard": true,
+      "humanReviewFlags": [
+        "Kawhi Leonard now shows NBA team TOR and Brandon Ingram shows LAC in the live Yahoo snapshot (swapped from the prior board's LAC/TOR) -- applied per Yahoo-is-authoritative-for-NBA-team, flagged for a sanity check since it's a large unexpected swap.",
+        "24 deep-bench/rookie players (all $0, all outside the required oRank 1-144 cap-model band) fell outside Yahoo's returned top-300 window on this fetch; their displayed values were left unchanged rather than guessed."
+      ],
+      "resolvedDuringThisRefresh": [
+        "Thịnh (Seattle SuperSonics) kept-roster total hit $182 vs the new $177 ceiling ($5 over). Owner directed keeping all 9 slots filled rather than shrinking the roster: kept Jimmy Butler III ($0, INJ, low-cap/upside hold), cut Sandro Mamukelashvili ($3) and Davion Mitchell ($3), and added Oso Ighodaro ($0) and Royce O'Neale ($0) back in from cuts -- final 9-man roster totals $176/177 (1 ROOM).",
+        "LC (Long con): owner directed swapping Ty Jerome ($9) and Day'Ron Sharpe ($9) out for Draymond Green ($0) and Alperen Şengün ($31, LC's highest-value pre-existing cut) from the cuts list -- new total $169/177 (8 ROOM). An intermediate step added Aaron Nesmith instead of Şengün; the owner caught that Şengün (a much higher-value cut) had been overlooked, so Nesmith was dropped and Şengün added instead.",
+        "Bz (Putin the Tank Driver): the board's pre-existing 'DYSON IN · RANDLE OUT' note assumed Julius Randle had to be cut to fit Dyson Daniels under the old $175 ceiling. Owner confirmed that's no longer necessary under the new $177 ceiling. Cut Isaiah Stewart ($0, the weaker of Bz's two $0 fillers by live oRank) and added Julius Randle ($13) back in -- new total $173/177 (4 ROOM). Meta-strip note updated to 'DYSON + RANDLE IN · STEWART OUT'.",
+        "All 16 teams' kept-player rows are now sorted by cap dollars descending (owner directive, applied board-wide).",
+        "Fixed a parsing bug from the first refresh pass: 5 cut-chips carrying a pre-existing '<strong>$N</strong>' cap annotation (e.g. Julius Randle, Alperen Şengün) were being silently dropped by the cut-list regex. Re-parsed from the true pre-refresh index.html and now every nonzero-live-cap cut chip across all 16 teams carries a refreshed annotation (owner directive: 'for cuts you gotta remember to keep the cap numbers').",
+        "Fixed the FA/Draft-60 pool sort, in several owner-reviewed rounds. The board's meta-strip label ('35% DYNASTY / 50% YAHOO / 15% CAP') describes a real documented rule found in local_sources/nba_talk_vn_dynasty_forensic_state_2026-08-20.md (non-canonical for data, but the source of this process note): 'salary descending first; within a salary tier, current consensus/ADP/current fantasy utility, with dynasty upside used when consensus thins out... established NOW players can and should sit above speculative rookies.' FINAL state: cap dollars descending is the strict primary key (owner: 'sort fa pool by cap number' -- CAP column is always monotonically non-increasing); within an exact cap tie, a 0.50/0.35-weighted blend of live Yahoo oRank and Hashtag Basketball's live crowdsourced dynasty ranking (hashtagbasketball.com/fantasy-basketball-dynasty-rankings, 400 players, updated 2026-09-14) decides order (owner: 'sort a mix of yahoo and dynasty'), with a neutral oRank=150 substituted for anyone outside Yahoo's 300-fetch so that absence doesn't unfairly bury a dynasty-good player.",
+        "Fixed a coverage gap: the pool universe was built only from Yahoo's 300-player fetch, so ~105 current players (mostly 2026 rookies + deep bench, e.g. Kingston Flemings, Allen Graves, Nate Ament, Aday Mara) that fell outside Yahoo's window were invisible to the pool regardless of dynasty rank (owner: 'missing a lot of rookies'). Backfilled them from the same Hashtag dynasty page (name + position + NBA team from its own badges, $0 cap, since no live cap data exists for them), translating its team abbreviations to Yahoo's convention (GS->GSW, NO->NOP, NY->NYK, PHO->PHX, SA->SAS). Added a hard dedup guard after two near-miss duplicates surfaced during testing (Bub Carrington / Carlton Carrington and Jimmy Butler / Jimmy Butler III are the same people under different name spellings on the two sources).",
+        "Fixed the rookie ('R') classification. It had inherited the pre-refresh board's rookie tags as-is, which mixed in players who were actually 2025 draftees now in their second year (owner: 'rookies in 2026 not 2025 ok'). Fetched the real, complete 2026 NBA draft class (all 60 picks, en.wikipedia.org/wiki/2026_NBA_draft) and made it the single source of truth for the rookie flag and purple rookie-row styling, overriding whatever the old board said. Net effect combined with the coverage-gap fix: 21 verified rookies now surface in the top 60 (was 15, some of them wrongly tagged).",
+        "Fixed two more bugs surfaced by owner review: (1) a health-badge extraction regex never captured the badge's title tooltip text, so every kept/cut player's INJ/REC badge lost its title (e.g. 'Meniscus rehab') and 2 cut-list badges (Moses Moody, Donte DiVincenzo) were dropped entirely during the first pool rebuild -- re-parsed from the true pre-refresh index.html and restored all 9 original badges with correct titles. (2) Jonathan Kuminga (DHA) was still showing NBA team ATL, a stale value carried through untouched because he's outside Yahoo's 300-player fetch; both the prior Yahoo snapshot and the live Hashtag dynasty page agree he's on MIN, so kept players missing from the live Yahoo fetch now also fall back to the dynasty page's team/position data instead of staying on stale board values."
+      ]
     },
     "rosterBaseline": {
       "franchisesJson": "committed, 16/16 franchises, canonical order verified",
