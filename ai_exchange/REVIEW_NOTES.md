@@ -6,22 +6,14 @@ file isn't meant to accumulate history (Git already has that).
 
 ## Issues
 
-- Visual/mobile QA for this font change could not be run in this
-  session: no headless browser or screenshot tool is available under
-  this non-interactive run's tool allowlist (same limitation as the
-  first Samsung Sans pass on this issue). The mobile-overflow fix
-  (`letter-spacing:-.02em` on `.gap-big`/`.cap-gap`, see
-  `IMPLEMENTATION_REPORT.md`) is a calculated estimate based on
-  Roboto Mono's vs. Arial's average digit advance width, not a
-  verified screenshot.
-- Everything else (font swap scope, weight mapping, removing the old
-  Yahoo/Samsung Sans references, no proprietary binaries committed)
-  was verified directly in `index.html` plus `./validate.sh` and the
-  test suite.
+None. Visual review (desktop + mobile) was run this session via headless
+Playwright screenshots — see `ai_exchange/IMPLEMENTATION_REPORT.md`.
 
 ## Decisions Required
 
-- None. Please do a quick visual pass (desktop + a ~390px-wide mobile
-  view) on the KEEPERS cards and the CAP grid before merging, since
-  this session couldn't screenshot it — specifically the `"NN TO
-  FLOOR"` / `"NN ROOM"` chips called out above.
+- Cameron Carr and Labaron Philon Jr. were reviewed per the correction
+  pack's instruction but do not clear the CAP-first top 60 naturally
+  (no Yahoo rank, $0 cap, no forced-inclusion guarantee for these two
+  specifically) -- excluded. Flagging in case the owner wants either
+  force-included the way the other 16 curated names are; that's a one-line
+  change to `GUARANTEED_NAMES` in `scripts/build_fa_draft_pool.py`.
