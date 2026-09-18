@@ -13,9 +13,9 @@
   },
   "working": {
     "branch": "fix/fa-draft-pool-and-ui-polish",
-    "commit": null,
+    "commit": "c7ff790",
     "issue": null,
-    "prUrl": null,
+    "prUrl": "https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/22",
     "status": "READY_FOR_REVIEW"
   },
   "canonicalState": {
