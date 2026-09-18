@@ -41,38 +41,27 @@ has been needed in practice).
 
 ## Current verified regression snapshot
 
-Computed from the live Yahoo endpoint on 2026-09-16 using
-`projected_auction_value` as `capDollars` (see
-`docs/YAHOO_DATA_SOURCE.md` for why that field is authoritative):
-
-```
-R1 = 51.0625
-R2 = 32.2500
-R3 = 24.4375
-R4 = 18.1875
-R5 = 14.0625
-R6 = 7.8125
-R7 = 4.0000
-R8 = 0.7500
-R9 = 0.0000
-
-benchmark    = 152.5625
-raw floor    = 129.678125
-raw ceiling  = 175.446875
-rounded      = 130 / 175
-```
-
-This is also the currently **published** board snapshot
-(`FLOOR 130` / `CEILING 175` in `index.html`). The live 2026-09-16
-recalculation matched it exactly — see `./refresh-yahoo.sh` output in
-`ai_exchange/CURRENT_STATE.json`.
-
-`tests/test_cap_model.py` encodes this snapshot as a regression fixture
-(16 identical-valued players per band, since a band of 16 identical
-values has that value as its mean — a legitimate construction, not a
+`tests/test_cap_model.py` encodes a fixed regression fixture (16
+identical-valued players per band, since a band of 16 identical values
+has that value as its mean — a legitimate construction, not a
 reverse-engineered shortcut), plus structural tests: insufficient
 rankings rejected, duplicate rank rejected, missing rank rejected, row
-order doesn't matter, $0 accepted.
+order doesn't matter, $0 accepted. That fixture is independent of the
+published board and does not need updating when the board's snapshot
+changes.
+
+## Published board snapshot history
+
+| Promoted | League refresh timestamp | Floor / Ceiling |
+|---|---|---|
+| 2026-09-16 (original migration) | 2026-09-16 (live-matched) | 130 / 175 |
+| 2026-09-18 | 2026-09-18T01:43:50Z | **131 / 177** (current) |
+
+The 2026-09-18 promotion is recorded in `ai_exchange/CURRENT_STATE.json`
+(`canonicalState.lastYahooRefresh`), including the human-review flags it
+surfaced (one team over the new ceiling; an NBA-team swap worth a sanity
+check). See `docs/YAHOO_DATA_SOURCE.md` for why `projected_auction_value`
+is the authoritative `capDollars` field.
 
 ## Governance
 

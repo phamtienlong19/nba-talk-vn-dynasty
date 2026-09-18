@@ -12,22 +12,30 @@
     "liveContentCheck": "PASS"
   },
   "working": {
-    "branch": "claude/issue-5-20260916-1043",
+    "branch": "data/yahoo-keeper-board-2026-09-18",
     "commit": null,
-    "issue": 5,
+    "issue": null,
     "prUrl": null,
     "status": "READY_FOR_REVIEW"
   },
   "canonicalState": {
-    "capFloor": 130,
-    "capCeiling": 175,
+    "capFloor": 131,
+    "capCeiling": 177,
     "lastYahooRefresh": {
-      "timestamp": "2026-09-16T03:20:25Z",
+      "timestamp": "2026-09-18T01:43:50Z",
       "leagueKey": "478.l.public",
       "playersFetched": 300,
-      "result": "MATCH",
-      "liveFloor": 130,
-      "liveCeiling": 175
+      "result": "CHANGED",
+      "liveFloor": 131,
+      "liveCeiling": 177,
+      "promotedToBoard": true,
+      "humanReviewFlags": [
+        "Kawhi Leonard now shows NBA team TOR and Brandon Ingram shows LAC in the live Yahoo snapshot (swapped from the prior board's LAC/TOR) -- applied per Yahoo-is-authoritative-for-NBA-team, flagged for a sanity check since it's a large unexpected swap.",
+        "24 deep-bench/rookie players (all $0, all outside the required oRank 1-144 cap-model band) fell outside Yahoo's returned top-300 window on this fetch; their displayed values were left unchanged rather than guessed."
+      ],
+      "resolvedDuringThisRefresh": [
+        "Thịnh (Seattle SuperSonics) kept-roster total hit $182 vs the new $177 ceiling ($5 over), violating 'may not exceed cap ceiling at declaration'. Owner (Long, in-session) directed cutting from the lowest-cap keepers up until compliant: cut Jimmy Butler III ($0, INJ), Sandro Mamukelashvili ($3), Davion Mitchell ($3) -- new total $176/177 (1 ROOM). Kristaps Porziņģis ($4) was kept since removing the three $0-3 players alone already cleared the ceiling."
+      ]
     },
     "rosterBaseline": {
       "franchisesJson": "committed, 16/16 franchises, canonical order verified",
