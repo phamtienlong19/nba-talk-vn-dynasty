@@ -12,7 +12,7 @@
     "liveContentCheck": "PASS"
   },
   "working": {
-    "branch": "data/yahoo-keeper-board-2026-09-18",
+    "branch": "fix/fa-draft-pool-and-ui-polish",
     "commit": null,
     "issue": null,
     "prUrl": null,
@@ -21,6 +21,20 @@
   "canonicalState": {
     "capFloor": 131,
     "capCeiling": 177,
+    "faDraftCorrectionPack": {
+      "timestamp": "2026-09-18T13:00:00Z",
+      "summary": "Narrow follow-up to PR #21: FA/DRAFT 60 rebuilt as a CAP-ordered board (dynasty consensus dropped as a sort input entirely, superseding the 35/50/15 blended methodology described in lastYahooRefresh.resolvedDuringThisRefresh below, which is now historical only). Sort key: CAP dollars descending strictly (CAP column always monotonic, missing=$0) -> Yahoo O-Rank ascending where available -> a small manual-relevance tiebreak (real 2026 draft pick number) for players Yahoo doesn't rank -> name. Candidate universe = every projected cut (all 16 teams) UNION every non-kept Yahoo-ranked player, plus a curated overlay of 16 named 2026 rookies/prospects (force-included if not kept, even if they'd otherwise fall outside the natural top 60) so they are never silently dropped. Implemented in scripts/build_fa_draft_pool.py (candidate generation / metadata enrichment / sort+truncate / render kept as separate, independently-tested functions); regression coverage in tests/test_fa_draft_pool.py.",
+      "curatedOverlayForced": ["Cameron Boozer", "Caleb Wilson", "AJ Dybantsa", "Darryn Peterson", "Darius Acuff Jr.", "Keaton Wagler", "Mikel Brown Jr.", "Kingston Flemings", "Yaxel Lendeborg", "Morez Johnson Jr.", "Allen Graves", "Meleek Thomas", "Ebuka Okorie", "Brayden Burries", "Aday Mara", "Hannes Steinbach"],
+      "reviewedNotForced": {
+        "Cameron Carr": "does not clear the CAP-first top 60 naturally (no Yahoo rank, no cap, low draft-relevance vs. the pool's $0/OR-ranked tier) -- excluded per the correction pack's explicit non-guarantee for this name.",
+        "Labaron Philon Jr.": "same reasoning as Cameron Carr -- reviewed, excluded."
+      },
+      "paulReed": "present (rank 17, PF/C, DET, $0) -- was missing from the board merged in PR #21 (origin/main), now included by the CAP/OR-first rebuild.",
+      "playersEnteredCount": 17,
+      "playersExitedCount": 17,
+      "defendingChampionCrown": "Presentation-only 👑 marker added for franchise-09 (M. Jordat | The Silver Seekers, board short name 'Đạt') everywhere its identity is shown: draft order pick chips (3x), KEEPERS 9-16 team-card header, CAP page team row, and the FA/DRAFT 60 src-cut badge on any of its cut players that land in the pool. Does not affect rank/cap/keeper math/draft order/eligibility -- covered by tests/test_fa_draft_pool.py::TestCrownMarker.",
+      "uiPolish": "Draft order split from 2 panels (Round 1 | Round 2-3 combined) to 3 (Round 1 | Round 2 | Round 3), .order-grid now 3 columns desktop, mobile unchanged (collapses to 1 column below 1250px as before). Cuts reordered CAP-descending per team (display only, no roster/cap change). Roboto Mono applied to picks-tag pick numbers and FA/DRAFT pool rank/cap columns (already mono elsewhere). Per-player CAP column enlarged (11.2px/600 -> 14px/700) and mobile .pos made to wrap instead of overflow for long position-eligibility strings."
+    },
     "lastYahooRefresh": {
       "timestamp": "2026-09-18T01:43:50Z",
       "leagueKey": "478.l.public",

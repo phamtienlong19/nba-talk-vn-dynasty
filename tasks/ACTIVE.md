@@ -1,44 +1,28 @@
 # Active Task
 
-No active GitHub Issue. Direct human-requested task, not issue-backed.
-Branch: data/yahoo-keeper-board-2026-09-18
-Generated: 2026-09-18T01:58:00Z
+No active GitHub Issue. Direct human-requested narrow follow-up to
+merged PR #21, not issue-backed.
+Branch: fix/fa-draft-pool-and-ui-polish
+Generated: 2026-09-18T13:00:00Z
 
 ## Task
 
-Live Yahoo ranking refresh (`478.l.public`) promoted with explicit human
-authorization for this branch. Cap model recomputed and independently
-confirmed the floor/ceiling change already found by the GitHub Action
-(130/175 -> 131/177). Full 16-team keeper board reconciled in
-`index.html` against the new snapshot: per-player cap/NBA-team/position,
-team cap totals, floor/ceiling status, and the FA/Draft-60 pool were
-mechanically recomputed; existing keeper/cut judgments, roster
-ownership, team order/colors, and picks were preserved unchanged.
+FA/DRAFT correction pack + light UI polish. Keeper rosters, keeper cap
+totals, and the refreshed floor/ceiling from PR #21 are untouched
+(verified byte-identical for all 144 kept-player rows and all 16
+cap-total/gap-big values).
 
-Several owner-directed roster adjustments were made in-session on top of
-the mechanical refresh (Thịnh kept all 9 slots filled instead of
-shrinking; LC and Bz each swapped two low-value keepers for better
-cut-list players now that the higher ceiling allows it) -- see
-`canonicalState.lastYahooRefresh.resolvedDuringThisRefresh` in
-`ai_exchange/CURRENT_STATE.json` for the exact swaps and reasoning.
-All 16 teams' kept rows are now sorted by cap descending, and every
-nonzero-cap cut chip carries a refreshed `$N` annotation. The FA/Draft-60
-pool went through several owner-reviewed sort iterations -- final state:
-cap descending strictly (CAP column always monotonic), a 50/35 blend of
-live Yahoo oRank and Hashtag Basketball's live dynasty consensus breaks
-exact cap ties, and the pool universe now includes ~105 players missing
-from Yahoo's 300-fetch (backfilled from the same dynasty source) so
-rookies aren't invisible. Rookie tagging was also fixed to match the
-real, fetched 2026 NBA draft class rather than the old board's inherited
-(partly stale) "R" tags. Two more bugs found via owner review are fixed:
-health-badge tooltip text was being dropped during extraction, and
-Jonathan Kuminga's NBA team was stuck on a stale value. Full trail in
-`canonicalState.lastYahooRefresh.resolvedDuringThisRefresh` in
-`ai_exchange/CURRENT_STATE.json`. Remaining human-review flags
-(an NBA-team swap worth a sanity check; some $0 deep-bench players
-outside this fetch's top-300 window) are recorded in the same block.
+Full methodology, entered/exited players, and decisions are in
+`ai_exchange/CURRENT_STATE.json` (`canonicalState.faDraftCorrectionPack`)
+-- not restated here per the context-discipline rule.
+
+Also added: a presentation-only 👑 defending-champion marker for
+franchise-09 (Đạt | The Silver Seekers) everywhere its identity is
+shown, with regression coverage (`tests/test_fa_draft_pool.py`).
 
 ## Status
 
-Implementation complete, tests/validation passing, PR open (#21) but not
-yet updated with this round of changes.
+Implementation complete. `python3 -m unittest discover -s tests` (96
+tests) and `./validate.sh` both pass. Visual review done via headless
+Playwright screenshots (desktop + mobile) across Draft/Keepers/FA60/Cap.
+PR not yet opened.
