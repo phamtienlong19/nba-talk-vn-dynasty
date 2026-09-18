@@ -20,9 +20,20 @@ Also added: a presentation-only 👑 defending-champion marker for
 franchise-09 (Đạt | The Silver Seekers) everywhere its identity is
 shown, with regression coverage (`tests/test_fa_draft_pool.py`).
 
+Second owner-review round (post-PR-open): removed the inaccurate
+"MARK $0 · INJ" meta-pill from KEEPERS 1-8 (owner: mark is actually 5,
+pill added no value) and restyled the CAP floor/ceiling pill
+(`.meta-pill-cap`, `index.html`), now shown consistently on both
+KEEPERS 1-8 and KEEPERS 9-16 (previously missing entirely on 9-16) and
+on the CAP page. Owner's other two concerns (FA-vs-R badge confusion,
+dynasty/Yahoo pool fusion clustering rookies at the bottom) were
+already resolved by commits b466b1e and a3c2e33 on this same branch --
+confirmed by inspecting the committed FA/DRAFT pool markup, no further
+code change needed there.
+
 ## Status
 
-Implementation complete. `python3 -m unittest discover -s tests` (96
+Implementation complete. `python3 -m unittest discover -s tests` (101
 tests) and `./validate.sh` both pass. Visual review done via headless
-Playwright screenshots (desktop + mobile) across Draft/Keepers/FA60/Cap.
-PR not yet opened.
+Playwright screenshots (desktop + mobile) across Keepers/Cap headers.
+PR #22 open: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/22
