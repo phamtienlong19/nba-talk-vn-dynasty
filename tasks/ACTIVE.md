@@ -22,17 +22,20 @@ cut-list players now that the higher ceiling allows it) -- see
 `canonicalState.lastYahooRefresh.resolvedDuringThisRefresh` in
 `ai_exchange/CURRENT_STATE.json` for the exact swaps and reasoning.
 All 16 teams' kept rows are now sorted by cap descending, and every
-nonzero-cap cut chip carries a refreshed `$N` annotation. The FA/Draft-60
-pool went through several owner-reviewed sort iterations -- final state:
-cap descending strictly (CAP column always monotonic), a 50/35 blend of
-live Yahoo oRank and Hashtag Basketball's live dynasty consensus breaks
-exact cap ties, and the pool universe now includes ~105 players missing
-from Yahoo's 300-fetch (backfilled from the same dynasty source) so
-rookies aren't invisible. Rookie tagging was also fixed to match the
-real, fetched 2026 NBA draft class rather than the old board's inherited
-(partly stale) "R" tags. Two more bugs found via owner review are fixed:
-health-badge tooltip text was being dropped during extraction, and
-Jonathan Kuminga's NBA team was stuck on a stale value. Full trail in
+nonzero-cap cut chip carries a refreshed `$N` annotation.
+
+The FA/Draft-60 pool was rebuilt, after several owner-reviewed
+iterations, as a likely-draft-value board rather than a cap-sorted
+inventory or a dynasty-prospect list: universe = all projected cuts +
+all non-kept Yahoo-ranked players, with dynasty consensus used only to
+backfill names Yahoo's 300-fetch misses. Ranked by a composite score
+(Yahoo dominant, dynasty secondary at 0.25x, cap a modest signal, CAP
+column intentionally not monotonic), with a conservative oRank proxy
+for Yahoo-missing names so dynasty coverage can't crowd out established
+Yahoo top-150/180 players. Regression-tested against Paul Reed (Yahoo
+OR138, $0) landing well inside the top 60. Rookie tagging matches the
+real fetched 2026 NBA draft class; final board carries 10/60 verified
+rookies, manually judged proportionate. Full trail in
 `canonicalState.lastYahooRefresh.resolvedDuringThisRefresh` in
 `ai_exchange/CURRENT_STATE.json`. Remaining human-review flags
 (an NBA-team swap worth a sanity check; some $0 deep-bench players
