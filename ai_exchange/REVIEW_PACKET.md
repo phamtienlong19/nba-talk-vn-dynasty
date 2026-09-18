@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-09-18T06:35:59Z
+Generated: 2026-09-18T06:49:10Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: fix/fa-draft-pool-and-ui-polish
-Commit: a3c2e33
+Commit: b466b1e
 Base: main
 Working tree: clean
 
@@ -18,7 +18,7 @@ Working tree: clean
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
 PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/22 (OPEN)
-CI: Claude Code: completed/skipped
+CI: validate: completed/failure
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,15 +27,15 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/CURRENT_STATE.json       |  21 +-
- ai_exchange/IMPLEMENTATION_REPORT.md |  73 +++----
- ai_exchange/REVIEW_NOTES.md          |  24 +--
- ai_exchange/REVIEW_PACKET.md         |  64 +++---
+ ai_exchange/CURRENT_STATE.json       |  23 +-
+ ai_exchange/IMPLEMENTATION_REPORT.md |  73 +++---
+ ai_exchange/REVIEW_NOTES.md          |  24 +-
+ ai_exchange/REVIEW_PACKET.md         |  62 +++---
  index.html                           |  50 +++--
- scripts/build_fa_draft_pool.py       | 392 +++++++++++++++++++++++++++++++++++
+ scripts/build_fa_draft_pool.py       | 418 +++++++++++++++++++++++++++++++++++
  tasks/ACTIVE.md                      |  54 ++---
- tests/test_fa_draft_pool.py          | 245 ++++++++++++++++++++++
- 8 files changed, 772 insertions(+), 151 deletions(-)
+ tests/test_fa_draft_pool.py          | 285 ++++++++++++++++++++++++
+ 8 files changed, 839 insertions(+), 150 deletions(-)
 ```
 
 ## Validation
