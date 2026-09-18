@@ -23,11 +23,18 @@ cut-list players now that the higher ceiling allows it) -- see
 `ai_exchange/CURRENT_STATE.json` for the exact swaps and reasoning.
 All 16 teams' kept rows are now sorted by cap descending, and every
 nonzero-cap cut chip carries a refreshed `$N` annotation. The FA/Draft-60
-pool was rebuilt cap-descending with a live-fetched Hashtag Basketball
-consensus dynasty ranking as the within-tier tiebreak, matching the
-documented "salary first, consensus/dynasty within a tier" pool rule
-found in `local_sources/` (see the same block for the full source trail)
-against the final kept set. Remaining human-review flags
+pool went through several owner-reviewed sort iterations -- final state:
+cap descending strictly (CAP column always monotonic), a 50/35 blend of
+live Yahoo oRank and Hashtag Basketball's live dynasty consensus breaks
+exact cap ties, and the pool universe now includes ~105 players missing
+from Yahoo's 300-fetch (backfilled from the same dynasty source) so
+rookies aren't invisible. Rookie tagging was also fixed to match the
+real, fetched 2026 NBA draft class rather than the old board's inherited
+(partly stale) "R" tags. Two more bugs found via owner review are fixed:
+health-badge tooltip text was being dropped during extraction, and
+Jonathan Kuminga's NBA team was stuck on a stale value. Full trail in
+`canonicalState.lastYahooRefresh.resolvedDuringThisRefresh` in
+`ai_exchange/CURRENT_STATE.json`. Remaining human-review flags
 (an NBA-team swap worth a sanity check; some $0 deep-bench players
 outside this fetch's top-300 window) are recorded in the same block.
 
