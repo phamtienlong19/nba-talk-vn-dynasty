@@ -43,12 +43,14 @@ jobs:
           path: previous
 
       - name: Run Yahoo cap refresh (networked fetch)
-        run: ./refresh-yahoo.sh | tee refresh-output.log
+        shell: bash
+        run: |
+          mkdir -p artifacts/yahoo-refresh
+          ./refresh-yahoo.sh | tee artifacts/yahoo-refresh/refresh-output.log
 
       - name: Build machine-readable refresh result
         run: |
-          mkdir -p artifacts
-          cp local_data/yahoo/players_normalized.json artifacts/yahoo-players-normalized.json
+          cp local_data/yahoo/players_normalized.json artifacts/yahoo-refresh/yahoo-players-normalized.json
 
           PREV_PLAYERS_ARG=""
           if [ -f previous/yahoo-players-normalized.json ]; then
@@ -59,19 +61,20 @@ jobs:
             --cap-snapshot local_data/yahoo/cap_snapshot_latest.json \
             --current-players local_data/yahoo/players_normalized.json \
             --source-config config/yahoo_source.json \
-            --output artifacts/yahoo-refresh-result.json \
+            --output artifacts/yahoo-refresh/yahoo-refresh-result.json \
             $PREV_PLAYERS_ARG
 
       - name: Write job summary
-        run: python3 scripts/write_yahoo_job_summary.py artifacts/yahoo-refresh-result.json
+        run: python3 scripts/write_yahoo_job_summary.py artifacts/yahoo-refresh/yahoo-refresh-result.json
 
       - name: Upload refresh artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: yahoo-refresh-result
-          path: |
-            artifacts/yahoo-refresh-result.json
-            artifacts/yahoo-players-normalized.json
-            refresh-output.log
+          # Single staged directory as the artifact root, so the next run's
+          # download-artifact (path: previous) lands files at a flat,
+          # predictable previous/<filename> -- no upload/download root
+          # mismatch between files that started under artifacts/ vs repo root.
+          path: artifacts/yahoo-refresh
           retention-days: 90
