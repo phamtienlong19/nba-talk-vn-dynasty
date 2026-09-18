@@ -103,10 +103,38 @@ to HTML scraping or guess at a different shape.
 ## Raw snapshot storage
 
 Raw fetched snapshots are written to `local_data/yahoo/` (gitignored) as
-`draft_analysis_<UTC timestamp>.json`. They are never committed. A derived
-normalized snapshot (`local_data/yahoo/players_normalized.json`) is also
-local-only for now (Section 14 permits committing a small derived cap
-snapshot later; not done in this bootstrap).
+`draft_analysis_<UTC timestamp>.json`. They are never committed. The
+derived normalized snapshot (`local_data/yahoo/players_normalized.json`)
+is also local-only in every run of `./refresh-yahoo.sh` itself (Section
+14's small derived cap snapshot is committed, but only via the workflow
+below, never directly by the script).
+
+## Networked CI refresh + committed candidate snapshot
+
+The Claude issue-agent sandbox cannot reach Yahoo's endpoint (no
+interactive network approval in a non-interactive run) or the GitHub
+Actions artifact API. `.github/workflows/yahoo-refresh.yml`
+(`workflow_dispatch`) is the permanent bridge: it runs on a normal
+GitHub-hosted runner, executes this same `./refresh-yahoo.sh` unchanged,
+then:
+
+- **MATCH** (live result equals the published floor/ceiling
+  `./refresh-yahoo.sh` compares against — currently 130/175): no repo
+  changes, just a job summary.
+- **CHANGED**: commits the verified snapshot to branch
+  `automation/yahoo-refresh` (`data/yahoo/players_normalized.json`,
+  `cap_snapshot.json`, `provenance.json` — see `../data/README.md`) and
+  opens/updates one PR against `main` (`scripts/prepare_yahoo_data_pr.py`
+  builds the candidate files and PR text from the refresh's own output;
+  it does not re-derive anything).
+
+**Merging that PR is the human promotion approval** — Git itself, not an
+Actions artifact, is the handoff to the offline issue-agent, which reads
+`data/yahoo/` straight off `main` with no network access. The workflow
+never merges its own PR and never touches `index.html` or keeper/roster
+state; the intended next step after a human merges the data PR is a
+normal GitHub Issue ("Propagate canonical Yahoo refresh through
+cap/keeper/site state") for that propagation work.
 
 ## Why CI does not use live network
 

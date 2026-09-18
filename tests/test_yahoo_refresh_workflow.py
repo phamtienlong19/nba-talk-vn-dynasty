@@ -181,5 +181,71 @@ class TestPreviousSnapshotPathContract(unittest.TestCase):
         self.assertIn("rankingChangesNote", result)
 
 
+class TestDecideStatusGatesDataPrCandidateFiles(unittest.TestCase):
+    """MATCH must never touch data/yahoo/; CHANGED must always write it.
+
+    Runs the real "Decide status and prepare data-PR candidate files" step
+    body (extracted from the workflow file), which in turn shells out to
+    the real scripts/prepare_yahoo_data_pr.py -- proving the CHANGED/MATCH
+    gate actually controls whether canonical data gets written, not just
+    that the two scripts individually behave when called directly."""
+
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmpdir, ignore_errors=True)
+        os.symlink(os.path.join(REPO_ROOT, "scripts"), os.path.join(self.tmpdir, "scripts"))
+        os.makedirs(os.path.join(self.tmpdir, "local_data", "yahoo"))
+        os.makedirs(os.path.join(self.tmpdir, "artifacts", "yahoo-refresh"))
+
+        with open(os.path.join(self.tmpdir, "local_data", "yahoo", "players_normalized.json"), "w") as f:
+            json.dump([{"oRank": 1, "name": "Current Player"}], f)
+        with open(os.path.join(self.tmpdir, "local_data", "yahoo", "cap_snapshot_latest.json"), "w") as f:
+            json.dump({
+                "fetchedAt": "2026-09-18T000000Z",
+                "roundedFloor": 131, "roundedCeiling": 177,
+                "publishedFloor": 130, "publishedCeiling": 175,
+            }, f)
+
+    def _run_decide_step(self, status):
+        with open(os.path.join(self.tmpdir, "artifacts", "yahoo-refresh", "yahoo-refresh-result.json"), "w") as f:
+            json.dump({
+                "source": "478.l.public",
+                "fetchedAt": "2026-09-18T000000Z",
+                "status": status,
+                "previous": {"floor": 130, "ceiling": 175},
+                "current": {"floor": 131, "ceiling": 177},
+                "rankingChanges": [],
+            }, f)
+
+        github_output = os.path.join(self.tmpdir, "github_output.txt")
+        open(github_output, "w").close()
+
+        _, run_text = _step_block("Decide status and prepare data-PR candidate files")
+        env = dict(os.environ, GITHUB_OUTPUT=github_output, GITHUB_RUN_ID="", GITHUB_RUN_ATTEMPT="",
+                   GITHUB_REPOSITORY="", GITHUB_SERVER_URL="https://github.com")
+        result = subprocess.run(["bash", "-c", run_text], cwd=self.tmpdir, env=env,
+                                 capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+        with open(github_output) as f:
+            output_lines = f.read()
+        return output_lines
+
+    def test_changed_writes_candidate_files(self):
+        output = self._run_decide_step("CHANGED")
+        self.assertIn("status=CHANGED", output)
+        data_dir = os.path.join(self.tmpdir, "data", "yahoo")
+        for name in ("players_normalized.json", "cap_snapshot.json", "provenance.json"):
+            self.assertTrue(os.path.isfile(os.path.join(data_dir, name)), f"missing {name}")
+
+    def test_match_does_not_touch_data_dir(self):
+        output = self._run_decide_step("MATCH")
+        self.assertIn("status=MATCH", output)
+        self.assertFalse(
+            os.path.exists(os.path.join(self.tmpdir, "data", "yahoo")),
+            "MATCH must not create/modify data/yahoo/",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -4,7 +4,8 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   actions: read
 
 jobs:
@@ -66,6 +67,80 @@ jobs:
 
       - name: Write job summary
         run: python3 scripts/write_yahoo_job_summary.py artifacts/yahoo-refresh/yahoo-refresh-result.json
+
+      - name: Decide status and prepare data-PR candidate files
+        id: decide
+        run: |
+          STATUS=$(python3 -c "import json; print(json.load(open('artifacts/yahoo-refresh/yahoo-refresh-result.json'))['status'])")
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+
+          if [ "$STATUS" = "CHANGED" ]; then
+            python3 scripts/prepare_yahoo_data_pr.py \
+              --result artifacts/yahoo-refresh/yahoo-refresh-result.json \
+              --current-players local_data/yahoo/players_normalized.json \
+              --cap-snapshot local_data/yahoo/cap_snapshot_latest.json \
+              --data-dir data/yahoo \
+              --pr-title-out artifacts/yahoo-refresh/pr_title.txt \
+              --pr-body-out artifacts/yahoo-refresh/pr_body.md \
+              --run-id "$GITHUB_RUN_ID" \
+              --run-attempt "$GITHUB_RUN_ATTEMPT" \
+              --repository "$GITHUB_REPOSITORY" \
+              --server-url "$GITHUB_SERVER_URL"
+          fi
+
+      # This is the only step that writes to Git/GitHub. It only ever
+      # touches data/yahoo/ -- never index.html, keeper/roster state, or
+      # cap-model/domain logic. Merging the resulting PR is the human
+      # promotion approval; nothing here merges it automatically.
+      - name: Open or update Yahoo data PR
+        if: steps.decide.outputs.status == 'CHANGED'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          git checkout -B automation/yahoo-refresh origin/main
+
+          git add data/yahoo
+          if git diff --cached --quiet; then
+            echo "Candidate data/yahoo files are identical to main; nothing to PR."
+          else
+            git commit -m "$(cat artifacts/yahoo-refresh/pr_title.txt)"
+            git push --force-with-lease origin automation/yahoo-refresh
+
+            EXISTING_PR="$(gh pr list --head automation/yahoo-refresh --base main --state open --json number --jq '.[0].number // ""')"
+            if [ -n "$EXISTING_PR" ]; then
+              gh pr edit "$EXISTING_PR" \
+                --title "$(cat artifacts/yahoo-refresh/pr_title.txt)" \
+                --body-file artifacts/yahoo-refresh/pr_body.md
+              PR_URL="$(gh pr view "$EXISTING_PR" --json url --jq .url)"
+            else
+              PR_URL="$(gh pr create --base main --head automation/yahoo-refresh \
+                --title "$(cat artifacts/yahoo-refresh/pr_title.txt)" \
+                --body-file artifacts/yahoo-refresh/pr_body.md)"
+            fi
+
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Data PR:** $PR_URL" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # On MATCH we deliberately do not touch an existing automation PR --
+      # conservative per policy: report it as possibly obsolete, never
+      # auto-close/auto-clean it.
+      - name: Flag a possibly obsolete data PR
+        if: steps.decide.outputs.status == 'MATCH'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXISTING="$(gh pr list --head automation/yahoo-refresh --base main --state open --json number,url --jq '.[0] // empty')"
+          if [ -n "$EXISTING" ]; then
+            PR_NUM="$(echo "$EXISTING" | python3 -c "import json,sys; print(json.load(sys.stdin)['number'])")"
+            PR_URL="$(echo "$EXISTING" | python3 -c "import json,sys; print(json.load(sys.stdin)['url'])")"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Note:** live Yahoo data now matches canonical state, but automation/yahoo-refresh PR #$PR_NUM ($PR_URL) is still open and may be obsolete. Not closed automatically -- review manually." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload refresh artifacts
         if: always()
