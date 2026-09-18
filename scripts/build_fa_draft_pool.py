@@ -107,12 +107,16 @@ def _fit_dynasty_or_scale(yahoo_by_norm):
 def _dynasty_or_proxy(dynasty_rank, scale):
     return round(dynasty_rank * scale)
 
-# Curated names that MUST appear in the final 60 if they are not kept on
-# a roster (forced-inclusion guarantee). Cameron Carr / Labaron Philon
-# are deliberately excluded from this set per the correction pack --
-# they're reviewed, not guaranteed.
-GUARANTEED_NAMES = {n for n in CURATED_ROOKIE_OVERLAY if n not in ("Cameron Carr", "Labaron Philon Jr.")}
-GUARANTEED_NAMES.add("Paul Reed")
+# Names force-included in the final 60 regardless of where they'd
+# naturally sort (see Candidate.guaranteed). Paul Reed is the one name
+# guaranteed unconditionally; every curated rookie/prospect is guaranteed
+# ONLY when Yahoo has no data for them at all (build_candidates sets
+# guaranteed=True on exactly those candidates). A curated name Yahoo DOES
+# rank -- even weakly -- competes on real merit like everyone else and is
+# not forced in: forcing every named rookie regardless of real value was
+# the earlier bug that piled rookies up at the bottom of the pool,
+# displacing genuinely better non-rookie candidates.
+ALWAYS_GUARANTEED_NAMES = {"Paul Reed"}
 
 # Cut players present on a team's cut list but absent from both the
 # Yahoo 300 fetch and the curated overlay. Forced into the universe with
@@ -135,7 +139,7 @@ def normalize_name(name: str) -> str:
     return name
 
 
-GUARANTEED_NAMES_NORM = {normalize_name(n) for n in GUARANTEED_NAMES}
+ALWAYS_GUARANTEED_NAMES_NORM = {normalize_name(n) for n in ALWAYS_GUARANTEED_NAMES}
 
 
 @dataclass
@@ -148,6 +152,7 @@ class Candidate:
     rookie: bool = False
     src: str = "fa"  # "cut" | "fa" | "r"
     src_team: str = ""
+    guaranteed: bool = False
 
     def sort_key(self):
         return (-self.cap, self.o_rank, self.name)
@@ -219,14 +224,18 @@ def build_candidates(index_html: str, yahoo_by_norm: dict):
             add(Candidate(
                 name=yp["name"], pos=pos_from_eligible(yp["eligiblePositions"]),
                 nba=yp["nbaTeam"], cap=float(yp["capDollars"]), o_rank=int(yp["oRank"]),
-                src="cut", src_team=cut["team"],
+                rookie=yp["name"] in CURATED_ROOKIE_OVERLAY, src="cut", src_team=cut["team"],
             ))
             continue
         overlay = CURATED_ROOKIE_OVERLAY.get(cut["name"])
         if overlay is not None:
+            # Yahoo has no data for this cut player at all -- guaranteed,
+            # same as the backfill path below, EXCEPT the reviewed-not-
+            # guaranteed names (dynastyRank=None marks those).
             add(Candidate(
                 name=cut["name"], pos=overlay["pos"], nba=overlay["nba"], cap=cut["cap"],
                 o_rank=dynasty_proxy_or(overlay["dynastyRank"]), rookie=True,
+                guaranteed=overlay["dynastyRank"] is not None,
                 src="cut", src_team=cut["team"],
             ))
             continue
@@ -254,15 +263,25 @@ def build_candidates(index_html: str, yahoo_by_norm: dict):
             rookie=rookie, src="fa",
         ))
 
-    # 3. curated overlay backfill for names Yahoo/cuts never produced
+    # 3. curated overlay backfill for names Yahoo/cuts never produced --
+    # Yahoo has no data for these at all, so they're guaranteed, EXCEPT
+    # the reviewed-not-guaranteed names (dynastyRank=None marks those).
     for name, meta in CURATED_ROOKIE_OVERLAY.items():
         key = normalize_name(name)
         if key in kept or key in candidates:
             continue
         add(Candidate(
             name=name, pos=meta["pos"], nba=meta["nba"], cap=0.0,
-            o_rank=dynasty_proxy_or(meta["dynastyRank"]), rookie=True, src="r",
+            o_rank=dynasty_proxy_or(meta["dynastyRank"]), rookie=True,
+            guaranteed=meta["dynastyRank"] is not None, src="r",
         ))
+
+    # Names guaranteed unconditionally, regardless of which path supplied
+    # their data (e.g. Paul Reed usually arrives via the live Yahoo fetch).
+    for name in ALWAYS_GUARANTEED_NAMES:
+        cand = candidates.get(normalize_name(name))
+        if cand is not None:
+            cand.guaranteed = True
 
     return candidates
 
@@ -273,16 +292,15 @@ def sort_and_truncate(candidates: dict):
     top_keys = {normalize_name(c.name) for c in top}
 
     missing_guaranteed = [
-        c for key in GUARANTEED_NAMES_NORM
-        if (c := candidates.get(key)) is not None
-        and key not in top_keys
+        c for c in candidates.values()
+        if c.guaranteed and normalize_name(c.name) not in top_keys
     ]
 
     if missing_guaranteed:
         # Bump the lowest-priority non-guaranteed rows out, in reverse
         # sort order, to make room -- then the whole 60 gets re-sorted so
         # CAP ordering is unaffected by *where* the guarantee inserted.
-        removable = [c for c in reversed(top) if normalize_name(c.name) not in GUARANTEED_NAMES_NORM]
+        removable = [c for c in reversed(top) if not c.guaranteed]
         top_set = list(top)
         for extra in missing_guaranteed:
             if removable:
@@ -294,18 +312,26 @@ def sort_and_truncate(candidates: dict):
     return top
 
 
-SRC_HTML = {
-    "cut": lambda c: f'<span class="src src-cut">{crown_prefix(c.src_team)}{html_lib.escape(c.src_team)}</span>',
-    "fa": lambda c: '<span class="src src-fa">FA</span>',
-    "r": lambda c: '<span class="src src-r">R</span>',
-}
-
 DEFENDING_CHAMPION_SHORT_NAME = "Đạt"
 CROWN = "👑 "
 
 
 def crown_prefix(short_name: str) -> str:
     return CROWN if short_name == DEFENDING_CHAMPION_SHORT_NAME else ""
+
+
+def src_badge_html(c: "Candidate") -> str:
+    # Provenance (src) and rookie status are independent facts -- a
+    # rookie found via the live Yahoo fetch is still a rookie, and the
+    # SRC badge's job is to say "R" for any rookie, not "FA" just because
+    # of which source happened to supply their metadata. A cut still
+    # wins over "R" since knowing WHICH team cut them is more specific
+    # and no curated rookie is currently also a cut in this league.
+    if c.src == "cut":
+        return f'<span class="src src-cut">{crown_prefix(c.src_team)}{html_lib.escape(c.src_team)}</span>'
+    if c.rookie:
+        return '<span class="src src-r">R</span>'
+    return '<span class="src src-fa">FA</span>'
 
 
 def render_pool_html(ranked: list) -> str:
@@ -315,7 +341,7 @@ def render_pool_html(ranked: list) -> str:
         rows = []
         for i, c in enumerate(chunk, start=start + 1):
             row_class = "pool-row rookie-row" if c.rookie else "pool-row"
-            src_html = SRC_HTML[c.src](c)
+            src_html = src_badge_html(c)
             cap_display = str(int(c.cap)) if float(c.cap).is_integer() else str(c.cap)
             rows.append(
                 f'<div class="{row_class}">'

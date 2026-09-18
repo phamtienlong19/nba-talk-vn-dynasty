@@ -10,11 +10,20 @@ import build_fa_draft_pool as pool  # noqa: E402
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 INDEX_HTML = os.path.join(REPO_ROOT, "index.html")
 
-CURATED_ROOKIE_NAMES = [
+# Curated names Yahoo has ZERO data for -- these are the ones that must
+# never be silently omitted, per build_fa_draft_pool.Candidate.guaranteed.
+GUARANTEED_CURATED_ROOKIE_NAMES = [
+    "Kingston Flemings", "Allen Graves", "Meleek Thomas", "Ebuka Okorie", "Aday Mara",
+]
+
+# Curated names Yahoo DOES rank (even weakly). These compete on real merit
+# and are deliberately NOT force-included -- forcing every named rookie
+# regardless of real value was the bug that piled rookies up at the
+# bottom of the pool, displacing genuinely better non-rookie candidates.
+MERIT_ONLY_CURATED_ROOKIE_NAMES = [
     "Cameron Boozer", "Caleb Wilson", "AJ Dybantsa", "Darryn Peterson",
-    "Darius Acuff Jr.", "Keaton Wagler", "Mikel Brown Jr.", "Kingston Flemings",
-    "Yaxel Lendeborg", "Morez Johnson Jr.", "Allen Graves", "Meleek Thomas",
-    "Ebuka Okorie", "Brayden Burries", "Aday Mara", "Hannes Steinbach",
+    "Darius Acuff Jr.", "Keaton Wagler", "Mikel Brown Jr.",
+    "Yaxel Lendeborg", "Morez Johnson Jr.", "Brayden Burries", "Hannes Steinbach",
 ]
 
 
@@ -65,10 +74,30 @@ class TestIndexHtmlPoolRegressions(unittest.TestCase):
     def test_paul_reed_present(self):
         self.assertIn("Paul Reed", self.names)
 
-    def test_curated_rookies_not_silently_omitted(self):
-        missing = [n for n in CURATED_ROOKIE_NAMES if pool.normalize_name(n) not in
-                   {pool.normalize_name(x) for x in self.names}]
-        self.assertEqual(missing, [], f"curated rookies missing from FA/DRAFT 60: {missing}")
+    def test_guaranteed_curated_rookies_not_silently_omitted(self):
+        present = {pool.normalize_name(x) for x in self.names}
+        missing = [n for n in GUARANTEED_CURATED_ROOKIE_NAMES if pool.normalize_name(n) not in present]
+        self.assertEqual(missing, [], f"guaranteed curated rookies missing from FA/DRAFT 60: {missing}")
+
+    def test_yahoo_ranked_rookie_src_badge_is_r_not_fa(self):
+        # A rookie found via the live Yahoo fetch is still a rookie --
+        # the SRC badge must say "R", not "FA", regardless of which
+        # source supplied their metadata. Anchored directly off each
+        # player's own name (fields are strictly ordered within a row),
+        # so this can't accidentally match a neighboring row.
+        block = _pool_block(self.html)
+        present = {pool.normalize_name(x) for x in self.names}
+        for name in MERIT_ONLY_CURATED_ROOKIE_NAMES:
+            if pool.normalize_name(name) not in present:
+                continue  # didn't clear the pool naturally this cycle, nothing to check
+            m = re.search(
+                rf'<div class="pool-player">{re.escape(name)}</div>'
+                rf'<div class="pool-nba">[^<]*</div><div class="pool-cap">[^<]*</div>'
+                rf'<div class="pool-src">(.*?)</div></div>',
+                block, re.S,
+            )
+            self.assertIsNotNone(m, f"{name} row not found in expected field order")
+            self.assertIn('src-r">R<', m.group(1), f"{name} should carry the R badge, not FA/cut")
 
     def test_defending_champion_crown_present_in_pool_source_tag(self):
         block = _pool_block(self.html)
@@ -179,13 +208,24 @@ class TestSortAndTruncateUnit(unittest.TestCase):
         for i in range(65):
             name = f"P{i}"
             candidates[pool.normalize_name(name)] = self._cand(name, cap=100 - i)
-        candidates[pool.normalize_name("Paul Reed")] = self._cand("Paul Reed", cap=0)
+        guaranteed = self._cand("Guaranteed Guy", cap=0)
+        guaranteed.guaranteed = True
+        candidates[pool.normalize_name("Guaranteed Guy")] = guaranteed
         ranked = pool.sort_and_truncate(candidates)
         names = [c.name for c in ranked]
-        self.assertIn("Paul Reed", names)
+        self.assertIn("Guaranteed Guy", names)
         caps = [c.cap for c in ranked]
         for a, b in zip(caps, caps[1:]):
             self.assertGreaterEqual(a, b)
+
+    def test_non_guaranteed_candidate_not_forced_in(self):
+        candidates = {}
+        for i in range(65):
+            name = f"P{i}"
+            candidates[pool.normalize_name(name)] = self._cand(name, cap=100 - i)
+        candidates[pool.normalize_name("Not Guaranteed")] = self._cand("Not Guaranteed", cap=0)
+        ranked = pool.sort_and_truncate(candidates)
+        self.assertNotIn("Not Guaranteed", [c.name for c in ranked])
 
     def test_no_duplicate_aliases_across_sources(self):
         html = _read_index_html()
