@@ -1,0 +1,77 @@
+name: Yahoo Ranking Refresh
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Find previous successful run
+        id: previous_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PREV_RUN_ID=$(gh run list \
+            --repo "${{ github.repository }}" \
+            --workflow "yahoo-refresh.yml" \
+            --status success \
+            --json databaseId \
+            --jq '.[0].databaseId // ""')
+          echo "run_id=$PREV_RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Download previous refresh result (best effort)
+        if: steps.previous_run.outputs.run_id != ''
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: yahoo-refresh-result
+          run-id: ${{ steps.previous_run.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: previous
+
+      - name: Run Yahoo cap refresh (networked fetch)
+        run: ./refresh-yahoo.sh | tee refresh-output.log
+
+      - name: Build machine-readable refresh result
+        run: |
+          mkdir -p artifacts
+          cp local_data/yahoo/players_normalized.json artifacts/yahoo-players-normalized.json
+
+          PREV_PLAYERS_ARG=""
+          if [ -f previous/yahoo-players-normalized.json ]; then
+            PREV_PLAYERS_ARG="--previous-players previous/yahoo-players-normalized.json"
+          fi
+
+          python3 scripts/build_yahoo_refresh_result.py \
+            --cap-snapshot local_data/yahoo/cap_snapshot_latest.json \
+            --current-players local_data/yahoo/players_normalized.json \
+            --source-config config/yahoo_source.json \
+            --output artifacts/yahoo-refresh-result.json \
+            $PREV_PLAYERS_ARG
+
+      - name: Write job summary
+        run: python3 scripts/write_yahoo_job_summary.py artifacts/yahoo-refresh-result.json
+
+      - name: Upload refresh artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yahoo-refresh-result
+          path: |
+            artifacts/yahoo-refresh-result.json
+            artifacts/yahoo-players-normalized.json
+            refresh-output.log
+          retention-days: 90
