@@ -8,24 +8,30 @@ Pipeline (kept as separate stages so each is independently testable):
    index.html) and every non-kept player in the live Yahoo 300-player
    fetch (local_data/yahoo/players_normalized.json), plus a small curated
    overlay of 2026 rookies/prospects that Yahoo's fetch does not carry.
-2. metadata enrichment -- attach cap dollars, Yahoo O-Rank, position,
-   NBA team from the most authoritative source available per player.
-3. sorting -- CAP dollars descending is the only primary key. Yahoo
-   O-Rank (ascending) is the tiebreak within a CAP tier where available;
-   a small manual-relevance value (real 2026 draft pick number, lower is
-   better) is the tiebreak for players missing an O-Rank. This guarantees
-   CAP is strictly non-increasing top to bottom and that no dynasty/manual
-   signal can ever promote a $0 player above a $1+ player.
+2. metadata enrichment -- attach cap dollars, O-Rank, position, NBA team
+   from the most authoritative source available per player. For a
+   curated rookie/prospect Yahoo does not rank at all, a real dynasty
+   rookie rank is converted to an O-Rank-scale proxy (calibrated against
+   the curated names that DO have both a dynasty rank and a real Yahoo
+   O-Rank -- see _fit_dynasty_or_scale) so it can compete on the same
+   tiebreak axis as everyone else, rather than being dumped below every
+   Yahoo-ranked player regardless of how good the rookie actually is.
+3. sorting -- CAP dollars descending is the only primary key. O-Rank
+   (real or dynasty-calibrated proxy, ascending) is the tiebreak within
+   a CAP tier. This guarantees CAP is strictly non-increasing top to
+   bottom and that no dynasty/manual signal can ever promote a $0
+   player above a $1+ player -- but within a tier, a legitimately
+   well-regarded rookie CAN outrank a mediocre Yahoo-ranked veteran.
 4. truncation -- top 60 by the sort above, with a small guaranteed-name
    list (curated rookies + Paul Reed) force-included if they would
    otherwise fall outside the cut, then the final 60 is re-sorted so CAP
    ordering is never broken by the guarantee step.
 
-This intentionally does NOT use dynasty consensus rankings as a sorting
-input -- see the FA/DRAFT correction pack issue: dynasty/prospect bias
-had pushed out established, relevant free agents (e.g. Paul Reed). This
-board is cap-ordered with selective dynasty-aware candidate completion,
-not a dynasty board.
+CAP is the only strict/primary sort key -- see the FA/DRAFT correction
+pack issue: an earlier dynasty-weighted blend had pushed out established,
+relevant free agents (e.g. Paul Reed). This board is cap-ordered with
+dynasty-aware candidate completion AND dynasty-aware tiebreaking for
+Yahoo-missing prospects, not a dynasty board.
 """
 from __future__ import annotations
 
@@ -47,31 +53,59 @@ ROWS_PER_BLOCK = 20
 # pool even when Yahoo's public 300-player fetch does not carry them.
 # Position/NBA team verified against the actual 2026 NBA draft results
 # (not a mock/projection -- the draft already happened this cycle).
-# `pick` is the real draft slot, used only as a last-resort manual
-# tiebreak among otherwise-unranked players; it is never allowed to
-# outrank a player with a real Yahoo O-Rank or nonzero CAP.
+# `dynastyRank` is each player's real post-draft dynasty rookie rank
+# (NBC Sports Dynasty Rookie Rankings, 2026 NBA Draft class -- Boozer,
+# Peterson hold the top spots). It is used to calibrate an O-Rank-scale
+# proxy for the handful of these players Yahoo does not rank at all (see
+# DYNASTY_OR_PROXY below) -- real dynasty standing decides how a
+# Yahoo-missing rookie compares to the field, rather than mechanically
+# sorting every such rookie behind every Yahoo-ranked player regardless
+# of how good the rookie actually is.
 CURATED_ROOKIE_OVERLAY = {
-    "Cameron Boozer": dict(pos="PF", nba="MEM", pick=None),  # already in Yahoo fetch
-    "Caleb Wilson": dict(pos="PF", nba="CHI", pick=None),  # already in Yahoo fetch
-    "AJ Dybantsa": dict(pos="SF", nba="WAS", pick=None),  # already in Yahoo fetch
-    "Darryn Peterson": dict(pos="SG", nba="UTA", pick=None),  # already in Yahoo fetch
-    "Darius Acuff Jr.": dict(pos="PG", nba="SAC", pick=None),  # already in Yahoo fetch
-    "Keaton Wagler": dict(pos="SG", nba="LAC", pick=5),  # already in Yahoo fetch
-    "Mikel Brown Jr.": dict(pos="PG", nba="BKN", pick=None),  # already in Yahoo fetch
-    "Kingston Flemings": dict(pos="PG", nba="ATL", pick=8),
-    "Yaxel Lendeborg": dict(pos="PF", nba="GSW", pick=None),  # already in Yahoo fetch
-    "Morez Johnson Jr.": dict(pos="PF", nba="DAL", pick=None),  # already in Yahoo fetch
-    "Allen Graves": dict(pos="PF", nba="TOR", pick=19),
-    "Meleek Thomas": dict(pos="SG", nba="CLE", pick=34),
-    "Ebuka Okorie": dict(pos="PG", nba="DET", pick=17),
-    "Brayden Burries": dict(pos="SG", nba="MIL", pick=None),  # already in Yahoo fetch
-    "Aday Mara": dict(pos="C", nba="OKC", pick=12),
-    "Hannes Steinbach": dict(pos="PF", nba="CHA", pick=14),  # already in Yahoo fetch (OR240)
+    "Cameron Boozer": dict(pos="PF", nba="MEM", dynastyRank=1),  # already in Yahoo fetch
+    "Caleb Wilson": dict(pos="PF", nba="CHI", dynastyRank=3),  # already in Yahoo fetch
+    "AJ Dybantsa": dict(pos="SF", nba="WAS", dynastyRank=4),  # already in Yahoo fetch
+    "Darryn Peterson": dict(pos="SG", nba="UTA", dynastyRank=2),  # already in Yahoo fetch
+    "Darius Acuff Jr.": dict(pos="PG", nba="SAC", dynastyRank=7),  # already in Yahoo fetch
+    "Keaton Wagler": dict(pos="SG", nba="LAC", dynastyRank=8),  # already in Yahoo fetch
+    "Mikel Brown Jr.": dict(pos="PG", nba="BKN", dynastyRank=6),  # already in Yahoo fetch
+    "Kingston Flemings": dict(pos="PG", nba="ATL", dynastyRank=5),
+    "Yaxel Lendeborg": dict(pos="PF", nba="GSW", dynastyRank=11),  # already in Yahoo fetch
+    "Morez Johnson Jr.": dict(pos="PF", nba="DAL", dynastyRank=9),  # already in Yahoo fetch
+    "Allen Graves": dict(pos="PF", nba="TOR", dynastyRank=17),
+    "Meleek Thomas": dict(pos="SG", nba="CLE", dynastyRank=36),
+    "Ebuka Okorie": dict(pos="PG", nba="DET", dynastyRank=16),
+    "Brayden Burries": dict(pos="SG", nba="MIL", dynastyRank=10),  # already in Yahoo fetch
+    "Aday Mara": dict(pos="C", nba="OKC", dynastyRank=14),
+    "Hannes Steinbach": dict(pos="PF", nba="CHA", dynastyRank=13),  # already in Yahoo fetch (OR240)
     # Reviewed per the correction pack, included only if they clear the
     # CAP-first pool naturally (no forced-inclusion guarantee below).
-    "Cameron Carr": dict(pos="SG", nba="LAL", pick=24),
-    "Labaron Philon Jr.": dict(pos="PG", nba="PHI", pick=22),
+    "Cameron Carr": dict(pos="SG", nba="LAL", dynastyRank=None),
+    "Labaron Philon Jr.": dict(pos="PG", nba="PHI", dynastyRank=None),
 }
+
+# Calibrate a dynasty-rank -> O-Rank-scale proxy from the curated names
+# that have BOTH a real dynasty rank and a real Yahoo O-Rank (a simple
+# through-the-origin least-squares fit: OR ~= k * dynastyRank). Applied
+# only to curated names Yahoo does not rank at all, so a legitimately
+# well-regarded rookie can land ahead of a mediocre Yahoo-ranked veteran
+# within a CAP tier, instead of every OR-missing rookie being dumped
+# below every OR-having player regardless of real relative value.
+def _fit_dynasty_or_scale(yahoo_by_norm):
+    num = den = 0.0
+    for name, meta in CURATED_ROOKIE_OVERLAY.items():
+        rank = meta["dynastyRank"]
+        yp = yahoo_by_norm.get(normalize_name(name))
+        if rank is None or yp is None:
+            continue
+        o_rank = int(yp["oRank"])
+        num += rank * o_rank
+        den += rank * rank
+    return num / den if den else 30.0  # fallback slope if fetch is ever empty
+
+
+def _dynasty_or_proxy(dynasty_rank, scale):
+    return round(dynasty_rank * scale)
 
 # Curated names that MUST appear in the final 60 if they are not kept on
 # a roster (forced-inclusion guarantee). Cameron Carr / Labaron Philon
@@ -90,7 +124,6 @@ CONSERVATIVE_CUT_DEFAULTS = {
 }
 
 MISSING_OR = 9999
-MISSING_PICK = 999
 
 
 def normalize_name(name: str) -> str:
@@ -112,13 +145,12 @@ class Candidate:
     nba: str
     cap: float
     o_rank: int = MISSING_OR
-    pick: int = MISSING_PICK
     rookie: bool = False
     src: str = "fa"  # "cut" | "fa" | "r"
     src_team: str = ""
 
     def sort_key(self):
-        return (-self.cap, self.o_rank, self.pick, self.name)
+        return (-self.cap, self.o_rank, self.name)
 
 
 def parse_team_cards(index_html: str):
@@ -166,6 +198,10 @@ def pos_from_eligible(eligible):
 
 def build_candidates(index_html: str, yahoo_by_norm: dict):
     kept, cuts = parse_team_cards(index_html)
+    dynasty_or_scale = _fit_dynasty_or_scale(yahoo_by_norm)
+
+    def dynasty_proxy_or(dynasty_rank):
+        return _dynasty_or_proxy(dynasty_rank, dynasty_or_scale) if dynasty_rank else MISSING_OR
 
     candidates: dict[str, Candidate] = {}
 
@@ -190,7 +226,8 @@ def build_candidates(index_html: str, yahoo_by_norm: dict):
         if overlay is not None:
             add(Candidate(
                 name=cut["name"], pos=overlay["pos"], nba=overlay["nba"], cap=cut["cap"],
-                pick=overlay["pick"] or MISSING_PICK, rookie=True, src="cut", src_team=cut["team"],
+                o_rank=dynasty_proxy_or(overlay["dynastyRank"]), rookie=True,
+                src="cut", src_team=cut["team"],
             ))
             continue
         fallback = CONSERVATIVE_CUT_DEFAULTS.get(cut["name"])
@@ -224,7 +261,7 @@ def build_candidates(index_html: str, yahoo_by_norm: dict):
             continue
         add(Candidate(
             name=name, pos=meta["pos"], nba=meta["nba"], cap=0.0,
-            pick=meta["pick"] or MISSING_PICK, rookie=True, src="r",
+            o_rank=dynasty_proxy_or(meta["dynastyRank"]), rookie=True, src="r",
         ))
 
     return candidates

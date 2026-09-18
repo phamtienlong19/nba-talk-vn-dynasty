@@ -136,8 +136,8 @@ class TestSortAndTruncateUnit(unittest.TestCase):
     """Unit-level coverage of the ranking pipeline against synthetic data,
     independent of live Yahoo/index.html state."""
 
-    def _cand(self, name, cap, o_rank=pool.MISSING_OR, pick=pool.MISSING_PICK):
-        return pool.Candidate(name=name, pos="PF", nba="XXX", cap=cap, o_rank=o_rank, pick=pick)
+    def _cand(self, name, cap, o_rank=pool.MISSING_OR):
+        return pool.Candidate(name=name, pos="PF", nba="XXX", cap=cap, o_rank=o_rank)
 
     def test_cap_is_primary_key(self):
         candidates = {
@@ -148,11 +148,11 @@ class TestSortAndTruncateUnit(unittest.TestCase):
         self.assertEqual([c.name for c in ranked], ["B", "A"])
 
     def test_dynasty_or_manual_relevance_never_beats_cap_tier(self):
-        # "B" has a much better manual-relevance pick number, but $0 vs $1
-        # must still keep A ahead of B.
+        # "B" has a far better O-Rank (dynasty-calibrated or real), but
+        # $0 vs $1 must still keep A ahead of B.
         candidates = {
             "a": self._cand("A", cap=1),
-            "b": self._cand("B", cap=0, pick=1),
+            "b": self._cand("B", cap=0, o_rank=1),
         }
         ranked = pool.sort_and_truncate(candidates)
         self.assertEqual([c.name for c in ranked], ["A", "B"])
@@ -194,6 +194,51 @@ class TestSortAndTruncateUnit(unittest.TestCase):
         names = [c.name for c in candidates.values()]
         normed = [pool.normalize_name(n) for n in names]
         self.assertEqual(len(normed), len(set(normed)))
+
+
+class TestDynastyOrProxy(unittest.TestCase):
+    """A Yahoo-missing curated rookie's tiebreak position must reflect its
+    real dynasty rank, not just get dumped after every Yahoo-ranked player
+    regardless of relative quality -- this is what makes it possible for a
+    well-regarded rookie to outrank a mediocre real-OR veteran within a
+    CAP tier."""
+
+    def test_proxy_is_monotonic_in_dynasty_rank(self):
+        yahoo = pool.load_yahoo_players()
+        scale = pool._fit_dynasty_or_scale(yahoo)
+        better = pool._dynasty_or_proxy(5, scale)
+        worse = pool._dynasty_or_proxy(36, scale)
+        self.assertLess(better, worse)
+
+    def test_top_rookie_proxy_beats_some_real_or_yahoo_players(self):
+        # Kingston Flemings (real post-draft dynasty rank 5, not in the
+        # Yahoo fetch) must be able to outrank at least one $0 Yahoo
+        # player with a real but mediocre O-Rank -- confirms the fix
+        # doesn't just re-sort the 5 Yahoo-missing rookies among
+        # themselves at the bottom of the pool.
+        html = _read_index_html()
+        yahoo = pool.load_yahoo_players()
+        candidates = pool.build_candidates(html, yahoo)
+        flemings = candidates[pool.normalize_name("Kingston Flemings")]
+        self.assertEqual(flemings.cap, 0.0)
+        beaten = [
+            c for c in candidates.values()
+            if c.cap == 0.0 and c.o_rank != pool.MISSING_OR and c.o_rank > flemings.o_rank
+        ]
+        self.assertTrue(beaten, "top curated rookie should outrank at least one real-OR $0 player")
+
+    def test_reviewed_names_without_dynasty_rank_get_no_fabricated_advantage(self):
+        # Cameron Carr / Labaron Philon Jr. have dynastyRank=None (reviewed,
+        # not guaranteed) -- if Yahoo doesn't rank them either, they must
+        # fall back to MISSING_OR, never a fabricated proxy value.
+        html = _read_index_html()
+        yahoo = pool.load_yahoo_players()
+        candidates = pool.build_candidates(html, yahoo)
+        for name in ("Cameron Carr", "Labaron Philon Jr."):
+            cand = candidates.get(pool.normalize_name(name))
+            if cand is not None and cand.o_rank != pool.MISSING_OR:
+                continue  # Yahoo ranked them directly, nothing to check
+            self.assertEqual(cand.o_rank, pool.MISSING_OR)
 
 
 if __name__ == "__main__":
