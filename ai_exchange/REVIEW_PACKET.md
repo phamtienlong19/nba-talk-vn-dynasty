@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-01T02:05:56Z
+Generated: 2026-10-01T02:40:12Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: fix/fa-draft-pool-and-ui-polish
-Commit: 2376dcc
+Branch: fix/yahoo-refresh-pr-automation
+Commit: 5a091bf
 Base: main
 Working tree: clean
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/22 (OPEN)
-CI: Claude Code Review: completed/success
+PR: none
+CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,22 +27,27 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/CURRENT_STATE.json          |  23 +-
- ai_exchange/IMPLEMENTATION_REPORT.md    |  73 +++---
- ai_exchange/REVIEW_NOTES.md             |  24 +-
- ai_exchange/REVIEW_PACKET.md            |  62 +++--
- index.html                              |  65 +++--
- scripts/build_fa_draft_pool.py          | 418 ++++++++++++++++++++++++++++++++
- tasks/ACTIVE.md                         |  67 +++--
- tests/fixtures/yahoo_players_small.json |  16 ++
- tests/test_fa_draft_pool.py             | 308 +++++++++++++++++++++++
- 9 files changed, 905 insertions(+), 151 deletions(-)
+ .github/workflows/yahoo-refresh.yml            |  15 +-
+ README.md                                      |  13 +-
+ ai_exchange/CURRENT_STATE.json                 |  14 +-
+ promote-yahoo-refresh.sh                       | 137 ++++++++++++++++
+ refresh-yahoo.sh                               |  11 +-
+ scripts/prepare_yahoo_data_pr.py               | 211 +++++++++++++++++++++++++
+ scripts/refresh_keeper_board_display.py        | 113 +++++++++++++
+ tasks/ACTIVE.md                                |  43 ++---
+ tests/_yahoo_promote_test_utils.py             | 210 ++++++++++++++++++++++++
+ tests/test_prepare_yahoo_data_pr.py            | 124 +++++++++++++++
+ tests/test_promote_yahoo_refresh.py            | 164 +++++++++++++++++++
+ tests/test_refresh_keeper_board_display.py     |  84 ++++++++++
+ tests/test_refresh_yahoo_published_baseline.py | 106 +++++++++++++
+ tests/test_yahoo_refresh_workflow.py           |  27 ++++
+ 14 files changed, 1236 insertions(+), 36 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
 - tests: PASS (OK)
-- Yahoo refresh: last local snapshot: draft_analysis_2026-09-18T014350Z.json
+- Yahoo refresh: last local snapshot: draft_analysis_2026-10-01T022910Z.json
 - live HTTP: OK
 
 ## Canonical State
@@ -51,15 +56,20 @@ Cap snapshot: 131-177
 Yahoo source timestamp: 2026-09-18T01:43:50Z
 
 ## Files Changed
+- .github/workflows/yahoo-refresh.yml
+- README.md
 - ai_exchange/CURRENT_STATE.json
-- ai_exchange/IMPLEMENTATION_REPORT.md
-- ai_exchange/REVIEW_NOTES.md
-- ai_exchange/REVIEW_PACKET.md
-- index.html
-- scripts/build_fa_draft_pool.py
+- promote-yahoo-refresh.sh
+- refresh-yahoo.sh
+- scripts/prepare_yahoo_data_pr.py
+- scripts/refresh_keeper_board_display.py
 - tasks/ACTIVE.md
-- tests/fixtures/yahoo_players_small.json
-- tests/test_fa_draft_pool.py
+- tests/_yahoo_promote_test_utils.py
+- tests/test_prepare_yahoo_data_pr.py
+- tests/test_promote_yahoo_refresh.py
+- tests/test_refresh_keeper_board_display.py
+- tests/test_refresh_yahoo_published_baseline.py
+- tests/test_yahoo_refresh_workflow.py
 
 ## Issues
 None. Visual review (desktop + mobile) was run this session via headless
@@ -75,4 +85,4 @@ Playwright screenshots — see `ai_exchange/IMPLEMENTATION_REPORT.md`.
   change to `GUARANTEED_NAMES` in `scripts/build_fa_draft_pool.py`.
 
 ## Suggested Next Step
-Open/update the PR from `fix/fa-draft-pool-and-ui-polish` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `fix/yahoo-refresh-pr-automation` if not already done, then request human/ChatGPT review of this packet.
