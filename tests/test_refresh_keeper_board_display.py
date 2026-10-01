@@ -1,10 +1,15 @@
 import os
+import re
 import sys
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
-from refresh_keeper_board_display import refresh_keeper_board, refresh_cut_chips  # noqa: E402
+from refresh_keeper_board_display import (  # noqa: E402
+    refresh_keeper_board,
+    refresh_cut_chips,
+    sort_kept_rows,
+)
 
 
 def _team_card(cuts_html):
@@ -159,6 +164,64 @@ class TestRefreshCutChips(unittest.TestCase):
         self.assertEqual(new_html.count("cut-chip"), 2)
         self.assertIn("ZZ", new_html)
         self.assertIn("YY", new_html)
+
+
+def _players_block(rows_html, cuts_html=""):
+    return (
+        '<section class="team-card"><span class="identity-tag">ZZ</span>'
+        f'<div class="players">{rows_html}</div>'
+        f'<footer class="cuts"><div class="cuts-list">{cuts_html}</div></footer></section>'
+    )
+
+
+class TestSortKeptRows(unittest.TestCase):
+    def test_resorts_rows_cap_descending(self):
+        html = _players_block(
+            _row("PF/C", "Low Cap Guy", "AAA", "0")
+            + _row("C", "High Cap Guy", "BBB", "40")
+            + _row("PG", "Mid Cap Guy", "CCC", "10")
+        )
+        new_html, teams_resorted = sort_kept_rows(html)
+        self.assertEqual(teams_resorted, 1)
+        names_in_order = re.findall(r'<div class="pname">([^<]*)</div>', new_html)
+        self.assertEqual(names_in_order, ["High Cap Guy", "Mid Cap Guy", "Low Cap Guy"])
+
+    def test_already_sorted_team_is_not_counted_as_resorted(self):
+        html = _players_block(
+            _row("C", "High Cap Guy", "BBB", "40")
+            + _row("PG", "Mid Cap Guy", "CCC", "10")
+        )
+        new_html, teams_resorted = sort_kept_rows(html)
+        self.assertEqual(teams_resorted, 0)
+        self.assertEqual(new_html, html)
+
+    def test_never_changes_roster_membership_only_order(self):
+        html = _players_block(
+            _row("PF/C", "Low Cap Guy", "AAA", "0")
+            + _row("C", "High Cap Guy", "BBB", "40")
+        )
+        new_html, _ = sort_kept_rows(html)
+        self.assertEqual(new_html.count("player-row"), 2)
+        self.assertIn("Low Cap Guy", new_html)
+        self.assertIn("High Cap Guy", new_html)
+
+    def test_cuts_list_is_untouched(self):
+        html = _players_block(
+            _row("C", "High Cap Guy", "BBB", "40") + _row("PF/C", "Low Cap Guy", "AAA", "0"),
+            cuts_html='<span class="cut-chip">Some Cut</span>',
+        )
+        new_html, _ = sort_kept_rows(html)
+        self.assertIn('<span class="cut-chip">Some Cut</span>', new_html)
+
+    def test_multiple_teams_each_sorted_independently(self):
+        html = (
+            _players_block(_row("PF/C", "A Low", "X", "0") + _row("C", "A High", "X", "20"))
+            + _players_block(_row("C", "B High", "Y", "30") + _row("PG", "B Low", "Y", "1"))
+        )
+        new_html, teams_resorted = sort_kept_rows(html)
+        self.assertEqual(teams_resorted, 1)  # only the first team was out of order
+        names_in_order = re.findall(r'<div class="pname">([^<]*)</div>', new_html)
+        self.assertEqual(names_in_order, ["A High", "A Low", "B High", "B Low"])
 
 
 if __name__ == "__main__":

@@ -21,6 +21,12 @@ is still the same person, not a new/duplicate entry (see
 CUT_CHIP_RE in build_fa_draft_pool.py for the identity-matching rule
 this relies on).
 
+KEPT rows are also mandatorily re-sorted CAP descending after refreshing
+(sort_kept_rows) -- every future refresh must leave a team's keeper rows
+in the same CAP order already enforced for cut chips, not whatever order
+a past manual edit happened to leave them in. Sorting never changes
+which players are kept, only their on-page order.
+
 Reuses build_fa_draft_pool.normalize_name/pos_from_eligible rather than
 re-deriving name-matching or position-collapsing logic.
 
@@ -54,6 +60,10 @@ PLAYER_ROW_RE = re.compile(
 
 CUTS_LIST_RE = re.compile(r'(<div class="cuts-list">)(.*?)(</div></footer>)', re.S)
 HEALTH_BADGE_RE = re.compile(r'<span class="health-badge[^>]*>[^<]*</span>')
+
+PLAYERS_BLOCK_RE = re.compile(r'(<div class="players">)(.*?)(</div>\s*<footer[^>]*>)', re.S)
+PLAYER_ROW_FULL_RE = re.compile(r'<div class="player-row[^"]*">.*?</div></div>', re.S)
+ROW_CAP_RE = re.compile(r'<div class="cap">([\d.]+)</div>')
 
 
 def _cap_display(value) -> str:
@@ -90,6 +100,30 @@ def refresh_keeper_board(index_html: str, yahoo_by_norm: dict) -> tuple[str, int
 
     new_html = PLAYER_ROW_RE.sub(repl, index_html)
     return new_html, updated
+
+
+def sort_kept_rows(index_html: str) -> tuple[str, int]:
+    """Re-sort each team's KEPT player rows CAP descending (stable for
+    ties). Mandatory as of this pass -- every future refresh must keep
+    kept rows in the same CAP-descending order already enforced for cut
+    chips, not just whatever order a past manual edit happened to leave
+    them in. Never adds, removes, or changes which players are kept --
+    only their on-page order within their own team."""
+    teams_resorted = 0
+
+    def repl(match: re.Match) -> str:
+        nonlocal teams_resorted
+        prefix, body, suffix = match.groups()
+        rows = PLAYER_ROW_FULL_RE.findall(body)
+        caps = [float(ROW_CAP_RE.search(row).group(1)) for row in rows]
+        order = sorted(range(len(rows)), key=lambda i: -caps[i])
+        if order != list(range(len(rows))):
+            teams_resorted += 1
+        new_body = "".join(rows[i] for i in order)
+        return f"{prefix}{new_body}{suffix}"
+
+    new_html = PLAYERS_BLOCK_RE.sub(repl, index_html)
+    return new_html, teams_resorted
 
 
 def _parse_chip(chip_inner: str):
@@ -159,6 +193,7 @@ def main():
 
     new_html, kept_updated = refresh_keeper_board(index_html, yahoo_by_norm)
     new_html, cuts_updated = refresh_cut_chips(new_html, yahoo_by_norm)
+    new_html, teams_resorted = sort_kept_rows(new_html)
 
     with open(args.output, "w", encoding="utf-8") as f:
         f.write(new_html)
@@ -169,11 +204,12 @@ def main():
             json.dump({
                 "keptPlayerRowsUpdated": kept_updated,
                 "cutChipsUpdated": cuts_updated,
+                "teamsKeptRowsResorted": teams_resorted,
             }, f, indent=2)
 
     print(
         f"Keeper board display refresh: {kept_updated} kept player row(s), "
-        f"{cuts_updated} cut chip(s) updated"
+        f"{cuts_updated} cut chip(s) updated, {teams_resorted} team(s) re-sorted by CAP"
     )
 
 
