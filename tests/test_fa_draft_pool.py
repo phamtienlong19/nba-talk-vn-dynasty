@@ -322,6 +322,51 @@ class TestDynastyOrProxy(unittest.TestCase):
             self.assertEqual(cand.o_rank, pool.MISSING_OR)
 
 
+class TestBlendScore(unittest.TestCase):
+    """Owner-flagged bug: a candidate with real dynasty buzz but ZERO live
+    Yahoo data (e.g. Cameron Carr, Labaron Philon Jr. -- reviewed,
+    deliberately not force-guaranteed) was floating artificially high
+    because missing the Yahoo axis entirely meant it was skipped rather
+    than counted against them, the mirror image of the dynasty-consensus
+    absence-penalty bug. Both axes must now be symmetric: missing either
+    signal is a worst-case percentile (1.0) on that axis, not a free
+    pass averaged away."""
+
+    def _cand(self, cap=0.0, o_rank=pool.MISSING_OR, dynasty_rank=None,
+              yahoo_rank_max=300, dynasty_rank_max=500):
+        return pool.Candidate(
+            name="X", pos="PF", nba="XXX", cap=cap, o_rank=o_rank, dynasty_rank=dynasty_rank,
+            yahoo_rank_max=yahoo_rank_max, dynasty_rank_max=dynasty_rank_max,
+        )
+
+    def test_both_signals_present_is_a_straight_average(self):
+        c = self._cand(o_rank=30, dynasty_rank=50, yahoo_rank_max=300, dynasty_rank_max=500)
+        self.assertAlmostEqual(c.blend_score(), 0.5 * (30 / 300) + 0.5 * (50 / 500))
+
+    def test_missing_dynasty_signal_is_penalized_not_skipped(self):
+        c = self._cand(o_rank=30, dynasty_rank=None, yahoo_rank_max=300)
+        self.assertAlmostEqual(c.blend_score(), 0.5 * (30 / 300) + 0.5 * 1.0)
+
+    def test_missing_yahoo_signal_is_penalized_not_skipped(self):
+        # This is the Cameron Carr / Labaron Philon Jr. shape: real
+        # dynasty rank, zero Yahoo data. Must NOT collapse to the
+        # dynasty component alone.
+        c = self._cand(o_rank=pool.MISSING_OR, dynasty_rank=50, dynasty_rank_max=500)
+        self.assertAlmostEqual(c.blend_score(), 0.5 * 1.0 + 0.5 * (50 / 500))
+
+    def test_a_yahoo_missing_candidate_with_mediocre_dynasty_rank_no_longer_floats_to_the_top(self):
+        # A mediocre-dynasty, Yahoo-missing candidate must sort BEHIND a
+        # real-Yahoo-ranked candidate with a comparably mediocre O-Rank,
+        # not ahead of it just for having half a signal.
+        yahoo_missing = self._cand(o_rank=pool.MISSING_OR, dynasty_rank=250, dynasty_rank_max=500)  # 0.5 dynasty pct
+        yahoo_ranked = self._cand(o_rank=140, yahoo_rank_max=300)  # ~0.47 yahoo pct, no dynasty data
+        self.assertLess(yahoo_ranked.blend_score(), yahoo_missing.blend_score())
+
+    def test_missing_both_signals_is_worst_case(self):
+        c = self._cand()
+        self.assertAlmostEqual(c.blend_score(), 1.0)
+
+
 class TestLoadYahooPlayersInjectable(unittest.TestCase):
     """load_yahoo_players must default to the real production path (so
     build()'s no-arg call is unaffected) but accept an explicit path/fixture

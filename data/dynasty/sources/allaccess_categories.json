@@ -2,6 +2,7 @@
   "source": "ALL ACCESS - NBA Dynasty Rankings (user-supplied spreadsheet export, 'Categories'/9-cat sheet, updated July 26, 2026)",
   "fetchedAt": "2026-07-26T00:00:00Z",
   "note": "525-player 9-category dynasty consensus board (matches this league's 9-cat H2H format exactly). Supplied by the league owner from ~/Downloads. Verified current: includes the full 2026 draft class (Cameron Boozer #10, Darryn Peterson #15, etc.) and deep bench/rookie coverage beyond the other sources (e.g. Nique Clifford, Joan Beringer, Meleek Thomas all present).",
+  "informativeAbsence": true,
   "playerCount": 525,
   "players": [
     {
