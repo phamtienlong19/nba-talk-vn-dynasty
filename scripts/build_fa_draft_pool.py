@@ -207,20 +207,27 @@ class Candidate:
     def blend_score(self) -> float:
         """50/50 blend of live Yahoo O-Rank and crowdsourced dynasty rank,
         each expressed as a percentile (0=best) within its own list so
-        neither source's list length biases the other. Falls back to
-        whichever single signal exists when only one does; a candidate
-        with neither is worst-case (1.0). This is a tiebreak ONLY -- see
-        sort_key: CAP dollars descending is still the sole primary key,
-        so this can never promote a $0 player above a $1+ one."""
+        neither source's list length biases the other. This is a
+        tiebreak ONLY -- see sort_key: CAP dollars descending is still
+        the sole primary key, so this can never promote a $0 player
+        above a $1+ one.
+
+        Missing a signal is a worst-case percentile (1.0) on THAT axis,
+        not a free pass averaged away -- Yahoo's 300-player fetch is
+        itself a curated "most fantasy-relevant" cut (see
+        docs/YAHOO_DATA_SOURCE.md), so not appearing in it is as
+        informative as not appearing on a curated dynasty board (see
+        ABSENCE_PENALTY_PERCENTILE in build_dynasty_consensus.py). A
+        player with real Yahoo value but genuinely no dynasty buzz, or
+        vice versa, should land in the middle of a cap tier, not float
+        to the top on half a signal -- e.g. a curated rookie overlay
+        name with no live Yahoo data at all (Cameron Carr, Labaron
+        Philon Jr.) no longer skips the Yahoo axis entirely."""
         has_o = self.o_rank != MISSING_OR
         has_d = self.dynasty_rank is not None
-        if not has_o and not has_d:
-            return 1.0
-        o_component = self.o_rank / self.yahoo_rank_max if has_o else None
-        d_component = self.dynasty_rank / self.dynasty_rank_max if has_d else None
-        if has_o and has_d:
-            return 0.5 * o_component + 0.5 * d_component
-        return o_component if has_o else d_component
+        o_component = self.o_rank / self.yahoo_rank_max if has_o else 1.0
+        d_component = self.dynasty_rank / self.dynasty_rank_max if has_d else 1.0
+        return 0.5 * o_component + 0.5 * d_component
 
     def sort_key(self):
         return (-self.cap, self.blend_score(), self.name)
