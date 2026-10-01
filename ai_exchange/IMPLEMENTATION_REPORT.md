@@ -1,51 +1,42 @@
 # Implementation Report
 
-Run: 2026-09-16 — Issue #5 (Samsung Sans replaced with open-font system)
+Run: 2026-09-18 — FA/DRAFT correction pack + UI polish (narrow follow-up to merged PR #21)
 
 ## What changed
 
-- **`index.html`**: removed every `"Yahoo Sans"` / `"Yahoo Sans Cond"`
-  reference (Samsung Sans was never committed — blocked earlier on
-  licensing, see Git history). Added a Google Fonts `<link>` for
-  **Inter** (400/500/600/700/800) and **Roboto Mono** (500/600/700).
-  No font binaries committed.
-- **Inter** applied to all UI text: body, topbar/nav, headings, team
-  identity (`.title`, `.brand`, `.team-name`), player/pool names,
-  section labels, tags/chips.
-- **Roboto Mono** applied only to numeric/data elements: cap totals
-  (`.cap-total`, `.cap-num`), salary values (`.cap`, `.pool-cap`),
-  gap/room text (`.gap-big`, `.cap-gap`), pick numbers (`.pick-slot`),
-  ranks (`.pool-rank`, `.yahoo-rank`), the team seed badge
-  (`.team-index`), and the unused legacy matrix cap column (`.mcap`).
-  No condensed family was invented — the old `"...Cond"` stack is gone.
-- **Font weights**: replaced the old ad-hoc 650–950 scale (tuned for a
-  condensed display face) with the issue's suggested scale — Inter
-  400 body / 500–600 labels, nav, player rows / 700–800 headings and
-  team identity; Roboto Mono 500–700 for numeric emphasis.
-- **Mobile overflow mitigation**: `"Yahoo Sans"/"Yahoo Sans Cond"`
-  never matched an installed font, so the page always silently
-  rendered on the Arial/Helvetica fallback already baked into each
-  stack — this is the first time a real, distinct typeface renders.
-  Roboto Mono's average digit advance (~0.6em) is measurably wider
-  than Arial's (~0.556em); the tightest spot is the `"NN TO FLOOR"` /
-  `"NN ROOM"` strings (`.gap-big`, `.cap-gap`) inside fixed ~108–132px
-  grid columns on the 680px breakpoint. Added `letter-spacing:-.02em`
-  to both to offset the width increase without changing box
-  dimensions (layout preserved). No other numeric field was close
-  enough to its container width to need the same treatment.
-- Colors, grid layout, responsiveness breakpoints, and all league data
-  are unchanged.
+- **FA/DRAFT 60 rebuilt** (`scripts/build_fa_draft_pool.py`, new): CAP
+  dollars descending is now the strict, monotonic primary sort key
+  (was a 35% dynasty / 50% Yahoo / 15% cap blend). Yahoo O-Rank breaks
+  CAP ties where available; a curated overlay of 16 named 2026
+  rookies/prospects is force-included if not kept, even when it would
+  otherwise fall outside the natural top 60. Full methodology,
+  entered/exited players, and the Cameron Carr / Labaron Philon
+  decision are in `ai_exchange/CURRENT_STATE.json`
+  (`canonicalState.faDraftCorrectionPack`).
+- **Defending champion crown**: presentation-only 👑 marker for
+  franchise-09 (Đạt | The Silver Seekers) added everywhere its identity
+  renders (draft order chips, KEEPERS 9–16 card, CAP page row,
+  FA/DRAFT src-cut badge). Does not touch rank/cap/keeper/draft logic.
+- **UI polish**: Draft Order split into 3 columns (Round 1 / 2 / 3,
+  was 2 panels with Round 2–3 combined); per-team cuts reordered CAP
+  descending; Roboto Mono applied to pick numbers and FA/DRAFT
+  rank/cap columns; per-player CAP display enlarged; mobile position
+  eligibility now wraps instead of overflowing.
 
-## Not done / limitation
+## What did NOT change
 
-- Could not render the page in a real browser in this session to
-  visually confirm the mobile-overflow mitigation (no headless
-  browser/screenshot tooling available under this session's
-  non-interactive tool allowlist). The fix above is a calculated
-  estimate, not a verified screenshot. See `REVIEW_NOTES.md`.
+Keeper rosters, keeper cap totals, and the PR #21 floor/ceiling refresh
+are untouched — verified byte-identical for all 144 kept-player rows
+and all 16 team cap-total/gap-big values (diffed against origin/main).
 
 ## Validation
 
-- `./validate.sh`: PASS
-- `python3 -m unittest discover -s tests`: 68 tests, PASS
-- `./handoff.sh`: regenerated `REVIEW_PACKET.md`
+- `python3 -m unittest discover -s tests` — 96 tests, all pass
+  (19 new in `tests/test_fa_draft_pool.py`).
+- `./validate.sh` — PASS.
+- Visual review: headless Playwright screenshots at desktop (1680px)
+  and mobile (390px) widths across Draft, Keepers, FA/DRAFT 60, and Cap.
+  Confirmed 3-column draft order renders cleanly, mobile draft order
+  unchanged (still collapses to 1 column), cuts CAP-ordered, crown
+  renders at all 6 expected locations, no position-eligibility overflow
+  on mobile team cards.
