@@ -2,6 +2,7 @@
   "source": "rotowire.com — Fantasy Basketball Dynasty Rankings 2026-27 (Top 100), published 2026-09-23 by Kirien Sprecher",
   "fetchedAt": "2026-09-23T00:00:00Z",
   "note": "Top 100 dynasty rankings, explicitly dated 2026-09-23 (post 2026 NBA draft) and includes the full 2026 draft class. No position column in source.",
+  "informativeAbsence": true,
   "playerCount": 100,
   "players": [
     {

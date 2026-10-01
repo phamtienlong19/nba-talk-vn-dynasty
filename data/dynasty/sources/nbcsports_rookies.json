@@ -2,6 +2,7 @@
   "source": "nbcsports.com — 2026 NBA Draft Dynasty Rookie Rankings (rookies only), by Rotoworld Staff",
   "fetchedAt": "2026-10-01T00:00:00Z",
   "note": "Rookie-only dynasty rankings for the 2026 draft class (68 entries, UDFAs included). Explicitly dated post-draft ('With the star-studded 2026 NBA Draft officially complete'). Does not rank any veteran -- only contributes percentile data for rookie names in the consensus blend.",
+  "informativeAbsence": false,
   "playerCount": 68,
   "players": [
     {
