@@ -10,6 +10,12 @@ import build_fa_draft_pool as pool  # noqa: E402
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 INDEX_HTML = os.path.join(REPO_ROOT, "index.html")
 
+# Small deterministic Yahoo fixture -- unit tests must not depend on the
+# developer-local, gitignored local_data/yahoo/players_normalized.json
+# (absent in a clean CI checkout). Contains only synthetic players, so
+# these tests stay valid even after real Yahoo rankings change.
+FIXTURE_YAHOO = os.path.join(os.path.dirname(__file__), "fixtures", "yahoo_players_small.json")
+
 # Curated names Yahoo has ZERO data for -- these are the ones that must
 # never be silently omitted, per build_fa_draft_pool.Candidate.guaranteed.
 GUARANTEED_CURATED_ROOKIE_NAMES = [
@@ -229,7 +235,7 @@ class TestSortAndTruncateUnit(unittest.TestCase):
 
     def test_no_duplicate_aliases_across_sources(self):
         html = _read_index_html()
-        yahoo = pool.load_yahoo_players()
+        yahoo = pool.load_yahoo_players(FIXTURE_YAHOO)
         candidates = pool.build_candidates(html, yahoo)
         names = [c.name for c in candidates.values()]
         normed = [pool.normalize_name(n) for n in names]
@@ -244,7 +250,7 @@ class TestDynastyOrProxy(unittest.TestCase):
     CAP tier."""
 
     def test_proxy_is_monotonic_in_dynasty_rank(self):
-        yahoo = pool.load_yahoo_players()
+        yahoo = pool.load_yahoo_players(FIXTURE_YAHOO)
         scale = pool._fit_dynasty_or_scale(yahoo)
         better = pool._dynasty_or_proxy(5, scale)
         worse = pool._dynasty_or_proxy(36, scale)
@@ -257,7 +263,7 @@ class TestDynastyOrProxy(unittest.TestCase):
         # doesn't just re-sort the 5 Yahoo-missing rookies among
         # themselves at the bottom of the pool.
         html = _read_index_html()
-        yahoo = pool.load_yahoo_players()
+        yahoo = pool.load_yahoo_players(FIXTURE_YAHOO)
         candidates = pool.build_candidates(html, yahoo)
         flemings = candidates[pool.normalize_name("Kingston Flemings")]
         self.assertEqual(flemings.cap, 0.0)
@@ -272,13 +278,30 @@ class TestDynastyOrProxy(unittest.TestCase):
         # not guaranteed) -- if Yahoo doesn't rank them either, they must
         # fall back to MISSING_OR, never a fabricated proxy value.
         html = _read_index_html()
-        yahoo = pool.load_yahoo_players()
+        yahoo = pool.load_yahoo_players(FIXTURE_YAHOO)
         candidates = pool.build_candidates(html, yahoo)
         for name in ("Cameron Carr", "Labaron Philon Jr."):
             cand = candidates.get(pool.normalize_name(name))
             if cand is not None and cand.o_rank != pool.MISSING_OR:
                 continue  # Yahoo ranked them directly, nothing to check
             self.assertEqual(cand.o_rank, pool.MISSING_OR)
+
+
+class TestLoadYahooPlayersInjectable(unittest.TestCase):
+    """load_yahoo_players must default to the real production path (so
+    build()'s no-arg call is unaffected) but accept an explicit path/fixture
+    for tests -- no network, no dependency on gitignored local_data/."""
+
+    def test_default_path_is_the_production_yahoo_file(self):
+        import inspect
+        default = inspect.signature(pool.load_yahoo_players).parameters["path"].default
+        self.assertEqual(default, pool.YAHOO_NORMALIZED)
+
+    def test_explicit_path_loads_the_supplied_fixture(self):
+        by_norm = pool.load_yahoo_players(FIXTURE_YAHOO)
+        self.assertIn(pool.normalize_name("Fixture Bench Guy"), by_norm)
+        self.assertIn(pool.normalize_name("Fixture Vet Guy"), by_norm)
+        self.assertEqual(len(by_norm), 2)
 
 
 if __name__ == "__main__":

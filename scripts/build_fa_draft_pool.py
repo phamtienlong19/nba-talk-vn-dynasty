@@ -184,8 +184,8 @@ def parse_team_cards(index_html: str):
     return kept, cuts
 
 
-def load_yahoo_players():
-    with open(YAHOO_NORMALIZED, encoding="utf-8") as f:
+def load_yahoo_players(path=YAHOO_NORMALIZED):
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
     by_norm = {}
     for p in data:

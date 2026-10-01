@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Fixture Bench Guy",
+    "nbaTeam": "ZZZ",
+    "eligiblePositions": ["SF"],
+    "oRank": 250,
+    "capDollars": 0.0
+  },
+  {
+    "name": "Fixture Vet Guy",
+    "nbaTeam": "ZZZ",
+    "eligiblePositions": ["PG"],
+    "oRank": 40,
+    "capDollars": 5.0
+  }
+]
