@@ -42,7 +42,16 @@ print(f"Floor: {result['roundedFloor']}")
 print(f"Ceiling: {result['roundedCeiling']}")
 print("")
 
-PUBLISHED_FLOOR, PUBLISHED_CEILING = 130, 175
+try:
+    canonical_state = json.load(open("ai_exchange/CURRENT_STATE.json", encoding="utf-8"))
+    PUBLISHED_FLOOR = canonical_state["canonicalState"]["capFloor"]
+    PUBLISHED_CEILING = canonical_state["canonicalState"]["capCeiling"]
+except (OSError, KeyError, json.JSONDecodeError):
+    # Defensive fallback only -- ai_exchange/CURRENT_STATE.json is the
+    # canonical published floor/ceiling (see CLAUDE.md source hierarchy);
+    # a hardcoded constant here would silently drift stale the moment a
+    # future PR promotes a new floor/ceiling, as happened previously.
+    PUBLISHED_FLOOR, PUBLISHED_CEILING = 130, 175
 print(f"Current published board: {PUBLISHED_FLOOR}-{PUBLISHED_CEILING}")
 print(f"Live Yahoo result:       {result['roundedFloor']}-{result['roundedCeiling']}")
 if (result["roundedFloor"], result["roundedCeiling"]) == (PUBLISHED_FLOOR, PUBLISHED_CEILING):

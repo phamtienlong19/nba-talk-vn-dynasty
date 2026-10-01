@@ -126,6 +126,33 @@ class TestPipefailConfiguration(unittest.TestCase):
             )
 
 
+class TestPrPromotionIsWired(unittest.TestCase):
+    """The workflow must actually have permission to write/PR, and must
+    actually invoke the promotion step -- this is what Run #3 was
+    missing entirely (no such step existed on main at all)."""
+
+    def setUp(self):
+        with open(WORKFLOW_PATH, encoding="utf-8") as f:
+            self.text = f.read()
+
+    def test_permissions_grant_contents_and_pr_write(self):
+        permissions_block = self.text.split("jobs:", 1)[0]
+        self.assertIn("contents: write", permissions_block)
+        self.assertIn("pull-requests: write", permissions_block)
+
+    def test_promotion_step_invokes_promote_script_with_the_result_json(self):
+        _, run_text = _step_block("Promote CHANGED refresh to a single candidate PR")
+        self.assertIn("./promote-yahoo-refresh.sh", run_text)
+        self.assertIn("artifacts/yahoo-refresh/yahoo-refresh-result.json", run_text)
+
+    def test_promotion_step_has_a_github_token_for_gh_cli_calls(self):
+        header_lines, _ = _step_block("Promote CHANGED refresh to a single candidate PR")
+        self.assertTrue(
+            any("GH_TOKEN" in line for line in header_lines),
+            "promotion step needs GH_TOKEN for gh pr create/edit/list/view",
+        )
+
+
 class TestPreviousSnapshotPathContract(unittest.TestCase):
     """Runs the real "Build machine-readable refresh result" step body
     (extracted from the workflow file) against a fixture working directory,

@@ -1,39 +1,22 @@
 # Active Task
 
-No active GitHub Issue. Direct human-requested narrow follow-up to
-merged PR #21, not issue-backed.
-Branch: fix/fa-draft-pool-and-ui-polish
-Generated: 2026-09-18T13:00:00Z
+No active GitHub Issue. Direct human-requested fix, not issue-backed.
+Branch: fix/yahoo-refresh-pr-automation
+Generated: 2026-10-01T00:00:00Z
 
 ## Task
 
-FA/DRAFT correction pack + light UI polish. Keeper rosters, keeper cap
-totals, and the refreshed floor/ceiling from PR #21 are untouched
-(verified byte-identical for all 144 kept-player rows and all 16
-cap-total/gap-big values).
-
-Full methodology, entered/exited players, and decisions are in
-`ai_exchange/CURRENT_STATE.json` (`canonicalState.faDraftCorrectionPack`)
+Fix `.github/workflows/yahoo-refresh.yml`: a CHANGED refresh (Run #3,
+2026-10-01) produced no PR because the merged workflow was artifact-only
+(no write permissions, no git/gh steps at all -- the PR-creation commit
+on `ci/yahoo-refresh-workflow` was pushed after PR #20 already merged,
+so it was never on main). Full diagnosis, fix, and related
+`refresh-yahoo.sh` published-baseline bug are in
+`ai_exchange/CURRENT_STATE.json` (`canonicalState.yahooRefreshAutomation`)
 -- not restated here per the context-discipline rule.
-
-Also added: a presentation-only 👑 defending-champion marker for
-franchise-09 (Đạt | The Silver Seekers) everywhere its identity is
-shown, with regression coverage (`tests/test_fa_draft_pool.py`).
-
-Second owner-review round (post-PR-open): removed the inaccurate
-"MARK $0 · INJ" meta-pill from KEEPERS 1-8 (owner: mark is actually 5,
-pill added no value) and restyled the CAP floor/ceiling pill
-(`.meta-pill-cap`, `index.html`), now shown consistently on both
-KEEPERS 1-8 and KEEPERS 9-16 (previously missing entirely on 9-16) and
-on the CAP page. Owner's other two concerns (FA-vs-R badge confusion,
-dynasty/Yahoo pool fusion clustering rookies at the bottom) were
-already resolved by commits b466b1e and a3c2e33 on this same branch --
-confirmed by inspecting the committed FA/DRAFT pool markup, no further
-code change needed there.
 
 ## Status
 
-Implementation complete. `python3 -m unittest discover -s tests` (101
-tests) and `./validate.sh` both pass. Visual review done via headless
-Playwright screenshots (desktop + mobile) across Keepers/Cap headers.
-PR #22 open: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/22
+Implementation complete. `python3 -m unittest discover -s tests` (130
+tests) and `./validate.sh` both pass, including with `local_data/`
+removed (clean-checkout simulation). No PR opened yet.
