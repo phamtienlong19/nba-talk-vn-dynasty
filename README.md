@@ -53,9 +53,20 @@ deployment-freshness marker). See `CLAUDE.md` for the full workflow.
 
 Fetches Yahoo's public Draft Analysis endpoint, normalizes it, recomputes
 the current R1–R9 / benchmark / cap-range formula, and reports whether it
-still matches the published board's `130–175` cap range. Never modifies
+still matches the published board's cap range (the current floor/ceiling
+in `ai_exchange/CURRENT_STATE.json`'s `canonicalState`). Never modifies
 `index.html` automatically — see `docs/CAP_MODEL.md` and
 `docs/YAHOO_DATA_SOURCE.md`.
+
+The "Yahoo Ranking Refresh" GitHub Actions workflow (`workflow_dispatch`)
+runs this same refresh in CI. When it reports `CHANGED`, it goes further
+than the local script: `./promote-yahoo-refresh.sh` mechanically
+regenerates the keeper board's Yahoo-sourced display fields (position/NBA
+team/cap, never which players are kept) and the FA/DRAFT 60 pool, then
+opens/updates exactly one PR (branch `automation/yahoo-refresh`) carrying
+the refreshed `data/yahoo/` snapshot and both regenerations together.
+Merging that PR is the human promotion approval — no separate issue/PR
+follows. On `MATCH`, no PR is touched.
 
 ## Architecture today
 

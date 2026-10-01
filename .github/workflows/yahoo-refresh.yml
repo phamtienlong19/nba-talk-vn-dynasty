@@ -4,7 +4,8 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   actions: read
 
 jobs:
@@ -66,6 +67,18 @@ jobs:
 
       - name: Write job summary
         run: python3 scripts/write_yahoo_job_summary.py artifacts/yahoo-refresh/yahoo-refresh-result.json
+
+      # The only step that writes to Git/GitHub. On MATCH it is a no-op.
+      # On CHANGED it mechanically regenerates index.html (keeper-board
+      # Yahoo display fields + FA/DRAFT 60 pool), refreshes data/yahoo/,
+      # and opens/updates exactly one PR against main -- never changes
+      # discretionary keeper selections, and hard-fails (see
+      # promote-yahoo-refresh.sh) rather than reporting green success for
+      # CHANGED-with-no-PR.
+      - name: Promote CHANGED refresh to a single candidate PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./promote-yahoo-refresh.sh artifacts/yahoo-refresh/yahoo-refresh-result.json
 
       - name: Upload refresh artifacts
         if: always()
