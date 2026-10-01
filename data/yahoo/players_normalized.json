@@ -1,0 +1,7457 @@
+[
+  {
+    "playerId": "5352",
+    "playerKey": "478.p.5352",
+    "name": "Nikola Jokić",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 2,
+    "capDollars": 61.0,
+    "auctionValue": 70.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "2"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10094",
+    "playerKey": "478.p.10094",
+    "name": "Victor Wembanyama",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 1,
+    "capDollars": 60.0,
+    "auctionValue": 70.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "1"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6014",
+    "playerKey": "478.p.6014",
+    "name": "Luka Dončić",
+    "nbaTeam": "LAL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 3,
+    "capDollars": 59.0,
+    "auctionValue": 72.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "3"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6022",
+    "playerKey": "478.p.6022",
+    "name": "Shai Gilgeous-Alexander",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 4,
+    "capDollars": 57.0,
+    "auctionValue": 67.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "4"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6512",
+    "playerKey": "478.p.6512",
+    "name": "Cade Cunningham",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 5,
+    "capDollars": 57.0,
+    "auctionValue": 64.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "5"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5185",
+    "playerKey": "478.p.5185",
+    "name": "Giannis Antetokounmpo",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 9,
+    "capDollars": 55.0,
+    "auctionValue": 57.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "9"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5765",
+    "playerKey": "478.p.5765",
+    "name": "Jayson Tatum",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 8,
+    "capDollars": 54.0,
+    "auctionValue": 53.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "8"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6355",
+    "playerKey": "478.p.6355",
+    "name": "Anthony Edwards",
+    "nbaTeam": "MIN",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 7,
+    "capDollars": 52.0,
+    "auctionValue": 60.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "7"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6413",
+    "playerKey": "478.p.6413",
+    "name": "Tyrese Maxey",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 6,
+    "capDollars": 50.0,
+    "auctionValue": 58.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "6"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6404",
+    "playerKey": "478.p.6404",
+    "name": "Tyrese Haliburton",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 12,
+    "capDollars": 49.0,
+    "auctionValue": 44.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "12"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6562",
+    "playerKey": "478.p.6562",
+    "name": "Jalen Johnson",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 10,
+    "capDollars": 47.0,
+    "auctionValue": 50.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "10"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5826",
+    "playerKey": "478.p.5826",
+    "name": "Donovan Mitchell",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 11,
+    "capDollars": 46.0,
+    "auctionValue": 45.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "11"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10468",
+    "playerKey": "478.p.10468",
+    "name": "Cooper Flagg",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 13,
+    "capDollars": 44.0,
+    "auctionValue": 52.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "13"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6515",
+    "playerKey": "478.p.6515",
+    "name": "Scottie Barnes",
+    "nbaTeam": "TOR",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 14,
+    "capDollars": 42.0,
+    "auctionValue": 45.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "14"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4244",
+    "playerKey": "478.p.4244",
+    "name": "Kevin Durant",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 15,
+    "capDollars": 42.0,
+    "auctionValue": 42.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "15"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5432",
+    "playerKey": "478.p.5432",
+    "name": "Karl-Anthony Towns",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 16,
+    "capDollars": 41.0,
+    "auctionValue": 38.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "16"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5638",
+    "playerKey": "478.p.5638",
+    "name": "Jamal Murray",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 17,
+    "capDollars": 40.0,
+    "auctionValue": 35.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "17"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6016",
+    "playerKey": "478.p.6016",
+    "name": "Trae Young",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 19,
+    "capDollars": 38.0,
+    "auctionValue": 31.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "19"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6548",
+    "playerKey": "478.p.6548",
+    "name": "Josh Giddey",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 18,
+    "capDollars": 37.0,
+    "auctionValue": 33.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "18"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10108",
+    "playerKey": "478.p.10108",
+    "name": "Amen Thompson",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 21,
+    "capDollars": 35.0,
+    "auctionValue": 21.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "21"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6606",
+    "playerKey": "478.p.6606",
+    "name": "Austin Reaves",
+    "nbaTeam": "LAL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 20,
+    "capDollars": 33.0,
+    "auctionValue": 27.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "20"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5473",
+    "playerKey": "478.p.5473",
+    "name": "Devin Booker",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 24,
+    "capDollars": 32.0,
+    "auctionValue": 26.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "24"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6558",
+    "playerKey": "478.p.6558",
+    "name": "Alperen Şengün",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 25,
+    "capDollars": 32.0,
+    "auctionValue": 30.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "25"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6395",
+    "playerKey": "478.p.6395",
+    "name": "LaMelo Ball",
+    "nbaTeam": "MIN",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 23,
+    "capDollars": 31.0,
+    "auctionValue": 29.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "23"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4612",
+    "playerKey": "478.p.4612",
+    "name": "Stephen Curry",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 26,
+    "capDollars": 31.0,
+    "auctionValue": 29.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "26"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5827",
+    "playerKey": "478.p.5827",
+    "name": "Bam Adebayo",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 32,
+    "capDollars": 31.0,
+    "auctionValue": 23.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "32"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6692",
+    "playerKey": "478.p.6692",
+    "name": "Chet Holmgren",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 27,
+    "capDollars": 30.0,
+    "auctionValue": 30.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "27"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6514",
+    "playerKey": "478.p.6514",
+    "name": "Evan Mobley",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 28,
+    "capDollars": 30.0,
+    "auctionValue": 21.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "28"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6044",
+    "playerKey": "478.p.6044",
+    "name": "Jalen Brunson",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 29,
+    "capDollars": 30.0,
+    "auctionValue": 35.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "29"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4563",
+    "playerKey": "478.p.4563",
+    "name": "James Harden",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 30,
+    "capDollars": 29.0,
+    "auctionValue": 17.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "30"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6559",
+    "playerKey": "478.p.6559",
+    "name": "Trey Murphy III",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 35,
+    "capDollars": 29.0,
+    "auctionValue": 14.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "35"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5769",
+    "playerKey": "478.p.5769",
+    "name": "Lauri Markkanen",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 34,
+    "capDollars": 28.0,
+    "auctionValue": 15.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "34"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6703",
+    "playerKey": "478.p.6703",
+    "name": "Jalen Duren",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 36,
+    "capDollars": 27.0,
+    "auctionValue": 16.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "36"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5642",
+    "playerKey": "478.p.5642",
+    "name": "Domantas Sabonis",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 22,
+    "capDollars": 26.0,
+    "auctionValue": 22.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "22"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6702",
+    "playerKey": "478.p.6702",
+    "name": "Jalen Williams",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 38,
+    "capDollars": 26.0,
+    "auctionValue": 22.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "38"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5842",
+    "playerKey": "478.p.5842",
+    "name": "Derrick White",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 41,
+    "capDollars": 26.0,
+    "auctionValue": 7.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "41"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4896",
+    "playerKey": "478.p.4896",
+    "name": "Kawhi Leonard",
+    "nbaTeam": "TOR",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 33,
+    "capDollars": 25.0,
+    "auctionValue": 35.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "33"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10285",
+    "playerKey": "478.p.10285",
+    "name": "Donovan Clingan",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 39,
+    "capDollars": 25.0,
+    "auctionValue": 10.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "39"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10104",
+    "playerKey": "478.p.10104",
+    "name": "Brandon Miller",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 40,
+    "capDollars": 25.0,
+    "auctionValue": 19.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "40"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "3704",
+    "playerKey": "478.p.3704",
+    "name": "LeBron James",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 42,
+    "capDollars": 25.0,
+    "auctionValue": 22.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "42"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6712",
+    "playerKey": "478.p.6712",
+    "name": "Walker Kessler",
+    "nbaTeam": "LAL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 37,
+    "capDollars": 24.0,
+    "auctionValue": 19.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "37"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6015",
+    "playerKey": "478.p.6015",
+    "name": "Jaren Jackson Jr.",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 43,
+    "capDollars": 24.0,
+    "auctionValue": 14.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "43"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10100",
+    "playerKey": "478.p.10100",
+    "name": "Keyonte George",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 51,
+    "capDollars": 24.0,
+    "auctionValue": 7.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "51"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5602",
+    "playerKey": "478.p.5602",
+    "name": "Jaylen Brown",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 31,
+    "capDollars": 23.0,
+    "auctionValue": 28.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "31"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5007",
+    "playerKey": "478.p.5007",
+    "name": "Anthony Davis",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 44,
+    "capDollars": 23.0,
+    "auctionValue": 21.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "44"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6422",
+    "playerKey": "478.p.6422",
+    "name": "Desmond Bane",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 46,
+    "capDollars": 23.0,
+    "auctionValue": 6.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "46"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4840",
+    "playerKey": "478.p.4840",
+    "name": "Kyrie Irving",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 48,
+    "capDollars": 23.0,
+    "auctionValue": 11.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "48"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6401",
+    "playerKey": "478.p.6401",
+    "name": "Deni Avdija",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 47,
+    "capDollars": 22.0,
+    "auctionValue": 16.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "47"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6398",
+    "playerKey": "478.p.6398",
+    "name": "Onyeka Okongwu",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 50,
+    "capDollars": 22.0,
+    "auctionValue": 8.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "50"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6550",
+    "playerKey": "478.p.6550",
+    "name": "Franz Wagner",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 49,
+    "capDollars": 21.0,
+    "auctionValue": 11.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "49"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10592",
+    "playerKey": "478.p.10592",
+    "name": "Cameron Boozer",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 57,
+    "capDollars": 20.0,
+    "auctionValue": 12.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "57"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6691",
+    "playerKey": "478.p.6691",
+    "name": "Paolo Banchero",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 52,
+    "capDollars": 19.0,
+    "auctionValue": 17.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "52"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5294",
+    "playerKey": "478.p.5294",
+    "name": "Joel Embiid",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 59,
+    "capDollars": 19.0,
+    "auctionValue": 7.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "59"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6205",
+    "playerKey": "478.p.6205",
+    "name": "Nickeil Alexander-Walker",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 54,
+    "capDollars": 18.0,
+    "auctionValue": 4.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "54"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6167",
+    "playerKey": "478.p.6167",
+    "name": "Darius Garland",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 61,
+    "capDollars": 18.0,
+    "auctionValue": 7.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "61"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5663",
+    "playerKey": "478.p.5663",
+    "name": "Ivica Zubac",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 63,
+    "capDollars": 18.0,
+    "auctionValue": 9.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "63"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5660",
+    "playerKey": "478.p.5660",
+    "name": "Dejounte Murray",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 64,
+    "capDollars": 18.0,
+    "auctionValue": 1.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "64"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6025",
+    "playerKey": "478.p.6025",
+    "name": "Michael Porter Jr.",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 53,
+    "capDollars": 17.0,
+    "auctionValue": 4.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "53"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6253",
+    "playerKey": "478.p.6253",
+    "name": "Naz Reid",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 56,
+    "capDollars": 17.0,
+    "auctionValue": 5.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "56"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6698",
+    "playerKey": "478.p.6698",
+    "name": "Dyson Daniels",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 60,
+    "capDollars": 17.0,
+    "auctionValue": 5.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "60"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5658",
+    "playerKey": "478.p.5658",
+    "name": "Pascal Siakam",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 62,
+    "capDollars": 17.0,
+    "auctionValue": 15.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "62"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10294",
+    "playerKey": "478.p.10294",
+    "name": "Alex Sarr",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 68,
+    "capDollars": 17.0,
+    "auctionValue": 8.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "68"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6734",
+    "playerKey": "478.p.6734",
+    "name": "Ryan Rollins",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 70,
+    "capDollars": 17.0,
+    "auctionValue": 2.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "70"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10450",
+    "playerKey": "478.p.10450",
+    "name": "Kon Knueppel",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 45,
+    "capDollars": 16.0,
+    "auctionValue": 15.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "45"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5601",
+    "playerKey": "478.p.5601",
+    "name": "Brandon Ingram",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util",
+      "IL"
+    ],
+    "oRank": 55,
+    "capDollars": 16.0,
+    "auctionValue": 3.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "55"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5012",
+    "playerKey": "478.p.5012",
+    "name": "Damian Lillard",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 58,
+    "capDollars": 16.0,
+    "auctionValue": 6.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "58"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5835",
+    "playerKey": "478.p.5835",
+    "name": "Jarrett Allen",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 65,
+    "capDollars": 16.0,
+    "auctionValue": 3.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "65"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6175",
+    "playerKey": "478.p.6175",
+    "name": "Tyler Herro",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 67,
+    "capDollars": 16.0,
+    "auctionValue": 6.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "67"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10265",
+    "playerKey": "478.p.10265",
+    "name": "Matas Buzelis",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 80,
+    "capDollars": 16.0,
+    "auctionValue": 8.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "80"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10287",
+    "playerKey": "478.p.10287",
+    "name": "Zach Edey",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 66,
+    "capDollars": 15.0,
+    "auctionValue": 8.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "66"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10274",
+    "playerKey": "478.p.10274",
+    "name": "Kel'el Ware",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 69,
+    "capDollars": 15.0,
+    "auctionValue": 5.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "69"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5836",
+    "playerKey": "478.p.5836",
+    "name": "OG Anunoby",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 71,
+    "capDollars": 14.0,
+    "auctionValue": 5.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "71"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5318",
+    "playerKey": "478.p.5318",
+    "name": "Julius Randle",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 75,
+    "capDollars": 14.0,
+    "auctionValue": 9.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "75"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5767",
+    "playerKey": "478.p.5767",
+    "name": "De'Aaron Fox",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 73,
+    "capDollars": 13.0,
+    "auctionValue": 7.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "73"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6418",
+    "playerKey": "478.p.6418",
+    "name": "Payton Pritchard",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 74,
+    "capDollars": 13.0,
+    "auctionValue": 7.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "74"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10290",
+    "playerKey": "478.p.10290",
+    "name": "Stephon Castle",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 77,
+    "capDollars": 13.0,
+    "auctionValue": 7.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "77"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4725",
+    "playerKey": "478.p.4725",
+    "name": "Paul George",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 76,
+    "capDollars": 12.0,
+    "auctionValue": 2.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "76"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6021",
+    "playerKey": "478.p.6021",
+    "name": "Mikal Bridges",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 78,
+    "capDollars": 12.0,
+    "auctionValue": 4.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "78"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6169",
+    "playerKey": "478.p.6169",
+    "name": "Coby White",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 83,
+    "capDollars": 12.0,
+    "auctionValue": 4.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "83"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6163",
+    "playerKey": "478.p.6163",
+    "name": "Zion Williamson",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 84,
+    "capDollars": 12.0,
+    "auctionValue": 4.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "84"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10096",
+    "playerKey": "478.p.10096",
+    "name": "Ausar Thompson",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 90,
+    "capDollars": 12.0,
+    "auctionValue": 3.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "90"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5197",
+    "playerKey": "478.p.5197",
+    "name": "Rudy Gobert",
+    "nbaTeam": "MIN",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 72,
+    "capDollars": 11.0,
+    "auctionValue": 8.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "72"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10467",
+    "playerKey": "478.p.10467",
+    "name": "Dylan Harper",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 91,
+    "capDollars": 11.0,
+    "auctionValue": 3.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "91"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10465",
+    "playerKey": "478.p.10465",
+    "name": "Cedric Coward",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 81,
+    "capDollars": 10.0,
+    "auctionValue": 7.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "81"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10595",
+    "playerKey": "478.p.10595",
+    "name": "Caleb Wilson",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 82,
+    "capDollars": 10.0,
+    "auctionValue": 2.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "82"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5506",
+    "playerKey": "478.p.5506",
+    "name": "Norman Powell",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 85,
+    "capDollars": 9.0,
+    "auctionValue": 2.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "85"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6417",
+    "playerKey": "478.p.6417",
+    "name": "Immanuel Quickley",
+    "nbaTeam": "TOR",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 88,
+    "capDollars": 9.0,
+    "auctionValue": 1.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "88"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10454",
+    "playerKey": "478.p.10454",
+    "name": "VJ Edgecombe",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 79,
+    "capDollars": 8.0,
+    "auctionValue": 10.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "79"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6219",
+    "playerKey": "478.p.6219",
+    "name": "Nic Claxton",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 86,
+    "capDollars": 7.0,
+    "auctionValue": 3.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "86"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6571",
+    "playerKey": "478.p.6571",
+    "name": "Day'Ron Sharpe",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 87,
+    "capDollars": 6.0,
+    "auctionValue": 6.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "87"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6420",
+    "playerKey": "478.p.6420",
+    "name": "Jaden McDaniels",
+    "nbaTeam": "MIN",
+    "eligiblePositions": [
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 89,
+    "capDollars": 6.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "89"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10599",
+    "playerKey": "478.p.10599",
+    "name": "AJ Dybantsa",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 95,
+    "capDollars": 6.0,
+    "auctionValue": 4.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "95"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10444",
+    "playerKey": "478.p.10444",
+    "name": "Derik Queen",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 92,
+    "capDollars": 5.0,
+    "auctionValue": 6.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "92"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5292",
+    "playerKey": "478.p.5292",
+    "name": "Andrew Wiggins",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 93,
+    "capDollars": 5.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "93"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5471",
+    "playerKey": "478.p.5471",
+    "name": "Myles Turner",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 99,
+    "capDollars": 5.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "99"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5856",
+    "playerKey": "478.p.5856",
+    "name": "Isaiah Hartenstein",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 102,
+    "capDollars": 5.0,
+    "auctionValue": 1.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "102"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6164",
+    "playerKey": "478.p.6164",
+    "name": "Ja Morant",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 103,
+    "capDollars": 5.0,
+    "auctionValue": 3.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "103"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6516",
+    "playerKey": "478.p.6516",
+    "name": "Jalen Suggs",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 104,
+    "capDollars": 5.0,
+    "auctionValue": 3.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "104"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6580",
+    "playerKey": "478.p.6580",
+    "name": "Ayo Dosunmu",
+    "nbaTeam": "MIN",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 110,
+    "capDollars": 5.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "110"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6018",
+    "playerKey": "478.p.6018",
+    "name": "Wendell Carter Jr.",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 141,
+    "capDollars": 5.0,
+    "auctionValue": 1.5,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "141"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4614",
+    "playerKey": "478.p.4614",
+    "name": "DeMar DeRozan",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 251,
+    "capDollars": 5.0,
+    "auctionValue": 2.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "251"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6705",
+    "playerKey": "478.p.6705",
+    "name": "Mark Williams",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "C",
+      "Util",
+      "IL"
+    ],
+    "oRank": 252,
+    "capDollars": 5.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "252"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6693",
+    "playerKey": "478.p.6693",
+    "name": "Jabari Smith Jr.",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 94,
+    "capDollars": 4.0,
+    "auctionValue": 1.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "94"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5324",
+    "playerKey": "478.p.5324",
+    "name": "Zach LaVine",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 96,
+    "capDollars": 4.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "96"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5464",
+    "playerKey": "478.p.5464",
+    "name": "Kristaps Porziņģis",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 97,
+    "capDollars": 4.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "97"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6023",
+    "playerKey": "478.p.6023",
+    "name": "Miles Bridges",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 98,
+    "capDollars": 4.0,
+    "auctionValue": 2.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "98"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5843",
+    "playerKey": "478.p.5843",
+    "name": "Josh Hart",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 100,
+    "capDollars": 4.0,
+    "auctionValue": 2.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "100"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10065",
+    "playerKey": "478.p.10065",
+    "name": "Toumani Camara",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 101,
+    "capDollars": 4.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "101"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6721",
+    "playerKey": "478.p.6721",
+    "name": "Andrew Nembhard",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 105,
+    "capDollars": 4.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "105"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5327",
+    "playerKey": "478.p.5327",
+    "name": "Jusuf Nurkić",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 106,
+    "capDollars": 4.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "106"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6720",
+    "playerKey": "478.p.6720",
+    "name": "Peyton Watson",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 108,
+    "capDollars": 4.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "108"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5161",
+    "playerKey": "478.p.5161",
+    "name": "CJ McCollum",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 107,
+    "capDollars": 3.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "107"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6551",
+    "playerKey": "478.p.6551",
+    "name": "Davion Mitchell",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 109,
+    "capDollars": 3.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "109"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10443",
+    "playerKey": "478.p.10443",
+    "name": "Collin Murray-Boyles",
+    "nbaTeam": "TOR",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 111,
+    "capDollars": 3.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "111"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5832",
+    "playerKey": "478.p.5832",
+    "name": "John Collins",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 112,
+    "capDollars": 3.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "112"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6218",
+    "playerKey": "478.p.6218",
+    "name": "Kevin Porter Jr.",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 121,
+    "capDollars": 3.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "121"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6596",
+    "playerKey": "478.p.6596",
+    "name": "Sandro Mamukelashvili",
+    "nbaTeam": "LAL",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 123,
+    "capDollars": 3.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "123"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10590",
+    "playerKey": "478.p.10590",
+    "name": "Darryn Peterson",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 113,
+    "capDollars": 2.0,
+    "auctionValue": 9.8,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "113"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5640",
+    "playerKey": "478.p.5640",
+    "name": "Jakob Poeltl",
+    "nbaTeam": "TOR",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 114,
+    "capDollars": 2.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "114"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6581",
+    "playerKey": "478.p.6581",
+    "name": "Neemias Queta",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 118,
+    "capDollars": 2.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "118"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6694",
+    "playerKey": "478.p.6694",
+    "name": "Keegan Murray",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 128,
+    "capDollars": 2.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "128"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6212",
+    "playerKey": "478.p.6212",
+    "name": "Ty Jerome",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 133,
+    "capDollars": 2.0,
+    "auctionValue": 2.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "133"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10582",
+    "playerKey": "478.p.10582",
+    "name": "Darius Acuff Jr.",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 156,
+    "capDollars": 2.0,
+    "auctionValue": 3.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "156"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10447",
+    "playerKey": "478.p.10447",
+    "name": "Khaman Maluach",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 115,
+    "capDollars": 1.0,
+    "auctionValue": 1.7,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "115"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10115",
+    "playerKey": "478.p.10115",
+    "name": "Brandin Podziemski",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 116,
+    "capDollars": 1.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "116"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10288",
+    "playerKey": "478.p.10288",
+    "name": "Reed Sheppard",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 117,
+    "capDollars": 1.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "117"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5295",
+    "playerKey": "478.p.5295",
+    "name": "Aaron Gordon",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 119,
+    "capDollars": 1.0,
+    "auctionValue": 1.7,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "119"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10272",
+    "playerKey": "478.p.10272",
+    "name": "Kyshawn George",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 120,
+    "capDollars": 1.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "120"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10092",
+    "playerKey": "478.p.10092",
+    "name": "Jaime Jaquez Jr.",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 127,
+    "capDollars": 1.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "127"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5727",
+    "playerKey": "478.p.5727",
+    "name": "Fred VanVleet",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 136,
+    "capDollars": 1.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "136"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6226",
+    "playerKey": "478.p.6226",
+    "name": "Daniel Gafford",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 170,
+    "capDollars": 1.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "170"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6403",
+    "playerKey": "478.p.6403",
+    "name": "Devin Vassell",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 122,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "122"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10571",
+    "playerKey": "478.p.10571",
+    "name": "Yaxel Lendeborg",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 124,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "124"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6513",
+    "playerKey": "478.p.6513",
+    "name": "Jalen Green",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 125,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "125"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10107",
+    "playerKey": "478.p.10107",
+    "name": "Cason Wallace",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 126,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "126"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6433",
+    "playerKey": "478.p.6433",
+    "name": "Tre Jones",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 129,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "129"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10304",
+    "playerKey": "478.p.10304",
+    "name": "Ajay Mitchell",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 130,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "130"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6165",
+    "playerKey": "478.p.6165",
+    "name": "RJ Barrett",
+    "nbaTeam": "TOR",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 131,
+    "capDollars": 0.0,
+    "auctionValue": 1.3,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "131"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4622",
+    "playerKey": "478.p.4622",
+    "name": "Jrue Holiday",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 132,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "132"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4912",
+    "playerKey": "478.p.4912",
+    "name": "Jimmy Butler III",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util",
+      "IL"
+    ],
+    "oRank": 134,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "134"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10496",
+    "playerKey": "478.p.10496",
+    "name": "Maxime Raynaud",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 135,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "135"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6751",
+    "playerKey": "478.p.6751",
+    "name": "Collin Gillespie",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 137,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "137"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6450",
+    "playerKey": "478.p.6450",
+    "name": "Paul Reed",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 138,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "138"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6707",
+    "playerKey": "478.p.6707",
+    "name": "Tari Eason",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 139,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "139"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5482",
+    "playerKey": "478.p.5482",
+    "name": "Bobby Portis Jr.",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 140,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "140"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5069",
+    "playerKey": "478.p.5069",
+    "name": "Draymond Green",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 142,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "142"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6711",
+    "playerKey": "478.p.6711",
+    "name": "Christian Braun",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 143,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "143"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4897",
+    "playerKey": "478.p.4897",
+    "name": "Nikola Vučević",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 144,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "144"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6733",
+    "playerKey": "478.p.6733",
+    "name": "Moussa Diabaté",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 145,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "145"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6411",
+    "playerKey": "478.p.6411",
+    "name": "Saddiq Bey",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 146,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "146"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6406",
+    "playerKey": "478.p.6406",
+    "name": "Aaron Nesmith",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 147,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "147"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4901",
+    "playerKey": "478.p.4901",
+    "name": "Tobias Harris",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 148,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "148"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6577",
+    "playerKey": "478.p.6577",
+    "name": "Herbert Jones",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 149,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "149"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5858",
+    "playerKey": "478.p.5858",
+    "name": "Dillon Brooks",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 150,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "150"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6174",
+    "playerKey": "478.p.6174",
+    "name": "P.J. Washington",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 151,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "151"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10462",
+    "playerKey": "478.p.10462",
+    "name": "Ace Bailey",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 152,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "152"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10095",
+    "playerKey": "478.p.10095",
+    "name": "Anthony Black",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 153,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "153"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10316",
+    "playerKey": "478.p.10316",
+    "name": "Daniss Jenkins",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 154,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "154"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10440",
+    "playerKey": "478.p.10440",
+    "name": "Jeremiah Fears",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 155,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "155"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5475",
+    "playerKey": "478.p.5475",
+    "name": "Kelly Oubre Jr.",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 157,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "157"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6567",
+    "playerKey": "478.p.6567",
+    "name": "Quentin Grimes",
+    "nbaTeam": "LAL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 158,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "158"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10572",
+    "playerKey": "478.p.10572",
+    "name": "Morez Johnson Jr.",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 159,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "159"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6032",
+    "playerKey": "478.p.6032",
+    "name": "Grayson Allen",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 160,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "160"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6019",
+    "playerKey": "478.p.6019",
+    "name": "Collin Sexton",
+    "nbaTeam": "LAL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 161,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "161"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6696",
+    "playerKey": "478.p.6696",
+    "name": "Bennedict Mathurin",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 162,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "162"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5350",
+    "playerKey": "478.p.5350",
+    "name": "Jerami Grant",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 163,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "163"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10445",
+    "playerKey": "478.p.10445",
+    "name": "Egor Dëmin",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 164,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "164"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4472",
+    "playerKey": "478.p.4472",
+    "name": "Brook Lopez",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 165,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "165"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10289",
+    "playerKey": "478.p.10289",
+    "name": "Yves Missi",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 166,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "166"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6619",
+    "playerKey": "478.p.6619",
+    "name": "Sam Hauser",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 167,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "167"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6408",
+    "playerKey": "478.p.6408",
+    "name": "Isaiah Stewart",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 168,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "168"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10048",
+    "playerKey": "478.p.10048",
+    "name": "Scoot Henderson",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 169,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "169"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10313",
+    "playerKey": "478.p.10313",
+    "name": "Oso Ighodaro",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 171,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "171"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6173",
+    "playerKey": "478.p.6173",
+    "name": "Cameron Johnson",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 172,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "172"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6572",
+    "playerKey": "478.p.6572",
+    "name": "Santi Aldama",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 173,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "173"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6216",
+    "playerKey": "478.p.6216",
+    "name": "Jordan Poole",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 174,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "174"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10097",
+    "playerKey": "478.p.10097",
+    "name": "Dereck Lively II",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 175,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "175"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10315",
+    "playerKey": "478.p.10315",
+    "name": "Kyle Filipowski",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 176,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "176"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6166",
+    "playerKey": "478.p.6166",
+    "name": "De'Andre Hunter",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 177,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "177"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6047",
+    "playerKey": "478.p.6047",
+    "name": "Mitchell Robinson",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 178,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "178"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6754",
+    "playerKey": "478.p.6754",
+    "name": "Julian Champagnie",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 179,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "179"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5840",
+    "playerKey": "478.p.5840",
+    "name": "Kyle Kuzma",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 180,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "180"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6035",
+    "playerKey": "478.p.6035",
+    "name": "Anfernee Simons",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 181,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "181"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5015",
+    "playerKey": "478.p.5015",
+    "name": "Andre Drummond",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 182,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "182"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5958",
+    "playerKey": "478.p.5958",
+    "name": "Deandre Ayton",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 183,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "183"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6267",
+    "playerKey": "478.p.6267",
+    "name": "Max Strus",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 184,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "184"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10340",
+    "playerKey": "478.p.10340",
+    "name": "Jaylen Wells",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 185,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "185"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6171",
+    "playerKey": "478.p.6171",
+    "name": "Rui Hachimura",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 186,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "186"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6597",
+    "playerKey": "478.p.6597",
+    "name": "Aaron Wiggins",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 187,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "187"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10576",
+    "playerKey": "478.p.10576",
+    "name": "Brayden Burries",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 188,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "188"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6057",
+    "playerKey": "478.p.6057",
+    "name": "De'Anthony Melton",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 189,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "189"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10099",
+    "playerKey": "478.p.10099",
+    "name": "Bilal Coulibaly",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 190,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "190"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6757",
+    "playerKey": "478.p.6757",
+    "name": "Scotty Pippen Jr.",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 191,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "191"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4892",
+    "playerKey": "478.p.4892",
+    "name": "Klay Thompson",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 192,
+    "capDollars": 0.0,
+    "auctionValue": 1.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "192"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10118",
+    "playerKey": "478.p.10118",
+    "name": "Cam Whitmore",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 193,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "193"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6400",
+    "playerKey": "478.p.6400",
+    "name": "Obi Toppin",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 194,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "194"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6578",
+    "playerKey": "478.p.6578",
+    "name": "Miles McBride",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 195,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "195"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6254",
+    "playerKey": "478.p.6254",
+    "name": "Luguentz Dort",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 196,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "196"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5582",
+    "playerKey": "478.p.5582",
+    "name": "T.J. McConnell",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 197,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "197"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6217",
+    "playerKey": "478.p.6217",
+    "name": "Keldon Johnson",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 198,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "198"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6402",
+    "playerKey": "478.p.6402",
+    "name": "Jalen Smith",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 199,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "199"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4245",
+    "playerKey": "478.p.4245",
+    "name": "Al Horford",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 200,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "200"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10588",
+    "playerKey": "478.p.10588",
+    "name": "Mikel Brown Jr.",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 201,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "201"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5905",
+    "playerKey": "478.p.5905",
+    "name": "Royce O'Neale",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 202,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "202"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6441",
+    "playerKey": "478.p.6441",
+    "name": "Isaiah Joe",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 203,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "203"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6038",
+    "playerKey": "478.p.6038",
+    "name": "Robert Williams III",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 204,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "204"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6073",
+    "playerKey": "478.p.6073",
+    "name": "Duncan Robinson",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 205,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "205"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10585",
+    "playerKey": "478.p.10585",
+    "name": "Keaton Wagler",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 206,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "206"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6753",
+    "playerKey": "478.p.6753",
+    "name": "Keon Ellis",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 207,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "207"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5824",
+    "playerKey": "478.p.5824",
+    "name": "Malik Monk",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 208,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "208"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6617",
+    "playerKey": "478.p.6617",
+    "name": "Jay Huff",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 209,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "209"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6499",
+    "playerKey": "478.p.6499",
+    "name": "Naji Marshall",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 210,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "210"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5636",
+    "playerKey": "478.p.5636",
+    "name": "Kris Dunn",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 211,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "211"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6725",
+    "playerKey": "478.p.6725",
+    "name": "Max Christie",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 212,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "212"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6697",
+    "playerKey": "478.p.6697",
+    "name": "Shaedon Sharpe",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util",
+      "IL"
+    ],
+    "oRank": 213,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "213"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10476",
+    "playerKey": "478.p.10476",
+    "name": "Ryan Kalkbrenner",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 214,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "214"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5747",
+    "playerKey": "478.p.5747",
+    "name": "Derrick Jones Jr.",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 215,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "215"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6028",
+    "playerKey": "478.p.6028",
+    "name": "Donte DiVincenzo",
+    "nbaTeam": "MIN",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util",
+      "IL"
+    ],
+    "oRank": 216,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "216"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10121",
+    "playerKey": "478.p.10121",
+    "name": "Noah Clowney",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 217,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "217"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5754",
+    "playerKey": "478.p.5754",
+    "name": "Alex Caruso",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 218,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "218"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5903",
+    "playerKey": "478.p.5903",
+    "name": "Luke Kornet",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 219,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "219"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10275",
+    "playerKey": "478.p.10275",
+    "name": "Tristan da Silva",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 220,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "220"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5194",
+    "playerKey": "478.p.5194",
+    "name": "Tim Hardaway Jr.",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 221,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "221"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10448",
+    "playerKey": "478.p.10448",
+    "name": "Tre Johnson",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 222,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "222"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6709",
+    "playerKey": "478.p.6709",
+    "name": "Jake LaRavia",
+    "nbaTeam": "LAL",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 223,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "223"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10510",
+    "playerKey": "478.p.10510",
+    "name": "Dylan Cardwell",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 224,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "224"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6170",
+    "playerKey": "478.p.6170",
+    "name": "Jaxson Hayes",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 225,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "225"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10296",
+    "playerKey": "478.p.10296",
+    "name": "Zaccharie Risacher",
+    "nbaTeam": "DAL",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 226,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "226"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10263",
+    "playerKey": "478.p.10263",
+    "name": "Ronald Holland II",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 227,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "227"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6030",
+    "playerKey": "478.p.6030",
+    "name": "Kevin Huerter",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 228,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "228"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6452",
+    "playerKey": "478.p.6452",
+    "name": "Sam Merrill",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 229,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "229"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5841",
+    "playerKey": "478.p.5841",
+    "name": "Tony Bradley",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 230,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "230"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6564",
+    "playerKey": "478.p.6564",
+    "name": "Isaiah Jackson",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 231,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "231"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10279",
+    "playerKey": "478.p.10279",
+    "name": "Jaylon Tyson",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 232,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "232"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10103",
+    "playerKey": "478.p.10103",
+    "name": "Jarace Walker",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 233,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "233"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10278",
+    "playerKey": "478.p.10278",
+    "name": "Ja'Kobe Walter",
+    "nbaTeam": "TOR",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 234,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "234"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6616",
+    "playerKey": "478.p.6616",
+    "name": "Jordan Goodwin",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 235,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "235"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6724",
+    "playerKey": "478.p.6724",
+    "name": "Jaylin Williams",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 236,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "236"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5073",
+    "playerKey": "478.p.5073",
+    "name": "Khris Middleton",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 237,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "237"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5825",
+    "playerKey": "478.p.5825",
+    "name": "Luke Kennard",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 238,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "238"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10308",
+    "playerKey": "478.p.10308",
+    "name": "Quinten Post",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 239,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "239"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10577",
+    "playerKey": "478.p.10577",
+    "name": "Hannes Steinbach",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 240,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "240"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6036",
+    "playerKey": "478.p.6036",
+    "name": "Moritz Wagner",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 241,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "241"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10470",
+    "playerKey": "478.p.10470",
+    "name": "Kobe Sanders",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 242,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "242"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10335",
+    "playerKey": "478.p.10335",
+    "name": "Adem Bona",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 243,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "243"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10110",
+    "playerKey": "478.p.10110",
+    "name": "Taylor Hendricks",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 244,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "244"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5187",
+    "playerKey": "478.p.5187",
+    "name": "Dennis Schröder",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 245,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "245"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10327",
+    "playerKey": "478.p.10327",
+    "name": "Cam Spencer",
+    "nbaTeam": "MEM",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 246,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "246"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6742",
+    "playerKey": "478.p.6742",
+    "name": "Karlo Matković",
+    "nbaTeam": "NOP",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 247,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "247"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10276",
+    "playerKey": "478.p.10276",
+    "name": "Jared McCain",
+    "nbaTeam": "OKC",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 248,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "248"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10277",
+    "playerKey": "478.p.10277",
+    "name": "Baylor Scheierman",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 249,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "249"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6745",
+    "playerKey": "478.p.6745",
+    "name": "Gui Santos",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 250,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "250"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6632",
+    "playerKey": "478.p.6632",
+    "name": "Justin Champagnie",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 253,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "253"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6269",
+    "playerKey": "478.p.6269",
+    "name": "Javonte Green",
+    "nbaTeam": "DET",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 254,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "254"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5013",
+    "playerKey": "478.p.5013",
+    "name": "Harrison Barnes",
+    "nbaTeam": "SAS",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 255,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "255"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10122",
+    "playerKey": "478.p.10122",
+    "name": "Brice Sensabaugh",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 256,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "256"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6556",
+    "playerKey": "478.p.6556",
+    "name": "Moses Moody",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "PF",
+      "F",
+      "Util",
+      "IL"
+    ],
+    "oRank": 257,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "257"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6755",
+    "playerKey": "478.p.6755",
+    "name": "AJ Green",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 258,
+    "capDollars": 0.0,
+    "auctionValue": 0.0,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "258"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4390",
+    "playerKey": "478.p.4390",
+    "name": "Russell Westbrook",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 259,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "259"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6206",
+    "playerKey": "478.p.6206",
+    "name": "Goga Bitadze",
+    "nbaTeam": "ORL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 260,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "260"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6412",
+    "playerKey": "478.p.6412",
+    "name": "Precious Achiuwa",
+    "nbaTeam": "SAC",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 261,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "261"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5739",
+    "playerKey": "478.p.5739",
+    "name": "Gary Payton II",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 262,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "262"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10273",
+    "playerKey": "478.p.10273",
+    "name": "Bub Carrington",
+    "nbaTeam": "WAS",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 263,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "263"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6053",
+    "playerKey": "478.p.6053",
+    "name": "Bruce Brown",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 264,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "264"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6552",
+    "playerKey": "478.p.6552",
+    "name": "Ziaire Williams",
+    "nbaTeam": "LAL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 265,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "265"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6791",
+    "playerKey": "478.p.6791",
+    "name": "Dominick Barlow",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 266,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "266"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10333",
+    "playerKey": "478.p.10333",
+    "name": "Jamal Shead",
+    "nbaTeam": "TOR",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 267,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "267"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6255",
+    "playerKey": "478.p.6255",
+    "name": "John Konchar",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 268,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "268"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6613",
+    "playerKey": "478.p.6613",
+    "name": "Jose Alvarado",
+    "nbaTeam": "NYK",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 269,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "269"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4886",
+    "playerKey": "478.p.4886",
+    "name": "Jonas Valančiūnas",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 270,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "270"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5317",
+    "playerKey": "478.p.5317",
+    "name": "Marcus Smart",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 271,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "271"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6652",
+    "playerKey": "478.p.6652",
+    "name": "Dru Smith",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 272,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "272"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10312",
+    "playerKey": "478.p.10312",
+    "name": "Pelle Larsson",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 273,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "273"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6429",
+    "playerKey": "478.p.6429",
+    "name": "Vít Krejčí",
+    "nbaTeam": "POR",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 274,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "274"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6614",
+    "playerKey": "478.p.6614",
+    "name": "Jock Landale",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 275,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "275"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6256",
+    "playerKey": "478.p.6256",
+    "name": "Dean Wade",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 276,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "276"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6397",
+    "playerKey": "478.p.6397",
+    "name": "Isaac Okoro",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 277,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "277"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10292",
+    "playerKey": "478.p.10292",
+    "name": "Ryan Dunn",
+    "nbaTeam": "PHX",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 278,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "278"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6679",
+    "playerKey": "478.p.6679",
+    "name": "Brandon Williams",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 279,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "279"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4487",
+    "playerKey": "478.p.4487",
+    "name": "Nicolas Batum",
+    "nbaTeam": "LAC",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 280,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "280"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6766",
+    "playerKey": "478.p.6766",
+    "name": "Simone Fontecchio",
+    "nbaTeam": "MIA",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 281,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "281"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10069",
+    "playerKey": "478.p.10069",
+    "name": "Mouhamed Gueye",
+    "nbaTeam": "ATL",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 282,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "282"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10282",
+    "playerKey": "478.p.10282",
+    "name": "Isaiah Collier",
+    "nbaTeam": "UTA",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 283,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "283"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5159",
+    "playerKey": "478.p.5159",
+    "name": "Kentavious Caldwell-Pope",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 284,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "284"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5959",
+    "playerKey": "478.p.5959",
+    "name": "Marvin Bagley III",
+    "nbaTeam": "DEN",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 285,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "285"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6236",
+    "playerKey": "478.p.6236",
+    "name": "Terance Mann",
+    "nbaTeam": "BKN",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 286,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "286"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5336",
+    "playerKey": "478.p.5336",
+    "name": "Clint Capela",
+    "nbaTeam": "HOU",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 287,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "287"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10485",
+    "playerKey": "478.p.10485",
+    "name": "Will Richard",
+    "nbaTeam": "GSW",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 288,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "288"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6594",
+    "playerKey": "478.p.6594",
+    "name": "Luka Garza",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 289,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "289"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10075",
+    "playerKey": "478.p.10075",
+    "name": "Jordan Walsh",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 290,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "290"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "6568",
+    "playerKey": "478.p.6568",
+    "name": "Bones Hyland",
+    "nbaTeam": "MIN",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 291,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "291"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10145",
+    "playerKey": "478.p.10145",
+    "name": "Craig Porter Jr.",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "PG",
+      "SG",
+      "G",
+      "Util"
+    ],
+    "oRank": 292,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "292"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5651",
+    "playerKey": "478.p.5651",
+    "name": "Caris LeVert",
+    "nbaTeam": "MIL",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 293,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "293"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "4246",
+    "playerKey": "478.p.4246",
+    "name": "Mike Conley",
+    "nbaTeam": "BOS",
+    "eligiblePositions": [
+      "PG",
+      "G",
+      "Util"
+    ],
+    "oRank": 294,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "294"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10498",
+    "playerKey": "478.p.10498",
+    "name": "Sion James",
+    "nbaTeam": "CHA",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 295,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "295"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10113",
+    "playerKey": "478.p.10113",
+    "name": "Ben Sheppard",
+    "nbaTeam": "IND",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 296,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "296"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5637",
+    "playerKey": "478.p.5637",
+    "name": "Buddy Hield",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "SG",
+      "G",
+      "SF",
+      "F",
+      "Util"
+    ],
+    "oRank": 297,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "297"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5855",
+    "playerKey": "478.p.5855",
+    "name": "Thomas Bryant",
+    "nbaTeam": "CLE",
+    "eligiblePositions": [
+      "C",
+      "Util"
+    ],
+    "oRank": 298,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "298"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "10310",
+    "playerKey": "478.p.10310",
+    "name": "Justin Edwards",
+    "nbaTeam": "PHI",
+    "eligiblePositions": [
+      "SF",
+      "PF",
+      "F",
+      "Util"
+    ],
+    "oRank": 299,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "299"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  },
+  {
+    "playerId": "5647",
+    "playerKey": "478.p.5647",
+    "name": "Guerschon Yabusele",
+    "nbaTeam": "CHI",
+    "eligiblePositions": [
+      "PF",
+      "F",
+      "C",
+      "Util"
+    ],
+    "oRank": 300,
+    "capDollars": 0.0,
+    "auctionValue": null,
+    "expertRanks": [
+      {
+        "player_rank": {
+          "rank_type": "OR",
+          "rank_value": "300"
+        }
+      }
+    ],
+    "sourceTimestamp": "2026-10-01T024836Z",
+    "sourceLeagueKey": "478.l.101"
+  }
+]

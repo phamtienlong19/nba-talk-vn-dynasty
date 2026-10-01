@@ -1,0 +1,21 @@
+{
+  "fetchedAt": "2026-10-01T024836Z",
+  "bands": [
+    51.0,
+    31.75,
+    24.4375,
+    18.5625,
+    13.875,
+    8.0,
+    4.0625,
+    1.25,
+    0.5
+  ],
+  "benchmark": 153.4375,
+  "rawFloor": 130.421875,
+  "rawCeiling": 176.453125,
+  "roundedFloor": 130,
+  "roundedCeiling": 176,
+  "publishedFloor": 131,
+  "publishedCeiling": 177
+}
