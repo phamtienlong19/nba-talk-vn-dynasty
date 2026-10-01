@@ -241,6 +241,27 @@ class TestSortAndTruncateUnit(unittest.TestCase):
         normed = [pool.normalize_name(n) for n in names]
         self.assertEqual(len(normed), len(set(normed)))
 
+    def test_cut_chip_with_nested_health_badge_is_parsed_fully(self):
+        # A bare non-greedy `(.*?)</span>` stops at the health-badge
+        # span's own close instead of the chip's, truncating the name and
+        # silently losing the cap/position lookup for any cut player who
+        # also carries a health badge (see CUT_CHIP_RE).
+        html = (
+            '<section class="team-card">'
+            '<span class="identity-tag">ZZ</span>'
+            '<div class="players"></div>'
+            '<footer><div class="cuts-list">'
+            '<span class="cut-chip">Hurt Guy'
+            '<span class="health-badge inj" title="ACL">INJ</span></span>'
+            '<span class="cut-chip">Paid Guy <strong>7</strong></span>'
+            '</div></footer></section>'
+        )
+        kept, cuts = pool.parse_team_cards(html)
+        names = {c["name"]: c for c in cuts}
+        self.assertIn("Hurt Guy", names)
+        self.assertNotIn("span", names["Hurt Guy"]["name"].lower())
+        self.assertEqual(names["Paid Guy"]["cap"], 7.0)
+
 
 class TestDynastyOrProxy(unittest.TestCase):
     """A Yahoo-missing curated rookie's tiebreak position must reflect its
@@ -302,6 +323,16 @@ class TestLoadYahooPlayersInjectable(unittest.TestCase):
         self.assertIn(pool.normalize_name("Fixture Bench Guy"), by_norm)
         self.assertIn(pool.normalize_name("Fixture Vet Guy"), by_norm)
         self.assertEqual(len(by_norm), 2)
+
+    def test_build_defaults_to_the_production_yahoo_file(self):
+        import inspect
+        default = inspect.signature(pool.build).parameters["yahoo_players_path"].default
+        self.assertEqual(default, pool.YAHOO_NORMALIZED)
+
+    def test_build_accepts_an_explicit_yahoo_players_path(self):
+        html = _read_index_html()
+        new_html, ranked = pool.build(html, FIXTURE_YAHOO)
+        self.assertEqual(len(ranked), 60)
 
 
 if __name__ == "__main__":

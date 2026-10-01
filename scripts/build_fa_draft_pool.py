@@ -35,6 +35,7 @@ Yahoo-missing prospects, not a dynasty board.
 """
 from __future__ import annotations
 
+import argparse
 import html as html_lib
 import json
 import os
@@ -129,6 +130,19 @@ CONSERVATIVE_CUT_DEFAULTS = {
 
 MISSING_OR = 9999
 
+# A cut chip is `<span class="cut-chip">NAME[<strong>CAP</strong>]</span>`,
+# optionally with ONE nested health-badge span appended to NAME (e.g. a
+# cut player who's INJ/REC) -- a bare non-greedy `(.*?)</span>` stops at
+# that inner span's own close instead of the chip's, silently truncating
+# the captured name and losing the cap/position lookup for every cut
+# player who also carries a health badge. This explicitly consumes a
+# complete nested health-badge span as part of the chip instead.
+CUT_CHIP_RE = re.compile(
+    r'<span class="cut-chip">('
+    r'(?:[^<]|<strong>[^<]*</strong>|<span class="health-badge[^>]*>[^<]*</span>)*'
+    r')</span>'
+)
+
 
 def normalize_name(name: str) -> str:
     name = html_lib.unescape(name)
@@ -175,10 +189,11 @@ def parse_team_cards(index_html: str):
 
         cuts_block = re.search(r'<div class="cuts-list">(.*?)</div></footer>', card, re.S)
         if cuts_block:
-            for chip in re.findall(r'<span class="cut-chip">(.*?)</span>', cuts_block.group(1), re.S):
+            for chip in re.findall(CUT_CHIP_RE, cuts_block.group(1)):
                 cap_m = re.search(r"<strong>(\d+)</strong>", chip)
                 cap_val = float(cap_m.group(1)) if cap_m else 0.0
-                name_only = re.sub(r"<strong>.*?</strong>", "", chip).strip()
+                name_only = re.sub(r"<strong>.*?</strong>", "", chip)
+                name_only = re.sub(r"<span.*?</span>", "", name_only).strip()
                 cuts.append({"name": html_lib.unescape(name_only), "cap": cap_val, "team": short_name})
 
     return kept, cuts
@@ -377,8 +392,8 @@ def splice_pool_into_index(index_html: str, pool_html: str) -> str:
     return index_html[:start] + replacement + index_html[end:]
 
 
-def build(index_html: str) -> tuple[str, list]:
-    yahoo_by_norm = load_yahoo_players()
+def build(index_html: str, yahoo_players_path: str = YAHOO_NORMALIZED) -> tuple[str, list]:
+    yahoo_by_norm = load_yahoo_players(yahoo_players_path)
     candidates = build_candidates(index_html, yahoo_by_norm)
     ranked = sort_and_truncate(candidates)
     pool_html = render_pool_html(ranked)
@@ -387,6 +402,13 @@ def build(index_html: str) -> tuple[str, list]:
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--yahoo-players", default=YAHOO_NORMALIZED,
+        help="normalized Yahoo snapshot to rebuild against (default: the local gitignored refresh output)",
+    )
+    args = parser.parse_args()
+
     with open(INDEX_HTML, encoding="utf-8") as f:
         index_html = f.read()
 
@@ -396,7 +418,7 @@ def main():
         re.findall(r'<div class="pool-player">(.*?)</div>', index_html[start:end])
     }
 
-    new_html, ranked = build(index_html)
+    new_html, ranked = build(index_html, args.yahoo_players)
 
     with open(INDEX_HTML, "w", encoding="utf-8") as f:
         f.write(new_html)
