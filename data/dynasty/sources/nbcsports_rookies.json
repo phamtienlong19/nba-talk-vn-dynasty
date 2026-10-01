@@ -1,0 +1,280 @@
+{
+  "source": "nbcsports.com — 2026 NBA Draft Dynasty Rookie Rankings (rookies only), by Rotoworld Staff",
+  "fetchedAt": "2026-10-01T00:00:00Z",
+  "note": "Rookie-only dynasty rankings for the 2026 draft class (68 entries, UDFAs included). Explicitly dated post-draft ('With the star-studded 2026 NBA Draft officially complete'). Does not rank any veteran -- only contributes percentile data for rookie names in the consensus blend.",
+  "playerCount": 68,
+  "players": [
+    {
+      "rank": 1,
+      "name": "Cameron Boozer"
+    },
+    {
+      "rank": 2,
+      "name": "Darryn Peterson"
+    },
+    {
+      "rank": 3,
+      "name": "Caleb Wilson"
+    },
+    {
+      "rank": 4,
+      "name": "AJ Dybantsa"
+    },
+    {
+      "rank": 5,
+      "name": "Kingston Flemings"
+    },
+    {
+      "rank": 6,
+      "name": "Mikel Brown Jr."
+    },
+    {
+      "rank": 7,
+      "name": "Darius Acuff Jr."
+    },
+    {
+      "rank": 8,
+      "name": "Keaton Wagler"
+    },
+    {
+      "rank": 9,
+      "name": "Morez Johnson Jr."
+    },
+    {
+      "rank": 10,
+      "name": "Brayden Burries"
+    },
+    {
+      "rank": 11,
+      "name": "Yaxel Lendeborg"
+    },
+    {
+      "rank": 12,
+      "name": "Dailyn Swain"
+    },
+    {
+      "rank": 13,
+      "name": "Hannes Steinbach"
+    },
+    {
+      "rank": 14,
+      "name": "Aday Mara"
+    },
+    {
+      "rank": 15,
+      "name": "Bennett Stirtz"
+    },
+    {
+      "rank": 16,
+      "name": "Ebuka Okorie"
+    },
+    {
+      "rank": 17,
+      "name": "Allen Graves"
+    },
+    {
+      "rank": 18,
+      "name": "Labaron Philon"
+    },
+    {
+      "rank": 19,
+      "name": "Zuby Ejiofor"
+    },
+    {
+      "rank": 20,
+      "name": "Cameron Carr"
+    },
+    {
+      "rank": 21,
+      "name": "Bruce Thornton"
+    },
+    {
+      "rank": 22,
+      "name": "Karim López"
+    },
+    {
+      "rank": 23,
+      "name": "Christian Anderson"
+    },
+    {
+      "rank": 24,
+      "name": "Baba Miller"
+    },
+    {
+      "rank": 25,
+      "name": "Nate Ament"
+    },
+    {
+      "rank": 26,
+      "name": "Jayden Quaintance"
+    },
+    {
+      "rank": 27,
+      "name": "Tarris Reed Jr."
+    },
+    {
+      "rank": 28,
+      "name": "Sergio de Larrea"
+    },
+    {
+      "rank": 29,
+      "name": "Joshua Jefferson"
+    },
+    {
+      "rank": 30,
+      "name": "Henri Veesaar"
+    },
+    {
+      "rank": 31,
+      "name": "Trevon Brazile"
+    },
+    {
+      "rank": 32,
+      "name": "Richie Saunders"
+    },
+    {
+      "rank": 33,
+      "name": "Isaiah Evans"
+    },
+    {
+      "rank": 34,
+      "name": "Chris Cenac Jr."
+    },
+    {
+      "rank": 35,
+      "name": "Ugonna Onyenso"
+    },
+    {
+      "rank": 36,
+      "name": "Meleek Thomas"
+    },
+    {
+      "rank": 37,
+      "name": "Ja'Kobi Gillespie"
+    },
+    {
+      "rank": 38,
+      "name": "Koa Peat"
+    },
+    {
+      "rank": 39,
+      "name": "Quadir Copeland"
+    },
+    {
+      "rank": 40,
+      "name": "Jaden Bradley"
+    },
+    {
+      "rank": 41,
+      "name": "Rafael Castro"
+    },
+    {
+      "rank": 42,
+      "name": "Felix Okpara"
+    },
+    {
+      "rank": 43,
+      "name": "Braden Smith"
+    },
+    {
+      "rank": 44,
+      "name": "Emanuel Sharp"
+    },
+    {
+      "rank": 45,
+      "name": "Izaiyah Nelson"
+    },
+    {
+      "rank": 46,
+      "name": "Tobi Lawal"
+    },
+    {
+      "rank": 47,
+      "name": "Ryan Conwell"
+    },
+    {
+      "rank": 48,
+      "name": "Lajae Jones"
+    },
+    {
+      "rank": 49,
+      "name": "Dillon Mitchell"
+    },
+    {
+      "rank": 50,
+      "name": "Maliq Brown"
+    },
+    {
+      "rank": 51,
+      "name": "Alex Karaban"
+    },
+    {
+      "rank": 52,
+      "name": "Tobe Awaka"
+    },
+    {
+      "rank": 53,
+      "name": "Jack Kayil"
+    },
+    {
+      "rank": 54,
+      "name": "Tre Donaldson"
+    },
+    {
+      "rank": 55,
+      "name": "Bryce Hopkins"
+    },
+    {
+      "rank": 56,
+      "name": "Otega Oweh"
+    },
+    {
+      "rank": 57,
+      "name": "Malique Lewis"
+    },
+    {
+      "rank": 58,
+      "name": "Tyler Nickel"
+    },
+    {
+      "rank": 59,
+      "name": "Tyler Bilodeau"
+    },
+    {
+      "rank": 60,
+      "name": "AK Okereke"
+    },
+    {
+      "rank": 61,
+      "name": "Trey Kaufman-Renn"
+    },
+    {
+      "rank": 62,
+      "name": "Peter Suder"
+    },
+    {
+      "rank": 63,
+      "name": "Nick Martinelli"
+    },
+    {
+      "rank": 64,
+      "name": "Narcisse Ngoy"
+    },
+    {
+      "rank": 65,
+      "name": "Vsevolod Ishchenko"
+    },
+    {
+      "rank": 66,
+      "name": "Josh Dix"
+    },
+    {
+      "rank": 67,
+      "name": "Jaron Pierre Jr."
+    },
+    {
+      "rank": 68,
+      "name": "Sam Hoiberg"
+    }
+  ]
+}

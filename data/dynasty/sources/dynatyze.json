@@ -1,0 +1,446 @@
+{
+  "source": "dynatyze.com/basketball/dynasty-rankings",
+  "fetchedAt": "2026-10-01T00:00:00Z",
+  "note": "Dynasty value rankings, free-tier top 75 only (2027 1st-round pick placeholders excluded) -- the full board is paywalled behind a Pro/Ultra subscription; not bypassed. Verified current.",
+  "playerCount": 73,
+  "players": [
+    {
+      "rank": 1,
+      "name": "Victor Wembanyama",
+      "pos": "C",
+      "team": "SAS"
+    },
+    {
+      "rank": 2,
+      "name": "Shai Gilgeous-Alexander",
+      "pos": "G",
+      "team": "OKC"
+    },
+    {
+      "rank": 3,
+      "name": "Luka Dončić",
+      "pos": "G",
+      "team": "LAL"
+    },
+    {
+      "rank": 4,
+      "name": "Nikola Jokić",
+      "pos": "C",
+      "team": "DEN"
+    },
+    {
+      "rank": 5,
+      "name": "Cooper Flagg",
+      "pos": "F",
+      "team": "DAL"
+    },
+    {
+      "rank": 6,
+      "name": "Cade Cunningham",
+      "pos": "G",
+      "team": "DET"
+    },
+    {
+      "rank": 7,
+      "name": "Jayson Tatum",
+      "pos": "F",
+      "team": "BOS"
+    },
+    {
+      "rank": 8,
+      "name": "Anthony Edwards",
+      "pos": "G",
+      "team": "MIN"
+    },
+    {
+      "rank": 9,
+      "name": "Tyrese Maxey",
+      "pos": "G",
+      "team": "PHI"
+    },
+    {
+      "rank": 10,
+      "name": "Jalen Johnson",
+      "pos": "F",
+      "team": "ATL"
+    },
+    {
+      "rank": 11,
+      "name": "Tyrese Haliburton",
+      "pos": "G",
+      "team": "IND"
+    },
+    {
+      "rank": 12,
+      "name": "Cameron Boozer",
+      "pos": "C",
+      "team": "MEM"
+    },
+    {
+      "rank": 13,
+      "name": "Scottie Barnes",
+      "pos": "F",
+      "team": "TOR"
+    },
+    {
+      "rank": 14,
+      "name": "Darryn Peterson",
+      "pos": "G",
+      "team": "UTA"
+    },
+    {
+      "rank": 15,
+      "name": "Alperen Sengun",
+      "pos": "C",
+      "team": "HOU"
+    },
+    {
+      "rank": 16,
+      "name": "Chet Holmgren",
+      "pos": "C",
+      "team": "OKC"
+    },
+    {
+      "rank": 17,
+      "name": "Giannis Antetokounmpo",
+      "pos": "F",
+      "team": "MIA"
+    },
+    {
+      "rank": 18,
+      "name": "Evan Mobley",
+      "pos": "C",
+      "team": "CLE"
+    },
+    {
+      "rank": 19,
+      "name": "AJ Dybantsa",
+      "pos": "F",
+      "team": "WAS"
+    },
+    {
+      "rank": 20,
+      "name": "Amen Thompson",
+      "pos": "G",
+      "team": "HOU"
+    },
+    {
+      "rank": 21,
+      "name": "Dylan Harper",
+      "pos": "G",
+      "team": "SAS"
+    },
+    {
+      "rank": 22,
+      "name": "Jalen Williams",
+      "pos": "G",
+      "team": "OKC"
+    },
+    {
+      "rank": 23,
+      "name": "Donovan Mitchell",
+      "pos": "G",
+      "team": "CLE"
+    },
+    {
+      "rank": 24,
+      "name": "Franz Wagner",
+      "pos": "F",
+      "team": "ORL"
+    },
+    {
+      "rank": 25,
+      "name": "Austin Reaves",
+      "pos": "G",
+      "team": "LAL"
+    },
+    {
+      "rank": 26,
+      "name": "Caleb Wilson",
+      "pos": "F",
+      "team": "CHI"
+    },
+    {
+      "rank": 27,
+      "name": "Kon Knueppel",
+      "pos": "G",
+      "team": "CHA"
+    },
+    {
+      "rank": 28,
+      "name": "Deni Avdija",
+      "pos": "F",
+      "team": "POR"
+    },
+    {
+      "rank": 29,
+      "name": "Darius Garland",
+      "pos": "G",
+      "team": "LAC"
+    },
+    {
+      "rank": 30,
+      "name": "LaMelo Ball",
+      "pos": "G",
+      "team": "MIN"
+    },
+    {
+      "rank": 31,
+      "name": "Jamal Murray",
+      "pos": "G",
+      "team": "DEN"
+    },
+    {
+      "rank": 32,
+      "name": "Josh Giddey",
+      "pos": "G",
+      "team": "CHI"
+    },
+    {
+      "rank": 33,
+      "name": "Devin Booker",
+      "pos": "G",
+      "team": "PHX"
+    },
+    {
+      "rank": 34,
+      "name": "Trey Murphy III",
+      "pos": "G",
+      "team": "NOP"
+    },
+    {
+      "rank": 35,
+      "name": "Karl-Anthony Towns",
+      "pos": "C",
+      "team": "NYK"
+    },
+    {
+      "rank": 36,
+      "name": "Jalen Brunson",
+      "pos": "G",
+      "team": "NYK"
+    },
+    {
+      "rank": 37,
+      "name": "Jalen Duren",
+      "pos": "C",
+      "team": "DET"
+    },
+    {
+      "rank": 38,
+      "name": "Jaren Jackson Jr.",
+      "pos": "C",
+      "team": "UTA"
+    },
+    {
+      "rank": 39,
+      "name": "Trae Young",
+      "pos": "G",
+      "team": "WAS"
+    },
+    {
+      "rank": 40,
+      "name": "Paolo Banchero",
+      "pos": "F",
+      "team": "ORL"
+    },
+    {
+      "rank": 42,
+      "name": "Jaylen Brown",
+      "pos": "G",
+      "team": "PHI"
+    },
+    {
+      "rank": 43,
+      "name": "VJ Edgecombe",
+      "pos": "G",
+      "team": "PHI"
+    },
+    {
+      "rank": 44,
+      "name": "Bam Adebayo",
+      "pos": "C",
+      "team": "MIA"
+    },
+    {
+      "rank": 45,
+      "name": "Brandon Miller",
+      "pos": "F",
+      "team": "CHA"
+    },
+    {
+      "rank": 46,
+      "name": "Lauri Markkanen",
+      "pos": "C",
+      "team": "UTA"
+    },
+    {
+      "rank": 47,
+      "name": "Alex Sarr",
+      "pos": "C",
+      "team": "WAS"
+    },
+    {
+      "rank": 48,
+      "name": "Stephon Castle",
+      "pos": "G",
+      "team": "SAS"
+    },
+    {
+      "rank": 49,
+      "name": "Desmond Bane",
+      "pos": "G",
+      "team": "ORL"
+    },
+    {
+      "rank": 50,
+      "name": "Donovan Clingan",
+      "pos": "C",
+      "team": "POR"
+    },
+    {
+      "rank": 51,
+      "name": "Zach Edey",
+      "pos": "C",
+      "team": "MEM"
+    },
+    {
+      "rank": 52,
+      "name": "Keyonte George",
+      "pos": "G",
+      "team": "UTA"
+    },
+    {
+      "rank": 53,
+      "name": "Keaton Wagler",
+      "pos": "G",
+      "team": "LAC"
+    },
+    {
+      "rank": 54,
+      "name": "Walker Kessler",
+      "pos": "C",
+      "team": "LAL"
+    },
+    {
+      "rank": 55,
+      "name": "Onyeka Okongwu",
+      "pos": "C",
+      "team": "ATL"
+    },
+    {
+      "rank": 56,
+      "name": "Mikel Brown",
+      "pos": "G",
+      "team": "BKN"
+    },
+    {
+      "rank": 57,
+      "name": "Domantas Sabonis",
+      "pos": "C",
+      "team": "SAC"
+    },
+    {
+      "rank": 58,
+      "name": "Kel'el Ware",
+      "pos": "C",
+      "team": "MIL"
+    },
+    {
+      "rank": 59,
+      "name": "Ivica Zubac",
+      "pos": "C",
+      "team": "IND"
+    },
+    {
+      "rank": 60,
+      "name": "De'Aaron Fox",
+      "pos": "G",
+      "team": "SAS"
+    },
+    {
+      "rank": 61,
+      "name": "Anthony Davis",
+      "pos": "C",
+      "team": "WAS"
+    },
+    {
+      "rank": 62,
+      "name": "James Harden",
+      "pos": "G",
+      "team": "CLE"
+    },
+    {
+      "rank": 63,
+      "name": "Brandon Ingram",
+      "pos": "F",
+      "team": "LAC"
+    },
+    {
+      "rank": 64,
+      "name": "Kevin Durant",
+      "pos": "F",
+      "team": "HOU"
+    },
+    {
+      "rank": 65,
+      "name": "OG Anunoby",
+      "pos": "F",
+      "team": "NYK"
+    },
+    {
+      "rank": 66,
+      "name": "Stephen Curry",
+      "pos": "G",
+      "team": "GSW"
+    },
+    {
+      "rank": 67,
+      "name": "Derrick White",
+      "pos": "G",
+      "team": "BOS"
+    },
+    {
+      "rank": 68,
+      "name": "Darius Acuff Jr.",
+      "pos": "G",
+      "team": "SAC"
+    },
+    {
+      "rank": 69,
+      "name": "Collin Murray-Boyles",
+      "pos": "F",
+      "team": "TOR"
+    },
+    {
+      "rank": 70,
+      "name": "Zion Williamson",
+      "pos": "F",
+      "team": "NOP"
+    },
+    {
+      "rank": 72,
+      "name": "Matas Buzelis",
+      "pos": "F",
+      "team": "CHI"
+    },
+    {
+      "rank": 73,
+      "name": "Pascal Siakam",
+      "pos": "F",
+      "team": "IND"
+    },
+    {
+      "rank": 74,
+      "name": "Dyson Daniels",
+      "pos": "G",
+      "team": "ATL"
+    },
+    {
+      "rank": 75,
+      "name": "Kyrie Irving",
+      "pos": "G",
+      "team": "DAL"
+    }
+  ]
+}

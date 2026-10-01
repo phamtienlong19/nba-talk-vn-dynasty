@@ -134,6 +134,15 @@ def make_repo(tmp_dir: Path) -> Path:
 
     (repo / "index.html").write_text(MINIMAL_INDEX_HTML)
 
+    (repo / "data" / "dynasty").mkdir(parents=True)
+    (repo / "data" / "dynasty" / "consensus.json").write_text(json.dumps({
+        "generatedFrom": [], "playerCount": 2,
+        "players": [
+            {"name": "Kept Player One", "consensusRank": 1, "percentile": 0.1, "sourcesCount": 1, "sources": []},
+            {"name": "Free Agent Guy", "consensusRank": 2, "percentile": 0.5, "sourcesCount": 1, "sources": []},
+        ],
+    }))
+
     (repo / "local_data" / "yahoo").mkdir(parents=True)
     (repo / "local_data" / "yahoo" / "players_normalized.json").write_text(json.dumps([
         {"name": "Kept Player One", "nbaTeam": "BBB", "eligiblePositions": ["SG"], "oRank": 5, "capDollars": 15.0},

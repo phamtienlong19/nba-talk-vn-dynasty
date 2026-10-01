@@ -55,7 +55,7 @@ class TestMatchTakesNoAction(PromoteYahooRefreshTestCase):
         ).stdout
         self.assertEqual(remote_refs.strip(), "")
 
-        self.assertFalse((self.repo / "data").exists())
+        self.assertFalse((self.repo / "data" / "yahoo").exists())
         self.assertFalse(self.fake_gh_state.exists(), "no PR should have been created on MATCH")
 
 
