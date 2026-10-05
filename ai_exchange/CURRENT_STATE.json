@@ -101,7 +101,8 @@
         "TT | Kratos Dynasty": "KEEP Andrew Wiggins ($5), CUT Neemias Queta ($2): total $171 -> $174 (4 ROOM to 178).",
         "DHA | Đì troi pít tông": "KEEP Jakob Poeltl ($2), CUT Jonathan Kuminga ($0): total $158 -> $160 (18 ROOM to 178). Owner/commissioner keeper-choice corrections; both players are on the pre-keeper roster (no ownership change)."
       },
-      "capAudit178": "No team over 178. Under the 131 floor (unchanged commissioner decisions): CrazyCat 101, Dũng 126, Maxfixe 129, DonTrick 120."
+      "capAudit178": "No team over 178. Under the 131 floor (unchanged commissioner decisions): CrazyCat 101, Dũng 126, Maxfixe 129, DonTrick 120.",
+      "faDraftPageThree": "Owner directive (2026-10-05): rows 1-40 unchanged; rows 41-60 = owner-pinned depth names (Grayson Allen, Julian Champagnie, Scotty Pippen Jr., Jake LaRavia, Jared McCain, Bilal Coulibaly) + Paul Reed, then the best rookies / sophomores / 3rd-year players by the same hybrid score. Young = 2026 rookie source + data/dynasty/draft_classes.json (2025, 2024 classes; compiled from general knowledge, verify). Replaced: De'Andre Hunter, Bobby Portis Jr., Robert Williams III, Anfernee Simons, Nikola Vucevic, Brook Lopez, Naji Marshall, Jordan Poole, Dennis Schroder -> Brayden Burries, Ebuka Okorie, Tre Johnson, Nate Ament, Christian Anderson, Labaron Philon Jr., Cameron Carr, Zuby Ejiofor, Jaylen Wells. No age bonus in the score; CAP stays primary."
     },
     "yahooTop300Export": {
       "chain": "normalized Yahoo -> exports/yahoo_top300_proj_dollar_rank.md -> exports/yahoo_top300_proj_dollar_rank.xlsx",

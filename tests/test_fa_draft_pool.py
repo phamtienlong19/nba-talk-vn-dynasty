@@ -78,6 +78,14 @@ class TestIndexHtmlPoolRegressions(unittest.TestCase):
         for name in ("Rui Hachimura", "Paul Reed", "Tari Eason", "Tobias Harris"):
             self.assertIn(name, self.names, f"{name} must not be crowded out by dynasty prospects")
 
+    def test_page_three_keeps_pinned_names_and_drops_replaced_veterans(self):
+        tail = self.names[40:]
+        for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Bilal Coulibaly"):
+            self.assertIn(kept, tail)
+        for gone in ("De&#x27;Andre Hunter", "Bobby Portis Jr.", "Robert Williams III", "Anfernee Simons",
+                     "Nikola Vučević", "Brook Lopez", "Naji Marshall", "Jordan Poole", "Dennis Schröder"):
+            self.assertNotIn(gone, self.names)
+
     def test_young_dynasty_players_beyond_yahoo_reach_the_board(self):
         # Hannes Steinbach / Dailyn Swain: no Yahoo O-Rank, strong consensus rank.
         for name in ("Hannes Steinbach", "Dailyn Swain"):
@@ -415,6 +423,76 @@ class TestHybridWithinCapTier(unittest.TestCase):
         rows = [_yahoo_row("Paul Reed", 165)] + [_yahoo_row(f"Better {i}", 100 + i) for i in range(80)]
         cands = pool.build_candidates(EMPTY_BOARD, _yahoo_map(*rows), {}, 541)
         self.assertIn("Paul Reed", [c.name for c in pool.sort_and_truncate(cands)])
+
+
+class TestPageThreeYoungTail(unittest.TestCase):
+    """Rows 1-40 are the plain ranking; rows 41-60 hold owner-pinned depth
+    names, then the best rookies / sophomores / 3rd-years by hybrid score."""
+
+    def _c(self, name, o_rank, dyn=None, young=False, pinned=False, cap=0.0):
+        return pool.Candidate(name=name, pos="SF", nba="XXX", cap=cap, o_rank=o_rank, dynasty_rank=dyn,
+                              yahoo_rank_max=300, dynasty_rank_max=500, young=young, pinned=pinned)
+
+    def _universe(self):
+        c = {}
+        for i in range(40):  # strong core, mixed vets
+            x = self._c(f"Core{i}", 100 + i, 150 + i)
+            c[x.name] = x
+        for i in range(15):  # replaceable vets right behind the core
+            x = self._c(f"Vet{i}", 141 + i, 190 + i)
+            c[x.name] = x
+        x = self._c("PinnedVet", 190, 300, pinned=True); c[x.name] = x
+        for i in range(25):  # weaker young players
+            x = self._c(f"Young{i}", 230 + i, 100 + 5 * i, young=True); c[x.name] = x
+        return c
+
+    def test_core_is_untouched_and_total_is_sixty(self):
+        c = self._universe()
+        plain = sorted(c.values(), key=lambda x: x.sort_key())[:pool.CORE_SIZE]
+        ranked = pool.sort_and_truncate(c)
+        self.assertEqual(len(ranked), 60)
+        self.assertEqual([x.name for x in ranked[:pool.CORE_SIZE]], [x.name for x in plain])
+
+    def test_tail_is_pinned_then_young_and_replaceable_vets_are_dropped(self):
+        ranked = pool.sort_and_truncate(self._universe())
+        tail = [x.name for x in ranked[pool.CORE_SIZE:]]
+        self.assertIn("PinnedVet", tail)
+        self.assertFalse([n for n in tail if n.startswith("Vet")])
+        self.assertEqual(len([n for n in tail if n.startswith("Young")]), 19)
+
+    def test_best_young_by_hybrid_score_get_the_slots_no_quota(self):
+        ranked = pool.sort_and_truncate(self._universe())
+        young = [x.name for x in ranked if x.name.startswith("Young")]
+        self.assertEqual(young, [f"Young{i}" for i in range(19)])  # best 19 by score, not an arbitrary 19
+
+    def test_not_enough_young_candidates_falls_back_to_plain_order(self):
+        c = {f"P{i}": self._c(f"P{i}", 100 + i) for i in range(70)}
+        ranked = pool.sort_and_truncate(c)
+        self.assertEqual([x.name for x in ranked], [f"P{i}" for i in range(60)])
+
+    def test_cap_still_monotonic_with_the_tail(self):
+        c = self._universe()
+        c["PaidYoung"] = self._c("PaidYoung", 280, 450, young=True, cap=1)
+        caps = [x.cap for x in pool.sort_and_truncate(c)]
+        self.assertEqual(caps, sorted(caps, reverse=True))
+
+    def test_pinned_names_are_the_owner_approved_six(self):
+        self.assertEqual(pool.TAIL_PINNED_NAMES, {"Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.",
+                                                  "Jake LaRavia", "Jared McCain", "Bilal Coulibaly"})
+
+    def test_draft_class_table_marks_sophomores_and_third_years_but_not_older_players(self):
+        years = pool.load_draft_years()
+        self.assertEqual(years[pool.normalize_name("Tre Johnson")], 2025)
+        self.assertEqual(years[pool.normalize_name("Isaiah Collier")], 2024)
+        for old in ("Dereck Lively II", "Bilal Coulibaly", "Grayson Allen", "Tobias Harris"):
+            self.assertNotIn(pool.normalize_name(old), years)
+
+    def test_build_candidates_flags_young_and_pinned(self):
+        yahoo = _yahoo_map(_yahoo_row("Tre Johnson", 220), _yahoo_row("Grayson Allen", 187), _yahoo_row("Old Vet", 170))
+        cands = pool.build_candidates(EMPTY_BOARD, yahoo, {}, 541, draft_years={pool.normalize_name("Tre Johnson"): 2025})
+        self.assertTrue(cands[pool.normalize_name("Tre Johnson")].young)
+        self.assertFalse(cands[pool.normalize_name("Old Vet")].young)
+        self.assertTrue(cands[pool.normalize_name("Grayson Allen")].pinned)
 
 
 class TestLoadYahooPlayersInjectable(unittest.TestCase):

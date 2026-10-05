@@ -28,10 +28,13 @@ Pipeline (kept as separate stages so each is independently testable):
    still reach the 60. A player absent from the consensus board scores
    1.0 (worst) on the dynasty axis. No age bonus: youth only matters
    through the consensus rank itself.
-4. truncation -- top 60 by the sort above, with a tiny guaranteed-name
-   list (Paul Reed only) force-included if they would
-   otherwise fall outside the cut, then the final 60 is re-sorted so CAP
-   ordering is never broken by the guarantee step.
+4. truncation -- rows 1-40 are the plain ranking above. Rows 41-60 (page 3)
+   hold the owner-approved depth names (TAIL_PINNED_NAMES + Paul Reed) and
+   then the best rookies / sophomores / 3rd-year players (draft class from
+   data/dynasty/draft_classes.json + the 2026 rookie source) by the same
+   hybrid score -- so replacement-level veterans give way to young players
+   without any age bonus or per-class quota. The final 60 is re-sorted so CAP
+   ordering is never broken.
 
 CAP is the only strict/primary sort key -- see the FA/DRAFT correction
 pack issue: an earlier dynasty-weighted blend had pushed out established,
@@ -173,6 +176,21 @@ MISSING_YAHOO_SCORE = 0.75
 # if ranked at or inside this consensus rank (the board has ~540 players).
 DYNASTY_CANDIDATE_CUTOFF = 250
 
+# FA/DRAFT 60 layout: the first CORE_SIZE rows (pages 1-2) are the plain CAP-
+# then-hybrid ranking. The remaining rows (page 3) are filled with owner-
+# approved depth veterans (TAIL_PINNED_NAMES -- the veterans, plus two young
+# names, the owner explicitly wants kept) and then the best rookies /
+# sophomores / 3rd-year players by the same hybrid score. "Young" comes from
+# data/dynasty/draft_classes.json (2025, 2024 classes) and the 2026 rookie
+# source -- never an age bonus inside the score itself.
+CORE_SIZE = 40
+YOUNG_FIRST_CLASS_YEAR = 2024  # 2026 rookie, 2025 sophomore, 2024 3rd-year
+TAIL_PINNED_NAMES = {
+    "Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia",
+    "Jared McCain", "Bilal Coulibaly",
+}
+DRAFT_CLASSES = os.path.join(REPO_ROOT, "data", "dynasty", "draft_classes.json")
+
 # Dynasty-source team abbreviations -> Yahoo's convention.
 DYNASTY_TEAM_TO_YAHOO = {"GS": "GSW", "NO": "NOP", "NOR": "NOP", "NY": "NYK", "PHO": "PHX", "SA": "SAS"}
 
@@ -196,6 +214,8 @@ class Candidate:
     src: str = "fa"  # "cut" | "fa" | "r"
     src_team: str = ""
     guaranteed: bool = False
+    young: bool = False  # rookie, sophomore or 3rd-year (see TAIL_PINNED_NAMES / draft_classes.json)
+    pinned: bool = False  # owner-approved tail name
 
     def yahoo_score(self) -> float:
         """Current-market score (0 best, 1 worst): O-Rank as a percentile of
@@ -290,6 +310,16 @@ def load_rookie_names(path=ROOKIE_SOURCE) -> set:
         return set()
 
 
+def load_draft_years(path=DRAFT_CLASSES) -> dict:
+    """normalized name -> first-NBA-season draft year, for the 2025/2024 classes."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            classes = json.load(f)["classes"]
+    except OSError:
+        return {}
+    return {normalize_name(n): int(year) for year, names in classes.items() for n in names}
+
+
 SPECIFIC_POSITIONS = {"PG", "SG", "SF", "PF", "C"}
 
 
@@ -299,9 +329,11 @@ def pos_from_eligible(eligible):
 
 
 def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict | None = None,
-                      dynasty_rank_max: int | None = None, rookie_names: set | None = None):
+                      dynasty_rank_max: int | None = None, rookie_names: set | None = None,
+                      draft_years: dict | None = None):
     kept, cuts = parse_team_cards(index_html)
     rookie_names = rookie_names or set()
+    draft_years = draft_years or {}
 
     def is_rookie(name):
         return name in CURATED_ROOKIE_OVERLAY or normalize_name(name) in rookie_names
@@ -407,6 +439,11 @@ def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict
             rookie=True, src="r",
         ))
 
+    pinned_norm = {normalize_name(n) for n in TAIL_PINNED_NAMES}
+    for key, cand in candidates.items():
+        cand.young = cand.rookie or draft_years.get(key, 0) >= YOUNG_FIRST_CLASS_YEAR
+        cand.pinned = key in pinned_norm
+
     # Names guaranteed unconditionally, regardless of which path supplied
     # their data (e.g. Paul Reed usually arrives via the live Yahoo fetch).
     for name in ALWAYS_GUARANTEED_NAMES:
@@ -418,29 +455,35 @@ def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict
 
 
 def sort_and_truncate(candidates: dict):
+    """Pages 1-2 (CORE_SIZE rows): plain CAP-then-hybrid order. Page 3: the
+    guaranteed / owner-pinned names still available, then the best young
+    (rookie / sophomore / 3rd-year) candidates by the same hybrid score; if
+    there aren't enough young candidates the rest fills in plain order. The
+    final 60 is re-sorted so CAP order is never broken (tail rows are always
+    behind every core row on the sort key, so the core is unchanged)."""
     ordered = sorted(candidates.values(), key=lambda c: c.sort_key())
-    top = ordered[:POOL_SIZE]
-    top_keys = {normalize_name(c.name) for c in top}
+    core = ordered[:CORE_SIZE]
+    rest = ordered[CORE_SIZE:]
+    tail_slots = POOL_SIZE - len(core)
 
-    missing_guaranteed = [
-        c for c in candidates.values()
-        if c.guaranteed and normalize_name(c.name) not in top_keys
-    ]
+    must = [c for c in rest if c.guaranteed or c.pinned]
+    # A guaranteed name that is also past the pinned budget still gets in.
+    tail = must[:tail_slots]
+    chosen = {id(c) for c in tail}
+    for c in rest:
+        if len(tail) >= tail_slots:
+            break
+        if c.young and id(c) not in chosen:
+            tail.append(c)
+            chosen.add(id(c))
+    for c in rest:  # not enough young candidates: plain order fills the page
+        if len(tail) >= tail_slots:
+            break
+        if id(c) not in chosen:
+            tail.append(c)
+            chosen.add(id(c))
 
-    if missing_guaranteed:
-        # Bump the lowest-priority non-guaranteed rows out, in reverse
-        # sort order, to make room -- then the whole 60 gets re-sorted so
-        # CAP ordering is unaffected by *where* the guarantee inserted.
-        removable = [c for c in reversed(top) if not c.guaranteed]
-        top_set = list(top)
-        for extra in missing_guaranteed:
-            if removable:
-                drop = removable.pop(0)
-                top_set.remove(drop)
-            top_set.append(extra)
-        top = sorted(top_set, key=lambda c: c.sort_key())[:POOL_SIZE]
-
-    return top
+    return sorted(core + tail, key=lambda c: c.sort_key())[:POOL_SIZE]
 
 
 DEFENDING_CHAMPION_SHORT_NAME = "Đạt"
@@ -513,7 +556,7 @@ def build(index_html: str, yahoo_players_path: str = YAHOO_NORMALIZED,
     yahoo_by_norm = load_yahoo_players(yahoo_players_path)
     dynasty_by_norm, dynasty_rank_max = load_dynasty_rankings(dynasty_rankings_path)
     candidates = build_candidates(index_html, yahoo_by_norm, dynasty_by_norm, dynasty_rank_max,
-                                  rookie_names=load_rookie_names())
+                                  rookie_names=load_rookie_names(), draft_years=load_draft_years())
     ranked = sort_and_truncate(candidates)
     pool_html = render_pool_html(ranked)
     new_html = splice_pool_into_index(index_html, pool_html)
