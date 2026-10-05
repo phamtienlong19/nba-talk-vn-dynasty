@@ -20,6 +20,9 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Install Python dependencies
+        run: python3 -m pip install -r requirements.txt
+
       - name: Find previous successful run
         id: previous_run
         env:
@@ -47,6 +50,9 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts/yahoo-refresh
+          # Snapshot the COMMITTED Top-300 export before the refresh
+          # regenerates it, so staleness vs. the live snapshot is detectable.
+          cp exports/yahoo_top300_proj_dollar_rank.md artifacts/yahoo-refresh/committed-export.md 2>/dev/null || true
           ./refresh-yahoo.sh | tee artifacts/yahoo-refresh/refresh-output.log
 
       - name: Build machine-readable refresh result
@@ -63,6 +69,8 @@ jobs:
             --current-players local_data/yahoo/players_normalized.json \
             --source-config config/yahoo_source.json \
             --output artifacts/yahoo-refresh/yahoo-refresh-result.json \
+            --published-players data/yahoo/players_normalized.json \
+            --exports-md artifacts/yahoo-refresh/committed-export.md \
             $PREV_PLAYERS_ARG
 
       - name: Write job summary

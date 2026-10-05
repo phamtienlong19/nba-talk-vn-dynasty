@@ -1,13 +1,15 @@
 {
   "source": "478.l.public",
-  "fetchedAt": "2026-10-01T024836Z",
-  "workflowRunId": "36807560030",
-  "workflowRunAttempt": "1",
-  "workflowRunUrl": "https://github.com/phamtienlong19/nba-talk-vn-dynasty/actions/runs/36807560030/attempts/1",
+  "fetchedAt": "2026-10-05T032730Z",
+  "workflowRunId": null,
+  "workflowRunAttempt": null,
+  "workflowRunUrl": null,
   "normalizedPlayerCount": 300,
-  "derivedFloor": 130,
-  "derivedCeiling": 176,
-  "keeperBoardPlayerRowsUpdated": 74,
+  "derivedFloor": 131,
+  "derivedCeiling": 177,
+  "officialFloor": 131,
+  "officialCeiling": 178,
+  "keeperBoardPlayerRowsUpdated": 0,
   "faDraftPoolRebuilt": true,
   "testStatus": "PASS"
 }

@@ -11,7 +11,16 @@ Usage:
         --current-players local_data/yahoo/players_normalized.json \
         --source-config config/yahoo_source.json \
         --output artifacts/yahoo-refresh-result.json \
-        [--previous-players previous/players_normalized.json]
+        [--previous-players previous/players_normalized.json] \
+        [--published-players data/yahoo/players_normalized.json] \
+        [--exports-md exports/yahoo_top300_proj_dollar_rank.md]
+
+CAP status compares the live FORMULA band to the formula band the official
+league band was approved against (cap snapshot `approvedFormula*`), never to
+the official band itself -- the official band (e.g. 131-178) is commissioner
+policy and a refresh can't change it. Status is also CHANGED when the live
+Yahoo snapshot differs from the published one (--published-players) or the
+committed Top-300 export is stale vs. the live snapshot (--exports-md).
 
 If --previous-players is omitted or the file doesn't exist, rankingChanges
 is emitted as an empty list with rankingChangesNote explaining why (e.g.
@@ -51,6 +60,35 @@ def build_ranking_changes(current_players, previous_players):
     return changes
 
 
+PLAYER_FIELDS = ("name", "nbaTeam", "eligiblePositions", "oRank", "capDollars")
+
+
+def snapshot_differs(current_players, published_players) -> bool:
+    """True if any market field differs between two normalized snapshots
+    (timestamps / raw expert ranks are deliberately ignored)."""
+    def key(players):
+        return sorted(
+            (tuple(json.dumps(p.get(f), sort_keys=True, ensure_ascii=False) for f in PLAYER_FIELDS)
+             for p in players)
+        )
+    return key(current_players) != key(published_players)
+
+
+def exports_stale(current_players, md_path) -> bool:
+    """True if the committed Markdown export isn't what the live snapshot renders."""
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from export_yahoo_top300 import ExportError, build_rows, render_markdown
+    if not os.path.isfile(md_path):
+        return True
+    try:
+        fresh = render_markdown(build_rows(current_players))
+    except ExportError:
+        return True
+    with open(md_path, encoding="utf-8") as f:
+        return f.read() != fresh
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cap-snapshot", required=True)
@@ -58,21 +96,33 @@ def main():
     parser.add_argument("--source-config", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--previous-players", default=None)
+    parser.add_argument("--published-players", default=None)
+    parser.add_argument("--exports-md", default=None)
     args = parser.parse_args()
 
     cap_snapshot = load_json(args.cap_snapshot)
     current_players = load_json(args.current_players)
     source_config = load_json(args.source_config)
 
+    # Baseline = the FORMULA band the official band was approved against
+    # (falls back to the published band for snapshots without a policy).
     previous = {
-        "floor": cap_snapshot["publishedFloor"],
-        "ceiling": cap_snapshot["publishedCeiling"],
+        "floor": cap_snapshot.get("approvedFormulaFloor", cap_snapshot["publishedFloor"]),
+        "ceiling": cap_snapshot.get("approvedFormulaCeiling", cap_snapshot["publishedCeiling"]),
     }
     current = {
         "floor": cap_snapshot["roundedFloor"],
         "ceiling": cap_snapshot["roundedCeiling"],
     }
-    status = "MATCH" if current == previous else "CHANGED"
+    reasons = []
+    if current != previous:
+        reasons.append("formulaBandChanged")
+    if args.published_players and os.path.isfile(args.published_players):
+        if snapshot_differs(current_players, load_json(args.published_players)):
+            reasons.append("yahooSnapshotChanged")
+    if args.exports_md and exports_stale(current_players, args.exports_md):
+        reasons.append("exportsStale")
+    status = "CHANGED" if reasons else "MATCH"
 
     result = {
         "source": source_config["leagueKey"],
@@ -80,8 +130,16 @@ def main():
         "status": status,
         "previous": previous,
         "current": current,
+        "reasons": reasons,
         "rankingChanges": [],
     }
+    if "officialFloor" in cap_snapshot:
+        result["official"] = {
+            "floor": cap_snapshot["officialFloor"],
+            "ceiling": cap_snapshot["officialCeiling"],
+            "ceilingOverride": cap_snapshot.get("ceilingOverride", False),
+            "overrideReason": cap_snapshot.get("overrideReason"),
+        }
 
     if args.previous_players and os.path.isfile(args.previous_players):
         previous_players = load_json(args.previous_players)

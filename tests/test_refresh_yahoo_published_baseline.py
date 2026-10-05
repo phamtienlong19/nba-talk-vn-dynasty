@@ -1,16 +1,15 @@
-"""Regression coverage for refresh-yahoo.sh's published-floor/ceiling
-source. It used to hardcode PUBLISHED_FLOOR/CEILING = 130, 175, which
-silently went stale the moment a later PR promoted a new canonical
-floor/ceiling (131/177) -- every future refresh then reported CHANGED
-forever, even with no real Yahoo movement, since it was being compared
-against the wrong baseline. Fixed to read
-ai_exchange/CURRENT_STATE.json's canonicalState.capFloor/capCeiling,
-with the old hardcoded pair kept only as a defensive fallback.
+"""Regression coverage for refresh-yahoo.sh's cap handling.
+
+The OFFICIAL league band (config/cap_policy.json, currently 131-178) is
+commissioner governance, separate from the formula-derived band (131-177 on
+the current snapshot). A refresh must report formula-vs-approved status but
+never overwrite the official band with the formula result.
 
 Extracts the actual heredoc body out of refresh-yahoo.sh (not a
 hand-copied duplicate) so this can't drift from what runs in CI/production.
 """
 import json
+import shutil
 import os
 import subprocess
 import sys
@@ -33,73 +32,67 @@ def _extract_heredoc_body():
 HEREDOC_BODY = _extract_heredoc_body()
 
 
-class TestPublishedBaselineSource(unittest.TestCase):
-    def _run(self, tmp_dir, current_state=None):
+FIXTURE_MD = os.path.join(REPO_ROOT, "tests", "fixtures", "yahoo_top300_2026-10-04.md")
+
+
+def _snapshot_players():
+    sys.path.insert(0, os.path.join(REPO_ROOT, "scripts"))
+    from export_yahoo_top300 import parse_markdown
+    with open(FIXTURE_MD, encoding="utf-8") as f:
+        rows = parse_markdown(f.read())
+    return [{"name": n, "oRank": r, "capDollars": float(d), "sourceTimestamp": "2026-10-04T000000Z"}
+            for n, d, r in rows]
+
+
+class TestOfficialCapPolicyInRefresh(unittest.TestCase):
+    def _run(self, tmp_dir, players, policy=None):
         os.makedirs(os.path.join(tmp_dir, "scripts"), exist_ok=True)
+        os.makedirs(os.path.join(tmp_dir, "config"), exist_ok=True)
         os.makedirs(os.path.join(tmp_dir, "local_data", "yahoo"), exist_ok=True)
-        os.makedirs(os.path.join(tmp_dir, "ai_exchange"), exist_ok=True)
-
-        import shutil
         shutil.copy(os.path.join(REPO_ROOT, "scripts", "cap_model.py"), os.path.join(tmp_dir, "scripts", "cap_model.py"))
-
-        players = [{"name": f"P{i}", "oRank": i, "capDollars": 1.0, "sourceTimestamp": "2026-10-01T000000Z"} for i in range(1, 145)]
+        shutil.copy(os.path.join(REPO_ROOT, "config", "cap_policy.json"), os.path.join(tmp_dir, "config", "cap_policy.json"))
+        if policy is not None:
+            with open(os.path.join(tmp_dir, "config", "cap_policy.json"), "w") as f:
+                json.dump(policy, f)
         with open(os.path.join(tmp_dir, "local_data", "yahoo", "players_normalized.json"), "w") as f:
             json.dump(players, f)
-
-        if current_state is not None:
-            with open(os.path.join(tmp_dir, "ai_exchange", "CURRENT_STATE.json"), "w") as f:
-                json.dump(current_state, f)
-
         script_path = os.path.join(tmp_dir, "run.py")
         with open(script_path, "w", encoding="utf-8") as f:
             f.write(HEREDOC_BODY)
-
         result = subprocess.run(
             [sys.executable, script_path, "/tmp/not-a-real-raw-snapshot.json"],
             cwd=tmp_dir, capture_output=True, text=True,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        return result.stdout
+        with open(os.path.join(tmp_dir, "local_data", "yahoo", "cap_snapshot_latest.json")) as f:
+            return result.stdout, json.load(f)
 
-    def test_uses_canonical_state_floor_and_ceiling_when_present(self):
+    def test_current_snapshot_official_178_formula_177_raw_preserved(self):
         with tempfile.TemporaryDirectory() as tmp:
-            stdout = self._run(tmp, current_state={"canonicalState": {"capFloor": 131, "capCeiling": 177}})
-        self.assertIn("Current published board: 131-177", stdout)
+            stdout, snap = self._run(tmp, _snapshot_players())
+        self.assertAlmostEqual(snap["rawCeiling"], 177.3875)
+        self.assertEqual((snap["formulaFloor"], snap["formulaCeiling"]), (131, 177))
+        self.assertEqual((snap["officialFloor"], snap["officialCeiling"]), (131, 178))
+        self.assertTrue(snap["ceilingOverride"])
+        self.assertIn("Commissioner confirmed", snap["overrideReason"])
+        self.assertEqual((snap["publishedFloor"], snap["publishedCeiling"]), (131, 178))
+        self.assertIn("Status: MATCH", stdout)
 
-    def test_falls_back_to_hardcoded_defaults_when_state_file_missing(self):
+    def test_refresh_never_overwrites_official_ceiling_with_formula_ceiling(self):
         with tempfile.TemporaryDirectory() as tmp:
-            stdout = self._run(tmp, current_state=None)
-        self.assertIn("Current published board: 130-175", stdout)
-
-    def test_falls_back_to_hardcoded_defaults_when_state_file_malformed(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            os.makedirs(os.path.join(tmp, "ai_exchange"), exist_ok=True)
-            with open(os.path.join(tmp, "ai_exchange", "CURRENT_STATE.json"), "w") as f:
-                f.write("{not valid json")
-            os.makedirs(os.path.join(tmp, "scripts"), exist_ok=True)
-            os.makedirs(os.path.join(tmp, "local_data", "yahoo"), exist_ok=True)
-            import shutil
-            shutil.copy(os.path.join(REPO_ROOT, "scripts", "cap_model.py"), os.path.join(tmp, "scripts", "cap_model.py"))
             players = [{"name": f"P{i}", "oRank": i, "capDollars": 1.0, "sourceTimestamp": "t"} for i in range(1, 145)]
-            with open(os.path.join(tmp, "local_data", "yahoo", "players_normalized.json"), "w") as f:
-                json.dump(players, f)
-            script_path = os.path.join(tmp, "run.py")
-            with open(script_path, "w", encoding="utf-8") as f:
-                f.write(HEREDOC_BODY)
-            result = subprocess.run(
-                [sys.executable, script_path, "/tmp/not-a-real-raw-snapshot.json"],
-                cwd=tmp, capture_output=True, text=True,
-            )
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("Current published board: 130-175", result.stdout)
+            stdout, snap = self._run(tmp, players)
+        self.assertNotEqual(snap["formulaCeiling"], 178)
+        self.assertEqual(snap["officialCeiling"], 178)
+        self.assertEqual(snap["publishedCeiling"], 178)
+        self.assertIn("CHANGED", stdout)  # formula moved off the approved baseline -> human review
 
-    def test_published_floor_ceiling_written_into_cap_snapshot(self):
+    def test_status_compares_formula_to_approved_formula_not_to_official(self):
+        policy = {"officialFloor": 131, "officialCeiling": 178, "approvedFormulaFloor": 131,
+                  "approvedFormulaCeiling": 177, "overrideReason": "x"}
         with tempfile.TemporaryDirectory() as tmp:
-            self._run(tmp, current_state={"canonicalState": {"capFloor": 131, "capCeiling": 177}})
-            with open(os.path.join(tmp, "local_data", "yahoo", "cap_snapshot_latest.json")) as f:
-                snapshot = json.load(f)
-        self.assertEqual(snapshot["publishedFloor"], 131)
-        self.assertEqual(snapshot["publishedCeiling"], 177)
+            stdout, _ = self._run(tmp, _snapshot_players(), policy)
+        self.assertIn("Status: MATCH", stdout)
 
 
 if __name__ == "__main__":

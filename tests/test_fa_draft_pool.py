@@ -16,12 +16,6 @@ INDEX_HTML = os.path.join(REPO_ROOT, "index.html")
 # these tests stay valid even after real Yahoo rankings change.
 FIXTURE_YAHOO = os.path.join(os.path.dirname(__file__), "fixtures", "yahoo_players_small.json")
 
-# Curated names Yahoo has ZERO data for -- these are the ones that must
-# never be silently omitted, per build_fa_draft_pool.Candidate.guaranteed.
-GUARANTEED_CURATED_ROOKIE_NAMES = [
-    "Kingston Flemings", "Allen Graves", "Meleek Thomas", "Ebuka Okorie", "Aday Mara",
-]
-
 # Curated names Yahoo DOES rank (even weakly). These compete on real merit
 # and are deliberately NOT force-included -- forcing every named rookie
 # regardless of real value was the bug that piled rookies up at the
@@ -80,10 +74,27 @@ class TestIndexHtmlPoolRegressions(unittest.TestCase):
     def test_paul_reed_present(self):
         self.assertIn("Paul Reed", self.names)
 
-    def test_guaranteed_curated_rookies_not_silently_omitted(self):
-        present = {pool.normalize_name(x) for x in self.names}
-        missing = [n for n in GUARANTEED_CURATED_ROOKIE_NAMES if pool.normalize_name(n) not in present]
-        self.assertEqual(missing, [], f"guaranteed curated rookies missing from FA/DRAFT 60: {missing}")
+    def test_established_current_value_players_survive(self):
+        for name in ("Rui Hachimura", "Paul Reed", "Tari Eason", "Tobias Harris"):
+            self.assertIn(name, self.names, f"{name} must not be crowded out by dynasty prospects")
+
+    def test_page_three_keeps_pinned_names_and_drops_replaced_veterans(self):
+        tail = self.names[pool.CORE_SIZE:]
+        for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Bilal Coulibaly", "Allen Graves", "Aday Mara", "Tre Jones"):
+            self.assertIn(kept, tail)
+        for gone in ("De&#x27;Andre Hunter", "Bobby Portis Jr.", "Robert Williams III", "Anfernee Simons",
+                     "Nikola Vučević", "Brook Lopez", "Naji Marshall", "Jordan Poole", "Dennis Schröder"):
+            self.assertNotIn(gone, self.names)
+
+    def test_young_dynasty_players_beyond_yahoo_reach_the_board(self):
+        # Hannes Steinbach / Dailyn Swain: no Yahoo O-Rank, strong consensus rank.
+        for name in ("Hannes Steinbach", "Dailyn Swain"):
+            self.assertIn(name, self.names)
+
+    def test_rui_hachimura_present(self):
+        # CAP $0, Yahoo OR 121, available (not kept by any team): must
+        # appear -- guards against dynasty prospects crowding him out.
+        self.assertIn("Rui Hachimura", self.names)
 
     def test_yahoo_ranked_rookie_src_badge_is_r_not_fa(self):
         # A rookie found via the live Yahoo fetch is still a rookie --
@@ -277,94 +288,213 @@ class TestSortAndTruncateUnit(unittest.TestCase):
         self.assertEqual(names["Paid Guy"]["cap"], 7.0)
 
 
-class TestDynastyOrProxy(unittest.TestCase):
-    """A Yahoo-missing curated rookie's tiebreak position must reflect its
-    real dynasty rank, not just get dumped after every Yahoo-ranked player
-    regardless of relative quality -- this is what makes it possible for a
-    well-regarded rookie to outrank a mediocre real-OR veteran within a
-    CAP tier."""
-
-    def test_proxy_is_monotonic_in_dynasty_rank(self):
-        yahoo = pool.load_yahoo_players(FIXTURE_YAHOO)
-        scale = pool._fit_dynasty_or_scale(yahoo)
-        better = pool._dynasty_or_proxy(5, scale)
-        worse = pool._dynasty_or_proxy(36, scale)
-        self.assertLess(better, worse)
-
-    def test_top_rookie_proxy_beats_some_real_or_yahoo_players(self):
-        # Kingston Flemings (real post-draft dynasty rank 5, not in the
-        # Yahoo fetch) must be able to outrank at least one $0 Yahoo
-        # player with a real but mediocre O-Rank -- confirms the fix
-        # doesn't just re-sort the 5 Yahoo-missing rookies among
-        # themselves at the bottom of the pool.
-        html = _read_index_html()
-        yahoo = pool.load_yahoo_players(FIXTURE_YAHOO)
-        candidates = pool.build_candidates(html, yahoo)
-        flemings = candidates[pool.normalize_name("Kingston Flemings")]
-        self.assertEqual(flemings.cap, 0.0)
-        beaten = [
-            c for c in candidates.values()
-            if c.cap == 0.0 and c.o_rank != pool.MISSING_OR and c.o_rank > flemings.o_rank
-        ]
-        self.assertTrue(beaten, "top curated rookie should outrank at least one real-OR $0 player")
-
-    def test_reviewed_names_without_dynasty_rank_get_no_fabricated_advantage(self):
-        # Cameron Carr / Labaron Philon Jr. have dynastyRank=None (reviewed,
-        # not guaranteed) -- if Yahoo doesn't rank them either, they must
-        # fall back to MISSING_OR, never a fabricated proxy value.
-        html = _read_index_html()
-        yahoo = pool.load_yahoo_players(FIXTURE_YAHOO)
-        candidates = pool.build_candidates(html, yahoo)
-        for name in ("Cameron Carr", "Labaron Philon Jr."):
-            cand = candidates.get(pool.normalize_name(name))
-            if cand is not None and cand.o_rank != pool.MISSING_OR:
-                continue  # Yahoo ranked them directly, nothing to check
-            self.assertEqual(cand.o_rank, pool.MISSING_OR)
+def _yahoo_row(name, o_rank, cap=0.0, pos="SF"):
+    return {"name": name, "nbaTeam": "ZZZ", "eligiblePositions": [pos],
+            "oRank": o_rank, "capDollars": cap}
 
 
-class TestBlendScore(unittest.TestCase):
-    """Owner-flagged bug: a candidate with real dynasty buzz but ZERO live
-    Yahoo data (e.g. Cameron Carr, Labaron Philon Jr. -- reviewed,
-    deliberately not force-guaranteed) was floating artificially high
-    because missing the Yahoo axis entirely meant it was skipped rather
-    than counted against them, the mirror image of the dynasty-consensus
-    absence-penalty bug. Both axes must now be symmetric: missing either
-    signal is a worst-case percentile (1.0) on that axis, not a free
-    pass averaged away."""
+def _yahoo_map(*rows):
+    return {pool.normalize_name(r["name"]): r for r in rows}
 
-    def _cand(self, cap=0.0, o_rank=pool.MISSING_OR, dynasty_rank=None,
-              yahoo_rank_max=300, dynasty_rank_max=500):
+
+EMPTY_BOARD = '<section class="team-card"><span class="identity-tag">ZZ</span><div class="players"></div></section>'
+
+
+class TestHybridWithinCapTier(unittest.TestCase):
+    """Product rule: CAP desc is absolute; inside a CAP tier a 60% Yahoo /
+    40% dynasty-consensus hybrid of normalized percentile scores decides
+    order; the candidate universe is built from cuts + Yahoo + the project
+    dynasty consensus + approved prospects BEFORE ranking."""
+
+    def _cand(self, name, o_rank=pool.MISSING_OR, dynasty_rank=None, cap=0.0):
         return pool.Candidate(
-            name="X", pos="PF", nba="XXX", cap=cap, o_rank=o_rank, dynasty_rank=dynasty_rank,
-            yahoo_rank_max=yahoo_rank_max, dynasty_rank_max=dynasty_rank_max,
+            name=name, pos="SF", nba="XXX", cap=cap, o_rank=o_rank,
+            dynasty_rank=dynasty_rank, yahoo_rank_max=300, dynasty_rank_max=500,
         )
 
-    def test_both_signals_present_is_a_straight_average(self):
-        c = self._cand(o_rank=30, dynasty_rank=50, yahoo_rank_max=300, dynasty_rank_max=500)
-        self.assertAlmostEqual(c.blend_score(), 0.5 * (30 / 300) + 0.5 * (50 / 500))
+    # --- weights / scores -------------------------------------------------
+    def test_weights_are_65_35_and_yahoo_is_the_larger_component(self):
+        self.assertAlmostEqual(pool.YAHOO_WEIGHT, 0.60)
+        self.assertAlmostEqual(pool.DYNASTY_WEIGHT, 0.40)
+        self.assertGreater(pool.YAHOO_WEIGHT, pool.DYNASTY_WEIGHT)
 
-    def test_missing_dynasty_signal_is_penalized_not_skipped(self):
-        c = self._cand(o_rank=30, dynasty_rank=None, yahoo_rank_max=300)
-        self.assertAlmostEqual(c.blend_score(), 0.5 * (30 / 300) + 0.5 * 1.0)
+    def test_blend_uses_normalized_percentiles_of_each_list(self):
+        c = self._cand("X", o_rank=60, dynasty_rank=100)  # 0.2 yahoo pct, 0.2 dynasty pct
+        self.assertAlmostEqual(c.relevance_score(), 0.60 * (60 / 300) + 0.40 * (100 / 500))
 
-    def test_missing_yahoo_signal_is_penalized_not_skipped(self):
-        # This is the Cameron Carr / Labaron Philon Jr. shape: real
-        # dynasty rank, zero Yahoo data. Must NOT collapse to the
-        # dynasty component alone.
-        c = self._cand(o_rank=pool.MISSING_OR, dynasty_rank=50, dynasty_rank_max=500)
-        self.assertAlmostEqual(c.blend_score(), 0.5 * 1.0 + 0.5 * (50 / 500))
+    def test_yahoo_remains_dominant_where_both_signals_exist(self):
+        # Same total rank distance, opposite sources: the better YAHOO rank wins.
+        yahoo_strong = self._cand("YahooStrong", o_rank=50, dynasty_rank=250)
+        dynasty_strong = self._cand("DynastyStrong", o_rank=250, dynasty_rank=50 * 500 // 300)
+        self.assertLess(yahoo_strong.relevance_score(), dynasty_strong.relevance_score())
 
-    def test_a_yahoo_missing_candidate_with_mediocre_dynasty_rank_no_longer_floats_to_the_top(self):
-        # A mediocre-dynasty, Yahoo-missing candidate must sort BEHIND a
-        # real-Yahoo-ranked candidate with a comparably mediocre O-Rank,
-        # not ahead of it just for having half a signal.
-        yahoo_missing = self._cand(o_rank=pool.MISSING_OR, dynasty_rank=250, dynasty_rank_max=500)  # 0.5 dynasty pct
-        yahoo_ranked = self._cand(o_rank=140, yahoo_rank_max=300)  # ~0.47 yahoo pct, no dynasty data
-        self.assertLess(yahoo_ranked.blend_score(), yahoo_missing.blend_score())
+    def test_dynasty_signal_materially_moves_a_young_player_ahead_of_a_veteran(self):
+        vet = self._cand("Vet", o_rank=165, dynasty_rank=450)  # replaceable veteran
+        young = self._cand("Young", o_rank=210, dynasty_rank=40)  # elite dynasty asset, weak current OR
+        ranked = pool.sort_and_truncate({"a": vet, "b": young})
+        self.assertEqual([c.name for c in ranked], ["Young", "Vet"])
 
-    def test_missing_both_signals_is_worst_case(self):
-        c = self._cand()
-        self.assertAlmostEqual(c.blend_score(), 1.0)
+    def test_dynasty_does_not_automatically_push_speculative_rookies_over_established_players(self):
+        useful = self._cand("Useful", o_rank=121, dynasty_rank=218 * 500 // 541)
+        speculative = self._cand("Speculative", o_rank=240, dynasty_rank=200)
+        ranked = pool.sort_and_truncate({"a": speculative, "b": useful})
+        self.assertEqual([c.name for c in ranked], ["Useful", "Speculative"])
+
+    # --- Yahoo-missing ----------------------------------------------------
+    def test_missing_yahoo_carries_the_documented_penalty(self):
+        c = self._cand("NoYahoo", dynasty_rank=50)
+        self.assertEqual(c.yahoo_score(), pool.MISSING_YAHOO_SCORE)
+        self.assertAlmostEqual(c.relevance_score(), 0.60 * pool.MISSING_YAHOO_SCORE + 0.40 * (50 / 500))
+
+    def test_dynasty_only_player_does_not_outrank_a_credible_yahoo_rotation_player(self):
+        rotation = self._cand("Rotation", o_rank=140, dynasty_rank=250)
+        elite_but_unranked = self._cand("EliteNoYahoo", dynasty_rank=60)
+        self.assertLess(rotation.relevance_score(), elite_but_unranked.relevance_score())
+
+    def test_elite_dynasty_only_player_beats_deep_yahoo_only_names_and_can_make_the_cut(self):
+        elite = self._cand("EliteNoYahoo", dynasty_rank=10)
+        deep = [self._cand(f"Deep{i}", o_rank=230 + i) for i in range(59)]
+        ranked = pool.sort_and_truncate({c.name: c for c in deep + [elite]})
+        self.assertIn("EliteNoYahoo", [c.name for c in ranked])
+
+    def test_absent_from_dynasty_board_is_worst_case_on_that_axis(self):
+        self.assertEqual(self._cand("X", o_rank=100).dynasty_score(), 1.0)
+
+    def test_cap_is_absolute_primary_even_for_elite_dynasty(self):
+        paid = self._cand("Paid", o_rank=290, cap=1)
+        elite = self._cand("Elite", o_rank=5, dynasty_rank=1, cap=0)
+        ranked = pool.sort_and_truncate({"a": elite, "b": paid})
+        self.assertEqual([c.name for c in ranked], ["Paid", "Elite"])
+
+    # --- candidate universe ----------------------------------------------
+    def test_yahoo_listed_rookie_uses_actual_yahoo_or(self):
+        yahoo = _yahoo_map(_yahoo_row("Cameron Boozer", 51, cap=20, pos="PF"))
+        cands = pool.build_candidates(EMPTY_BOARD, yahoo, {pool.normalize_name("Cameron Boozer"): {"rank": 1}}, 400)
+        boozer = cands[pool.normalize_name("Cameron Boozer")]
+        self.assertEqual(boozer.o_rank, 51)
+        self.assertTrue(boozer.rookie)
+
+    def test_dynasty_consensus_players_outside_yahoo_enter_the_universe(self):
+        dyn = {pool.normalize_name("Young Breakout"): {"rank": 120, "pos": "SG", "team": "SA", "name": "Young Breakout"},
+               pool.normalize_name("Deep Nobody"): {"rank": 400, "pos": "SG", "team": "SA", "name": "Deep Nobody"}}
+        cands = pool.build_candidates(EMPTY_BOARD, _yahoo_map(_yahoo_row("Some Vet", 130)), dyn, 541)
+        self.assertIn(pool.normalize_name("Young Breakout"), cands)
+        self.assertNotIn(pool.normalize_name("Deep Nobody"), cands)  # beyond DYNASTY_CANDIDATE_CUTOFF
+        yb = cands[pool.normalize_name("Young Breakout")]
+        self.assertEqual((yb.pos, yb.nba, yb.cap, yb.o_rank), ("SG", "SAS", 0.0, pool.MISSING_OR))
+
+    def test_kept_players_never_enter_the_universe_from_any_source(self):
+        board = ('<section class="team-card"><span class="identity-tag">ZZ</span><div class="players">'
+                 '<div class="player-row"><div class="pos">SG</div><div class="pname">Kept Young</div>'
+                 '<div class="nba">AAA</div><div class="cap">3</div></div></div></section>')
+        dyn = {pool.normalize_name("Kept Young"): {"rank": 20, "pos": "SG", "team": "AAA", "name": "Kept Young"}}
+        cands = pool.build_candidates(board, _yahoo_map(_yahoo_row("Kept Young", 50, cap=3)), dyn, 541)
+        self.assertNotIn(pool.normalize_name("Kept Young"), cands)
+
+    def test_cuts_enter_the_universe_with_the_cutting_team_as_source(self):
+        board = ('<section class="team-card"><span class="identity-tag">TT</span><div class="players"></div>'
+                 '<footer class="cuts"><div class="cuts-label">CUTS</div><div class="cuts-list">'
+                 '<span class="cut-chip">Cut Guy <strong>2</strong></span></div></footer></section>')
+        cands = pool.build_candidates(board, _yahoo_map(_yahoo_row("Cut Guy", 113, cap=2)), {}, 541)
+        cut = cands[pool.normalize_name("Cut Guy")]
+        self.assertEqual((cut.src, cut.src_team, cut.cap), ("cut", "TT", 2.0))
+
+    def test_rookie_flag_comes_from_the_project_rookie_source(self):
+        dyn = {pool.normalize_name("Source Rookie"): {"rank": 90, "pos": "PF", "team": "CHI", "name": "Source Rookie"}}
+        cands = pool.build_candidates(EMPTY_BOARD, _yahoo_map(_yahoo_row("Some Vet", 130)), dyn, 541,
+                                      rookie_names={pool.normalize_name("Source Rookie")})
+        self.assertTrue(cands[pool.normalize_name("Source Rookie")].rookie)
+
+    def test_curated_prospects_enter_but_are_never_force_included(self):
+        cands = pool.build_candidates(EMPTY_BOARD, _yahoo_map(_yahoo_row("Some Vet", 130)), {}, 541)
+        self.assertIn(pool.normalize_name("Kingston Flemings"), cands)
+        self.assertEqual([c.name for c in cands.values() if c.guaranteed], [])
+
+    def test_rui_hachimura_cap0_or121_makes_the_pool_when_available(self):
+        rows = [_yahoo_row("Rui Hachimura", 121)]
+        rows += [_yahoo_row(f"Deep Prospect {i}", 230 + i) for i in range(70)]
+        dynasty = {pool.normalize_name(f"Deep Prospect {i}"): {"rank": 60 + i} for i in range(70)}
+        dynasty[pool.normalize_name("Rui Hachimura")] = {"rank": 218}
+        cands = pool.build_candidates(EMPTY_BOARD, _yahoo_map(*rows), dynasty, 541)
+        ranked = pool.sort_and_truncate(cands)
+        self.assertIn("Rui Hachimura", [c.name for c in ranked])
+
+    def test_paul_reed_is_guaranteed(self):
+        rows = [_yahoo_row("Paul Reed", 165)] + [_yahoo_row(f"Better {i}", 100 + i) for i in range(80)]
+        cands = pool.build_candidates(EMPTY_BOARD, _yahoo_map(*rows), {}, 541)
+        self.assertIn("Paul Reed", [c.name for c in pool.sort_and_truncate(cands)])
+
+
+class TestPageThreeYoungTail(unittest.TestCase):
+    """Rows 1-40 are the plain ranking; rows 41-60 hold owner-pinned depth
+    names, then the best rookies / sophomores / 3rd-years by hybrid score."""
+
+    def _c(self, name, o_rank, dyn=None, young=False, pinned=False, cap=0.0):
+        return pool.Candidate(name=name, pos="SF", nba="XXX", cap=cap, o_rank=o_rank, dynasty_rank=dyn,
+                              yahoo_rank_max=300, dynasty_rank_max=500, young=young, pinned=pinned)
+
+    def _universe(self):
+        c = {}
+        for i in range(40):  # strong core, mixed vets
+            x = self._c(f"Core{i}", 100 + i, 150 + i)
+            c[x.name] = x
+        for i in range(15):  # replaceable vets right behind the core
+            x = self._c(f"Vet{i}", 141 + i, 190 + i)
+            c[x.name] = x
+        x = self._c("PinnedVet", 190, 300, pinned=True); c[x.name] = x
+        for i in range(25):  # weaker young players
+            x = self._c(f"Young{i}", 230 + i, 100 + 5 * i, young=True); c[x.name] = x
+        return c
+
+    def test_core_is_untouched_and_total_is_sixty(self):
+        c = self._universe()
+        plain = sorted(c.values(), key=lambda x: x.sort_key())[:pool.CORE_SIZE]
+        ranked = pool.sort_and_truncate(c)
+        self.assertEqual(len(ranked), 60)
+        self.assertEqual([x.name for x in ranked[:pool.CORE_SIZE]], [x.name for x in plain])
+
+    def test_tail_is_pinned_then_young_and_replaceable_vets_are_dropped(self):
+        ranked = pool.sort_and_truncate(self._universe())
+        tail = [x.name for x in ranked[pool.CORE_SIZE:]]
+        self.assertIn("PinnedVet", tail)
+        self.assertFalse([n for n in tail if n.startswith("Vet")])
+        self.assertEqual(len([n for n in tail if n.startswith("Young")]), 60 - pool.CORE_SIZE - 1)  # PinnedVet takes 1 slot
+
+    def test_best_young_by_hybrid_score_get_the_slots_no_quota(self):
+        ranked = pool.sort_and_truncate(self._universe())
+        young = [x.name for x in ranked if x.name.startswith("Young")]
+        n = 60 - pool.CORE_SIZE - 1
+        self.assertEqual(young, [f"Young{i}" for i in range(n)])  # the best n by score, not an arbitrary n
+
+    def test_not_enough_young_candidates_falls_back_to_plain_order(self):
+        c = {f"P{i}": self._c(f"P{i}", 100 + i) for i in range(70)}
+        ranked = pool.sort_and_truncate(c)
+        self.assertEqual([x.name for x in ranked], [f"P{i}" for i in range(60)])
+
+    def test_cap_still_monotonic_with_the_tail(self):
+        c = self._universe()
+        c["PaidYoung"] = self._c("PaidYoung", 280, 450, young=True, cap=1)
+        caps = [x.cap for x in pool.sort_and_truncate(c)]
+        self.assertEqual(caps, sorted(caps, reverse=True))
+
+    def test_pinned_names_are_the_owner_approved_nine(self):
+        self.assertEqual(pool.TAIL_PINNED_NAMES, {"Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.",
+                                                  "Jake LaRavia", "Jared McCain", "Bilal Coulibaly",
+                                                  "Allen Graves", "Aday Mara", "Tre Jones"})
+
+    def test_draft_class_table_marks_sophomores_and_third_years_but_not_older_players(self):
+        years = pool.load_draft_years()
+        self.assertEqual(years[pool.normalize_name("Tre Johnson")], 2025)
+        self.assertEqual(years[pool.normalize_name("Isaiah Collier")], 2024)
+        for old in ("Dereck Lively II", "Bilal Coulibaly", "Grayson Allen", "Tobias Harris"):
+            self.assertNotIn(pool.normalize_name(old), years)
+
+    def test_build_candidates_flags_young_and_pinned(self):
+        yahoo = _yahoo_map(_yahoo_row("Tre Johnson", 220), _yahoo_row("Grayson Allen", 187), _yahoo_row("Old Vet", 170))
+        cands = pool.build_candidates(EMPTY_BOARD, yahoo, {}, 541, draft_years={pool.normalize_name("Tre Johnson"): 2025})
+        self.assertTrue(cands[pool.normalize_name("Tre Johnson")].young)
+        self.assertFalse(cands[pool.normalize_name("Old Vet")].young)
+        self.assertTrue(cands[pool.normalize_name("Grayson Allen")].pinned)
 
 
 class TestLoadYahooPlayersInjectable(unittest.TestCase):

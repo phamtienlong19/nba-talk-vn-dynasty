@@ -1,32 +1,45 @@
 #!/usr/bin/env python3
-"""Pure cap-model calculation over Yahoo-ranked player rows.
+"""Pure cap-model calculation over Yahoo player rows.
 
 Standard library only. No network access. No hardcoded R1-R9 results --
 those are test fixtures/expectations, not part of the calculation itself.
 
-Input: an iterable of player rows, each with at least:
-    oRank       int, Yahoo O-Rank, 1-based, unique across the input
-    capDollars  number, projected/auction cap dollars ($0 is valid)
+The benchmark simulates a Yahoo salary-cap draft, so players are ordered
+by PROJECTED AUCTION VALUE (capDollars) descending -- NOT by Yahoo
+O-Rank. O-Rank order is not salary order (e.g. a $5 player at O-Rank 123
+is drafted ahead of a $4 player at O-Rank 97). O-Rank is used only as a
+deterministic tie-break inside an equal-dollar tier.
 
-The current league model requires ranks 1-144 (nine bands of 16) to be
-present and unique. Row order in the input does not matter.
+Input: an iterable of player rows, each with at least:
+    capDollars  number, projected auction value ($0 is valid)
+    oRank       int, Yahoo O-Rank, unique across the input (tie-break only)
+
+The current league model takes the first 144 players (nine bands of 16)
+in that order. Row order in the input does not matter.
 """
 from __future__ import annotations
 
+import json
+import os
+
 BAND_SIZE = 16
 NUM_BANDS = 9
-REQUIRED_RANKS = BAND_SIZE * NUM_BANDS  # 144
+REQUIRED_PLAYERS = BAND_SIZE * NUM_BANDS  # 144
+NUM_TEAMS = 16
 FLOOR_FACTOR = 0.85
 CEILING_FACTOR = 1.15
 
 
 class CapModelError(ValueError):
     """Raised when input player rows do not satisfy the cap model's
-    structural requirements (missing ranks, duplicates, etc.)."""
+    structural requirements (too few players, duplicates, etc.)."""
 
 
-def _validate_and_index(players):
-    by_rank = {}
+def draft_order(players) -> list:
+    """Return (capDollars, oRank) pairs in simulated salary-draft order:
+    capDollars DESC, then Yahoo O-Rank ASC within an equal-dollar tier."""
+    seen_ranks = set()
+    pairs = []
     for row in players:
         if "oRank" not in row or "capDollars" not in row:
             raise CapModelError(
@@ -39,48 +52,45 @@ def _validate_and_index(players):
             raise CapModelError(f"oRank must be an int, got {rank!r}")
         if not isinstance(dollars, (int, float)) or isinstance(dollars, bool):
             raise CapModelError(f"capDollars must be numeric, got {dollars!r}")
-
-        if rank in by_rank:
+        if rank in seen_ranks:
             raise CapModelError(f"duplicate oRank: {rank}")
-        by_rank[rank] = float(dollars)
+        seen_ranks.add(rank)
+        pairs.append((float(dollars), rank))
 
-    missing = [r for r in range(1, REQUIRED_RANKS + 1) if r not in by_rank]
-    if missing:
+    if len(pairs) < REQUIRED_PLAYERS:
         raise CapModelError(
-            f"missing required oRank values (need 1-{REQUIRED_RANKS}): "
-            f"{missing[:10]}{'...' if len(missing) > 10 else ''}"
+            f"need at least {REQUIRED_PLAYERS} players, got {len(pairs)}"
         )
-
-    return by_rank
-
-
-def band_average(by_rank: dict, band_index: int) -> float:
-    """band_index is 1-based: 1 -> ranks 1-16, 2 -> ranks 17-32, ..."""
-    start = (band_index - 1) * BAND_SIZE + 1
-    end = band_index * BAND_SIZE
-    values = [by_rank[r] for r in range(start, end + 1)]
-    return sum(values) / len(values)
+    pairs.sort(key=lambda t: (-t[0], t[1]))
+    return pairs
 
 
 def compute_cap_model(players) -> dict:
     """Compute R1-R9, benchmark, and floor/ceiling from player rows.
 
-    Returns a dict with keys: bands (list R1..R9), benchmark, rawFloor,
-    rawCeiling, roundedFloor, roundedCeiling.
+    Returns a dict with keys: top144Sum, bands (list R1..R9), benchmark,
+    rawFloor, rawCeiling, roundedFloor, roundedCeiling.
 
-    Rounding: raw floor/ceiling are rounded to the nearest whole dollar
-    using banker's-rounding-free "round half up" via Python's round(),
-    which for these values resolves unambiguously (no .5 ties expected
-    in real cap data; if one occurs, round() uses round-half-to-even).
+    bands[i] is the mean projected $ of the i-th group of 16 in salary-draft
+    order; benchmark = sum(bands) = top144Sum / 16.
+
+    Rounding uses Python's round() (nearest whole dollar; round-half-to-even
+    on exact .5 ties, which do not occur in current data).
     """
-    by_rank = _validate_and_index(players)
+    top = draft_order(players)[:REQUIRED_PLAYERS]
+    dollars = [d for d, _ in top]
 
-    bands = [band_average(by_rank, i) for i in range(1, NUM_BANDS + 1)]
-    benchmark = sum(bands)
+    bands = [
+        sum(dollars[i * BAND_SIZE:(i + 1) * BAND_SIZE]) / BAND_SIZE
+        for i in range(NUM_BANDS)
+    ]
+    top_sum = sum(dollars)
+    benchmark = top_sum / NUM_TEAMS
     raw_floor = benchmark * FLOOR_FACTOR
     raw_ceiling = benchmark * CEILING_FACTOR
 
     return {
+        "top144Sum": top_sum,
         "bands": bands,
         "benchmark": benchmark,
         "rawFloor": raw_floor,
@@ -90,8 +100,44 @@ def compute_cap_model(players) -> dict:
     }
 
 
+POLICY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config", "cap_policy.json")
+
+
+def load_cap_policy(path: str = POLICY_PATH) -> dict:
+    """Official league cap policy (commissioner governance), kept apart from
+    the formula so a Yahoo refresh can never overwrite it."""
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def apply_cap_policy(result: dict, policy: dict) -> dict:
+    """Return `result` plus formula-vs-official fields.
+
+    formulaFloor/formulaCeiling are the formula-rounded values (identical to
+    roundedFloor/roundedCeiling). officialFloor/officialCeiling are the
+    commissioner's operating band and come ONLY from the policy file.
+    approvedFormula* record the formula result the policy was approved
+    against; a live formula that differs from it needs human review, but never
+    changes the official band by itself."""
+    return {
+        **result,
+        "formulaFloor": result["roundedFloor"],
+        "formulaCeiling": result["roundedCeiling"],
+        "officialFloor": policy["officialFloor"],
+        "officialCeiling": policy["officialCeiling"],
+        "ceilingOverride": policy["officialCeiling"] != result["roundedCeiling"],
+        "floorOverride": policy["officialFloor"] != result["roundedFloor"],
+        "overrideReason": policy.get("overrideReason"),
+        "approvedFormulaFloor": policy["approvedFormulaFloor"],
+        "approvedFormulaCeiling": policy["approvedFormulaCeiling"],
+        "formulaMatchesApproved": (
+            result["roundedFloor"] == policy["approvedFormulaFloor"]
+            and result["roundedCeiling"] == policy["approvedFormulaCeiling"]
+        ),
+    }
+
+
 def main():
-    import json
     import sys
 
     if len(sys.argv) != 2:

@@ -73,6 +73,9 @@ CAP_CARD_RE = re.compile(
 )
 
 
+CAP_PILL_RE = re.compile(r'(<span class="pill-k">CAP</span><span class="pill-v">)\d+\u2013\d+(</span>)')
+
+
 def _fmt(value: float) -> str:
     value = float(value)
     return str(int(value)) if value.is_integer() else str(value)
@@ -123,6 +126,10 @@ def refresh_team_cap_summary(index_html: str, floor: int, ceiling: int) -> tuple
         return f"{pre1}{info['class']}{pre2}{tag_html}{pre3}{_fmt(info['total'])}{pre4}{ceiling}{pre5}{info['text']}{suf}"
 
     new_html = CAP_CARD_RE.sub(repl_cap_card, new_html)
+
+    # The floor-ceiling pills (both keeper pages + CAP page) come from the
+    # same floor/ceiling, so a band change can never leave a stale pill.
+    new_html = CAP_PILL_RE.sub(lambda m: f"{m.group(1)}{floor}\u2013{ceiling}{m.group(2)}", new_html)
 
     return new_html, summary
 

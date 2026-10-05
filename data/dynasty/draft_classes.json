@@ -1,0 +1,22 @@
+{
+  "note": "NBA draft class (first NBA season) for players who can appear in the FA/DRAFT candidate universe. Used ONLY to decide who counts as a rookie / sophomore / 3rd-year player for the FA/DRAFT 60 tail (scripts/build_fa_draft_pool.py); never an age bonus. The 2026 class (rookies) is NOT listed here: it is the project's rookie source, data/dynasty/sources/nbcsports_rookies.json. Compiled from general NBA knowledge, not a scraped source -- verify before relying on it for anything else. Players not listed are treated as not young.",
+  "classes": {
+    "2025": [
+      "Cooper Flagg", "Dylan Harper", "VJ Edgecombe", "Kon Knueppel", "Ace Bailey", "Tre Johnson", "Jeremiah Fears",
+      "Egor Dëmin", "Collin Murray-Boyles", "Khaman Maluach", "Cedric Coward", "Noa Essengue", "Derik Queen",
+      "Carter Bryant", "Thomas Sorber", "Yang Hansen", "Joan Beringer", "Walter Clayton Jr.", "Nolan Traore",
+      "Kasparas Jakucionis", "Will Riley", "Asa Newell", "Nique Clifford", "Jase Richardson", "Ben Saraf",
+      "Danny Wolf", "Hugo González", "Liam McNeeley", "Yanic Konan Niederhäuser", "Rasheer Fleming",
+      "Ryan Kalkbrenner", "Maxime Raynaud", "Jamir Watkins"
+    ],
+    "2024": [
+      "Zaccharie Risacher", "Alex Sarr", "Reed Sheppard", "Stephon Castle", "Ron Holland II", "Ronald Holland II",
+      "Matas Buzelis", "Nikola Topić", "Rob Dillingham", "Zach Edey", "Cody Williams", "Donovan Clingan",
+      "Dalton Knecht", "Bub Carrington", "Kyshawn George", "Tidjane Salaün", "Yves Missi", "Tristan da Silva",
+      "Ja'Kobe Walter", "Jared McCain", "Devin Carter", "Kel'el Ware", "Jaylon Tyson", "Isaiah Collier",
+      "Baylor Scheierman", "Kyle Filipowski", "Ryan Dunn", "Jaylen Wells", "Adem Bona", "Jamal Shead",
+      "Terrence Shannon Jr.", "Cam Spencer", "Pelle Larsson", "Oso Ighodaro", "Quinten Post", "Justin Edwards",
+      "Ajay Mitchell", "Jonathan Mogbo", "Bronny James"
+    ]
+  }
+}
