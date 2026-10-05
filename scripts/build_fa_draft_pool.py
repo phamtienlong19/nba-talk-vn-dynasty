@@ -19,9 +19,9 @@ Pipeline (kept as separate stages so each is independently testable):
 3. sorting -- CAP dollars descending is the only primary key; a $0 player
    can never outrank a $1+ player. Within a CAP tier,
    Candidate.relevance_score blends two normalized percentile scores:
-   65% current-market (Yahoo O-Rank / 300) and 35% dynasty consensus
+   60% current-market (Yahoo O-Rank / 300) and 40% dynasty consensus
    (consensus rank / consensus size). A player Yahoo does not rank gets a
-   fixed MISSING_YAHOO_SCORE (0.75, i.e. as if Yahoo had him ~OR 225) on
+   fixed MISSING_YAHOO_SCORE (0.80, i.e. as if Yahoo had him ~OR 240) on
    the Yahoo axis -- a documented uncertainty/current-contribution
    penalty -- so a dynasty-only player does not automatically outrank a
    credible Yahoo OR 120-160 rotation player but an elite young asset can
@@ -164,14 +164,14 @@ DYNASTY_RANK_MAX = 400
 
 # Within-CAP-tier hybrid (see Candidate.relevance_score). Yahoo (current
 # market) stays the larger component.
-YAHOO_WEIGHT = 0.65
-DYNASTY_WEIGHT = 0.35
+YAHOO_WEIGHT = 0.60
+DYNASTY_WEIGHT = 0.40
 # Yahoo-axis score for a player Yahoo does not rank (0 = best, 1 = worst).
-# 0.75 ~ "Yahoo would have him around OR 225": a conservative
+# 0.80 ~ "Yahoo would have him around OR 240": a conservative
 # uncertainty/current-contribution penalty. Even with a top-10 dynasty rank
-# the blended score is ~0.50, i.e. behind a credible Yahoo OR 120-150 player
+# the blended score is ~0.52, i.e. behind a credible Yahoo OR 120-150 player
 # with a middling dynasty rank, but ahead of deep Yahoo-only players.
-MISSING_YAHOO_SCORE = 0.75
+MISSING_YAHOO_SCORE = 0.80
 # A non-kept player enters the candidate universe from the dynasty consensus
 # if ranked at or inside this consensus rank (the board has ~540 players).
 DYNASTY_CANDIDATE_CUTOFF = 250

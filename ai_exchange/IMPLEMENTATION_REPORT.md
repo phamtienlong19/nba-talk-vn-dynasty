@@ -11,8 +11,8 @@ Run: 2026-10-05 — PR #26 final correction pass
   Kuminga out ($160); Seattle Porziņģis in / Davion out ($177). All 16 teams
   displayed against 178.
 - **FA/DRAFT 60**: universe = cuts + Yahoo + dynasty consensus (rank <= 250) +
-  approved prospects, ranked CAP desc then 65% Yahoo / 35% dynasty percentile
-  hybrid (Yahoo-missing score 0.75; absent from consensus 1.0). Paul Reed the
+  approved prospects, ranked CAP desc then 60% Yahoo / 40% dynasty percentile
+  hybrid (Yahoo-missing score 0.80; absent from consensus 1.0). Paul Reed the
   only forced name.
 - **Exports** remain pure Yahoo (Player | Proj $ | Rank).
 - Docs/state updated: `docs/CAP_MODEL.md`, `docs/YAHOO_DATA_SOURCE.md`, README,

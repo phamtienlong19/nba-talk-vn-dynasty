@@ -38,11 +38,22 @@ STATUS="$(python3 -c "import json; print(json.load(open('$RESULT_JSON'))['status
 echo "status=$STATUS"
 
 if [ "$STATUS" != "CHANGED" ]; then
-  echo "MATCH -- no PR needed."
-  if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-    { echo ""; echo "No update required."; } >> "$GITHUB_STEP_SUMMARY"
+  # A MATCH in cap policy / market inputs does not guarantee the commissioner
+  # exports are fresh: regenerate them and treat any diff vs. the committed
+  # copy as a change that needs a PR. Only a MATCH with byte-identical
+  # exports is a true no-op.
+  echo "MATCH -- regenerating Yahoo Top 300 exports to confirm they are fresh..."
+  bash -c "$EXPORT_CMD"
+  if [ -d exports ] && [ -n "$(git status --porcelain -- exports)" ]; then
+    echo "Exports changed on a MATCH refresh -- promoting as CHANGED."
+    STATUS=CHANGED
+  else
+    echo "MATCH -- exports fresh, no PR needed."
+    if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+      { echo ""; echo "No update required."; } >> "$GITHUB_STEP_SUMMARY"
+    fi
+    exit 0
   fi
-  exit 0
 fi
 
 mkdir -p "$ARTIFACT_DIR"

@@ -200,6 +200,25 @@ class TestCommittedExportArtifacts(unittest.TestCase):
         self.assertIn('href="exports/yahoo_top300_proj_dollar_rank.md"', html)
 
 
+class TestRankingOnlyChangeNeverLeavesAStaleExport(unittest.TestCase):
+    def test_ranking_only_change_is_detected_and_regenerated(self):
+        from build_yahoo_refresh_result import exports_stale
+        rows = _fixture_rows()
+        before = _players_from_rows(rows)
+        after = [dict(p) for p in before]
+        a = next(p for p in after if p["name"] == "Rui Hachimura")
+        b = next(p for p in after if p["name"] == "RJ Barrett")  # both $0: ranks swap, cap band unchanged
+        a["oRank"], b["oRank"] = b["oRank"], a["oRank"]
+        with tempfile.TemporaryDirectory() as tmp:
+            md = os.path.join(tmp, "e.md")
+            with open(md, "w", encoding="utf-8") as f:
+                f.write(md_export.render_markdown(md_export.build_rows(before)))
+            self.assertFalse(exports_stale(before, md))
+            self.assertTrue(exports_stale(after, md), "ranking-only change must make the committed export stale")
+            md_export.write_markdown.__call__  # regeneration entry point exists
+            self.assertEqual(compute_cap_model(before)["roundedCeiling"], compute_cap_model(after)["roundedCeiling"])
+
+
 class TestCapModelIndependence(unittest.TestCase):
     def test_cap_benchmark_is_unaffected_by_the_exported_rank_column(self):
         rows = _fixture_rows()

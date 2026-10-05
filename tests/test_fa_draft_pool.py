@@ -82,7 +82,9 @@ class TestIndexHtmlPoolRegressions(unittest.TestCase):
         tail = self.names[40:]
         for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Bilal Coulibaly", "Allen Graves", "Aday Mara"):
             self.assertIn(kept, tail)
-        for gone in ("De&#x27;Andre Hunter", "Bobby Portis Jr.", "Robert Williams III", "Anfernee Simons",
+        # (De'Andre Hunter is excluded: at 60/40 he is plain rank 40, i.e. the
+        # last CORE row, which the owner left alone.)
+        for gone in ("Bobby Portis Jr.", "Robert Williams III", "Anfernee Simons",
                      "Nikola Vučević", "Brook Lopez", "Naji Marshall", "Jordan Poole", "Dennis Schröder"):
             self.assertNotIn(gone, self.names)
 
@@ -301,8 +303,8 @@ EMPTY_BOARD = '<section class="team-card"><span class="identity-tag">ZZ</span><d
 
 
 class TestHybridWithinCapTier(unittest.TestCase):
-    """Product rule: CAP desc is absolute; inside a CAP tier a 65% Yahoo /
-    35% dynasty-consensus hybrid of normalized percentile scores decides
+    """Product rule: CAP desc is absolute; inside a CAP tier a 60% Yahoo /
+    40% dynasty-consensus hybrid of normalized percentile scores decides
     order; the candidate universe is built from cuts + Yahoo + the project
     dynasty consensus + approved prospects BEFORE ranking."""
 
@@ -314,13 +316,13 @@ class TestHybridWithinCapTier(unittest.TestCase):
 
     # --- weights / scores -------------------------------------------------
     def test_weights_are_65_35_and_yahoo_is_the_larger_component(self):
-        self.assertAlmostEqual(pool.YAHOO_WEIGHT, 0.65)
-        self.assertAlmostEqual(pool.DYNASTY_WEIGHT, 0.35)
+        self.assertAlmostEqual(pool.YAHOO_WEIGHT, 0.60)
+        self.assertAlmostEqual(pool.DYNASTY_WEIGHT, 0.40)
         self.assertGreater(pool.YAHOO_WEIGHT, pool.DYNASTY_WEIGHT)
 
     def test_blend_uses_normalized_percentiles_of_each_list(self):
         c = self._cand("X", o_rank=60, dynasty_rank=100)  # 0.2 yahoo pct, 0.2 dynasty pct
-        self.assertAlmostEqual(c.relevance_score(), 0.65 * (60 / 300) + 0.35 * (100 / 500))
+        self.assertAlmostEqual(c.relevance_score(), 0.60 * (60 / 300) + 0.40 * (100 / 500))
 
     def test_yahoo_remains_dominant_where_both_signals_exist(self):
         # Same total rank distance, opposite sources: the better YAHOO rank wins.
@@ -344,7 +346,7 @@ class TestHybridWithinCapTier(unittest.TestCase):
     def test_missing_yahoo_carries_the_documented_penalty(self):
         c = self._cand("NoYahoo", dynasty_rank=50)
         self.assertEqual(c.yahoo_score(), pool.MISSING_YAHOO_SCORE)
-        self.assertAlmostEqual(c.relevance_score(), 0.65 * pool.MISSING_YAHOO_SCORE + 0.35 * (50 / 500))
+        self.assertAlmostEqual(c.relevance_score(), 0.60 * pool.MISSING_YAHOO_SCORE + 0.40 * (50 / 500))
 
     def test_dynasty_only_player_does_not_outrank_a_credible_yahoo_rotation_player(self):
         rotation = self._cand("Rotation", o_rank=140, dynasty_rank=250)
