@@ -80,7 +80,7 @@ class TestIndexHtmlPoolRegressions(unittest.TestCase):
 
     def test_page_three_keeps_pinned_names_and_drops_replaced_veterans(self):
         tail = self.names[40:]
-        for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Bilal Coulibaly"):
+        for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Bilal Coulibaly", "Allen Graves", "Aday Mara"):
             self.assertIn(kept, tail)
         for gone in ("De&#x27;Andre Hunter", "Bobby Portis Jr.", "Robert Williams III", "Anfernee Simons",
                      "Nikola Vučević", "Brook Lopez", "Naji Marshall", "Jordan Poole", "Dennis Schröder"):
@@ -458,7 +458,7 @@ class TestPageThreeYoungTail(unittest.TestCase):
         tail = [x.name for x in ranked[pool.CORE_SIZE:]]
         self.assertIn("PinnedVet", tail)
         self.assertFalse([n for n in tail if n.startswith("Vet")])
-        self.assertEqual(len([n for n in tail if n.startswith("Young")]), 19)
+        self.assertEqual(len([n for n in tail if n.startswith("Young")]), 19)  # PinnedVet takes 1 of 20 slots
 
     def test_best_young_by_hybrid_score_get_the_slots_no_quota(self):
         ranked = pool.sort_and_truncate(self._universe())
@@ -476,9 +476,10 @@ class TestPageThreeYoungTail(unittest.TestCase):
         caps = [x.cap for x in pool.sort_and_truncate(c)]
         self.assertEqual(caps, sorted(caps, reverse=True))
 
-    def test_pinned_names_are_the_owner_approved_six(self):
+    def test_pinned_names_are_the_owner_approved_eight(self):
         self.assertEqual(pool.TAIL_PINNED_NAMES, {"Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.",
-                                                  "Jake LaRavia", "Jared McCain", "Bilal Coulibaly"})
+                                                  "Jake LaRavia", "Jared McCain", "Bilal Coulibaly",
+                                                  "Allen Graves", "Aday Mara"})
 
     def test_draft_class_table_marks_sophomores_and_third_years_but_not_older_players(self):
         years = pool.load_draft_years()

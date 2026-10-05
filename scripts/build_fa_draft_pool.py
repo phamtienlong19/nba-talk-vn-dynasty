@@ -178,8 +178,8 @@ DYNASTY_CANDIDATE_CUTOFF = 250
 
 # FA/DRAFT 60 layout: the first CORE_SIZE rows (pages 1-2) are the plain CAP-
 # then-hybrid ranking. The remaining rows (page 3) are filled with owner-
-# approved depth veterans (TAIL_PINNED_NAMES -- the veterans, plus two young
-# names, the owner explicitly wants kept) and then the best rookies /
+# approved names (TAIL_PINNED_NAMES -- depth veterans plus young players the
+# owner explicitly wants kept) and then the best rookies /
 # sophomores / 3rd-year players by the same hybrid score. "Young" comes from
 # data/dynasty/draft_classes.json (2025, 2024 classes) and the 2026 rookie
 # source -- never an age bonus inside the score itself.
@@ -188,6 +188,7 @@ YOUNG_FIRST_CLASS_YEAR = 2024  # 2026 rookie, 2025 sophomore, 2024 3rd-year
 TAIL_PINNED_NAMES = {
     "Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia",
     "Jared McCain", "Bilal Coulibaly",
+    "Allen Graves", "Aday Mara",  # owner: high-interest 2026 rookies whose deep Yahoo OR undersells them
 }
 DRAFT_CLASSES = os.path.join(REPO_ROOT, "data", "dynasty", "draft_classes.json")
 
