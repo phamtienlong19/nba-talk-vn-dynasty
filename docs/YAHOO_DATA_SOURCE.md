@@ -124,6 +124,11 @@ a CI dependency.
 ```
 
 Fetches the live endpoint, normalizes it, recomputes R1–R9/benchmark/
-floor/ceiling, and prints a `MATCH` / `CHANGED` comparison against the
-currently published board snapshot (130–175). It never modifies
-`index.html` automatically.
+floor/ceiling (salary-draft order — see `docs/CAP_MODEL.md`), and prints a
+`MATCH` / `CHANGED` comparison of the live FORMULA band against the formula
+band the official league band was approved against (`config/cap_policy.json`:
+formula 131–177, official **131–178**). The official band is commissioner
+policy and is never changed by a refresh. Status is also `CHANGED` when the
+live market snapshot differs from the tracked `data/yahoo/` snapshot or the
+committed Top-300 export is stale. It never modifies `index.html`
+automatically.

@@ -27,8 +27,11 @@ def render(result: dict) -> str:
         "",
         f"**Status:** {result.get('status', 'UNKNOWN')}",
         "",
-        f"**Old cap:** {result['previous']['floor']} / {result['previous']['ceiling']}",
-        f"**New cap:** {result['current']['floor']} / {result['current']['ceiling']}",
+        f"**Approved formula band:** {result['previous']['floor']} / {result['previous']['ceiling']}",
+        f"**Live formula band:** {result['current']['floor']} / {result['current']['ceiling']}",
+        *( [f"**Official league band (policy, unchanged by refresh):** {result['official']['floor']} / {result['official']['ceiling']}"]
+           if result.get("official") else [] ),
+        *( [f"**Reasons:** {', '.join(result['reasons'])}"] if result.get("reasons") else [] ),
         "",
         "**Ranking changes:**",
         "",

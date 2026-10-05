@@ -39,7 +39,7 @@ relevance; it must not define the cap buckets.
 `tests/test_cap_model.py` asserts, from the frozen fixture
 `tests/fixtures/yahoo_top300_2026-10-04.md` (nothing hardcoded in
 `cap_model.py`): top-144 sum 2468 → benchmark 154.25 → raw 131.1125 /
-177.3875 → **131 / 177**. It also asserts the salary-order regression
+177.3875 → formula **131 / 177** (official band 131 / 178, see below). It also asserts the salary-order regression
 (O-Rank 97 / $4 vs. O-Rank 123 / $5 → the $5 player is placed first).
 
 ## Published board snapshot history
@@ -47,13 +47,35 @@ relevance; it must not define the cap buckets.
 | Promoted | League refresh timestamp | Floor / Ceiling |
 |---|---|---|
 | 2026-09-16 (original migration) | 2026-09-16 (live-matched) | 130 / 175 |
-| 2026-09-18 | 2026-09-18T01:43:50Z | **131 / 177** (current; the corrected salary-order model reproduces it on the 2026-10-05 snapshot — the earlier O-Rank-bucket model had wrongly reported 130 / 176 and 153.25 / 153.4375) |
+| 2026-09-18 | 2026-09-18T01:43:50Z | 131 / 177 (historical formula band; the corrected salary-order model reproduces it on the 2026-10-05 snapshot — the earlier O-Rank-bucket model had wrongly reported 130 / 176 and 153.25 / 153.4375) |
+| 2026-10-05 | 2026-10-05T03:27:30Z | **131 / 178 official** (formula 131 / 177; commissioner ceiling override) |
 
-The 2026-09-18 promotion is recorded in `ai_exchange/CURRENT_STATE.json`
+The 2026-09-18 promotion (formula-only; historical) is recorded in `ai_exchange/CURRENT_STATE.json`
 (`canonicalState.lastYahooRefresh`), including the human-review flags it
 surfaced (one team over the new ceiling; an NBA-team swap worth a sanity
 check). See `docs/YAHOO_DATA_SOURCE.md` for why `projected_auction_value`
 is the authoritative `capDollars` field.
+
+## Official band vs. formula band
+
+The formula result and the league's **official operating band** are separate
+things (`config/cap_policy.json`, `scripts/cap_model.py:apply_cap_policy`):
+
+| Field | 2026-27 value | Meaning |
+|---|---|---|
+| `rawFloor` / `rawCeiling` | 131.1125 / 177.3875 | formula, unrounded |
+| `formulaFloor` / `formulaCeiling` | 131 / 177 | formula, rounded |
+| `officialFloor` / `officialCeiling` | **131 / 178** | commissioner policy |
+| `ceilingOverride` | true | official ≠ formula |
+| `approvedFormulaFloor` / `approvedFormulaCeiling` | 131 / 177 | formula result the official band was approved against |
+
+The 178 ceiling is a governance decision (commissioner confirmed after the R9
+review), not a claim that 177.3875 rounds to 178. `cap_model.py`'s math is not
+bent to produce it. The board, CAP page, team totals and
+`ai_exchange/CURRENT_STATE.json` (`capFloor`/`capCeiling`) show the official
+band. A Yahoo refresh only updates market inputs: it reports whether the live
+formula band still equals the approved one and never rewrites the official band
+— changing it means editing `config/cap_policy.json` (a human decision).
 
 ## Governance
 

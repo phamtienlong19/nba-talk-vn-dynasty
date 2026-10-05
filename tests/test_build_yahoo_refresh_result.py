@@ -92,5 +92,75 @@ class TestBuildYahooRefreshResultCLI(unittest.TestCase):
         self.assertNotIn("rankingChangesNote", result)
 
 
+class TestRefreshSemanticsOfficialBand(unittest.TestCase):
+    """The official 131-178 band is policy: a refresh compares the FORMULA
+    band to the approved formula band, reports snapshot/export staleness,
+    and never turns official 178 back into the formula's 177."""
+
+    def _run(self, tmpdir, players, published_players=None, exports_md_text=None, snapshot_extra=None):
+        snap = {"fetchedAt": "t", "roundedFloor": 131, "roundedCeiling": 177,
+                "approvedFormulaFloor": 131, "approvedFormulaCeiling": 177,
+                "officialFloor": 131, "officialCeiling": 178, "ceilingOverride": True,
+                "overrideReason": "commissioner", "publishedFloor": 131, "publishedCeiling": 178}
+        snap.update(snapshot_extra or {})
+        paths = {k: os.path.join(tmpdir, k + ".json") for k in ("snap", "players", "cfg", "pub")}
+        _write(paths["snap"], snap)
+        _write(paths["players"], players)
+        _write(paths["cfg"], {"leagueKey": "478.l.public"})
+        out = os.path.join(tmpdir, "out.json")
+        args = [sys.executable, SCRIPT, "--cap-snapshot", paths["snap"], "--current-players", paths["players"],
+                "--source-config", paths["cfg"], "--output", out]
+        if published_players is not None:
+            _write(paths["pub"], published_players)
+            args += ["--published-players", paths["pub"]]
+        if exports_md_text is not None:
+            md = os.path.join(tmpdir, "committed.md")
+            with open(md, "w", encoding="utf-8") as f:
+                f.write(exports_md_text)
+            args += ["--exports-md", md]
+        subprocess.run(args, check=True, capture_output=True, text=True)
+        with open(out, encoding="utf-8") as f:
+            return json.load(f)
+
+    def test_same_formula_same_snapshot_is_match_and_official_stays_178(self):
+        players = [{"oRank": 1, "name": "A", "capDollars": 1.0}]
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run(tmp, players, published_players=players)
+        self.assertEqual(result["status"], "MATCH")
+        self.assertEqual(result["reasons"], [])
+        self.assertEqual(result["official"]["ceiling"], 178)
+        self.assertTrue(result["official"]["ceilingOverride"])
+        self.assertEqual(result["current"]["ceiling"], 177)  # formula, not official
+
+    def test_formula_177_vs_official_178_is_not_a_change(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run(tmp, [{"oRank": 1, "name": "A", "capDollars": 1.0}])
+        self.assertEqual(result["status"], "MATCH")
+        self.assertEqual(result["previous"], {"floor": 131, "ceiling": 177})
+
+    def test_market_change_with_same_band_is_changed(self):
+        cur = [{"oRank": 1, "name": "A", "nbaTeam": "X", "eligiblePositions": ["PG"], "capDollars": 5.0}]
+        pub = [{"oRank": 2, "name": "A", "nbaTeam": "X", "eligiblePositions": ["PG"], "capDollars": 5.0}]
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run(tmp, cur, published_players=pub)
+        self.assertEqual(result["status"], "CHANGED")
+        self.assertIn("yahooSnapshotChanged", result["reasons"])
+        self.assertEqual(result["official"]["ceiling"], 178)
+
+    def test_formula_band_change_is_changed_and_official_unchanged(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run(tmp, [{"oRank": 1, "name": "A", "capDollars": 1.0}],
+                               snapshot_extra={"roundedFloor": 132, "roundedCeiling": 179})
+        self.assertEqual(result["status"], "CHANGED")
+        self.assertIn("formulaBandChanged", result["reasons"])
+        self.assertEqual((result["official"]["floor"], result["official"]["ceiling"]), (131, 178))
+
+    def test_stale_committed_export_is_changed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self._run(tmp, [{"oRank": 1, "name": "A", "capDollars": 1.0}], exports_md_text="# stale\n")
+        self.assertEqual(result["status"], "CHANGED")
+        self.assertIn("exportsStale", result["reasons"])
+
+
 if __name__ == "__main__":
     unittest.main()

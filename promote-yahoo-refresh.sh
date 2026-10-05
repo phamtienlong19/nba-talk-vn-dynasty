@@ -54,9 +54,10 @@ python3 scripts/refresh_keeper_board_display.py \
   --output index.html \
   --stats-out "$ARTIFACT_DIR/keeper_board_stats.json"
 
-echo "Recomputing team cap totals / floor-ceiling display against the corrected cap band..."
-CAP_FLOOR="$(python3 -c "import json; print(json.load(open('$RESULT_JSON'))['current']['floor'])")"
-CAP_CEILING="$(python3 -c "import json; print(json.load(open('$RESULT_JSON'))['current']['ceiling'])")"
+echo "Recomputing team cap totals / floor-ceiling display against the OFFICIAL cap band..."
+# OFFICIAL band (commissioner policy), never the raw formula band.
+CAP_FLOOR="$(python3 -c "import json; r=json.load(open('$RESULT_JSON')); print((r.get('official') or r['current'])['floor'])")"
+CAP_CEILING="$(python3 -c "import json; r=json.load(open('$RESULT_JSON')); print((r.get('official') or r['current'])['ceiling'])")"
 python3 scripts/refresh_team_cap_summary.py \
   --index-html index.html \
   --floor "$CAP_FLOOR" --ceiling "$CAP_CEILING" \

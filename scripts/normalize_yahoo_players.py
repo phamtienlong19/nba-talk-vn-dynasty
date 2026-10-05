@@ -12,8 +12,9 @@ fetched response (see docs/YAHOO_DATA_SOURCE.md) -- they are not guesses.
     oRank            int(player_rank.rank_value) where rank_type == "OR"
     capDollars       float(player.projected_auction_value)
                      -- confirmed authoritative: recomputing the current
-                        league cap model over this field reproduces the
-                        published R1-R9 / benchmark / 130-175 band exactly.
+                        league cap model over this field (in projected-$ draft
+                        order, see scripts/cap_model.py) reproduces the
+                        benchmark 154.25 / formula band 131-177 exactly.
     auctionValue     float(player.average_auction_cost) if present
                      -- kept alongside capDollars for reference; NOT used
                         by the cap model (see docs/YAHOO_DATA_SOURCE.md

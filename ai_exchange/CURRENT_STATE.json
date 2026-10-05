@@ -20,7 +20,7 @@
   },
   "canonicalState": {
     "capFloor": 131,
-    "capCeiling": 177,
+    "capCeiling": 178,
     "faDraftCorrectionPack": {
       "timestamp": "2026-09-18T13:00:00Z",
       "summary": "Narrow follow-up to PR #21: FA/DRAFT 60 rebuilt as a CAP-ordered board (dynasty consensus dropped as a sort input entirely, superseding the 35/50/15 blended methodology described in lastYahooRefresh.resolvedDuringThisRefresh below, which is now historical only). Sort key: CAP dollars descending strictly (CAP column always monotonic, missing=$0) -> Yahoo O-Rank ascending where available -> a small manual-relevance tiebreak (real 2026 draft pick number) for players Yahoo doesn't rank -> name. Candidate universe = every projected cut (all 16 teams) UNION every non-kept Yahoo-ranked player, plus a curated overlay of 16 named 2026 rookies/prospects (force-included if not kept, even if they'd otherwise fall outside the natural top 60) so they are never silently dropped. Implemented in scripts/build_fa_draft_pool.py (candidate generation / metadata enrichment / sort+truncate / render kept as separate, independently-tested functions); regression coverage in tests/test_fa_draft_pool.py.",
@@ -77,7 +77,8 @@
         "Fixed a coverage gap: the pool universe was built only from Yahoo's 300-player fetch, so ~105 current players (mostly 2026 rookies + deep bench, e.g. Kingston Flemings, Allen Graves, Nate Ament, Aday Mara) that fell outside Yahoo's window were invisible to the pool regardless of dynasty rank (owner: 'missing a lot of rookies'). Backfilled them from the same Hashtag dynasty page (name + position + NBA team from its own badges, $0 cap, since no live cap data exists for them), translating its team abbreviations to Yahoo's convention (GS->GSW, NO->NOP, NY->NYK, PHO->PHX, SA->SAS). Added a hard dedup guard after two near-miss duplicates surfaced during testing (Bub Carrington / Carlton Carrington and Jimmy Butler / Jimmy Butler III are the same people under different name spellings on the two sources).",
         "Fixed the rookie ('R') classification. It had inherited the pre-refresh board's rookie tags as-is, which mixed in players who were actually 2025 draftees now in their second year (owner: 'rookies in 2026 not 2025 ok'). Fetched the real, complete 2026 NBA draft class (all 60 picks, en.wikipedia.org/wiki/2026_NBA_draft) and made it the single source of truth for the rookie flag and purple rookie-row styling, overriding whatever the old board said. Net effect combined with the coverage-gap fix: 21 verified rookies now surface in the top 60 (was 15, some of them wrongly tagged).",
         "Fixed two more bugs surfaced by owner review: (1) a health-badge extraction regex never captured the badge's title tooltip text, so every kept/cut player's INJ/REC badge lost its title (e.g. 'Meniscus rehab') and 2 cut-list badges (Moses Moody, Donte DiVincenzo) were dropped entirely during the first pool rebuild -- re-parsed from the true pre-refresh index.html and restored all 9 original badges with correct titles. (2) Jonathan Kuminga (DHA) was still showing NBA team ATL, a stale value carried through untouched because he's outside Yahoo's 300-player fetch; both the prior Yahoo snapshot and the live Hashtag dynasty page agree he's on MIN, so kept players missing from the live Yahoo fetch now also fall back to the dynasty page's team/position data instead of staying on stale board values."
-      ]
+      ],
+      "note": "liveFloor/liveCeiling here are FORMULA values; the official band is canonicalState.capFloor/capCeiling."
     },
     "rosterBaseline": {
       "franchisesJson": "committed, 16/16 franchises, canonical order verified",
@@ -92,11 +93,15 @@
       "testCoverage": "tests/test_promote_yahoo_refresh.py (end-to-end via a throwaway git repo + fake gh, no live network/auth), tests/test_refresh_keeper_board_display.py, tests/test_prepare_yahoo_data_pr.py, tests/test_refresh_yahoo_published_baseline.py, and new cases in tests/test_yahoo_refresh_workflow.py."
     },
     "capModelSalaryOrderFix": {
-      "timestamp": "2026-10-05T04:00:00Z",
-      "summary": "Cap model now orders players by projected $ DESC (O-Rank ASC only as tie-break), takes the first 144, benchmark = sum/16. The old model bucketed by Yahoo O-Rank 1-144, which is not salary-draft order (e.g. $5 at OR 123 vs $4 at OR 97). Yahoo snapshot 2026-10-05T032730Z (identical to the supplied 2026-10-04 Top-300): top-144 sum 2468, benchmark 154.25, raw 131.1125 / 177.3875, band 131 / 177. See docs/CAP_MODEL.md.",
-      "seattle": "Thịnh re-solved at 177: keep Porziņģis ($4), cut Davion Mitchell ($3) -> 9 kept, $177/177, 0 ROOM (was Davion, $176/177). Davion enters the FA/DRAFT 60 with his Yahoo metadata; Porziņģis leaves it.",
-      "faDraftRanking": "Within a CAP tier, current Yahoo O-Rank is dominant (percentile); dynasty consensus is an upward-only secondary bonus (weight 0.15) for players with a real Yahoo O-Rank. Only curated prospects Yahoo does not rank get a conservative dynasty proxy (OR 150 + 3 x dynasty rookie rank). Curated rookies are no longer force-included (only Paul Reed is guaranteed); supersedes faDraftCorrectionPack.dynastyOrProxyFix / guaranteeScopeFix. Rui Hachimura (OR 121, $0) regression added.",
-      "cappedTeamsToReview": "No team is over 177. Teams under the 131 floor (CrazyCat, Dung, Maxfixe, DonTrick) are unchanged keeper decisions for the commissioner; this refresh did not reselect keepers beyond Seattle."
+      "timestamp": "2026-10-05T06:00:00Z",
+      "summary": "Cap model orders players by projected $ DESC (O-Rank ASC only as tie-break), takes the first 144, benchmark = sum/16 (old model bucketed by O-Rank). Yahoo snapshot 2026-10-05T032730Z: top-144 sum 2468, benchmark 154.25, raw 131.1125 / 177.3875, FORMULA band 131 / 177. OFFICIAL band is 131 / 178 (commissioner override, config/cap_policy.json). See docs/CAP_MODEL.md.",
+      "seattle": "Thịnh keeps Porziņģis ($4), cuts Davion Mitchell ($3): 9 kept, $177 (1 ROOM to 178).",
+      "faDraftRanking": "Candidate universe built before ranking: all cuts + non-kept Yahoo-ranked + non-kept players inside consensus rank 250 of data/dynasty/consensus.json (rookies through 4th-year and anyone else; Yahoo-less allowed) + approved curated prospects. Sort: CAP desc (absolute) then within-tier 65% Yahoo percentile (OR/300) + 35% dynasty percentile (consensus rank / board size); Yahoo-missing = 0.75 Yahoo score; absent from consensus = 1.0 dynasty score. No age bonus or quotas. Only Paul Reed is force-included. Supersedes faDraftCorrectionPack ranking notes and the earlier Yahoo-dominant (0.85/0.15 upward-only) PR #26 revision.",
+      "keeperOverrides": {
+        "TT | Kratos Dynasty": "KEEP Andrew Wiggins ($5), CUT Neemias Queta ($2): total $171 -> $174 (4 ROOM to 178).",
+        "DHA | Đì troi pít tông": "KEEP Jakob Poeltl ($2), CUT Jonathan Kuminga ($0): total $158 -> $160 (18 ROOM to 178). Owner/commissioner keeper-choice corrections; both players are on the pre-keeper roster (no ownership change)."
+      },
+      "capAudit178": "No team over 178. Under the 131 floor (unchanged commissioner decisions): CrazyCat 101, Dũng 126, Maxfixe 129, DonTrick 120."
     },
     "yahooTop300Export": {
       "chain": "normalized Yahoo -> exports/yahoo_top300_proj_dollar_rank.md -> exports/yahoo_top300_proj_dollar_rank.xlsx",
@@ -109,6 +114,19 @@
         "exports/yahoo_top300_proj_dollar_rank.md"
       ],
       "notes": "XLSX is parsed from the MD (never rebuilt from Yahoo); parity asserted on write and in tests/test_yahoo_top300_export.py. Commissioner reference only -- the cap model never reads it. Regenerated by refresh-yahoo.sh and promote-yahoo-refresh.sh."
+    },
+    "capFormulaFloor": 131,
+    "capFormulaCeiling": 177,
+    "capPolicy": {
+      "file": "config/cap_policy.json",
+      "officialFloor": 131,
+      "officialCeiling": 178,
+      "ceilingOverride": true,
+      "overrideReason": "Commissioner confirmed 2026-27 ceiling at 178 after R9 review (formula rounds 177.3875 to 177).",
+      "rawBenchmark": 154.25,
+      "rawFloor": 131.1125,
+      "rawCeiling": 177.3875,
+      "refreshSemantics": "A refresh compares the live FORMULA band to approvedFormula* and the live market snapshot / committed exports to tracked data; it never rewrites the official band (editing config/cap_policy.json is a human decision)."
     }
   }
 }

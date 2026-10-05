@@ -19,6 +19,9 @@ in that order. Row order in the input does not matter.
 """
 from __future__ import annotations
 
+import json
+import os
+
 BAND_SIZE = 16
 NUM_BANDS = 9
 REQUIRED_PLAYERS = BAND_SIZE * NUM_BANDS  # 144
@@ -97,8 +100,44 @@ def compute_cap_model(players) -> dict:
     }
 
 
+POLICY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config", "cap_policy.json")
+
+
+def load_cap_policy(path: str = POLICY_PATH) -> dict:
+    """Official league cap policy (commissioner governance), kept apart from
+    the formula so a Yahoo refresh can never overwrite it."""
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def apply_cap_policy(result: dict, policy: dict) -> dict:
+    """Return `result` plus formula-vs-official fields.
+
+    formulaFloor/formulaCeiling are the formula-rounded values (identical to
+    roundedFloor/roundedCeiling). officialFloor/officialCeiling are the
+    commissioner's operating band and come ONLY from the policy file.
+    approvedFormula* record the formula result the policy was approved
+    against; a live formula that differs from it needs human review, but never
+    changes the official band by itself."""
+    return {
+        **result,
+        "formulaFloor": result["roundedFloor"],
+        "formulaCeiling": result["roundedCeiling"],
+        "officialFloor": policy["officialFloor"],
+        "officialCeiling": policy["officialCeiling"],
+        "ceilingOverride": policy["officialCeiling"] != result["roundedCeiling"],
+        "floorOverride": policy["officialFloor"] != result["roundedFloor"],
+        "overrideReason": policy.get("overrideReason"),
+        "approvedFormulaFloor": policy["approvedFormulaFloor"],
+        "approvedFormulaCeiling": policy["approvedFormulaCeiling"],
+        "formulaMatchesApproved": (
+            result["roundedFloor"] == policy["approvedFormulaFloor"]
+            and result["roundedCeiling"] == policy["approvedFormulaCeiling"]
+        ),
+    }
+
+
 def main():
-    import json
     import sys
 
     if len(sys.argv) != 2:

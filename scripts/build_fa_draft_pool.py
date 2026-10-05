@@ -3,23 +3,31 @@
 
 Pipeline (kept as separate stages so each is independently testable):
 
-1. candidate generation -- union of every projected cut (parsed from the
-   16 team-card <footer class="cuts"> blocks already committed in
-   index.html) and every non-kept player in the live Yahoo 300-player
-   fetch (local_data/yahoo/players_normalized.json), plus a small curated
-   overlay of 2026 rookies/prospects that Yahoo's fetch does not carry.
-2. metadata enrichment -- attach cap dollars, O-Rank, position, NBA team
-   from the most authoritative source available per player. A candidate
-   with a current Yahoo O-Rank ALWAYS uses that real O-Rank. Only a
-   curated rookie/prospect Yahoo does not rank at all gets a
-   dynasty-derived O-Rank-scale PROXY (see _conservative_proxy_or) -- a
-   deliberately conservative one, so the overlay fills Yahoo COVERAGE
-   GAPS rather than overriding the Yahoo market.
-3. sorting -- CAP dollars descending is the only primary key. Within a
-   CAP tier, current Yahoo O-Rank is the dominant relevance signal
-   (Candidate.relevance_score); dynasty consensus is a small, upward-only
-   secondary refinement that can never leapfrog a large block of much
-   better Yahoo-ranked players. CAP stays strictly non-increasing.
+1. candidate generation -- the complete universe is built BEFORE ranking:
+   (A) every projected cut (parsed from the 16 team-card <footer
+   class="cuts"> blocks in index.html); (B) every non-kept player in the
+   live Yahoo 300-player fetch (local_data/yahoo/players_normalized.json);
+   (C) every non-kept player the project's dynasty consensus
+   (data/dynasty/consensus.json) ranks inside DYNASTY_CANDIDATE_CUTOFF --
+   rookies, sophomores, 3rd/4th-year players and anyone else the consensus
+   rates, whether or not Yahoo's top 300 carries them; (D) the small
+   curated overlay of approved 2026 prospects.
+2. metadata enrichment -- cap dollars, O-Rank, position, NBA team come from
+   the most authoritative source per player (Yahoo first; the consensus
+   board's pos/team only for players Yahoo lacks, with team abbreviations
+   translated to Yahoo's convention).
+3. sorting -- CAP dollars descending is the only primary key; a $0 player
+   can never outrank a $1+ player. Within a CAP tier,
+   Candidate.relevance_score blends two normalized percentile scores:
+   65% current-market (Yahoo O-Rank / 300) and 35% dynasty consensus
+   (consensus rank / consensus size). A player Yahoo does not rank gets a
+   fixed MISSING_YAHOO_SCORE (0.75, i.e. as if Yahoo had him ~OR 225) on
+   the Yahoo axis -- a documented uncertainty/current-contribution
+   penalty -- so a dynasty-only player does not automatically outrank a
+   credible Yahoo OR 120-160 rotation player but an elite young asset can
+   still reach the 60. A player absent from the consensus board scores
+   1.0 (worst) on the dynasty axis. No age bonus: youth only matters
+   through the consensus rank itself.
 4. truncation -- top 60 by the sort above, with a tiny guaranteed-name
    list (Paul Reed only) force-included if they would
    otherwise fall outside the cut, then the final 60 is re-sorted so CAP
@@ -55,14 +63,9 @@ ROWS_PER_BLOCK = 20
 # pool even when Yahoo's public 300-player fetch does not carry them.
 # Position/NBA team verified against the actual 2026 NBA draft results
 # (not a mock/projection -- the draft already happened this cycle).
-# `dynastyRank` is each player's real post-draft dynasty rookie rank
-# (NBC Sports Dynasty Rookie Rankings, 2026 NBA Draft class -- Boozer,
-# Peterson hold the top spots). It is used to calibrate an O-Rank-scale
-# proxy for the handful of these players Yahoo does not rank at all (see
-# DYNASTY_OR_PROXY below) -- real dynasty standing decides how a
-# Yahoo-missing rookie compares to the field, rather than mechanically
-# sorting every such rookie behind every Yahoo-ranked player regardless
-# of how good the rookie actually is.
+# `dynastyRank` is the real post-draft dynasty rookie rank (NBC Sports,
+# 2026 class), kept as reference data only -- ranking uses the project
+# consensus board (data/dynasty/consensus.json), not this field.
 CURATED_ROOKIE_OVERLAY = {
     "Cameron Boozer": dict(pos="PF", nba="MEM", dynastyRank=1),  # already in Yahoo fetch
     "Caleb Wilson": dict(pos="PF", nba="CHI", dynastyRank=3),  # already in Yahoo fetch
@@ -86,29 +89,11 @@ CURATED_ROOKIE_OVERLAY = {
     "Labaron Philon Jr.": dict(pos="PG", nba="PHI", dynastyRank=None),
 }
 
-# Conservative O-Rank-scale proxy for a curated prospect Yahoo does not
-# rank at all. Anchored well behind the credible Yahoo-ranked $0 tier
-# (established rotation players sit around Yahoo OR 120-180) so a
-# speculative prospect can never jump a large block of them; the dynasty
-# rookie rank only orders prospects among themselves and against the deep
-# end of the Yahoo list. The curated names still enter the universe, so a
-# Yahoo-missing prospect with real dynasty standing still reaches the
-# pool without turning the board into a dynasty prospect list.
-PROXY_OR_BASE = 150
-PROXY_OR_STEP = 3
-
-
-def _conservative_proxy_or(dynasty_rank):
-    return PROXY_OR_BASE + PROXY_OR_STEP * dynasty_rank
-
 # Names force-included in the final 60 regardless of where they'd
 # naturally sort (see Candidate.guaranteed). Paul Reed is the only one.
-# Curated rookies/prospects are NOT forced in: every one of them is in the
-# candidate universe and positioned by its real Yahoo O-Rank (or, for the
-# few Yahoo does not rank, the conservative dynasty proxy), so they make
-# the 60 only when that placement earns it. Forcing deep prospects in was
-# the over-dynasty failure that crowded out credible Yahoo-ranked $0
-# players (e.g. Rui Hachimura, Yahoo OR 121).
+# Prospects and young players are NOT forced in: they are in the candidate
+# universe and make the 60 only when the CAP-then-hybrid ranking earns it
+# (no category quotas).
 ALWAYS_GUARANTEED_NAMES = {"Paul Reed"}
 
 # Cut players present on a team's cut list but absent from both the
@@ -174,12 +159,27 @@ DYNASTY_NAME_ALIASES = {
 YAHOO_RANK_MAX = 300
 DYNASTY_RANK_MAX = 400
 
-# Dynasty consensus is a secondary, upward-only refinement of a player's
-# Yahoo-derived relevance. At 0.15 the best possible dynasty rank closes
-# at most 15% of a player's own Yahoo-percentile distance to the top --
-# e.g. Yahoo OR 250 with a top-5 dynasty rank is treated like OR ~213,
-# still far behind any credible OR 120-180 player.
-DYNASTY_WEIGHT = 0.15
+# Within-CAP-tier hybrid (see Candidate.relevance_score). Yahoo (current
+# market) stays the larger component.
+YAHOO_WEIGHT = 0.65
+DYNASTY_WEIGHT = 0.35
+# Yahoo-axis score for a player Yahoo does not rank (0 = best, 1 = worst).
+# 0.75 ~ "Yahoo would have him around OR 225": a conservative
+# uncertainty/current-contribution penalty. Even with a top-10 dynasty rank
+# the blended score is ~0.50, i.e. behind a credible Yahoo OR 120-150 player
+# with a middling dynasty rank, but ahead of deep Yahoo-only players.
+MISSING_YAHOO_SCORE = 0.75
+# A non-kept player enters the candidate universe from the dynasty consensus
+# if ranked at or inside this consensus rank (the board has ~540 players).
+DYNASTY_CANDIDATE_CUTOFF = 250
+
+# Dynasty-source team abbreviations -> Yahoo's convention.
+DYNASTY_TEAM_TO_YAHOO = {"GS": "GSW", "NO": "NOP", "NOR": "NOP", "NY": "NYK", "PHO": "PHX", "SA": "SAS"}
+
+
+def yahoo_team(abbr: str | None) -> str:
+    abbr = abbr or ""
+    return DYNASTY_TEAM_TO_YAHOO.get(abbr, abbr)
 
 
 @dataclass
@@ -189,7 +189,6 @@ class Candidate:
     nba: str
     cap: float
     o_rank: int = MISSING_OR  # real current Yahoo O-Rank only
-    proxy_or: int | None = None  # conservative proxy; used ONLY when o_rank is missing
     dynasty_rank: int | None = None
     yahoo_rank_max: int = YAHOO_RANK_MAX
     dynasty_rank_max: int = DYNASTY_RANK_MAX
@@ -198,32 +197,26 @@ class Candidate:
     src_team: str = ""
     guaranteed: bool = False
 
-    def effective_or(self) -> int:
-        """Real Yahoo O-Rank when the player has one; otherwise the
-        conservative dynasty-derived proxy; otherwise MISSING_OR."""
-        if self.o_rank != MISSING_OR:
-            return self.o_rank
-        if self.proxy_or is not None:
-            return self.proxy_or
-        return MISSING_OR
+    def yahoo_score(self) -> float:
+        """Current-market score (0 best, 1 worst): O-Rank as a percentile of
+        the Yahoo list; MISSING_YAHOO_SCORE when Yahoo does not rank him."""
+        if self.o_rank == MISSING_OR:
+            return MISSING_YAHOO_SCORE
+        return min(1.0, self.o_rank / self.yahoo_rank_max)
+
+    def dynasty_score(self) -> float:
+        """Dynasty score (0 best, 1 worst): consensus rank as a percentile of
+        the consensus board; 1.0 when the consensus does not rank him."""
+        if self.dynasty_rank is None:
+            return 1.0
+        return min(1.0, self.dynasty_rank / self.dynasty_rank_max)
 
     def relevance_score(self) -> float:
-        """Within-CAP-tier relevance, lower is better. Yahoo O-Rank
-        (real, else the conservative proxy) as a percentile of the Yahoo
-        list is the dominant term. For a player with a REAL Yahoo O-Rank,
-        dynasty consensus may only help: it closes at most DYNASTY_WEIGHT
-        of the gap between the player's Yahoo percentile and their dynasty
-        percentile -- never hurts (veterans with strong current Yahoo
-        value but little dynasty buzz are not penalized for it) and can
-        never produce a large jump. Proxy-ranked prospects are already
-        dynasty-derived, so no second dynasty adjustment is applied.
-        Never consulted across CAP tiers (see sort_key)."""
-        eff = self.effective_or()
-        y = 1.0 if eff == MISSING_OR else min(1.0, eff / self.yahoo_rank_max)
-        if self.o_rank != MISSING_OR and self.dynasty_rank is not None:
-            d = self.dynasty_rank / self.dynasty_rank_max
-            y -= DYNASTY_WEIGHT * max(0.0, y - d)
-        return y
+        """Within-CAP-tier relevance, lower is better:
+        YAHOO_WEIGHT * yahoo_score + DYNASTY_WEIGHT * dynasty_score, each a
+        normalized percentile (never raw ranks from lists of different
+        length). Only ever consulted inside one CAP tier (see sort_key)."""
+        return YAHOO_WEIGHT * self.yahoo_score() + DYNASTY_WEIGHT * self.dynasty_score()
 
     def sort_key(self):
         return (-self.cap, self.relevance_score(), self.name)
@@ -279,9 +272,22 @@ def load_dynasty_rankings(path=DYNASTY_RANKINGS):
     for p in data["players"]:
         key = normalize_name(p["name"])
         by_norm[DYNASTY_NAME_ALIASES.get(key, key)] = {
-            "rank": p["consensusRank"], "pos": p.get("pos"), "team": p.get("team"),
+            "rank": p["consensusRank"], "pos": p.get("pos"), "team": p.get("team"), "name": p["name"],
         }
     return by_norm, data["playerCount"]
+
+
+ROOKIE_SOURCE = os.path.join(REPO_ROOT, "data", "dynasty", "sources", "nbcsports_rookies.json")
+
+
+def load_rookie_names(path=ROOKIE_SOURCE) -> set:
+    """Normalized names of the 2026 draft class (the project's rookie-only
+    dynasty source), used for the R badge -- not for ranking."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            return {normalize_name(p["name"]) for p in json.load(f)["players"]}
+    except OSError:
+        return set()
 
 
 SPECIFIC_POSITIONS = {"PG", "SG", "SF", "PF", "C"}
@@ -293,11 +299,12 @@ def pos_from_eligible(eligible):
 
 
 def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict | None = None,
-                      dynasty_rank_max: int | None = None):
+                      dynasty_rank_max: int | None = None, rookie_names: set | None = None):
     kept, cuts = parse_team_cards(index_html)
+    rookie_names = rookie_names or set()
 
-    def proxy_or(dynasty_rank):
-        return _conservative_proxy_or(dynasty_rank) if dynasty_rank else None
+    def is_rookie(name):
+        return name in CURATED_ROOKIE_OVERLAY or normalize_name(name) in rookie_names
 
     # Real list sizes feed the relevance-score percentile normalization (see
     # Candidate.relevance_score) instead of the module-level fallback
@@ -332,17 +339,15 @@ def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict
             add(Candidate(
                 name=yp["name"], pos=pos_from_eligible(yp["eligiblePositions"]),
                 nba=yp["nbaTeam"], cap=float(yp["capDollars"]), o_rank=int(yp["oRank"]),
-                rookie=yp["name"] in CURATED_ROOKIE_OVERLAY, src="cut", src_team=cut["team"],
+                rookie=is_rookie(yp["name"]), src="cut", src_team=cut["team"],
             ))
             continue
         overlay = CURATED_ROOKIE_OVERLAY.get(cut["name"])
         if overlay is not None:
-            # Yahoo has no data for this cut player at all -- the
-            # conservative dynasty proxy positions it (no forced slot).
+            # Yahoo has no data for this cut player at all.
             add(Candidate(
                 name=cut["name"], pos=overlay["pos"], nba=overlay["nba"], cap=cut["cap"],
-                proxy_or=proxy_or(overlay["dynastyRank"]), rookie=True,
-                src="cut", src_team=cut["team"],
+                rookie=True, src="cut", src_team=cut["team"],
             ))
             continue
         fallback = CONSERVATIVE_CUT_DEFAULTS.get(cut["name"])
@@ -359,7 +364,7 @@ def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict
         # what the cut chip itself told us.
         dynasty_entry = dynasty_by_norm.get(normalize_name(cut["name"]))
         pos = (dynasty_entry.get("pos") or "") if dynasty_entry else ""
-        nba = (dynasty_entry.get("team") or "") if dynasty_entry else ""
+        nba = yahoo_team(dynasty_entry.get("team")) if dynasty_entry else ""
         add(Candidate(name=cut["name"], pos=pos, nba=nba, cap=cut["cap"], src="cut", src_team=cut["team"]))
 
     # 2. all non-kept Yahoo-ranked players
@@ -368,25 +373,38 @@ def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict
             continue
         if key in candidates:
             continue
-        rookie = yp["name"] in CURATED_ROOKIE_OVERLAY
         add(Candidate(
             name=yp["name"], pos=pos_from_eligible(yp["eligiblePositions"]),
             nba=yp["nbaTeam"], cap=float(yp["capDollars"]), o_rank=int(yp["oRank"]),
-            rookie=rookie, src="fa",
+            rookie=is_rookie(yp["name"]), src="fa",
         ))
 
-    # 3. curated overlay backfill for names Yahoo/cuts never produced --
-    # Yahoo has no data for these at all, so they enter the universe with
-    # the conservative dynasty proxy and then compete like everyone else
-    # (no forced slot -- see ALWAYS_GUARANTEED_NAMES).
+    # 3. the project's dynasty consensus board: every non-kept player ranked
+    # inside the candidate cutoff enters the universe even if Yahoo's top 300
+    # doesn't carry him (young players with a poor/absent Yahoo OR). Display
+    # name/pos/team come from the consensus board (Yahoo has no data for
+    # these players by construction -- Yahoo-ranked ones were added above).
+    for key, entry in sorted(dynasty_by_norm.items(), key=lambda kv: kv[1]["rank"]):
+        if entry["rank"] > DYNASTY_CANDIDATE_CUTOFF:
+            break
+        if key in kept or key in candidates:
+            continue
+        display = entry.get("name") or key.title()
+        add(Candidate(
+            name=display, pos=entry.get("pos") or "", nba=yahoo_team(entry.get("team")),
+            cap=0.0, rookie=is_rookie(display), src="r" if is_rookie(display) else "fa",
+        ))
+
+    # 4. curated overlay backfill for approved prospects none of the sources
+    # above produced -- they enter the universe and compete like everyone
+    # else (no forced slot -- see ALWAYS_GUARANTEED_NAMES).
     for name, meta in CURATED_ROOKIE_OVERLAY.items():
         key = normalize_name(name)
         if key in kept or key in candidates:
             continue
         add(Candidate(
             name=name, pos=meta["pos"], nba=meta["nba"], cap=0.0,
-            proxy_or=proxy_or(meta["dynastyRank"]), rookie=True,
-            src="r",
+            rookie=True, src="r",
         ))
 
     # Names guaranteed unconditionally, regardless of which path supplied
@@ -494,7 +512,8 @@ def build(index_html: str, yahoo_players_path: str = YAHOO_NORMALIZED,
           dynasty_rankings_path: str = DYNASTY_RANKINGS) -> tuple[str, list]:
     yahoo_by_norm = load_yahoo_players(yahoo_players_path)
     dynasty_by_norm, dynasty_rank_max = load_dynasty_rankings(dynasty_rankings_path)
-    candidates = build_candidates(index_html, yahoo_by_norm, dynasty_by_norm, dynasty_rank_max)
+    candidates = build_candidates(index_html, yahoo_by_norm, dynasty_by_norm, dynasty_rank_max,
+                                  rookie_names=load_rookie_names())
     ranked = sort_and_truncate(candidates)
     pool_html = render_pool_html(ranked)
     new_html = splice_pool_into_index(index_html, pool_html)

@@ -7,6 +7,8 @@
   "normalizedPlayerCount": 300,
   "derivedFloor": 131,
   "derivedCeiling": 177,
+  "officialFloor": 131,
+  "officialCeiling": 178,
   "keeperBoardPlayerRowsUpdated": 0,
   "faDraftPoolRebuilt": true,
   "testStatus": "PASS"

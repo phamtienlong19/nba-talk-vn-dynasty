@@ -1,6 +1,5 @@
 {
   "top144Sum": 2468.0,
-  "fetchedAt": "2026-10-05T032730Z",
   "bands": [
     51.0,
     32.25,
@@ -17,6 +16,15 @@
   "rawCeiling": 177.3875,
   "roundedFloor": 131,
   "roundedCeiling": 177,
+  "formulaFloor": 131,
+  "formulaCeiling": 177,
+  "officialFloor": 131,
+  "officialCeiling": 178,
+  "ceilingOverride": true,
+  "overrideReason": "Commissioner confirmed 2026-27 ceiling at 178 after R9 review (formula rounds 177.3875 to 177; official league policy is 178).",
+  "approvedFormulaFloor": 131,
+  "approvedFormulaCeiling": 177,
+  "fetchedAt": "2026-10-05T032730Z",
   "publishedFloor": 131,
-  "publishedCeiling": 177
+  "publishedCeiling": 178
 }

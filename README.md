@@ -52,9 +52,10 @@ deployment-freshness marker). See `CLAUDE.md` for the full workflow.
 ```
 
 Fetches Yahoo's public Draft Analysis endpoint, normalizes it, recomputes
-the current R1–R9 / benchmark / cap-range formula, and reports whether it
-still matches the published board's cap range (the current floor/ceiling
-in `ai_exchange/CURRENT_STATE.json`'s `canonicalState`). Never modifies
+the current R1–R9 / benchmark / cap-range formula, and reports whether the
+formula band still equals the one the official band was approved against
+(`config/cap_policy.json`; official 2026-27 band **131–178**, formula 131–177 —
+the refresh never changes the official band). Never modifies
 `index.html` automatically — see `docs/CAP_MODEL.md` and
 `docs/YAHOO_DATA_SOURCE.md`.
 
@@ -125,4 +126,4 @@ normalized Yahoo snapshot → `exports/yahoo_top300_proj_dollar_rank.md`
 (`scripts/export_yahoo_top300_xlsx.py`, derived from the Markdown, parity
 re-checked on write; needs `pip install -r requirements.txt`). Both are linked
 from the board's CAP page at stable paths. They are reference material only —
-the cap model never reads them.
+the cap model never reads them, and they contain pure Yahoo data (no cap policy, keeper, or dynasty content).

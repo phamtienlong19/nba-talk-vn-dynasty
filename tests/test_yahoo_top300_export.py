@@ -173,6 +173,26 @@ class TestCommittedExportArtifacts(unittest.TestCase):
         self.assertEqual(len({r[0] for r in md_rows}), 300)
         self.assertEqual(sorted(r[2] for r in md_rows), list(range(1, 301)))
 
+    def test_committed_export_is_fresh_vs_the_tracked_yahoo_snapshot(self):
+        import json
+        with open(os.path.join(REPO_ROOT, "data", "yahoo", "players_normalized.json"), encoding="utf-8") as f:
+            players = json.load(f)
+        with open(EXPORT_MD, encoding="utf-8") as f:
+            self.assertEqual(f.read(), md_export.render_markdown(md_export.build_rows(players)))
+
+    def test_export_is_pure_yahoo_no_cap_policy_keeper_or_dynasty_content(self):
+        with open(EXPORT_MD, encoding="utf-8") as f:
+            text = f.read().lower()
+        for forbidden in ("official", "ceiling", "dynasty", "keeper", "override", "cap policy"):
+            self.assertNotIn(forbidden, text)
+        warnings.simplefilter("ignore")
+        from openpyxl import load_workbook
+        wb = load_workbook(EXPORT_XLSX)
+        self.assertEqual(wb.sheetnames, ["Yahoo Top 300"])
+        self.assertEqual([wb.active.cell(3, c).value for c in (1, 2, 3)], ["Player", "Proj $", "Rank"])
+        self.assertIsNone(wb.active.cell(3, 4).value)
+        wb.close()
+
     def test_board_links_the_stable_xlsx_and_md_paths(self):
         with open(os.path.join(REPO_ROOT, "index.html"), encoding="utf-8") as f:
             html = f.read()

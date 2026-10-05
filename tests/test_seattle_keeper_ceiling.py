@@ -11,9 +11,9 @@ REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 
 
 class TestSeattleKeeperSetAtCorrectedCeiling(unittest.TestCase):
-    """Corrected cap band is 131/177. Seattle (Thịnh) must use the full
-    ceiling: Porziņģis ($4) kept over Davion Mitchell ($3), total exactly
-    $177, still nine legal slots."""
+    """Official cap band is 131/178 (formula 131/177). Seattle (Thịnh): Porziņģis
+    ($4) kept over Davion Mitchell ($3), total $177, still nine legal slots;
+    this approved keeper set is preserved under the 178 ceiling."""
 
     @classmethod
     def setUpClass(cls):
@@ -27,12 +27,12 @@ class TestSeattleKeeperSetAtCorrectedCeiling(unittest.TestCase):
     def _kept(self):
         return re.findall(r'<div class="pname">(.*?)</div><div class="nba">[^<]*</div><div class="cap">([\d.]+)</div>', self.card)
 
-    def test_nine_kept_totalling_exactly_the_177_ceiling(self):
+    def test_nine_kept_totalling_177_with_one_room_to_178(self):
         kept = self._kept()
         self.assertEqual(len(kept), 9)
         self.assertEqual(sum(float(c) for _, c in kept), 177)
-        self.assertIn('<div class="cap-total">177<span>/177</span></div>', self.card)
-        self.assertIn("0 ROOM", self.card)
+        self.assertIn('<div class="cap-total">177<span>/178</span></div>', self.card)
+        self.assertIn("1 ROOM", self.card)
 
     def test_porzingis_kept_and_davion_cut(self):
         kept_names = [re.sub(r"<span.*?</span>", "", n) for n, _ in self._kept()]
