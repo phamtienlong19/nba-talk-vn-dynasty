@@ -1,21 +1,22 @@
 {
-  "fetchedAt": "2026-10-01T024836Z",
+  "top144Sum": 2468.0,
+  "fetchedAt": "2026-10-05T032730Z",
   "bands": [
     51.0,
-    31.75,
+    32.25,
     24.4375,
-    18.5625,
-    13.875,
-    8.0,
-    4.0625,
-    1.25,
-    0.5
+    18.1875,
+    14.0625,
+    7.8125,
+    4.3125,
+    2.0,
+    0.1875
   ],
-  "benchmark": 153.4375,
-  "rawFloor": 130.421875,
-  "rawCeiling": 176.453125,
-  "roundedFloor": 130,
-  "roundedCeiling": 176,
+  "benchmark": 154.25,
+  "rawFloor": 131.11249999999998,
+  "rawCeiling": 177.3875,
+  "roundedFloor": 131,
+  "roundedCeiling": 177,
   "publishedFloor": 131,
   "publishedCeiling": 177
 }

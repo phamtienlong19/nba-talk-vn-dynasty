@@ -40,6 +40,16 @@ def _cap_card(tag_html, cls, total, ceiling, text, small="Full Name"):
     )
 
 
+class TestCapPillRefresh(unittest.TestCase):
+    def test_floor_ceiling_pills_follow_the_band_passed_in(self):
+        pill = '<span class="meta-pill meta-pill-cap"><span class="pill-k">CAP</span><span class="pill-v">130\u2013176</span></span>'
+        html = pill + _card("AA", "gap-room", 100, 176, "76 ROOM", [100])
+        new_html, _ = refresh_team_cap_summary(html, floor=131, ceiling=177)
+        self.assertIn('<span class="pill-v">131\u2013177</span>', new_html)
+        self.assertNotIn("130\u2013176", new_html)
+        self.assertIn("<span>/177</span>", new_html)
+
+
 class TestClassifyCap(unittest.TestCase):
     def test_under_floor(self):
         cls, text = classify_cap(100, floor=130, ceiling=176)

@@ -116,3 +116,13 @@ acting as database + UI + ledger + calculation engine all at once. See
 python3 -m unittest discover -s tests -v  # cap model, Yahoo normalization, roster baseline
 ./status.sh                            # current project state
 ```
+
+## Yahoo Top 300 commissioner export (generated)
+
+`./refresh-yahoo.sh` (and the CHANGED-refresh PR) regenerates, in order:
+normalized Yahoo snapshot → `exports/yahoo_top300_proj_dollar_rank.md`
+(`scripts/export_yahoo_top300.py`) → `exports/yahoo_top300_proj_dollar_rank.xlsx`
+(`scripts/export_yahoo_top300_xlsx.py`, derived from the Markdown, parity
+re-checked on write; needs `pip install -r requirements.txt`). Both are linked
+from the board's CAP page at stable paths. They are reference material only —
+the cap model never reads them.

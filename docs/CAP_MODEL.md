@@ -9,53 +9,45 @@ part of the formula).
 An iterable of player rows, each with:
 
 ```
-oRank        int, Yahoo O-Rank, 1-based, unique
-capDollars   number, projected cap dollars ($0 valid)
+capDollars   number, Yahoo projected auction value ($0 valid)
+oRank        int, Yahoo O-Rank, unique (tie-break only)
 ```
 
-Ranks 1–144 must all be present exactly once. Row order is irrelevant.
+At least 144 players. Row order is irrelevant.
 
 ## Calculation
 
-```
-R1 = mean(capDollars for oRank in 1..16)
-R2 = mean(capDollars for oRank in 17..32)
-R3 = mean(capDollars for oRank in 33..48)
-R4 = mean(capDollars for oRank in 49..64)
-R5 = mean(capDollars for oRank in 65..80)
-R6 = mean(capDollars for oRank in 81..96)
-R7 = mean(capDollars for oRank in 97..112)
-R8 = mean(capDollars for oRank in 113..128)
-R9 = mean(capDollars for oRank in 129..144)
+The benchmark simulates a Yahoo salary-cap draft, so it uses **salary-draft
+order — never O-Rank order**. (O-Rank is not salary order: e.g. a $5 player
+at O-Rank 123 is drafted ahead of a $4 player at O-Rank 97.)
 
-benchmark   = R1 + R2 + ... + R9
-rawFloor    = benchmark * 0.85
-rawCeiling  = benchmark * 1.15
-roundedFloor   = round(rawFloor)    # nearest whole dollar
-roundedCeiling = round(rawCeiling)  # nearest whole dollar
+```
+order      = players sorted by capDollars DESC, then oRank ASC (tie-break only)
+top144     = first 144 of that order            # 9 buckets x 16
+R1..R9     = mean(capDollars) of each consecutive group of 16 in `order`
+benchmark  = sum(top144 capDollars) / 16        # == R1 + ... + R9
+rawFloor   = benchmark * 0.85
+rawCeiling = benchmark * 1.15
+roundedFloor / roundedCeiling = round(raw...)   # nearest whole dollar
 ```
 
-Rounding uses Python's `round()` (round-half-to-even on exact .5 ties,
-which do not occur in the current verified data — no tie-breaking policy
-has been needed in practice).
+Yahoo O-Rank stays valid for display and for FA/DRAFT within-CAP-tier
+relevance; it must not define the cap buckets.
 
 ## Current verified regression snapshot
 
-`tests/test_cap_model.py` encodes a fixed regression fixture (16
-identical-valued players per band, since a band of 16 identical values
-has that value as its mean — a legitimate construction, not a
-reverse-engineered shortcut), plus structural tests: insufficient
-rankings rejected, duplicate rank rejected, missing rank rejected, row
-order doesn't matter, $0 accepted. That fixture is independent of the
-published board and does not need updating when the board's snapshot
-changes.
+`tests/test_cap_model.py` asserts, from the frozen fixture
+`tests/fixtures/yahoo_top300_2026-10-04.md` (nothing hardcoded in
+`cap_model.py`): top-144 sum 2468 → benchmark 154.25 → raw 131.1125 /
+177.3875 → **131 / 177**. It also asserts the salary-order regression
+(O-Rank 97 / $4 vs. O-Rank 123 / $5 → the $5 player is placed first).
 
 ## Published board snapshot history
 
 | Promoted | League refresh timestamp | Floor / Ceiling |
 |---|---|---|
 | 2026-09-16 (original migration) | 2026-09-16 (live-matched) | 130 / 175 |
-| 2026-09-18 | 2026-09-18T01:43:50Z | **131 / 177** (current) |
+| 2026-09-18 | 2026-09-18T01:43:50Z | **131 / 177** (current; the corrected salary-order model reproduces it on the 2026-10-05 snapshot — the earlier O-Rank-bucket model had wrongly reported 130 / 176 and 153.25 / 153.4375) |
 
 The 2026-09-18 promotion is recorded in `ai_exchange/CURRENT_STATE.json`
 (`canonicalState.lastYahooRefresh`), including the human-review flags it

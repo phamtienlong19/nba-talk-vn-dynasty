@@ -1,42 +1,22 @@
 # Implementation Report
 
-Run: 2026-09-18 — FA/DRAFT correction pack + UI polish (narrow follow-up to merged PR #21)
+Run: 2026-10-05 — cap model salary-order fix + Yahoo Top-300 export
 
-## What changed
+- `scripts/cap_model.py`: players ordered by projected $ DESC (O-Rank ASC
+  tie-break), top 144 / 16 → benchmark 154.25, band 131/177 (was O-Rank
+  buckets → 153.25–153.44, 130/176). Regression fixture + A/B salary-order
+  test in `tests/test_cap_model.py`.
+- Propagation: Seattle re-solved at 177 (Porziņģis in, Davion Mitchell out →
+  $177/177); team totals/floor-ceiling pills now refreshed by
+  `refresh_team_cap_summary.py` (pills included); FA/DRAFT 60 rebuilt.
+- FA/DRAFT ranking: Yahoo O-Rank dominant within a CAP tier, dynasty an
+  upward-only 0.15 bonus, conservative proxy only for Yahoo-missing curated
+  prospects, no forced prospect slots (Paul Reed only). Rui Hachimura
+  regression added; aggressive-proxy test removed.
+- Export: `scripts/export_yahoo_top300.py` → `exports/*.md` →
+  `scripts/export_yahoo_top300_xlsx.py` → `exports/*.xlsx`; linked on the CAP
+  page; wired into `refresh-yahoo.sh` / `promote-yahoo-refresh.sh`;
+  `requirements.txt` + CI installs openpyxl.
 
-- **FA/DRAFT 60 rebuilt** (`scripts/build_fa_draft_pool.py`, new): CAP
-  dollars descending is now the strict, monotonic primary sort key
-  (was a 35% dynasty / 50% Yahoo / 15% cap blend). Yahoo O-Rank breaks
-  CAP ties where available; a curated overlay of 16 named 2026
-  rookies/prospects is force-included if not kept, even when it would
-  otherwise fall outside the natural top 60. Full methodology,
-  entered/exited players, and the Cameron Carr / Labaron Philon
-  decision are in `ai_exchange/CURRENT_STATE.json`
-  (`canonicalState.faDraftCorrectionPack`).
-- **Defending champion crown**: presentation-only 👑 marker for
-  franchise-09 (Đạt | The Silver Seekers) added everywhere its identity
-  renders (draft order chips, KEEPERS 9–16 card, CAP page row,
-  FA/DRAFT src-cut badge). Does not touch rank/cap/keeper/draft logic.
-- **UI polish**: Draft Order split into 3 columns (Round 1 / 2 / 3,
-  was 2 panels with Round 2–3 combined); per-team cuts reordered CAP
-  descending; Roboto Mono applied to pick numbers and FA/DRAFT
-  rank/cap columns; per-player CAP display enlarged; mobile position
-  eligibility now wraps instead of overflowing.
-
-## What did NOT change
-
-Keeper rosters, keeper cap totals, and the PR #21 floor/ceiling refresh
-are untouched — verified byte-identical for all 144 kept-player rows
-and all 16 team cap-total/gap-big values (diffed against origin/main).
-
-## Validation
-
-- `python3 -m unittest discover -s tests` — 96 tests, all pass
-  (19 new in `tests/test_fa_draft_pool.py`).
-- `./validate.sh` — PASS.
-- Visual review: headless Playwright screenshots at desktop (1680px)
-  and mobile (390px) widths across Draft, Keepers, FA/DRAFT 60, and Cap.
-  Confirmed 3-column draft order renders cleanly, mobile draft order
-  unchanged (still collapses to 1 column), cuts CAP-ordered, crown
-  renders at all 6 expected locations, no position-eligibility overflow
-  on mobile team cards.
+Not changed: league rules; keeper selections other than Seattle's; the
+under-floor teams (commissioner decisions).

@@ -11,7 +11,7 @@
 #
 # On MATCH (per the result JSON's "status"): does nothing, exits 0.
 #
-# On CHANGED: mechanically regenerates index.html, runs the full test
+# On CHANGED: mechanically regenerates index.html (and exports/), runs the full test
 # suite + site validation as a hard gate, stages data/yahoo/ + index.html
 # on a deterministic branch (automation/yahoo-refresh), and opens/updates
 # exactly one PR against main. Asserts that PR actually exists at the end
@@ -30,6 +30,9 @@ ARTIFACT_DIR="artifacts/yahoo-refresh"
 # SYNC_AFTER_MERGE_*_CMD pattern) -- production default is the real suite.
 TEST_CMD="${PROMOTE_YAHOO_REFRESH_TEST_CMD:-python3 -m unittest discover -s tests}"
 VALIDATE_CMD="${PROMOTE_YAHOO_REFRESH_VALIDATE_CMD:-./validate.sh}"
+# Commissioner reference exports: normalized snapshot -> Markdown -> XLSX
+# (the XLSX is derived from the Markdown, never from Yahoo directly).
+EXPORT_CMD="${PROMOTE_YAHOO_REFRESH_EXPORT_CMD:-python3 scripts/export_yahoo_top300.py local_data/yahoo/players_normalized.json exports/yahoo_top300_proj_dollar_rank.md && python3 scripts/export_yahoo_top300_xlsx.py exports/yahoo_top300_proj_dollar_rank.md exports/yahoo_top300_proj_dollar_rank.xlsx}"
 
 STATUS="$(python3 -c "import json; print(json.load(open('$RESULT_JSON'))['status'])")"
 echo "status=$STATUS"
@@ -51,8 +54,20 @@ python3 scripts/refresh_keeper_board_display.py \
   --output index.html \
   --stats-out "$ARTIFACT_DIR/keeper_board_stats.json"
 
+echo "Recomputing team cap totals / floor-ceiling display against the corrected cap band..."
+CAP_FLOOR="$(python3 -c "import json; print(json.load(open('$RESULT_JSON'))['current']['floor'])")"
+CAP_CEILING="$(python3 -c "import json; print(json.load(open('$RESULT_JSON'))['current']['ceiling'])")"
+python3 scripts/refresh_team_cap_summary.py \
+  --index-html index.html \
+  --floor "$CAP_FLOOR" --ceiling "$CAP_CEILING" \
+  --output index.html \
+  --stats-out "$ARTIFACT_DIR/cap_summary_stats.json"
+
 echo "Rebuilding FA/DRAFT 60 pool..."
 python3 scripts/build_fa_draft_pool.py
+
+echo "Generating Yahoo Top 300 Markdown + XLSX exports..."
+bash -c "$EXPORT_CMD"
 
 echo "Running full test suite + site validation (hard gate before PR)..."
 TEST_STATUS=PASS
@@ -97,6 +112,7 @@ git fetch origin main
 git checkout -B "$BRANCH" origin/main
 
 git add "$DATA_DIR" index.html
+[ -d exports ] && git add exports
 
 if git diff --cached --quiet; then
   echo "::error::Yahoo refresh reported CHANGED but regeneration produced no diff against main -- investigate before trusting CHANGED detection."

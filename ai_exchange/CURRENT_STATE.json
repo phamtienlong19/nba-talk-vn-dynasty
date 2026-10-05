@@ -12,11 +12,11 @@
     "liveContentCheck": "PASS"
   },
   "working": {
-    "branch": "fix/yahoo-refresh-pr-automation",
-    "commit": "1bf2fde",
+    "branch": "fix/cap-model-salary-order-and-yahoo-export",
+    "commit": null,
     "issue": null,
-    "prUrl": "https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/23",
-    "status": "READY_FOR_REVIEW"
+    "prUrl": null,
+    "status": "IN_PROGRESS"
   },
   "canonicalState": {
     "capFloor": 131,
@@ -24,7 +24,24 @@
     "faDraftCorrectionPack": {
       "timestamp": "2026-09-18T13:00:00Z",
       "summary": "Narrow follow-up to PR #21: FA/DRAFT 60 rebuilt as a CAP-ordered board (dynasty consensus dropped as a sort input entirely, superseding the 35/50/15 blended methodology described in lastYahooRefresh.resolvedDuringThisRefresh below, which is now historical only). Sort key: CAP dollars descending strictly (CAP column always monotonic, missing=$0) -> Yahoo O-Rank ascending where available -> a small manual-relevance tiebreak (real 2026 draft pick number) for players Yahoo doesn't rank -> name. Candidate universe = every projected cut (all 16 teams) UNION every non-kept Yahoo-ranked player, plus a curated overlay of 16 named 2026 rookies/prospects (force-included if not kept, even if they'd otherwise fall outside the natural top 60) so they are never silently dropped. Implemented in scripts/build_fa_draft_pool.py (candidate generation / metadata enrichment / sort+truncate / render kept as separate, independently-tested functions); regression coverage in tests/test_fa_draft_pool.py.",
-      "curatedOverlayForced": ["Cameron Boozer", "Caleb Wilson", "AJ Dybantsa", "Darryn Peterson", "Darius Acuff Jr.", "Keaton Wagler", "Mikel Brown Jr.", "Kingston Flemings", "Yaxel Lendeborg", "Morez Johnson Jr.", "Allen Graves", "Meleek Thomas", "Ebuka Okorie", "Brayden Burries", "Aday Mara", "Hannes Steinbach"],
+      "curatedOverlayForced": [
+        "Cameron Boozer",
+        "Caleb Wilson",
+        "AJ Dybantsa",
+        "Darryn Peterson",
+        "Darius Acuff Jr.",
+        "Keaton Wagler",
+        "Mikel Brown Jr.",
+        "Kingston Flemings",
+        "Yaxel Lendeborg",
+        "Morez Johnson Jr.",
+        "Allen Graves",
+        "Meleek Thomas",
+        "Ebuka Okorie",
+        "Brayden Burries",
+        "Aday Mara",
+        "Hannes Steinbach"
+      ],
       "reviewedNotForced": {
         "Cameron Carr": "does not clear the CAP-first top 60 naturally (no Yahoo rank, no cap, low draft-relevance vs. the pool's $0/OR-ranked tier) -- excluded per the correction pack's explicit non-guarantee for this name.",
         "Labaron Philon Jr.": "same reasoning as Cameron Carr -- reviewed, excluded."
@@ -39,7 +56,7 @@
       "srcBadgeFix": "Owner-spotted bug: rookies found via the live Yahoo fetch (e.g. Cameron Boozer, AJ Dybantsa) were showing the 'FA' SRC badge instead of 'R', because the badge was keyed off which data path supplied the candidate rather than the independent rookie flag. Fixed in scripts/build_fa_draft_pool.py:src_badge_html -- badge priority is now cut (team short name) > rookie ('R') > 'FA', so every rookie shows 'R' regardless of source, and a cut player who happens to also be a curated rookie (not currently the case in this league) still correctly shows the cut team's name."
     },
     "lastYahooRefresh": {
-      "timestamp": "2026-09-18T01:43:50Z",
+      "timestamp": "2026-10-05T03:27:30Z",
       "leagueKey": "478.l.public",
       "playersFetched": 300,
       "result": "CHANGED",
@@ -73,6 +90,25 @@
       "relatedFix": "refresh-yahoo.sh's MATCH/CHANGED comparison was hardcoding PUBLISHED_FLOOR/CEILING = 130, 175 -- stale since PR #21/#22 promoted the canonical floor/ceiling to 131/177 (see canonicalState.capFloor/capCeiling above). Left unfixed, every future refresh would report CHANGED forever regardless of real Yahoo movement. Now reads ai_exchange/CURRENT_STATE.json's canonicalState.capFloor/capCeiling, falling back to the old hardcoded pair only if that file/keys are unavailable.",
       "knownLimitation": "GITHUB_TOKEN-authored pushes/PRs do not auto-trigger this repo's own push/pull_request-triggered CI (validate.yml, claude-code-review.yml) -- a documented GitHub Actions anti-recursion behavior, not a bug in this fix. The PR body says so and recommends manually re-running checks on the opened PR. Confirmed repository setting (gh api .../actions/permissions/workflow): can_approve_pull_request_reviews=true, i.e. 'Allow GitHub Actions to create and approve pull requests' is already enabled, so PR creation itself is not blocked.",
       "testCoverage": "tests/test_promote_yahoo_refresh.py (end-to-end via a throwaway git repo + fake gh, no live network/auth), tests/test_refresh_keeper_board_display.py, tests/test_prepare_yahoo_data_pr.py, tests/test_refresh_yahoo_published_baseline.py, and new cases in tests/test_yahoo_refresh_workflow.py."
+    },
+    "capModelSalaryOrderFix": {
+      "timestamp": "2026-10-05T04:00:00Z",
+      "summary": "Cap model now orders players by projected $ DESC (O-Rank ASC only as tie-break), takes the first 144, benchmark = sum/16. The old model bucketed by Yahoo O-Rank 1-144, which is not salary-draft order (e.g. $5 at OR 123 vs $4 at OR 97). Yahoo snapshot 2026-10-05T032730Z (identical to the supplied 2026-10-04 Top-300): top-144 sum 2468, benchmark 154.25, raw 131.1125 / 177.3875, band 131 / 177. See docs/CAP_MODEL.md.",
+      "seattle": "Thịnh re-solved at 177: keep Porziņģis ($4), cut Davion Mitchell ($3) -> 9 kept, $177/177, 0 ROOM (was Davion, $176/177). Davion enters the FA/DRAFT 60 with his Yahoo metadata; Porziņģis leaves it.",
+      "faDraftRanking": "Within a CAP tier, current Yahoo O-Rank is dominant (percentile); dynasty consensus is an upward-only secondary bonus (weight 0.15) for players with a real Yahoo O-Rank. Only curated prospects Yahoo does not rank get a conservative dynasty proxy (OR 150 + 3 x dynasty rookie rank). Curated rookies are no longer force-included (only Paul Reed is guaranteed); supersedes faDraftCorrectionPack.dynastyOrProxyFix / guaranteeScopeFix. Rui Hachimura (OR 121, $0) regression added.",
+      "cappedTeamsToReview": "No team is over 177. Teams under the 131 floor (CrazyCat, Dung, Maxfixe, DonTrick) are unchanged keeper decisions for the commissioner; this refresh did not reselect keepers beyond Seattle."
+    },
+    "yahooTop300Export": {
+      "chain": "normalized Yahoo -> exports/yahoo_top300_proj_dollar_rank.md -> exports/yahoo_top300_proj_dollar_rank.xlsx",
+      "scripts": [
+        "scripts/export_yahoo_top300.py",
+        "scripts/export_yahoo_top300_xlsx.py"
+      ],
+      "publicPaths": [
+        "exports/yahoo_top300_proj_dollar_rank.xlsx",
+        "exports/yahoo_top300_proj_dollar_rank.md"
+      ],
+      "notes": "XLSX is parsed from the MD (never rebuilt from Yahoo); parity asserted on write and in tests/test_yahoo_top300_export.py. Commissioner reference only -- the cap model never reads it. Regenerated by refresh-yahoo.sh and promote-yahoo-refresh.sh."
     }
   }
 }

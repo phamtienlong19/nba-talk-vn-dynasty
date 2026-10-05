@@ -23,9 +23,6 @@ from cap_model import compute_cap_model, CapModelError
 players = json.load(open("local_data/yahoo/players_normalized.json", encoding="utf-8"))
 print(f"Players parsed: {len(players)}")
 
-ranks = {p["oRank"] for p in players}
-complete_1_144 = all(r in ranks for r in range(1, 145))
-print(f"Ranks 1-144 complete: {'PASS' if complete_1_144 else 'FAIL'}")
 print("")
 
 try:
@@ -34,12 +31,17 @@ except CapModelError as e:
     print(f"CAP MODEL ERROR: {e}", file=sys.stderr)
     sys.exit(1)
 
+# Salary-draft order (projected $ DESC, O-Rank ASC tie-break) -- see
+# scripts/cap_model.py. O-Rank never defines the cap buckets.
 for i, band in enumerate(result["bands"], start=1):
     print(f"R{i}: {band:.4f}")
 print("")
-print(f"Benchmark: {result['benchmark']:.4f}")
-print(f"Floor: {result['roundedFloor']}")
-print(f"Ceiling: {result['roundedCeiling']}")
+print(f"TOP-144 PROJECTED-$ SUM: {result['top144Sum']:g}")
+print(f"BENCHMARK: {result['benchmark']:.4f}")
+print(f"RAW FLOOR: {result['rawFloor']:.4f}")
+print(f"RAW CEILING: {result['rawCeiling']:.4f}")
+print(f"PUBLISHED FLOOR: {result['roundedFloor']}")
+print(f"PUBLISHED CEILING: {result['roundedCeiling']}")
 print("")
 
 try:
@@ -60,6 +62,7 @@ else:
     print("Status: CHANGED — REVIEW BEFORE SEASON SNAPSHOT UPDATE")
 
 snapshot = {
+    "top144Sum": result["top144Sum"],
     "fetchedAt": players[0]["sourceTimestamp"] if players else None,
     "rawSnapshot": sys.argv[1],
     "bands": result["bands"],
@@ -74,3 +77,9 @@ snapshot = {
 with open("local_data/yahoo/cap_snapshot_latest.json", "w", encoding="utf-8") as f:
     json.dump(snapshot, f, indent=2)
 PYEOF
+
+# Commissioner reference exports: normalized snapshot -> Markdown -> XLSX.
+# The XLSX is derived from the Markdown (one tabular interpretation); the
+# cap model above never reads either file.
+python3 scripts/export_yahoo_top300.py local_data/yahoo/players_normalized.json exports/yahoo_top300_proj_dollar_rank.md
+python3 scripts/export_yahoo_top300_xlsx.py exports/yahoo_top300_proj_dollar_rank.md exports/yahoo_top300_proj_dollar_rank.xlsx
