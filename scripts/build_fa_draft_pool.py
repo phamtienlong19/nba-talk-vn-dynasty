@@ -28,7 +28,7 @@ Pipeline (kept as separate stages so each is independently testable):
    still reach the 60. A player absent from the consensus board scores
    1.0 (worst) on the dynasty axis. No age bonus: youth only matters
    through the consensus rank itself.
-4. truncation -- rows 1-40 are the plain ranking above. Rows 41-60 (page 3)
+4. truncation -- rows 1-39 are the plain ranking above. Rows 40-60
    hold the owner-approved depth names (TAIL_PINNED_NAMES + Paul Reed) and
    then the best rookies / sophomores / 3rd-year players (draft class from
    data/dynasty/draft_classes.json + the 2026 rookie source) by the same
@@ -183,11 +183,12 @@ DYNASTY_CANDIDATE_CUTOFF = 250
 # sophomores / 3rd-year players by the same hybrid score. "Young" comes from
 # data/dynasty/draft_classes.json (2025, 2024 classes) and the 2026 rookie
 # source -- never an age bonus inside the score itself.
-CORE_SIZE = 40
+CORE_SIZE = 39
 YOUNG_FIRST_CLASS_YEAR = 2024  # 2026 rookie, 2025 sophomore, 2024 3rd-year
 TAIL_PINNED_NAMES = {
     "Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia",
     "Jared McCain", "Bilal Coulibaly",
+    "Tre Jones",  # owner: preferred over De'Andre Hunter (plain rank 40) for the last depth slot
     "Allen Graves", "Aday Mara",  # owner: high-interest 2026 rookies whose deep Yahoo OR undersells them
 }
 DRAFT_CLASSES = os.path.join(REPO_ROOT, "data", "dynasty", "draft_classes.json")

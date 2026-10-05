@@ -79,12 +79,10 @@ class TestIndexHtmlPoolRegressions(unittest.TestCase):
             self.assertIn(name, self.names, f"{name} must not be crowded out by dynasty prospects")
 
     def test_page_three_keeps_pinned_names_and_drops_replaced_veterans(self):
-        tail = self.names[40:]
-        for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Bilal Coulibaly", "Allen Graves", "Aday Mara"):
+        tail = self.names[pool.CORE_SIZE:]
+        for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Bilal Coulibaly", "Allen Graves", "Aday Mara", "Tre Jones"):
             self.assertIn(kept, tail)
-        # (De'Andre Hunter is excluded: at 60/40 he is plain rank 40, i.e. the
-        # last CORE row, which the owner left alone.)
-        for gone in ("Bobby Portis Jr.", "Robert Williams III", "Anfernee Simons",
+        for gone in ("De&#x27;Andre Hunter", "Bobby Portis Jr.", "Robert Williams III", "Anfernee Simons",
                      "Nikola Vučević", "Brook Lopez", "Naji Marshall", "Jordan Poole", "Dennis Schröder"):
             self.assertNotIn(gone, self.names)
 
@@ -460,12 +458,13 @@ class TestPageThreeYoungTail(unittest.TestCase):
         tail = [x.name for x in ranked[pool.CORE_SIZE:]]
         self.assertIn("PinnedVet", tail)
         self.assertFalse([n for n in tail if n.startswith("Vet")])
-        self.assertEqual(len([n for n in tail if n.startswith("Young")]), 19)  # PinnedVet takes 1 of 20 slots
+        self.assertEqual(len([n for n in tail if n.startswith("Young")]), 60 - pool.CORE_SIZE - 1)  # PinnedVet takes 1 slot
 
     def test_best_young_by_hybrid_score_get_the_slots_no_quota(self):
         ranked = pool.sort_and_truncate(self._universe())
         young = [x.name for x in ranked if x.name.startswith("Young")]
-        self.assertEqual(young, [f"Young{i}" for i in range(19)])  # best 19 by score, not an arbitrary 19
+        n = 60 - pool.CORE_SIZE - 1
+        self.assertEqual(young, [f"Young{i}" for i in range(n)])  # the best n by score, not an arbitrary n
 
     def test_not_enough_young_candidates_falls_back_to_plain_order(self):
         c = {f"P{i}": self._c(f"P{i}", 100 + i) for i in range(70)}
@@ -478,10 +477,10 @@ class TestPageThreeYoungTail(unittest.TestCase):
         caps = [x.cap for x in pool.sort_and_truncate(c)]
         self.assertEqual(caps, sorted(caps, reverse=True))
 
-    def test_pinned_names_are_the_owner_approved_eight(self):
+    def test_pinned_names_are_the_owner_approved_nine(self):
         self.assertEqual(pool.TAIL_PINNED_NAMES, {"Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.",
                                                   "Jake LaRavia", "Jared McCain", "Bilal Coulibaly",
-                                                  "Allen Graves", "Aday Mara"})
+                                                  "Allen Graves", "Aday Mara", "Tre Jones"})
 
     def test_draft_class_table_marks_sophomores_and_third_years_but_not_older_players(self):
         years = pool.load_draft_years()
