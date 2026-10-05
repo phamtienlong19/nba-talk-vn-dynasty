@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-05T03:56:03Z
+Generated: 2026-10-05T04:04:32Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: fix/cap-model-salary-order-and-yahoo-export
-Commit: 8a5eab5
+Commit: 6a993a4
 Base: main
 Working tree: clean
 
@@ -18,7 +18,7 @@ Working tree: clean
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
 PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/26 (OPEN)
-CI: Claude Code Review: completed/success
+CI: validate: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -30,11 +30,12 @@ Fingerprint: FRESH
  .github/workflows/validate.yml                 |    3 +
  .github/workflows/yahoo-refresh.yml            |    8 +
  README.md                                      |   17 +-
- ai_exchange/CURRENT_STATE.json                 |   70 +-
+ ai_exchange/CURRENT_STATE.json                 |   71 +-
  ai_exchange/IMPLEMENTATION_REPORT.md           |   55 +-
- ai_exchange/REVIEW_PACKET.md                   |  108 +-
+ ai_exchange/REVIEW_PACKET.md                   |  126 +-
  config/cap_policy.json                         |    9 +
  data/dynasty/consensus.json                    | 6605 +++++++++++++++++++++
+ data/dynasty/draft_classes.json                |   22 +
  data/dynasty/sources/allaccess_categories.json | 3159 ++++++++++
  data/dynasty/sources/dynatyze.json             |  447 ++
  data/dynasty/sources/hashtagbasketball.json    | 2361 ++++++++
@@ -52,7 +53,7 @@ Fingerprint: FRESH
  refresh-yahoo.sh                               |   60 +-
  requirements.txt                               |    1 +
  scripts/build_dynasty_consensus.py             |  189 +
- scripts/build_fa_draft_pool.py                 |  331 +-
+ scripts/build_fa_draft_pool.py                 |  422 +-
  scripts/build_yahoo_refresh_result.py          |   66 +-
  scripts/cap_model.py                           |  120 +-
  scripts/export_yahoo_top300.py                 |  101 +
@@ -68,7 +69,7 @@ Fingerprint: FRESH
  tests/test_build_dynasty_consensus.py          |  161 +
  tests/test_build_yahoo_refresh_result.py       |   70 +
  tests/test_cap_model.py                        |  136 +-
- tests/test_fa_draft_pool.py                    |  254 +-
+ tests/test_fa_draft_pool.py                    |  332 +-
  tests/test_keeper_overrides.py                 |   82 +
  tests/test_official_cap_policy.py              |   87 +
  tests/test_promote_yahoo_refresh.py            |    2 +-
@@ -77,7 +78,7 @@ Fingerprint: FRESH
  tests/test_refresh_yahoo_published_baseline.py |  107 +-
  tests/test_seattle_keeper_ceiling.py           |   59 +
  tests/test_yahoo_top300_export.py              |  218 +
- 50 files changed, 24293 insertions(+), 562 deletions(-)
+ 51 files changed, 24481 insertions(+), 584 deletions(-)
 ```
 
 ## Validation
@@ -100,6 +101,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - ai_exchange/REVIEW_PACKET.md
 - config/cap_policy.json
 - data/dynasty/consensus.json
+- data/dynasty/draft_classes.json
 - data/dynasty/sources/allaccess_categories.json
 - data/dynasty/sources/dynatyze.json
 - data/dynasty/sources/hashtagbasketball.json
