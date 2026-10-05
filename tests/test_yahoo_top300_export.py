@@ -151,6 +151,52 @@ class TestXlsxParity(unittest.TestCase):
             with open(a, "rb") as fa, open(b, "rb") as fb:
                 self.assertEqual(fa.read(), fb.read())
 
+    def test_three_generations_have_identical_sha256_even_across_a_clock_tick(self):
+        import hashlib
+        import time
+        digests = set()
+        with tempfile.TemporaryDirectory() as tmp:
+            for i in range(3):
+                path = os.path.join(tmp, f"g{i}.xlsx")
+                xlsx_export.export_xlsx(FIXTURE_MD, path)
+                with open(path, "rb") as f:
+                    digests.add(hashlib.sha256(f.read()).hexdigest())
+                time.sleep(2.1)  # ZIP timestamps have 2-second resolution
+        self.assertEqual(len(digests), 1)
+
+    def test_zip_members_are_canonical_and_workbook_still_loads(self):
+        import zipfile
+        from openpyxl import load_workbook
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "c.xlsx")
+            xlsx_export.export_xlsx(FIXTURE_MD, path)
+            with zipfile.ZipFile(path) as z:
+                self.assertIsNone(z.testzip())
+                infos = z.infolist()
+                self.assertEqual(infos[0].filename, "[Content_Types].xml")
+                self.assertEqual({i.date_time for i in infos}, {(1980, 1, 1, 0, 0, 0)})
+                self.assertEqual({i.compress_type for i in infos}, {zipfile.ZIP_DEFLATED})
+                self.assertEqual([i.filename for i in infos[1:]], sorted(i.filename for i in infos[1:]))
+            wb = load_workbook(path)
+            ws = wb["Yahoo Top 300"]
+            self.assertEqual(ws.freeze_panes, "A4")
+            self.assertEqual(ws.auto_filter.ref, "A3:C303")
+            self.assertEqual([str(r) for r in ws.merged_cells.ranges], ["A1:C1"])
+            self.assertEqual(len(ws.conditional_formatting), 1)
+            self.assertEqual(wb.properties.created, xlsx_export.FIXED_DATETIME)
+            self.assertEqual(wb.properties.modified, xlsx_export.FIXED_DATETIME)
+            wb.close()
+            self.assertEqual(os.listdir(tmp), ["c.xlsx"], "no temp/canonicalization files may remain")
+
+    def test_no_temp_files_remain_after_a_failed_export(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bad_md = os.path.join(tmp, "bad.md")
+            with open(bad_md, "w", encoding="utf-8") as f:
+                f.write("# nothing\n")
+            with self.assertRaises(ValueError):
+                xlsx_export.export_xlsx(bad_md, os.path.join(tmp, "o.xlsx"))
+            self.assertEqual(os.listdir(tmp), ["bad.md"])
+
     def test_divergence_between_md_and_xlsx_is_detected(self):
         from openpyxl import load_workbook
         wb = load_workbook(self.xlsx)

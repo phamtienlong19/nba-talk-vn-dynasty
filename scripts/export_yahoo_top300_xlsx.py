@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import datetime
 import os
+import re
 import sys
+import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from export_yahoo_top300 import (  # noqa: E402
@@ -25,6 +27,11 @@ SHEET = "Yahoo Top 300"
 TITLE = "Yahoo Top 300 — Projected $ / Rank"
 HEADERS = ("Player", "Proj $", "Rank")
 FIRST_DATA_ROW = 4
+
+FIXED_DATETIME = datetime.datetime(1980, 1, 1)
+ZIP_EPOCH = (1980, 1, 1, 0, 0, 0)
+
+MODIFIED_RE = re.compile(rb"(<dcterms:modified[^>]*>)[^<]*(</dcterms:modified>)")
 
 PURPLE_TITLE = "5F01D1"
 DARK_HEADER = "111827"
@@ -91,16 +98,51 @@ def build_workbook(rows, out_path: str) -> None:
     ws.freeze_panes = f"A{FIRST_DATA_ROW}"
     ws.auto_filter.ref = f"A3:C{last}"
 
-    # Fixed timestamps keep regeneration byte-stable for identical input.
-    fixed = datetime.datetime(2000, 1, 1)
-    wb.properties.created = fixed
-    wb.properties.modified = fixed
+    # Fixed workbook metadata (never the current time or the environment).
+    wb.properties.created = FIXED_DATETIME
+    wb.properties.modified = FIXED_DATETIME
     wb.properties.creator = "nba-talk-vn-dynasty"
+    wb.properties.lastModifiedBy = "nba-talk-vn-dynasty"
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    raw = out_path + ".raw.tmp"
     tmp = out_path + ".tmp"
-    wb.save(tmp)
-    os.replace(tmp, out_path)
+    try:
+        wb.save(raw)
+        canonicalize_xlsx(raw, tmp)
+        os.replace(tmp, out_path)
+    finally:
+        for leftover in (raw, tmp):
+            if os.path.exists(leftover):
+                os.remove(leftover)
+
+
+def canonicalize_xlsx(src: str, dst: str) -> None:
+    """Rewrite an XLSX (ZIP) so identical content gives identical bytes:
+    members in a fixed order, every ZipInfo.date_time pinned to ZIP_EPOCH,
+    one fixed compression method/level and fixed attributes. XML payloads are
+    copied byte-for-byte."""
+    with zipfile.ZipFile(src) as zin:
+        # [Content_Types].xml first (as Excel writes it), rest alphabetical.
+        names = sorted(zin.namelist(), key=lambda n: (n != "[Content_Types].xml", n))
+        payloads = [(n, zin.read(n)) for n in names]
+    # openpyxl's save() unconditionally stamps dcterms:modified with the
+    # current time (openpyxl/writer/excel.py), so pinning
+    # wb.properties.modified beforehand isn't enough: rewrite that one value
+    # in docProps/core.xml. Every other payload is copied byte-for-byte.
+    pinned = FIXED_DATETIME.strftime("%Y-%m-%dT%H:%M:%SZ").encode()
+    payloads = [
+        (n, MODIFIED_RE.sub(rb"\g<1>" + pinned + rb"\g<2>", d) if n == "docProps/core.xml" else d)
+        for n, d in payloads
+    ]
+    with zipfile.ZipFile(dst, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zout:
+        for name, data in payloads:
+            info = zipfile.ZipInfo(name, date_time=ZIP_EPOCH)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 3  # fixed regardless of the platform that wrote it
+            info.external_attr = 0o600 << 16
+            info.flag_bits = 0
+            zout.writestr(info, data, compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
 
 
 def export_xlsx(md_path: str = DEFAULT_MD, out_path: str = DEFAULT_XLSX) -> list:
