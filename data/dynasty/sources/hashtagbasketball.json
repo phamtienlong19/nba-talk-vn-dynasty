@@ -2,6 +2,7 @@
   "source": "hashtagbasketball.com/fantasy-basketball-dynasty-rankings",
   "fetchedAt": "2026-10-01T00:00:00Z",
   "note": "Crowdsourced consensus dynasty rankings, 400 entries minus 8 non-player draft-pick placeholder rows. Extracted via live browser DOM read (.dyn-card elements) -- a plain HTTP fetch only returns the first ~98 (client-rendered beyond that). Verified current: includes full 2026 NBA draft class.",
+  "informativeAbsence": true,
   "playerCount": 392,
   "players": [
     {
