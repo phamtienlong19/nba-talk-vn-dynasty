@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-05T04:05:37Z
+Generated: 2026-10-05T04:21:23Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: fix/cap-model-salary-order-and-yahoo-export
-Commit: 066319c
+Commit: 260f51a
 Base: main
 Working tree: clean
 
@@ -18,7 +18,7 @@ Working tree: clean
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
 PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/26 (OPEN)
-CI: Claude Code Review: in_progress/
+CI: Claude Code Review: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -30,9 +30,9 @@ Fingerprint: FRESH
  .github/workflows/validate.yml                 |    3 +
  .github/workflows/yahoo-refresh.yml            |    8 +
  README.md                                      |   17 +-
- ai_exchange/CURRENT_STATE.json                 |   71 +-
+ ai_exchange/CURRENT_STATE.json                 |   72 +-
  ai_exchange/IMPLEMENTATION_REPORT.md           |   55 +-
- ai_exchange/REVIEW_PACKET.md                   |  128 +-
+ ai_exchange/REVIEW_PACKET.md                   |  126 +-
  config/cap_policy.json                         |    9 +
  data/dynasty/consensus.json                    | 6605 +++++++++++++++++++++
  data/dynasty/draft_classes.json                |   22 +
@@ -49,7 +49,7 @@ Fingerprint: FRESH
  exports/yahoo_top300_proj_dollar_rank.md       |  304 +
  exports/yahoo_top300_proj_dollar_rank.xlsx     |  Bin 0 -> 13118 bytes
  index.html                                     |  172 +-
- promote-yahoo-refresh.sh                       |   19 +-
+ promote-yahoo-refresh.sh                       |   38 +-
  refresh-yahoo.sh                               |   60 +-
  requirements.txt                               |    1 +
  scripts/build_dynasty_consensus.py             |  189 +
@@ -69,16 +69,16 @@ Fingerprint: FRESH
  tests/test_build_dynasty_consensus.py          |  161 +
  tests/test_build_yahoo_refresh_result.py       |   70 +
  tests/test_cap_model.py                        |  136 +-
- tests/test_fa_draft_pool.py                    |  333 +-
+ tests/test_fa_draft_pool.py                    |  335 +-
  tests/test_keeper_overrides.py                 |   82 +
  tests/test_official_cap_policy.py              |   87 +
- tests/test_promote_yahoo_refresh.py            |    2 +-
+ tests/test_promote_yahoo_refresh.py            |   40 +-
  tests/test_refresh_keeper_board_display.py     |  146 +-
  tests/test_refresh_team_cap_summary.py         |  158 +
  tests/test_refresh_yahoo_published_baseline.py |  107 +-
  tests/test_seattle_keeper_ceiling.py           |   59 +
- tests/test_yahoo_top300_export.py              |  218 +
- 51 files changed, 24485 insertions(+), 584 deletions(-)
+ tests/test_yahoo_top300_export.py              |  237 +
+ 51 files changed, 24559 insertions(+), 587 deletions(-)
 ```
 
 ## Validation
