@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-05T04:21:23Z
+Generated: 2026-10-05T04:36:14Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: fix/cap-model-salary-order-and-yahoo-export
-Commit: 260f51a
+Commit: a06c6a5
 Base: main
 Working tree: clean
 
@@ -32,7 +32,7 @@ Fingerprint: FRESH
  README.md                                      |   17 +-
  ai_exchange/CURRENT_STATE.json                 |   72 +-
  ai_exchange/IMPLEMENTATION_REPORT.md           |   55 +-
- ai_exchange/REVIEW_PACKET.md                   |  126 +-
+ ai_exchange/REVIEW_PACKET.md                   |  128 +-
  config/cap_policy.json                         |    9 +
  data/dynasty/consensus.json                    | 6605 +++++++++++++++++++++
  data/dynasty/draft_classes.json                |   22 +
@@ -53,7 +53,7 @@ Fingerprint: FRESH
  refresh-yahoo.sh                               |   60 +-
  requirements.txt                               |    1 +
  scripts/build_dynasty_consensus.py             |  189 +
- scripts/build_fa_draft_pool.py                 |  423 +-
+ scripts/build_fa_draft_pool.py                 |  424 +-
  scripts/build_yahoo_refresh_result.py          |   66 +-
  scripts/cap_model.py                           |  120 +-
  scripts/export_yahoo_top300.py                 |  101 +
@@ -69,7 +69,7 @@ Fingerprint: FRESH
  tests/test_build_dynasty_consensus.py          |  161 +
  tests/test_build_yahoo_refresh_result.py       |   70 +
  tests/test_cap_model.py                        |  136 +-
- tests/test_fa_draft_pool.py                    |  335 +-
+ tests/test_fa_draft_pool.py                    |  334 +-
  tests/test_keeper_overrides.py                 |   82 +
  tests/test_official_cap_policy.py              |   87 +
  tests/test_promote_yahoo_refresh.py            |   40 +-
@@ -78,7 +78,7 @@ Fingerprint: FRESH
  tests/test_refresh_yahoo_published_baseline.py |  107 +-
  tests/test_seattle_keeper_ceiling.py           |   59 +
  tests/test_yahoo_top300_export.py              |  237 +
- 51 files changed, 24559 insertions(+), 587 deletions(-)
+ 51 files changed, 24560 insertions(+), 588 deletions(-)
 ```
 
 ## Validation
