@@ -1,0 +1,190 @@
+{
+  "season": "2026-27",
+  "note": "Atomic transactions. Only status OFFICIAL mutates canonical state; PROPOSED/AGREED mutate scenario state only. Each asset: {type, playerKey|pickId, from, to}. `dependsOn` lists trades that must be active and applied first.",
+  "statuses": [
+    "PROPOSED",
+    "AGREED",
+    "OFFICIAL",
+    "VOID"
+  ],
+  "trades": [
+    {
+      "tradeId": "TRADE-A",
+      "label": "BZ ↔ BSY",
+      "status": "PROPOSED",
+      "order": 1,
+      "dependsOn": [],
+      "participants": [
+        "franchise-15",
+        "franchise-01"
+      ],
+      "note": "Gobert + 1.03 to Bz; Murray + 1.15 to Bsy.",
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.5197",
+          "name": "Rudy Gobert",
+          "from": "franchise-01",
+          "to": "franchise-15"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R1-03",
+          "name": "1.03",
+          "from": "franchise-01",
+          "to": "franchise-15"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.5638",
+          "name": "Jamal Murray",
+          "from": "franchise-15",
+          "to": "franchise-01"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R1-15",
+          "name": "1.15",
+          "from": "franchise-15",
+          "to": "franchise-01"
+        }
+      ]
+    },
+    {
+      "tradeId": "TRADE-B",
+      "label": "BZ ↔ DŨNG",
+      "status": "PROPOSED",
+      "order": 2,
+      "dependsOn": [],
+      "participants": [
+        "franchise-15",
+        "franchise-06"
+      ],
+      "note": "Franz Wagner + 3.06 to Bz; Duren + 2.15 to Dũng.",
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.6550",
+          "name": "Franz Wagner",
+          "from": "franchise-06",
+          "to": "franchise-15"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R3-06",
+          "name": "3.06",
+          "from": "franchise-06",
+          "to": "franchise-15"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.6703",
+          "name": "Jalen Duren",
+          "from": "franchise-15",
+          "to": "franchise-06"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R2-15",
+          "name": "2.15",
+          "from": "franchise-15",
+          "to": "franchise-06"
+        }
+      ]
+    },
+    {
+      "tradeId": "TRADE-C",
+      "label": "BZ ↔ SUP FAM",
+      "status": "PROPOSED",
+      "order": 3,
+      "dependsOn": [
+        "TRADE-A",
+        "TRADE-B"
+      ],
+      "participants": [
+        "franchise-15",
+        "franchise-12"
+      ],
+      "note": "Requires Bz to hold 1.03 (Trade A) and 3.06 (Trade B) first.",
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.6702",
+          "name": "Jalen Williams",
+          "from": "franchise-12",
+          "to": "franchise-15"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10288",
+          "name": "Reed Sheppard",
+          "from": "franchise-12",
+          "to": "franchise-15"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R3-12",
+          "name": "3.12",
+          "from": "franchise-12",
+          "to": "franchise-15"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R1-03",
+          "name": "1.03",
+          "from": "franchise-15",
+          "to": "franchise-12"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.5318",
+          "name": "Julius Randle",
+          "from": "franchise-15",
+          "to": "franchise-12"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R3-06",
+          "name": "3.06",
+          "from": "franchise-15",
+          "to": "franchise-12"
+        }
+      ]
+    },
+    {
+      "tradeId": "TRADE-D",
+      "label": "LC ↔ MELO",
+      "status": "PROPOSED",
+      "order": 4,
+      "dependsOn": [],
+      "participants": [
+        "franchise-04",
+        "franchise-03"
+      ],
+      "note": "PROPOSED / NOT FINAL. Not promoted automatically.",
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.10265",
+          "name": "Matas Buzelis",
+          "from": "franchise-03",
+          "to": "franchise-04"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R1-05",
+          "name": "1.05",
+          "from": "franchise-03",
+          "to": "franchise-04"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.6558",
+          "name": "Alperen Şengün",
+          "from": "franchise-04",
+          "to": "franchise-03"
+        }
+      ]
+    }
+  ]
+}

@@ -88,3 +88,8 @@ PYEOF
 # cap model above never reads either file.
 python3 scripts/export_yahoo_top300.py local_data/yahoo/players_normalized.json exports/yahoo_top300_proj_dollar_rank.md
 python3 scripts/export_yahoo_top300_xlsx.py exports/yahoo_top300_proj_dollar_rank.md exports/yahoo_top300_proj_dollar_rank.xlsx
+
+# Expanded Yahoo player registry (up to 600): the legal/searchable universe
+# used by the league-state layer. Separate from the 300-player market
+# snapshot above; never read by the cap model or the Top-300 exports.
+python3 scripts/build_player_registry.py

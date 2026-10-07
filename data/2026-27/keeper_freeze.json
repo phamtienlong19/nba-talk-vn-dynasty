@@ -1,0 +1,729 @@
+{
+  "season": "2026-27",
+  "status": "projected",
+  "statusNote": "PROJECTED keeper baseline taken from the current keeper board. NOT officially frozen; run `build_league_state.py lock-keepers` to create the immutable baseline.",
+  "source": "index.html keeper board",
+  "lockedAt": null,
+  "teams": [
+    {
+      "franchiseId": "franchise-01",
+      "short": "Bsy",
+      "teamName": "GTA San Antonio",
+      "color": "#313844",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.10094",
+          "name": "Victor Wembanyama"
+        },
+        {
+          "playerKey": "478.p.5765",
+          "name": "Jayson Tatum"
+        },
+        {
+          "playerKey": "478.p.10290",
+          "name": "Stephon Castle"
+        },
+        {
+          "playerKey": "478.p.5197",
+          "name": "Rudy Gobert"
+        },
+        {
+          "playerKey": "478.p.10467",
+          "name": "Dylan Harper"
+        },
+        {
+          "playerKey": "478.p.6165",
+          "name": "RJ Barrett"
+        },
+        {
+          "playerKey": "478.p.10304",
+          "name": "Ajay Mitchell"
+        },
+        {
+          "playerKey": "478.p.6019",
+          "name": "Collin Sexton"
+        },
+        {
+          "playerKey": "478.p.10279",
+          "name": "Jaylon Tyson"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-02",
+      "short": "CrazyCat",
+      "teamName": "CrazyCat Damageee",
+      "color": "#be0f22",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.10100",
+          "name": "Keyonte George"
+        },
+        {
+          "playerKey": "478.p.6422",
+          "name": "Desmond Bane"
+        },
+        {
+          "playerKey": "478.p.4840",
+          "name": "Kyrie Irving"
+        },
+        {
+          "playerKey": "478.p.5012",
+          "name": "Damian Lillard"
+        },
+        {
+          "playerKey": "478.p.6417",
+          "name": "Immanuel Quickley"
+        },
+        {
+          "playerKey": "478.p.5324",
+          "name": "Zach LaVine"
+        },
+        {
+          "playerKey": "478.p.10092",
+          "name": "Jaime Jaquez Jr."
+        },
+        {
+          "playerKey": "478.p.5727",
+          "name": "Fred VanVleet"
+        },
+        {
+          "playerKey": "478.p.6403",
+          "name": "Devin Vassell"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-03",
+      "short": "Melo",
+      "teamName": "MeloBB",
+      "color": "#c36b18",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.5185",
+          "name": "Giannis Antetokounmpo"
+        },
+        {
+          "playerKey": "478.p.5642",
+          "name": "Domantas Sabonis"
+        },
+        {
+          "playerKey": "478.p.6205",
+          "name": "Nickeil Alexander-Walker"
+        },
+        {
+          "playerKey": "478.p.10265",
+          "name": "Matas Buzelis"
+        },
+        {
+          "playerKey": "478.p.10096",
+          "name": "Ausar Thompson"
+        },
+        {
+          "playerKey": "478.p.5471",
+          "name": "Myles Turner"
+        },
+        {
+          "playerKey": "478.p.6720",
+          "name": "Peyton Watson"
+        },
+        {
+          "playerKey": "478.p.6694",
+          "name": "Keegan Murray"
+        },
+        {
+          "playerKey": "478.p.6513",
+          "name": "Jalen Green"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-04",
+      "short": "LC",
+      "teamName": "Long con",
+      "color": "#e6d326",
+      "text": "#111111",
+      "keepers": [
+        {
+          "playerKey": "478.p.5432",
+          "name": "Karl-Anthony Towns"
+        },
+        {
+          "playerKey": "478.p.6558",
+          "name": "Alperen Şengün"
+        },
+        {
+          "playerKey": "478.p.6692",
+          "name": "Chet Holmgren"
+        },
+        {
+          "playerKey": "478.p.5842",
+          "name": "Derrick White"
+        },
+        {
+          "playerKey": "478.p.10285",
+          "name": "Donovan Clingan"
+        },
+        {
+          "playerKey": "478.p.6167",
+          "name": "Darius Garland"
+        },
+        {
+          "playerKey": "478.p.6212",
+          "name": "Ty Jerome"
+        },
+        {
+          "playerKey": "478.p.5295",
+          "name": "Aaron Gordon"
+        },
+        {
+          "playerKey": "478.p.10107",
+          "name": "Cason Wallace"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-05",
+      "short": "HCMC",
+      "teamName": "HCMC Kindergarten",
+      "color": "#71d244",
+      "text": "#111111",
+      "keepers": [
+        {
+          "playerKey": "478.p.6355",
+          "name": "Anthony Edwards"
+        },
+        {
+          "playerKey": "478.p.6562",
+          "name": "Jalen Johnson"
+        },
+        {
+          "playerKey": "478.p.6016",
+          "name": "Trae Young"
+        },
+        {
+          "playerKey": "478.p.6021",
+          "name": "Mikal Bridges"
+        },
+        {
+          "playerKey": "478.p.6163",
+          "name": "Zion Williamson"
+        },
+        {
+          "playerKey": "478.p.10444",
+          "name": "Derik Queen"
+        },
+        {
+          "playerKey": "478.p.10115",
+          "name": "Brandin Podziemski"
+        },
+        {
+          "playerKey": "478.p.10440",
+          "name": "Jeremiah Fears"
+        },
+        {
+          "playerKey": "478.p.10048",
+          "name": "Scoot Henderson"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-06",
+      "short": "Dũng",
+      "teamName": "Trader by Trade",
+      "color": "#178b1e",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.6044",
+          "name": "Jalen Brunson"
+        },
+        {
+          "playerKey": "478.p.5769",
+          "name": "Lauri Markkanen"
+        },
+        {
+          "playerKey": "478.p.6550",
+          "name": "Franz Wagner"
+        },
+        {
+          "playerKey": "478.p.6025",
+          "name": "Michael Porter Jr."
+        },
+        {
+          "playerKey": "478.p.6253",
+          "name": "Naz Reid"
+        },
+        {
+          "playerKey": "478.p.6516",
+          "name": "Jalen Suggs"
+        },
+        {
+          "playerKey": "478.p.5843",
+          "name": "Josh Hart"
+        },
+        {
+          "playerKey": "478.p.6721",
+          "name": "Andrew Nembhard"
+        },
+        {
+          "playerKey": "478.p.10095",
+          "name": "Anthony Black"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-07",
+      "short": "Maxfixe",
+      "teamName": "Poop for Coop",
+      "color": "#9ae8b6",
+      "text": "#111111",
+      "keepers": [
+        {
+          "playerKey": "478.p.6395",
+          "name": "LaMelo Ball"
+        },
+        {
+          "playerKey": "478.p.6401",
+          "name": "Deni Avdija"
+        },
+        {
+          "playerKey": "478.p.5294",
+          "name": "Joel Embiid"
+        },
+        {
+          "playerKey": "478.p.5663",
+          "name": "Ivica Zubac"
+        },
+        {
+          "playerKey": "478.p.6175",
+          "name": "Tyler Herro"
+        },
+        {
+          "playerKey": "478.p.10274",
+          "name": "Kel'el Ware"
+        },
+        {
+          "playerKey": "478.p.6580",
+          "name": "Ayo Dosunmu"
+        },
+        {
+          "playerKey": "478.p.6218",
+          "name": "Kevin Porter Jr."
+        },
+        {
+          "playerKey": "478.p.6697",
+          "name": "Shaedon Sharpe"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-08",
+      "short": "DHA",
+      "teamName": "Đì troi pít tông",
+      "color": "#17779b",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.6512",
+          "name": "Cade Cunningham"
+        },
+        {
+          "playerKey": "478.p.6514",
+          "name": "Evan Mobley"
+        },
+        {
+          "playerKey": "478.p.6559",
+          "name": "Trey Murphy III"
+        },
+        {
+          "playerKey": "478.p.4896",
+          "name": "Kawhi Leonard"
+        },
+        {
+          "playerKey": "478.p.5506",
+          "name": "Norman Powell"
+        },
+        {
+          "playerKey": "478.p.6693",
+          "name": "Jabari Smith Jr."
+        },
+        {
+          "playerKey": "478.p.5327",
+          "name": "Jusuf Nurkić"
+        },
+        {
+          "playerKey": "478.p.5640",
+          "name": "Jakob Poeltl"
+        },
+        {
+          "playerKey": "478.p.10462",
+          "name": "Ace Bailey"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-09",
+      "short": "Đạt",
+      "teamName": "The Silver Seekers",
+      "color": "#67c4eb",
+      "text": "#111111",
+      "keepers": [
+        {
+          "playerKey": "478.p.6014",
+          "name": "Luka Dončić"
+        },
+        {
+          "playerKey": "478.p.6548",
+          "name": "Josh Giddey"
+        },
+        {
+          "playerKey": "478.p.5827",
+          "name": "Bam Adebayo"
+        },
+        {
+          "playerKey": "478.p.5602",
+          "name": "Jaylen Brown"
+        },
+        {
+          "playerKey": "478.p.5767",
+          "name": "De'Aaron Fox"
+        },
+        {
+          "playerKey": "478.p.4614",
+          "name": "DeMar DeRozan"
+        },
+        {
+          "playerKey": "478.p.5161",
+          "name": "CJ McCollum"
+        },
+        {
+          "playerKey": "478.p.5832",
+          "name": "John Collins"
+        },
+        {
+          "playerKey": "478.p.6751",
+          "name": "Collin Gillespie"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-10",
+      "short": "DonTrick",
+      "teamName": "DonTrick DevilTeam",
+      "color": "#2f5fd0",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.5473",
+          "name": "Devin Booker"
+        },
+        {
+          "playerKey": "478.p.5658",
+          "name": "Pascal Siakam"
+        },
+        {
+          "playerKey": "478.p.10450",
+          "name": "Kon Knueppel"
+        },
+        {
+          "playerKey": "478.p.5601",
+          "name": "Brandon Ingram"
+        },
+        {
+          "playerKey": "478.p.10287",
+          "name": "Zach Edey"
+        },
+        {
+          "playerKey": "478.p.4725",
+          "name": "Paul George"
+        },
+        {
+          "playerKey": "478.p.6219",
+          "name": "Nic Claxton"
+        },
+        {
+          "playerKey": "478.p.6164",
+          "name": "Ja Morant"
+        },
+        {
+          "playerKey": "478.p.10496",
+          "name": "Maxime Raynaud"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-11",
+      "short": "Thịnh",
+      "teamName": "Seattle SuperSonics",
+      "color": "#22257d",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.5352",
+          "name": "Nikola Jokić"
+        },
+        {
+          "playerKey": "478.p.6404",
+          "name": "Tyrese Haliburton"
+        },
+        {
+          "playerKey": "478.p.6606",
+          "name": "Austin Reaves"
+        },
+        {
+          "playerKey": "478.p.5835",
+          "name": "Jarrett Allen"
+        },
+        {
+          "playerKey": "478.p.5836",
+          "name": "OG Anunoby"
+        },
+        {
+          "playerKey": "478.p.5464",
+          "name": "Kristaps Porziņģis"
+        },
+        {
+          "playerKey": "478.p.4912",
+          "name": "Jimmy Butler III"
+        },
+        {
+          "playerKey": "478.p.10313",
+          "name": "Oso Ighodaro"
+        },
+        {
+          "playerKey": "478.p.5905",
+          "name": "Royce O'Neale"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-12",
+      "short": "sup fam",
+      "teamName": "Bruised for Boozer",
+      "color": "#aa8de6",
+      "text": "#111111",
+      "keepers": [
+        {
+          "playerKey": "478.p.10468",
+          "name": "Cooper Flagg"
+        },
+        {
+          "playerKey": "478.p.10108",
+          "name": "Amen Thompson"
+        },
+        {
+          "playerKey": "478.p.6702",
+          "name": "Jalen Williams"
+        },
+        {
+          "playerKey": "478.p.5007",
+          "name": "Anthony Davis"
+        },
+        {
+          "playerKey": "478.p.10465",
+          "name": "Cedric Coward"
+        },
+        {
+          "playerKey": "478.p.10443",
+          "name": "Collin Murray-Boyles"
+        },
+        {
+          "playerKey": "478.p.10447",
+          "name": "Khaman Maluach"
+        },
+        {
+          "playerKey": "478.p.10288",
+          "name": "Reed Sheppard"
+        },
+        {
+          "playerKey": "478.p.10272",
+          "name": "Kyshawn George"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-13",
+      "short": "Quân",
+      "teamName": "Okay See Thunder",
+      "color": "#8e2ab8",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.6022",
+          "name": "Shai Gilgeous-Alexander"
+        },
+        {
+          "playerKey": "478.p.6413",
+          "name": "Tyrese Maxey"
+        },
+        {
+          "playerKey": "478.p.10104",
+          "name": "Brandon Miller"
+        },
+        {
+          "playerKey": "478.p.6691",
+          "name": "Paolo Banchero"
+        },
+        {
+          "playerKey": "478.p.6018",
+          "name": "Wendell Carter Jr."
+        },
+        {
+          "playerKey": "478.p.6023",
+          "name": "Miles Bridges"
+        },
+        {
+          "playerKey": "478.p.6411",
+          "name": "Saddiq Bey"
+        },
+        {
+          "playerKey": "478.p.10449",
+          "name": "Will Riley"
+        },
+        {
+          "playerKey": "478.p.6572",
+          "name": "Santi Aldama"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-14",
+      "short": "TuLy",
+      "teamName": "No Country for Old Men",
+      "color": "#c925b1",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.4244",
+          "name": "Kevin Durant"
+        },
+        {
+          "playerKey": "478.p.4612",
+          "name": "Stephen Curry"
+        },
+        {
+          "playerKey": "478.p.3704",
+          "name": "LeBron James"
+        },
+        {
+          "playerKey": "478.p.6734",
+          "name": "Ryan Rollins"
+        },
+        {
+          "playerKey": "478.p.6418",
+          "name": "Payton Pritchard"
+        },
+        {
+          "playerKey": "478.p.6169",
+          "name": "Coby White"
+        },
+        {
+          "playerKey": "478.p.6420",
+          "name": "Jaden McDaniels"
+        },
+        {
+          "playerKey": "478.p.6174",
+          "name": "P.J. Washington"
+        },
+        {
+          "playerKey": "478.p.6725",
+          "name": "Max Christie"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-15",
+      "short": "Bz",
+      "teamName": "Putin the Tank Driver",
+      "color": "#e47fbe",
+      "text": "#111111",
+      "keepers": [
+        {
+          "playerKey": "478.p.6515",
+          "name": "Scottie Barnes"
+        },
+        {
+          "playerKey": "478.p.5638",
+          "name": "Jamal Murray"
+        },
+        {
+          "playerKey": "478.p.6703",
+          "name": "Jalen Duren"
+        },
+        {
+          "playerKey": "478.p.6712",
+          "name": "Walker Kessler"
+        },
+        {
+          "playerKey": "478.p.6698",
+          "name": "Dyson Daniels"
+        },
+        {
+          "playerKey": "478.p.5318",
+          "name": "Julius Randle"
+        },
+        {
+          "playerKey": "478.p.6705",
+          "name": "Mark Williams"
+        },
+        {
+          "playerKey": "478.p.10065",
+          "name": "Toumani Camara"
+        },
+        {
+          "playerKey": "478.p.6711",
+          "name": "Christian Braun"
+        }
+      ]
+    },
+    {
+      "franchiseId": "franchise-16",
+      "short": "TT",
+      "teamName": "Kratos Dynasty",
+      "color": "#925733",
+      "text": "#ffffff",
+      "keepers": [
+        {
+          "playerKey": "478.p.5826",
+          "name": "Donovan Mitchell"
+        },
+        {
+          "playerKey": "478.p.4563",
+          "name": "James Harden"
+        },
+        {
+          "playerKey": "478.p.6015",
+          "name": "Jaren Jackson Jr."
+        },
+        {
+          "playerKey": "478.p.6398",
+          "name": "Onyeka Okongwu"
+        },
+        {
+          "playerKey": "478.p.5660",
+          "name": "Dejounte Murray"
+        },
+        {
+          "playerKey": "478.p.10294",
+          "name": "Alex Sarr"
+        },
+        {
+          "playerKey": "478.p.10454",
+          "name": "VJ Edgecombe"
+        },
+        {
+          "playerKey": "478.p.5856",
+          "name": "Isaiah Hartenstein"
+        },
+        {
+          "playerKey": "478.p.5292",
+          "name": "Andrew Wiggins"
+        }
+      ]
+    }
+  ]
+}

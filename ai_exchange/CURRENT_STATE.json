@@ -129,6 +129,15 @@
       "rawFloor": 131.1125,
       "rawCeiling": 177.3875,
       "refreshSemantics": "A refresh compares the live FORMULA band to approvedFormula* and the live market snapshot / committed exports to tracked data; it never rewrites the official band (editing config/cap_policy.json is a human decision)."
+    },
+    "leagueStateLayer": {
+      "timestamp": "2026-10-07T12:00:00Z",
+      "doc": "docs/LEAGUE_STATE_MODEL.md",
+      "keeperFreeze": "projected (NOT locked) -- baseline taken from the keeper board; `build_league_state.py lock-keepers` creates the immutable freeze",
+      "trades": "Trades A (BZ/BSY), B (BZ/Dung), C (BZ/sup fam, depends on A+B), D (LC/Melo, not final) seeded as PROPOSED only; nothing OFFICIAL",
+      "playerRegistry": "data/yahoo/player_registry.json -- 600 Yahoo players, identity = playerKey; separate from the 300-player market snapshot",
+      "derived": "ownership, cap, room, roll-ups and scenarios are derived by scripts/league_state.py; page data embedded by scripts/build_league_state.py embed",
+      "deferred": "live draft operator (timer, on-the-clock, confirm/undo, ticker, Messenger copy, realtime backend)"
     }
   }
 }

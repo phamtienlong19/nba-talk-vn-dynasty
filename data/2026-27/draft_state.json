@@ -1,0 +1,6 @@
+{
+    "season": "2026-27",
+    "status": "PRE_DRAFT",
+    "note": "Append-only DRAFT_PICK events. Each event {eventId,type:DRAFT_PICK,pickId,franchiseId,playerKey,timestamp}. The engine derives roster, availability, cap, pick completion and the draft cursor from these -- no other draft state exists.",
+    "events": []
+}

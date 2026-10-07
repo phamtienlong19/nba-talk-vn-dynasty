@@ -8,6 +8,9 @@ Public, league-facing canonical state, committed as normalized JSON.
   ownership baseline for 2026-27 (pending import — see
   `../docs/OPEN_RULE_QUESTIONS.md`).
 
+Operational state files (`keeper_freeze.json`, `picks.json`, `trades.json`,
+`draft_state.json`) are documented in `../docs/LEAGUE_STATE_MODEL.md`.
+
 These are not yet wired into `index.html` (see `../docs/PRODUCT_SCOPE.md`,
 V2) but are the committed migration seed for the future canonical data
 model (`../docs/DATA_MODEL.md`).
