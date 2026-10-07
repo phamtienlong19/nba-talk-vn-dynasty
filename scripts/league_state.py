@@ -37,6 +37,8 @@ TRADE_STATUSES = ("PROPOSED", "AGREED", "OFFICIAL", "VOID")
 SELECTABLE_STATUSES = ("PROPOSED", "AGREED")
 SNAPSHOT_KINDS = ("KEEPER_FREEZE", "PRE_DRAFT_LOCK", "POST_DRAFT")
 MAX_KEEPERS = 9
+# Same convention as the board's existing "near ceiling" colouring (refresh_team_cap_summary.NEAR_THRESHOLD).
+NEAR_CEILING_ROOM = 4
 
 
 class StateError(ValueError):
@@ -163,6 +165,28 @@ def floor_status(inputs, cap):
     return "IN_BAND"
 
 
+def cap_status(inputs, cap):
+    """Constraint state of a cap total against the OFFICIAL band (not trade quality)."""
+    floor, ceiling = cap_band(inputs)
+    if cap > ceiling:
+        return "OVER_CEILING"
+    if cap == ceiling:
+        return "AT_CEILING"
+    if cap < floor:
+        return "UNDER_FLOOR"
+    if cap == floor:
+        return "AT_FLOOR"
+    if ceiling - cap <= NEAR_CEILING_ROOM:
+        return "NEAR_CEILING"
+    return "IN_RANGE"
+
+
+def team_roster(inputs, state, fid):
+    """Derived roster rows (cap desc, then name) -- the single source for roster, cap and count."""
+    rows = [{"k": k, "n": player_name(inputs, k), "c": player_cap(inputs, k)} for k in team_players(inputs, state, fid)]
+    return sorted(rows, key=lambda r: (-r["c"], r["n"]))
+
+
 def _owner(state, asset):
     return state["pickOwner"].get(asset["pickId"]) if asset["type"] == "pick" else state["playerOwner"].get(asset["playerKey"])
 
@@ -246,6 +270,7 @@ def _apply_trade(inputs, state, trade, active_ids):
         cap_a, n_a = team_cap(inputs, state, f), len(team_players(inputs, state, f))
         result["teams"][f] = {"capBefore": cap_b, "playerCapDelta": cap_a - cap_b, "capAfter": cap_a,
                               "roomToCeiling": ceiling - cap_a, "floorStatus": floor_status(inputs, cap_a),
+                              "status": cap_status(inputs, cap_a), "toFloor": max(0, floor - cap_a),
                               "countBefore": n_b, "countAfter": n_a}
         if result["applied"]:
             if cap_a > ceiling:
@@ -322,11 +347,16 @@ def resolve(inputs: dict, selected=(), mode: str = "OFFICIAL") -> dict:
 def team_report(inputs, state, fid, baseline=None):
     baseline = baseline or initial_state(inputs)
     floor, ceiling = cap_band(inputs)
-    cap = team_cap(inputs, state, fid)
+    roster = team_roster(inputs, state, fid)
+    cap = sum(r["c"] for r in roster)  # cap, count and roster all come from this one derived roster
+    base_keys = set(team_players(inputs, baseline, fid))
     return {"franchiseId": fid, "short": inputs["shorts"][fid], "cap": cap, "room": ceiling - cap,
-            "floorStatus": floor_status(inputs, cap), "count": len(team_players(inputs, state, fid)),
-            "baselineCap": team_cap(inputs, baseline, fid), "baselineCount": len(team_players(inputs, baseline, fid)),
-            "picks": [pick_label(inputs["pickIndex"][p]) for p in team_picks(state, fid)]}
+            "toFloor": max(0, floor - cap), "status": cap_status(inputs, cap),
+            "floorStatus": floor_status(inputs, cap), "count": len(roster),
+            "roster": roster, "inKeys": [r["k"] for r in roster if r["k"] not in base_keys],
+            "baselineCap": team_cap(inputs, baseline, fid), "baselineCount": len(base_keys),
+            "picks": [pick_label(inputs["pickIndex"][p]) for p in team_picks(state, fid)],
+            "pickIds": team_picks(state, fid)}
 
 
 def fold_team(inputs, state, fid):

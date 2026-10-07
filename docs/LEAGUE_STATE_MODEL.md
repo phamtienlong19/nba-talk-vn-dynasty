@@ -50,6 +50,17 @@ scenario cap on the CAP page, and a searchable ALL AVAILABLE panel on the
 FA/DRAFT page. Dynasty rank is never exposed in the operational data.
 `?mode=scenario&trades=TRADE-A,TRADE-B` opens a scenario directly.
 
+## Scenario rendering (one truth)
+
+In SCENARIO mode a team card is rendered entirely from the derived scenario
+state: roster rows (sent players removed, received players tagged IN, reusing
+the board's own rows), cap total and status, player count and pick list all
+come from the same `team_report` object. The official baseline is secondary
+(`OFFICIAL 144 · DELTA −13`). "View movement" only explains the change; the
+CUTS list is relabelled KEEPER-FREEZE CUTS and never rewritten by trades.
+Constraint states (not trade quality): UNDER FLOOR, AT FLOOR, IN RANGE,
+NEAR CEILING (room ≤ 4, the board's existing convention), AT CEILING, OVER CEILING.
+
 ## Commands
 
 ```bash

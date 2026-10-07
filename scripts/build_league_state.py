@@ -158,6 +158,15 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
               "color": t["color"], "text": t["text"]} for t in inputs["freeze"]["teams"]]
     base = ls.initial_state(inputs)
     official = ls.resolve(inputs, (), "OFFICIAL")
+    # playerKey -> the name as printed on the keeper board (the page re-uses the board's own rows)
+    board_teams, _ = parse_board(index_html)
+    lookup = registry_lookup(list(inputs["registry"].values()))
+    board_names = {}
+    for bt in board_teams:
+        for name, _cap in bt["kept"]:
+            p = lookup.get(pool.normalize_name(name))
+            if p is not None:
+                board_names[p["playerKey"]] = name
     official_teams = {t["id"]: ls.team_report(inputs, official, t["id"], base) for t in teams}
     trades = []
     for t in ls.selectable_trades(inputs) + [x for x in inputs["trades"]["trades"] if x["status"] not in ls.SELECTABLE_STATUSES]:
@@ -197,7 +206,8 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
     return {
         "season": inputs["freeze"]["season"],
         "keeperStatus": inputs["freeze"]["status"],
-        "cap": {"floor": floor, "ceiling": ceiling},
+        "cap": {"floor": floor, "ceiling": ceiling, "near": ls.NEAR_CEILING_ROOM},
+        "boardNames": board_names,
         "teams": teams,
         "official": {"teams": official_teams, "picks": ls.pick_table(inputs, official),
                      "windowWarnings": official["windowWarnings"], "tradeIds": official["activeTradeIds"]},
