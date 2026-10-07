@@ -1,0 +1,294 @@
+{
+  "season": "2026-27",
+  "note": "originalOwner = owner at the keeper baseline; current owner is DERIVED from the trade ledger.",
+  "picks": [
+    {
+      "pickId": "2026-R1-01",
+      "round": 1,
+      "slot": 1,
+      "originalOwner": "franchise-07"
+    },
+    {
+      "pickId": "2026-R1-02",
+      "round": 1,
+      "slot": 2,
+      "originalOwner": "franchise-04"
+    },
+    {
+      "pickId": "2026-R1-03",
+      "round": 1,
+      "slot": 3,
+      "originalOwner": "franchise-01"
+    },
+    {
+      "pickId": "2026-R1-04",
+      "round": 1,
+      "slot": 4,
+      "originalOwner": "franchise-02"
+    },
+    {
+      "pickId": "2026-R1-05",
+      "round": 1,
+      "slot": 5,
+      "originalOwner": "franchise-03"
+    },
+    {
+      "pickId": "2026-R1-06",
+      "round": 1,
+      "slot": 6,
+      "originalOwner": "franchise-05"
+    },
+    {
+      "pickId": "2026-R1-07",
+      "round": 1,
+      "slot": 7,
+      "originalOwner": "franchise-06"
+    },
+    {
+      "pickId": "2026-R1-08",
+      "round": 1,
+      "slot": 8,
+      "originalOwner": "franchise-08"
+    },
+    {
+      "pickId": "2026-R1-09",
+      "round": 1,
+      "slot": 9,
+      "originalOwner": "franchise-14"
+    },
+    {
+      "pickId": "2026-R1-10",
+      "round": 1,
+      "slot": 10,
+      "originalOwner": "franchise-13"
+    },
+    {
+      "pickId": "2026-R1-11",
+      "round": 1,
+      "slot": 11,
+      "originalOwner": "franchise-09"
+    },
+    {
+      "pickId": "2026-R1-12",
+      "round": 1,
+      "slot": 12,
+      "originalOwner": "franchise-10"
+    },
+    {
+      "pickId": "2026-R1-13",
+      "round": 1,
+      "slot": 13,
+      "originalOwner": "franchise-11"
+    },
+    {
+      "pickId": "2026-R1-14",
+      "round": 1,
+      "slot": 14,
+      "originalOwner": "franchise-12"
+    },
+    {
+      "pickId": "2026-R1-15",
+      "round": 1,
+      "slot": 15,
+      "originalOwner": "franchise-15"
+    },
+    {
+      "pickId": "2026-R1-16",
+      "round": 1,
+      "slot": 16,
+      "originalOwner": "franchise-16"
+    },
+    {
+      "pickId": "2026-R2-01",
+      "round": 2,
+      "slot": 1,
+      "originalOwner": "franchise-01"
+    },
+    {
+      "pickId": "2026-R2-02",
+      "round": 2,
+      "slot": 2,
+      "originalOwner": "franchise-02"
+    },
+    {
+      "pickId": "2026-R2-03",
+      "round": 2,
+      "slot": 3,
+      "originalOwner": "franchise-03"
+    },
+    {
+      "pickId": "2026-R2-04",
+      "round": 2,
+      "slot": 4,
+      "originalOwner": "franchise-04"
+    },
+    {
+      "pickId": "2026-R2-05",
+      "round": 2,
+      "slot": 5,
+      "originalOwner": "franchise-05"
+    },
+    {
+      "pickId": "2026-R2-06",
+      "round": 2,
+      "slot": 6,
+      "originalOwner": "franchise-06"
+    },
+    {
+      "pickId": "2026-R2-07",
+      "round": 2,
+      "slot": 7,
+      "originalOwner": "franchise-07"
+    },
+    {
+      "pickId": "2026-R2-08",
+      "round": 2,
+      "slot": 8,
+      "originalOwner": "franchise-08"
+    },
+    {
+      "pickId": "2026-R2-09",
+      "round": 2,
+      "slot": 9,
+      "originalOwner": "franchise-09"
+    },
+    {
+      "pickId": "2026-R2-10",
+      "round": 2,
+      "slot": 10,
+      "originalOwner": "franchise-10"
+    },
+    {
+      "pickId": "2026-R2-11",
+      "round": 2,
+      "slot": 11,
+      "originalOwner": "franchise-11"
+    },
+    {
+      "pickId": "2026-R2-12",
+      "round": 2,
+      "slot": 12,
+      "originalOwner": "franchise-12"
+    },
+    {
+      "pickId": "2026-R2-13",
+      "round": 2,
+      "slot": 13,
+      "originalOwner": "franchise-13"
+    },
+    {
+      "pickId": "2026-R2-14",
+      "round": 2,
+      "slot": 14,
+      "originalOwner": "franchise-14"
+    },
+    {
+      "pickId": "2026-R2-15",
+      "round": 2,
+      "slot": 15,
+      "originalOwner": "franchise-15"
+    },
+    {
+      "pickId": "2026-R2-16",
+      "round": 2,
+      "slot": 16,
+      "originalOwner": "franchise-16"
+    },
+    {
+      "pickId": "2026-R3-01",
+      "round": 3,
+      "slot": 1,
+      "originalOwner": "franchise-01"
+    },
+    {
+      "pickId": "2026-R3-02",
+      "round": 3,
+      "slot": 2,
+      "originalOwner": "franchise-02"
+    },
+    {
+      "pickId": "2026-R3-03",
+      "round": 3,
+      "slot": 3,
+      "originalOwner": "franchise-03"
+    },
+    {
+      "pickId": "2026-R3-04",
+      "round": 3,
+      "slot": 4,
+      "originalOwner": "franchise-04"
+    },
+    {
+      "pickId": "2026-R3-05",
+      "round": 3,
+      "slot": 5,
+      "originalOwner": "franchise-05"
+    },
+    {
+      "pickId": "2026-R3-06",
+      "round": 3,
+      "slot": 6,
+      "originalOwner": "franchise-06"
+    },
+    {
+      "pickId": "2026-R3-07",
+      "round": 3,
+      "slot": 7,
+      "originalOwner": "franchise-07"
+    },
+    {
+      "pickId": "2026-R3-08",
+      "round": 3,
+      "slot": 8,
+      "originalOwner": "franchise-08"
+    },
+    {
+      "pickId": "2026-R3-09",
+      "round": 3,
+      "slot": 9,
+      "originalOwner": "franchise-09"
+    },
+    {
+      "pickId": "2026-R3-10",
+      "round": 3,
+      "slot": 10,
+      "originalOwner": "franchise-10"
+    },
+    {
+      "pickId": "2026-R3-11",
+      "round": 3,
+      "slot": 11,
+      "originalOwner": "franchise-11"
+    },
+    {
+      "pickId": "2026-R3-12",
+      "round": 3,
+      "slot": 12,
+      "originalOwner": "franchise-12"
+    },
+    {
+      "pickId": "2026-R3-13",
+      "round": 3,
+      "slot": 13,
+      "originalOwner": "franchise-13"
+    },
+    {
+      "pickId": "2026-R3-14",
+      "round": 3,
+      "slot": 14,
+      "originalOwner": "franchise-14"
+    },
+    {
+      "pickId": "2026-R3-15",
+      "round": 3,
+      "slot": 15,
+      "originalOwner": "franchise-15"
+    },
+    {
+      "pickId": "2026-R3-16",
+      "round": 3,
+      "slot": 16,
+      "originalOwner": "franchise-16"
+    }
+  ]
+}

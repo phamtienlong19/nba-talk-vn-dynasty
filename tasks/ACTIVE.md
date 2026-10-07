@@ -1,19 +1,17 @@
 # Active Task
 
-No active GitHub Issue. Direct human-requested fix, not issue-backed.
-Branch: fix/cap-model-salary-order-and-yahoo-export (PR #26)
-Generated: 2026-10-05T00:00:00Z
+No active GitHub Issue. Direct human-requested feature, not issue-backed.
+Branch: feat/predraft-state-trade-ledger
+Generated: 2026-10-07T00:00:00Z
 
 ## Task
 
-PR #26 final correction pass: official cap 131–178 (formula 131–177) kept
-separate in `config/cap_policy.json`; keeper overrides (Kratos: Wiggins in /
-Queta out; DHA: Poeltl in / Kuminga out; Seattle: Porziņģis in / Davion out);
-FA/DRAFT 60 rebuilt as a CAP-then-60/40 Yahoo/dynasty hybrid over a
-cuts + Yahoo + dynasty-consensus universe. Details live in
-`ai_exchange/CURRENT_STATE.json` (`canonicalState.capPolicy`,
-`canonicalState.capModelSalaryOrderFix`) and `docs/CAP_MODEL.md`.
+Pre-draft state patch: keeper freeze (projected), trade ledger, pick ownership,
+derived cap, folded team views, OFFICIAL vs SCENARIO, expanded Yahoo player
+registry. Details in `docs/LEAGUE_STATE_MODEL.md` and
+`ai_exchange/CURRENT_STATE.json` (`canonicalState.leagueStateLayer`) — not
+restated here.
 
 ## Status
 
-Implementation complete; tests + `./validate.sh` pass. PR #26 updated.
+Implementation complete; tests + `./validate.sh` pass. PR pending review.

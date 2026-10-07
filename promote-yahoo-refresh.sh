@@ -30,6 +30,10 @@ ARTIFACT_DIR="artifacts/yahoo-refresh"
 # SYNC_AFTER_MERGE_*_CMD pattern) -- production default is the real suite.
 TEST_CMD="${PROMOTE_YAHOO_REFRESH_TEST_CMD:-python3 -m unittest discover -s tests}"
 VALIDATE_CMD="${PROMOTE_YAHOO_REFRESH_VALIDATE_CMD:-./validate.sh}"
+# League-state layer: re-derive the PROJECTED keeper baseline from the board
+# (a no-op once keepers are LOCKED) and re-embed official/scenario/available
+# views. Trades/draft events are never changed here.
+STATE_CMD="${PROMOTE_YAHOO_REFRESH_STATE_CMD:-python3 scripts/build_league_state.py baseline && python3 scripts/build_league_state.py embed}"
 # Commissioner reference exports: normalized snapshot -> Markdown -> XLSX
 # (the XLSX is derived from the Markdown, never from Yahoo directly).
 EXPORT_CMD="${PROMOTE_YAHOO_REFRESH_EXPORT_CMD:-python3 scripts/export_yahoo_top300.py local_data/yahoo/players_normalized.json exports/yahoo_top300_proj_dollar_rank.md && python3 scripts/export_yahoo_top300_xlsx.py exports/yahoo_top300_proj_dollar_rank.md exports/yahoo_top300_proj_dollar_rank.xlsx}"
@@ -78,6 +82,9 @@ python3 scripts/refresh_team_cap_summary.py \
 echo "Rebuilding FA/DRAFT 60 pool..."
 python3 scripts/build_fa_draft_pool.py
 
+echo "Rebuilding league-state views (baseline, trade scenarios, available universe)..."
+bash -c "$STATE_CMD"
+
 echo "Generating Yahoo Top 300 Markdown + XLSX exports..."
 bash -c "$EXPORT_CMD"
 
@@ -124,6 +131,7 @@ git fetch origin main
 git checkout -B "$BRANCH" origin/main
 
 git add "$DATA_DIR" index.html
+[ -d data/2026-27 ] && git add data/2026-27
 [ -d exports ] && git add exports
 
 if git diff --cached --quiet; then

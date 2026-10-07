@@ -127,3 +127,11 @@ normalized Yahoo snapshot → `exports/yahoo_top300_proj_dollar_rank.md`
 re-checked on write; needs `pip install -r requirements.txt`). Both are linked
 from the board's CAP page at stable paths. They are reference material only —
 the cap model never reads them, and they contain pure Yahoo data (no cap policy, keeper, or dynasty content).
+
+## League state: keepers, trades, picks (pre-draft layer)
+
+`data/2026-27/` holds the keeper freeze (currently **projected**, not locked), 48
+stable pick ids, the structured trade ledger (Trades A–D are seeded as
+`PROPOSED`, never official) and the draft ledger. The page's **TRADE LAB**,
+**PICKS** and **OFFICIAL / SCENARIO** switch are generated from it by the
+engine; see `docs/LEAGUE_STATE_MODEL.md`.

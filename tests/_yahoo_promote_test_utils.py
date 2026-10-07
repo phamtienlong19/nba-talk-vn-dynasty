@@ -212,6 +212,7 @@ def run_promote(
     # production default is the real suite (see promote-yahoo-refresh.sh).
     env.setdefault("PROMOTE_YAHOO_REFRESH_TEST_CMD", "true")
     env.setdefault("PROMOTE_YAHOO_REFRESH_VALIDATE_CMD", "true")
+    env.setdefault("PROMOTE_YAHOO_REFRESH_STATE_CMD", "true")  # real build needs the full registry + board
     env.setdefault("PROMOTE_YAHOO_REFRESH_EXPORT_CMD", "true")  # real export needs a full 300-player snapshot
     if env_extra:
         env.update(env_extra)
