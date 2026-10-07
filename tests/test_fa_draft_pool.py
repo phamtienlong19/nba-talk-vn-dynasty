@@ -80,8 +80,10 @@ class TestIndexHtmlPoolRegressions(unittest.TestCase):
 
     def test_page_three_keeps_pinned_names_and_drops_replaced_veterans(self):
         tail = self.names[pool.CORE_SIZE:]
-        for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Bilal Coulibaly", "Allen Graves", "Aday Mara", "Tre Jones"):
+        for kept in ("Grayson Allen", "Julian Champagnie", "Scotty Pippen Jr.", "Jake LaRavia", "Jared McCain", "Allen Graves", "Aday Mara", "Tre Jones"):
             self.assertIn(kept, tail)
+        # (Bilal Coulibaly was pinned but is now an official keeper, so he is correctly unavailable.)
+        self.assertNotIn("Bilal Coulibaly", self.names)
         for gone in ("De&#x27;Andre Hunter", "Bobby Portis Jr.", "Robert Williams III", "Anfernee Simons",
                      "Nikola Vučević", "Brook Lopez", "Naji Marshall", "Jordan Poole", "Dennis Schröder"):
             self.assertNotIn(gone, self.names)

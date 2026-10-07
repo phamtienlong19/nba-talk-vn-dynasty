@@ -45,21 +45,25 @@ class TestExplicitKeeperOverrides(unittest.TestCase):
         self.assertIn("Neemias Queta <strong>2</strong>", _cuts(card))
         self.assertNotIn("Andrew Wiggins", _cuts(card))
 
-    def test_dha_keeps_poeltl_and_cuts_kuminga(self):
+    def test_dha_final_keepers_bilal_and_kuminga_in_nurkic_and_poeltl_cut(self):
         card = _card(self.html, "DHA")
         kept = dict(_kept(card))
         self.assertEqual(len(kept), 9)
-        self.assertEqual(kept["Jakob Poeltl"], 2)
-        self.assertNotIn("Jonathan Kuminga", kept)
-        self.assertEqual(sum(kept.values()), 160)
-        self.assertIn('<div class="cap-total">160<span>/178</span></div>', card)
-        self.assertIn("Jonathan Kuminga", _cuts(card))
-        self.assertNotIn("Jakob Poeltl", _cuts(card))
+        self.assertEqual((kept["Bilal Coulibaly"], kept["Jonathan Kuminga"]), (0, 0))
+        self.assertNotIn("Jakob Poeltl", kept)
+        self.assertNotIn("Jusuf Nurkić", kept)
+        self.assertEqual(sum(kept.values()), 154)
+        self.assertIn('<div class="cap-total">154<span>/178</span></div>', card)
+        cuts = _cuts(card)
+        self.assertIn("Jusuf Nurkić <strong>4</strong>", cuts)
+        self.assertIn("Jakob Poeltl <strong>2</strong>", cuts)
+        self.assertLess(cuts.index("Nurkić"), cuts.index("Poeltl"))  # cuts are CAP-descending
 
     def test_kept_players_leave_the_fa_inventory_and_cuts_enter_with_the_right_source_tag(self):
-        for gone in ("Andrew Wiggins", "Jakob Poeltl", "Kristaps Porziņģis"):
-            self.assertNotIn(f'<div class="pool-player">{gone}</div>', self.pool)
-        for name, team in (("Neemias Queta", "TT"), ("Jonathan Kuminga", "DHA"), ("Davion Mitchell", "Thịnh")):
+        for gone in ("Andrew Wiggins", "Kristaps Porziņģis", "Bilal Coulibaly", "Jonathan Kuminga", "Isaiah Jackson",
+                     "Dennis Schröder", "Kelly Oubre Jr."):
+            self.assertNotIn(f'<div class="pool-player">{gone}</div>', self.pool, gone)
+        for name, team in (("Neemias Queta", "TT"), ("Davion Mitchell", "Thịnh"), ("Jusuf Nurkić", "DHA"), ("Jakob Poeltl", "DHA")):
             m = re.search(rf'<div class="pool-player">{name}</div><div class="pool-nba">[^<]*</div>'
                           rf'<div class="pool-cap">\d+</div><div class="pool-src"><span class="src src-cut">{team}</span>', self.pool)
             self.assertIsNotNone(m, f"{name} must enter the FA/DRAFT pool tagged as a {team} cut")
