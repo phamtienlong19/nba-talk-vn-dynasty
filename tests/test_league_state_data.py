@@ -166,6 +166,32 @@ class TestEmbeddedPageData(unittest.TestCase):
         fresh = bls.build_page_data(self.i, self.html)
         self.assertEqual(self.data, fresh)
 
+    def test_page_data_derives_from_tracked_canonical_yahoo_not_local_data(self):
+        self.assertEqual(os.path.relpath(bls.CANONICAL_YAHOO_PATH, REPO_ROOT), os.path.join("data", "yahoo", "players_normalized.json"))
+        self.assertNotIn("local_data", bls.CANONICAL_YAHOO_PATH)
+        opened = []
+        real_open = open
+
+        def spy(path, *a, **k):
+            opened.append(str(path))
+            return real_open(path, *a, **k)
+
+        import builtins
+        old_default = pool.YAHOO_NORMALIZED
+        pool.YAHOO_NORMALIZED = os.path.join(REPO_ROOT, "local_data", "yahoo", "DOES_NOT_EXIST.json")  # any implicit use would fail
+        builtins.open = spy
+        try:
+            data = bls.build_page_data(self.i, self.html)
+        finally:
+            builtins.open = real_open
+            pool.YAHOO_NORMALIZED = old_default
+        self.assertEqual(data, self.data)
+        self.assertFalse([p for p in opened if "local_data" in p], opened)
+
+    def test_yahoo_source_is_injectable_for_tests(self):
+        import inspect
+        self.assertEqual(inspect.signature(bls.build_page_data).parameters["yahoo_path"].default, bls.CANONICAL_YAHOO_PATH)
+
     def test_all_scenario_combinations_are_present(self):
         self.assertEqual(len(self.data["scenarios"]), 2 ** len(ls.selectable_trades(self.i)))
         self.assertIn("TRADE-A,TRADE-B,TRADE-C", self.data["scenarios"])

@@ -36,6 +36,10 @@ DATA_BEGIN = "<!--LEAGUE-DATA-BEGIN-->"
 DATA_END = "<!--LEAGUE-DATA-END-->"
 APP_MARK = '<script id="league-app">'
 SEASON = "2026-27"
+# Committed/public league views derive ONLY from tracked canonical state.
+# data/yahoo/ = promoted canonical Yahoo snapshot; local_data/yahoo/ is
+# mutable refresh working data and must never be an implicit dependency here.
+CANONICAL_YAHOO_PATH = os.path.join(REPO_ROOT, "data", "yahoo", "players_normalized.json")
 
 TEAM_CARD_RE = re.compile(r'<section class="team-card"([^>]*)>(.*?)</section>', re.S)
 
@@ -147,7 +151,7 @@ def cmd_lock(args):
 
 
 # ------------------------------------------------------------- embedding
-def build_page_data(inputs: dict, index_html: str) -> dict:
+def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_YAHOO_PATH) -> dict:
     floor, ceiling = ls.cap_band(inputs)
     fr = inputs["franchises"]
     teams = [{"id": t["franchiseId"], "short": t["short"], "name": t.get("teamName") or fr[t["franchiseId"]]["displayName"],
@@ -164,7 +168,7 @@ def build_page_data(inputs: dict, index_html: str) -> dict:
                        "dependsOn": t.get("dependsOn", []), "participants": t["participants"],
                        "receives": recv, "note": t.get("note")})
     # available universe: registry + curated Yahoo-missing prospects, minus kept (official state)
-    yahoo = pool.load_yahoo_players()
+    yahoo = pool.load_yahoo_players(yahoo_path)
     dyn, dyn_max = pool.load_dynasty_rankings()
     cands = pool.build_candidates(index_html, yahoo, dyn, dyn_max, rookie_names=pool.load_rookie_names(),
                                   draft_years=pool.load_draft_years())
