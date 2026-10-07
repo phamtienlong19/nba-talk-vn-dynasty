@@ -465,15 +465,29 @@ def make_snapshot(inputs, kind: str) -> dict:
         "playerOwner": dict(sorted(state["playerOwner"].items())),
         "pickOwner": dict(sorted(state["pickOwner"].items())),
         "teamCaps": {f: team_cap(inputs, state, f) for f in sorted(inputs["franchises"])},
+        "capBand": {"floor": cap_band(inputs)[0], "ceiling": cap_band(inputs)[1]},
+        "teams": {f: checkpoint_team(inputs, state, f) for f in sorted(inputs["franchises"])},
     }
 
 
-def lock_keepers(freeze: dict, locked_at: str) -> dict:
-    """Return a LOCKED copy of a keeper freeze with its immutability digest. Refuses to re-lock."""
+def checkpoint_team(inputs, state, fid) -> dict:
+    floor, ceiling = cap_band(inputs)
+    cap = team_cap(inputs, state, fid)
+    return {"short": inputs["shorts"][fid], "keeperCount": len(team_players(inputs, state, fid)), "keeperCap": cap,
+            "toFloor": max(0, floor - cap), "roomToCeiling": ceiling - cap, "status": cap_status(inputs, cap)}
+
+
+def lock_keepers(freeze: dict, locked_at: str, checkpoint: dict | None = None) -> dict:
+    """Return a LOCKED copy of a keeper freeze with its immutability digest. Refuses to re-lock.
+    `checkpoint` (official band, per-team keeper caps, provenance) is recorded as-is."""
     if freeze.get("status") == "locked":
         raise StateError("keeper freeze is already locked (immutable)")
     out = json.loads(json.dumps(freeze))
     out["status"] = "locked"
+    out["statusNote"] = "OFFICIAL KEEPER FREEZE. Final keeper declarations; immutable. Later changes are official trades / draft events."
+    out["source"] = "final keeper declarations"
+    if checkpoint:
+        out["checkpoint"] = checkpoint
     out["lockedAt"] = locked_at
     out["lockDigest"] = _digest({"teams": out["teams"], "season": out["season"]})
     return out

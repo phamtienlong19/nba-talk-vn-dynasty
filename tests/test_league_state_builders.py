@@ -58,7 +58,9 @@ class TestKeeperLockWorkflow(unittest.TestCase):
             for name in ("franchises.json", "keeper_freeze.json", "picks.json", "trades.json", "draft_state.json"):
                 shutil.copy(os.path.join(ls.DATA_DIR, name), tmp)
             path = os.path.join(tmp, "keeper_freeze.json")
-            locked = ls.lock_keepers(ls._load(path), "2026-10-09T00:00:00Z")
+            unlocked = ls._load(path)
+            unlocked["status"] = "projected"
+            locked = ls.lock_keepers(unlocked, "2026-10-09T00:00:00Z")
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(locked, f)
             old = bls.DATA_DIR
@@ -78,7 +80,7 @@ class TestKeeperLockWorkflow(unittest.TestCase):
         fr = ls._load(os.path.join(ls.DATA_DIR, "franchises.json"))["franchises"]
         a = bls.build_baseline(html, r, fr)
         self.assertEqual(a, bls.build_baseline(html, r, fr))
-        self.assertEqual(a[0], ls._load(os.path.join(ls.DATA_DIR, "keeper_freeze.json")))
+        self.assertEqual(a[0]["teams"], ls._load(os.path.join(ls.DATA_DIR, "keeper_freeze.json"))["teams"])
         self.assertEqual(a[1], ls._load(os.path.join(ls.DATA_DIR, "picks.json")))
 
 

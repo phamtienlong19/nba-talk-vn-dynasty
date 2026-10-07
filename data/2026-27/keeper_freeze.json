@@ -1,9 +1,9 @@
 {
   "season": "2026-27",
-  "status": "projected",
-  "statusNote": "PROJECTED keeper baseline taken from the current keeper board. NOT officially frozen; run `build_league_state.py lock-keepers` to create the immutable baseline.",
-  "source": "index.html keeper board",
-  "lockedAt": null,
+  "status": "locked",
+  "statusNote": "OFFICIAL KEEPER FREEZE. Final keeper declarations; immutable. Later changes are official trades / draft events.",
+  "source": "final keeper declarations",
+  "lockedAt": "2026-10-07T14:50:07Z",
   "teams": [
     {
       "franchiseId": "franchise-01",
@@ -41,12 +41,12 @@
           "name": "Ajay Mitchell"
         },
         {
-          "playerKey": "478.p.6019",
-          "name": "Collin Sexton"
-        },
-        {
           "playerKey": "478.p.10279",
           "name": "Jaylon Tyson"
+        },
+        {
+          "playerKey": "478.p.5187",
+          "name": "Dennis Schröder"
         }
       ]
     },
@@ -352,16 +352,16 @@
           "name": "Jabari Smith Jr."
         },
         {
-          "playerKey": "478.p.5327",
-          "name": "Jusuf Nurkić"
-        },
-        {
-          "playerKey": "478.p.5640",
-          "name": "Jakob Poeltl"
-        },
-        {
           "playerKey": "478.p.10462",
           "name": "Ace Bailey"
+        },
+        {
+          "playerKey": "478.p.10099",
+          "name": "Bilal Coulibaly"
+        },
+        {
+          "playerKey": "478.p.6549",
+          "name": "Jonathan Kuminga"
         }
       ]
     },
@@ -495,8 +495,8 @@
           "name": "Oso Ighodaro"
         },
         {
-          "playerKey": "478.p.5905",
-          "name": "Royce O'Neale"
+          "playerKey": "478.p.6564",
+          "name": "Isaiah Jackson"
         }
       ]
     },
@@ -630,8 +630,8 @@
           "name": "P.J. Washington"
         },
         {
-          "playerKey": "478.p.6725",
-          "name": "Max Christie"
+          "playerKey": "478.p.5475",
+          "name": "Kelly Oubre Jr."
         }
       ]
     },
@@ -725,5 +725,149 @@
         }
       ]
     }
-  ]
+  ],
+  "checkpoint": {
+    "season": "2026-27",
+    "capBand": {
+      "floor": 131,
+      "ceiling": 178,
+      "policy": "config/cap_policy.json (official; formula ceiling 177)"
+    },
+    "teams": {
+      "franchise-01": {
+        "short": "Bsy",
+        "keeperCount": 9,
+        "keeperCap": 149.0,
+        "toFloor": 0,
+        "roomToCeiling": 29.0,
+        "status": "IN_RANGE"
+      },
+      "franchise-02": {
+        "short": "CrazyCat",
+        "keeperCount": 9,
+        "keeperCap": 101.0,
+        "toFloor": 30.0,
+        "roomToCeiling": 77.0,
+        "status": "UNDER_FLOOR"
+      },
+      "franchise-03": {
+        "short": "Melo",
+        "keeperCount": 9,
+        "keeperCap": 138.0,
+        "toFloor": 0,
+        "roomToCeiling": 40.0,
+        "status": "IN_RANGE"
+      },
+      "franchise-04": {
+        "short": "LC",
+        "keeperCount": 9,
+        "keeperCap": 175.0,
+        "toFloor": 0,
+        "roomToCeiling": 3.0,
+        "status": "NEAR_CEILING"
+      },
+      "franchise-05": {
+        "short": "HCMC",
+        "keeperCount": 9,
+        "keeperCap": 167.0,
+        "toFloor": 0,
+        "roomToCeiling": 11.0,
+        "status": "IN_RANGE"
+      },
+      "franchise-06": {
+        "short": "Dũng",
+        "keeperCount": 9,
+        "keeperCap": 126.0,
+        "toFloor": 5.0,
+        "roomToCeiling": 52.0,
+        "status": "UNDER_FLOOR"
+      },
+      "franchise-07": {
+        "short": "Maxfixe",
+        "keeperCount": 9,
+        "keeperCap": 129.0,
+        "toFloor": 2.0,
+        "roomToCeiling": 49.0,
+        "status": "UNDER_FLOOR"
+      },
+      "franchise-08": {
+        "short": "DHA",
+        "keeperCount": 9,
+        "keeperCap": 154.0,
+        "toFloor": 0,
+        "roomToCeiling": 24.0,
+        "status": "IN_RANGE"
+      },
+      "franchise-09": {
+        "short": "Đạt",
+        "keeperCount": 9,
+        "keeperCap": 174.0,
+        "toFloor": 0,
+        "roomToCeiling": 4.0,
+        "status": "NEAR_CEILING"
+      },
+      "franchise-10": {
+        "short": "DonTrick",
+        "keeperCount": 9,
+        "keeperCap": 120.0,
+        "toFloor": 11.0,
+        "roomToCeiling": 58.0,
+        "status": "UNDER_FLOOR"
+      },
+      "franchise-11": {
+        "short": "Thịnh",
+        "keeperCount": 9,
+        "keeperCap": 177.0,
+        "toFloor": 0,
+        "roomToCeiling": 1.0,
+        "status": "NEAR_CEILING"
+      },
+      "franchise-12": {
+        "short": "sup fam",
+        "keeperCount": 9,
+        "keeperCap": 144.0,
+        "toFloor": 0,
+        "roomToCeiling": 34.0,
+        "status": "IN_RANGE"
+      },
+      "franchise-13": {
+        "short": "Quân",
+        "keeperCount": 9,
+        "keeperCap": 160.0,
+        "toFloor": 0,
+        "roomToCeiling": 18.0,
+        "status": "IN_RANGE"
+      },
+      "franchise-14": {
+        "short": "TuLy",
+        "keeperCount": 9,
+        "keeperCap": 146.0,
+        "toFloor": 0,
+        "roomToCeiling": 32.0,
+        "status": "IN_RANGE"
+      },
+      "franchise-15": {
+        "short": "Bz",
+        "keeperCount": 9,
+        "keeperCap": 173.0,
+        "toFloor": 0,
+        "roomToCeiling": 5.0,
+        "status": "IN_RANGE"
+      },
+      "franchise-16": {
+        "short": "TT",
+        "keeperCount": 9,
+        "keeperCap": 174.0,
+        "toFloor": 0,
+        "roomToCeiling": 4.0,
+        "status": "NEAR_CEILING"
+      }
+    },
+    "provenance": {
+      "declaration": "Final keeper declarations confirmed by the league owner (Thịnh, DHA, Bsy, TuLy corrections applied)",
+      "capSource": "Yahoo player registry projectedAuctionValue",
+      "yahooRegistryFetchedAt": "yd_0_600.json"
+    }
+  },
+  "lockDigest": "2ca946d45363a71e07e7c78f13bcd57711205ceedebba69f68ec7ac766ec895c"
 }

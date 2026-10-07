@@ -130,7 +130,7 @@ the cap model never reads them, and they contain pure Yahoo data (no cap policy,
 
 ## League state: keepers, trades, picks (pre-draft layer)
 
-`data/2026-27/` holds the keeper freeze (currently **projected**, not locked), 48
+`data/2026-27/` holds the OFFICIAL keeper freeze (**locked**), 48
 stable pick ids, the structured trade ledger (Trades A–D are seeded as
 `PROPOSED`, never official) and the draft ledger. The page's **TRADE LAB**,
 **PICKS** and **OFFICIAL / SCENARIO** switch are generated from it by the

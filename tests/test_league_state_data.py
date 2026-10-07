@@ -47,10 +47,12 @@ class TestRepoState(unittest.TestCase):
                     self.assertEqual(self.i["registry"][a["playerKey"]]["name"], a["name"])
 
     # ----- baseline
-    def test_keeper_freeze_is_projected_not_silently_frozen(self):
-        self.assertEqual(self.i["freeze"]["status"], "projected")
-        self.assertIsNone(self.i["freeze"]["lockedAt"])
-        self.assertFalse(ls.verify_lock(self.i["freeze"]))
+    def test_keeper_freeze_is_the_official_locked_baseline(self):
+        f = self.i["freeze"]
+        self.assertEqual(f["status"], "locked")
+        self.assertTrue(f["lockedAt"])
+        self.assertTrue(ls.verify_lock(f))
+        self.assertNotIn("projected", f["statusNote"].lower())
 
     def test_baseline_matches_the_keeper_board_totals(self):
         html = _html()

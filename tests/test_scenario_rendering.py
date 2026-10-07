@@ -168,6 +168,12 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn('class="scn-strip"', body)
         self.assertNotIn("scn-card", body)
 
+    def test_public_ui_says_keepers_are_locked(self):
+        for dom in (self.official, self.scenario):
+            m = re.search(r'id="lab-keeper-status">(.*?)</span>', dom)
+            self.assertEqual(m.group(1), "KEEPERS LOCKED · OFFICIAL")
+            self.assertNotIn("NOT FROZEN", dom.split("<body", 1)[1].split('<script id="league-app">')[0])
+
     def test_keeper_freeze_cuts_label_only_on_changed_cards(self):
         self.assertIn("KEEPER-FREEZE CUTS", _card(self.scenario, "sup fam"))
         self.assertNotIn("KEEPER-FREEZE CUTS", _card(self.scenario, "Quân"))

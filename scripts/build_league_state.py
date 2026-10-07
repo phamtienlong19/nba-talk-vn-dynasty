@@ -142,7 +142,19 @@ def cmd_baseline(args):
 
 def cmd_lock(args):
     path = os.path.join(DATA_DIR, "keeper_freeze.json")
-    locked = ls.lock_keepers(ls._load(path), args.at or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    inputs = ls.load_inputs()
+    state = ls.initial_state(inputs)
+    registry = ls._load(ls.REGISTRY_PATH)
+    checkpoint = {
+        "season": inputs["freeze"]["season"],
+        "capBand": {"floor": ls.cap_band(inputs)[0], "ceiling": ls.cap_band(inputs)[1],
+                    "policy": "config/cap_policy.json (official; formula ceiling 177)"},
+        "teams": {f: ls.checkpoint_team(inputs, state, f) for f in sorted(inputs["franchises"])},
+        "provenance": {"declaration": args.note or "Final keeper declarations confirmed by the league owner",
+                       "capSource": "Yahoo player registry projectedAuctionValue",
+                       "yahooRegistryFetchedAt": registry.get("fetchedAt")},
+    }
+    locked = ls.lock_keepers(ls._load(path), args.at or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), checkpoint)
     _write(path, locked)
     snap_dir = os.path.join(DATA_DIR, "snapshots")
     os.makedirs(snap_dir, exist_ok=True)
@@ -246,6 +258,7 @@ def main():
     sub.add_parser("baseline").set_defaults(fn=cmd_baseline)
     lk = sub.add_parser("lock-keepers")
     lk.add_argument("--at", default=None)
+    lk.add_argument("--note", default=None)
     lk.set_defaults(fn=cmd_lock)
     sub.add_parser("embed").set_defaults(fn=cmd_embed)
     args = ap.parse_args()

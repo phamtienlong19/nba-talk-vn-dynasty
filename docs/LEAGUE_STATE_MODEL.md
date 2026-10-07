@@ -4,7 +4,7 @@ Operational state under the board. The board's FA/DRAFT 60 stays a
 *recommendation*; this layer answers "who owns what right now".
 
 ```
-CURRENT OFFICIAL STATE = KEEPER FREEZE + OFFICIAL TRADES + DRAFT EVENTS
+CURRENT OFFICIAL STATE = OFFICIAL KEEPER FREEZE + OFFICIAL TRADES + DRAFT EVENTS
 SCENARIO STATE         = CURRENT OFFICIAL STATE + SELECTED PROPOSED/AGREED TRADES
 ```
 
@@ -15,7 +15,7 @@ Engine: `scripts/league_state.py` (pure, stdlib). Builder / embedder:
 
 | File | Role |
 |---|---|
-| `keeper_freeze.json` | per-team keeper `playerKey`s. `status`: `projected` (now — taken from the board, **not** frozen) or `locked` (`lock-keepers` adds `lockedAt` + `lockDigest`; `baseline` then refuses to overwrite it) |
+| `keeper_freeze.json` | per-team keeper `playerKey`s. `status`: `locked` — the OFFICIAL keeper freeze (final declarations, 2026-10-07): `lockedAt`, `lockDigest`, and a `checkpoint` (official band 131–178, per-team keeper cap / room / status, provenance). `baseline` refuses to overwrite a locked freeze; `projected` is only the pre-declaration state |
 | `picks.json` | 48 stable pick ids (`2026-R1-03`), `originalOwner` (never overwritten). Current owner is derived |
 | `trades.json` | atomic transactions: `PROPOSED` / `AGREED` / `OFFICIAL` / `VOID`; assets `{type, playerKey\|pickId, from, to}`; `dependsOn`; `order` |
 | `draft_state.json` | append-only `DRAFT_PICK` events (empty pre-draft). Roster, availability, cap, pick completion and the draft cursor are derived from them |
