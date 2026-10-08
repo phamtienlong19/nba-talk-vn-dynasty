@@ -320,7 +320,7 @@ def _chrome():
 
 
 HARNESS = r"""
-<script>(function(){var R={};function q(s){return document.querySelector(s)}function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
+<script>(function(){var R={};var C='\uD83D\uDC51';function q(s){return document.querySelector(s)}function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
 function totals(){return qa('section.team-card .cap-total').map(function(e){return e.firstChild.textContent});}
 function seg(t){qa('.wi-seg button').filter(function(b){return b.textContent===t})[0].click();}
 function dat(){return qa('article.wi-card').filter(function(c){return c.querySelector('.identity-tag').textContent==='Đạt'})[0];}
@@ -332,12 +332,12 @@ R.wi={cls:document.body.className,hidden:q('#what-if').hidden,banner:q('#scn-ban
   title:document.title,crown:q('#what-if').textContent.indexOf('\uD83D\uDC51')>=0,snap:q('#what-if .wi-pill-wi').textContent,url:location.search};
 qa('.wi-trow')[8].click();R.detail={cards:qa('.wi-detail article.team-card').length,rowsA:qa('.wi-detail .player-row').length};
 seg('REDO CUTS');R.redo={cards:qa('article.wi-card').length,sectionCards:qa('section.team-card').length,secTotals:totals(),dat0:tot()};
-row('DeMar').querySelector('.wi-tg').click();R.afterCut={dat:tot(),edited:!!dat().querySelector('.wi-reset:not([hidden])')};
+row('DeMar').querySelector('.wi-tg').click();R.redoCrown=dat().querySelector('.team-name').textContent.indexOf(C)>=0;R.afterCut={dat:tot(),edited:!!dat().querySelector('.wi-reset:not([hidden])')};
 row('Collin Gillespie').querySelector('.wi-tg').click();R.afterKeepAgain={dat:tot(),ds:!!row('Collin Gillespie')};
 dat().querySelector('.wi-reset').click();R.afterReset={dat:tot()};
 var locked=row('Luka');R.locked={disabled:locked.querySelector('.wi-tg').disabled};
-seg('FA 60');R.fa={rows:qa('.wi-fa .wi-fr:not(.head)').length,enter:qa('.wi-fr.enter').length,exit:qa('.wi-fr.exit').length};
-q('.modeswitch button[data-mode=SCENARIO]').click();R.scn={cls:document.body.className,hiddenWi:q('#what-if').hidden};
+seg('FA 60');R.faCrown=qa('.wi-fa .tchip').some(function(e){return e.textContent.indexOf(C)>=0});R.fa={rows:qa('.wi-fa .wi-fr:not(.head)').length,enter:qa('.wi-fr.enter').length,exit:qa('.wi-fr.exit').length};
+q('.modeswitch button[data-mode=SCENARIO]').click();R.scn={cls:document.body.className,hiddenWi:q('#what-if').hidden,crownCompare:q('#lab-compare').textContent.indexOf(C)>=0,crownPicks:q('#picks-grid').textContent.indexOf(C)>=0,crownCap:q('#cap').textContent.indexOf(C)>=0,crownCard:qa('section.team-card .team-name').some(function(e){return e.textContent.indexOf(C)>=0})};
 q('.modeswitch button[data-mode=OFFICIAL]').click();R.back={cls:document.body.className,hidden:q('#what-if').hidden,totals:totals(),pool:qa('.pool-player').length};
 q('.modeswitch button[data-mode=WHATIF]').click();qa('.navlink')[1].click();R.nav={cls:document.body.className};
 document.body.setAttribute('data-result',JSON.stringify(R));})();</script>
@@ -402,6 +402,14 @@ class TestRenderedUi(unittest.TestCase):
     def test_fa_view_marks_entrants_and_exits(self):
         self.assertEqual(self.R["fa"]["rows"], 120)
         self.assertEqual((self.R["fa"]["enter"], self.R["fa"]["exit"]), (1, 1))
+
+    def test_champion_crown_in_every_mode(self):
+        r = self.R
+        self.assertTrue(r["wi"]["crown"])
+        self.assertTrue(r["redoCrown"])
+        self.assertTrue(r["faCrown"])
+        for k in ("crownCompare", "crownPicks", "crownCap", "crownCard"):
+            self.assertTrue(r["scn"][k], k)
 
     def test_switching_is_reversible_and_official_untouched(self):
         b = self.R["back"]
