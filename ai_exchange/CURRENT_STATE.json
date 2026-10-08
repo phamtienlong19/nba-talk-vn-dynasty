@@ -138,6 +138,14 @@
       "playerRegistry": "data/yahoo/player_registry.json -- 600 Yahoo players, identity = playerKey; separate from the 300-player market snapshot",
       "derived": "ownership, cap, room, roll-ups and scenarios are derived by scripts/league_state.py; page data embedded by scripts/build_league_state.py embed",
       "deferred": "live draft operator (timer, on-the-clock, confirm/undo, ticker, Messenger copy, realtime backend)"
+    },
+    "whatIfMode": {
+      "doc": "docs/WHAT_IF_MODE.md",
+      "snapshots": [
+        "2026-10-08"
+      ],
+      "officialStateModified": false,
+      "headline": "Oct 8 band recomputes to 131-178 (unchanged); same keepers: 11 within / 4 below floor / 1 above ceiling (Dat 180); only Dat changes in REDO; FA 60 delta: +Collin Gillespie / -Yves Missi"
     }
   }
 }

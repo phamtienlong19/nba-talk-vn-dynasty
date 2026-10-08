@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "keeperMax": 9,
+  "nearCeilingRoom": 4,
+  "neverDropAtOrAbove": 20,
+  "reviewDropFrom": 10,
+  "discretionaryRankGap": 25,
+  "discretionaryMaxPerTeam": 3,
+  "alternativesMax": 3,
+  "meaningfulRankMove": 5,
+  "aliases": {
+    "carlton carrington": "bub carrington",
+    "anfernee simon": "anfernee simons",
+    "ron holland": "ronald holland",
+    "herb jones": "herbert jones",
+    "collin murray boyles r": "collin murray boyles"
+  },
+  "notEnforced": [
+    "Prospect/young-player keep exceptions (need minutes data)",
+    "Positional tag minimums and single-position caps (roster-wide, not a keeper test)",
+    "Injury / IL cap treatment (no deterministic rule in the repo)"
+  ]
+}

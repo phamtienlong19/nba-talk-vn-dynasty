@@ -135,3 +135,7 @@ stable pick ids, the structured trade ledger (Trades A–D are seeded as
 `PROPOSED`, never official) and the draft ledger. The page's **TRADE LAB**,
 **PICKS** and **OFFICIAL / SCENARIO** switch are generated from it by the
 engine; see `docs/LEAGUE_STATE_MODEL.md`.
+
+## What If (post-freeze, optional)
+
+Top-bar **WHAT IF** (`?mode=whatif`) reprices the frozen keepers with a dated Yahoo snapshot and projects alternative keeper/cut sets and a hypothetical FA 60. Read-only; see `docs/WHAT_IF_MODE.md`.
