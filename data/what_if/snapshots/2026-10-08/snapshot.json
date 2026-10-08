@@ -1,0 +1,16 @@
+{
+  "id": "2026-10-08",
+  "label": "Oct 8 2026",
+  "effectiveDate": "2026-10-08",
+  "fileAcquiredAt": "2026-10-08T06:42:10Z",
+  "sourceFile": "draft_analysis (1).json",
+  "sourceSha256": "db0458f2cc3ac0b46e783c5ed6350d1b171b52264489e7a078ae7b3f9a943c8a",
+  "capField": "projected_auction_value",
+  "yahoo": {
+    "leagueKey": "478.l.101",
+    "leagueEditKey": "2026-10-07",
+    "latestPlayerNoteAt": "2026-10-08T06:35:05Z"
+  },
+  "playerCount": 300,
+  "skippedWithoutRankOrCap": []
+}

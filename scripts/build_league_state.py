@@ -167,7 +167,8 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
     floor, ceiling = ls.cap_band(inputs)
     fr = inputs["franchises"]
     teams = [{"id": t["franchiseId"], "short": t["short"], "name": t.get("teamName") or fr[t["franchiseId"]]["displayName"],
-              "color": t["color"], "text": t["text"]} for t in inputs["freeze"]["teams"]]
+              "color": t["color"], "text": t["text"],
+              "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME} for t in inputs["freeze"]["teams"]]
     base = ls.initial_state(inputs)
     official = ls.resolve(inputs, (), "OFFICIAL")
     # playerKey -> the name as printed on the keeper board (the page re-uses the board's own rows)

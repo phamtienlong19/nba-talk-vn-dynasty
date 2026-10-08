@@ -332,8 +332,11 @@ def pos_from_eligible(eligible):
 
 def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict | None = None,
                       dynasty_rank_max: int | None = None, rookie_names: set | None = None,
-                      draft_years: dict | None = None):
-    kept, cuts = parse_team_cards(index_html)
+                      draft_years: dict | None = None, kept: set | None = None, cuts: list | None = None):
+    # `kept` (normalized names) / `cuts` ([{name, cap, team}]) default to what the
+    # keeper board in index_html shows; the What-If layer passes hypothetical ones.
+    if kept is None or cuts is None:
+        kept, cuts = parse_team_cards(index_html)
     rookie_names = rookie_names or set()
     draft_years = draft_years or {}
 
