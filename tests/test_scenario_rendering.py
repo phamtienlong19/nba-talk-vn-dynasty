@@ -168,6 +168,17 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn('class="scn-strip"', body)
         self.assertNotIn("scn-card", body)
 
+    def test_every_owned_pick_is_listed_and_never_clipped(self):
+        i = ls.load_inputs()
+        state = ls.resolve(i, ABC, "SCENARIO")
+        shorts = {t["franchiseId"]: t["short"] for t in i["freeze"]["teams"]}
+        for fid, short in shorts.items():
+            want = " · ".join(ls.pick_label(i["pickIndex"][k]) for k in ls.team_picks(state, fid))
+            self.assertEqual(_read(_card(self.scenario, short))["picks"], want, short)
+        css = re.search(r"\.picks-tag\{background:#edf2f9[^}]*\}", self.static).group(0)
+        for bad in ("nowrap", "ellipsis", "overflow:hidden"):
+            self.assertNotIn(bad, css)
+
     def test_public_ui_says_keepers_are_locked(self):
         for dom in (self.official, self.scenario):
             m = re.search(r'id="lab-keeper-status">(.*?)</span>', dom)
