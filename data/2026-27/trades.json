@@ -183,6 +183,13 @@
           "name": "Alperen Şengün",
           "from": "franchise-04",
           "to": "franchise-03"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.5295",
+          "name": "Aaron Gordon",
+          "from": "franchise-04",
+          "to": "franchise-03"
         }
       ]
     }

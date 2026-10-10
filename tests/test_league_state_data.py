@@ -147,8 +147,30 @@ class TestRepoState(unittest.TestCase):
         d = s["tradeResults"][0]
         self.assertTrue(d["applied"])  # still visualisable
         w = [x for x in d["warnings"] if x["code"] == "ASSET_COUNT_UNBALANCED"]
-        self.assertEqual(w[0]["detail"], {"LC": 2, "Melo": 1})
+        self.assertEqual(w, [])  # 2-for-2 once the Gordon amendment is in (3.03 is not part of the trade)
         self.assertEqual(self.i["tradeIndex"]["TRADE-D"]["status"], "PROPOSED")
+
+    def test_trade_d_gordon_amendment_and_3_03_stays_with_melo(self):
+        base = ls.initial_state(self.i)
+        legs = {(a["type"], a.get("playerKey") or a["pickId"], a["from"], a["to"]) for a in self.i["tradeIndex"]["TRADE-D"]["assets"]}
+        self.assertEqual(len(legs), 4)  # Buzelis, 1.05, Sengun + Gordon; 3.03 is NOT part of the trade
+        self.assertIn(("player", "478.p.5295", "franchise-04", "franchise-03"), legs)
+        self.assertFalse([l for l in legs if l[1] == "2026-R3-03"])
+        lc, melo = "franchise-04", "franchise-03"
+        once = ls.resolve(self.i, ["TRADE-D"], "SCENARIO")
+        again = ls.resolve(self.i, ["TRADE-D", "TRADE-D"], "SCENARIO")
+        self.assertEqual(ls.team_players(self.i, once, melo).count("478.p.5295"), 1)
+        self.assertNotIn("478.p.5295", ls.team_players(self.i, once, lc))
+        self.assertEqual(ls.team_picks(once, melo).count("2026-R3-03"), 1)
+        self.assertNotIn("2026-R3-03", ls.team_picks(once, lc))
+        self.assertEqual(ls.team_cap(self.i, once, lc), ls.team_cap(self.i, again, lc))
+        g = ls.player_cap(self.i, "478.p.5295")
+        self.assertEqual(g, 1.0)
+        self.assertEqual(ls.team_cap(self.i, once, lc), ls.team_cap(self.i, base, lc) + 16 - 32 - g)
+        self.assertEqual(ls.team_cap(self.i, once, melo), ls.team_cap(self.i, base, melo) - 16 + 32 + g)
+        official = ls.resolve(self.i, [], "OFFICIAL")
+        self.assertEqual(official["playerOwner"], base["playerOwner"])
+        self.assertEqual(official["pickOwner"]["2026-R3-03"], melo)
 
     def test_pre_draft_window_trade_limit_is_surfaced_for_bz(self):
         s = self._scn("TRADE-A", "TRADE-B", "TRADE-C")
