@@ -190,13 +190,6 @@
           "name": "Aaron Gordon",
           "from": "franchise-04",
           "to": "franchise-03"
-        },
-        {
-          "type": "pick",
-          "pickId": "2026-R3-03",
-          "name": "3.03",
-          "from": "franchise-03",
-          "to": "franchise-04"
         }
       ]
     }
