@@ -60,7 +60,7 @@
         "franchise-15",
         "franchise-06"
       ],
-      "note": "Franz Wagner + 3.06 to Bz; Duren + 2.15 to Dũng.",
+      "note": "Franz Wagner + 3.06 to Bz; Duren + 3.03 (Melo's original R3, held by Bz since the last-season swap) to Dũng. PROPOSED pending Dũng's agreement.",
       "assets": [
         {
           "type": "player",
@@ -85,8 +85,8 @@
         },
         {
           "type": "pick",
-          "pickId": "2026-R2-15",
-          "name": "2.15",
+          "pickId": "2026-R3-03",
+          "name": "3.03",
           "from": "franchise-15",
           "to": "franchise-06"
         }

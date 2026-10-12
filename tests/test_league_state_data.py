@@ -86,7 +86,8 @@ class TestRepoState(unittest.TestCase):
     def test_trade_b_ownership(self):
         s = self._scn("TRADE-B")
         self.assertEqual(s["pickOwner"]["2026-R3-06"], BZ)
-        self.assertEqual(s["pickOwner"]["2026-R2-15"], DUNG)
+        self.assertEqual(s["pickOwner"]["2026-R3-03"], DUNG)  # Melo's original R3, held by Bz
+        self.assertEqual(s["pickOwner"]["2026-R2-15"], MELO)  # untouched by Trade B
         self.assertEqual(s["playerOwner"]["478.p.6550"], BZ)    # F. Wagner
         self.assertEqual(s["playerOwner"]["478.p.6703"], DUNG)  # Duren
 
@@ -101,7 +102,7 @@ class TestRepoState(unittest.TestCase):
 
     def test_pick_table_current_and_original_columns(self):
         rows = {r["label"]: r for r in ls.pick_table(self.i, self._scn("TRADE-A", "TRADE-B", "TRADE-C"))}
-        expect = {"1.03": (SUP, BSY), "1.15": (BSY, BZ), "2.15": (DUNG, BZ), "3.06": (SUP, DUNG), "3.12": (BZ, SUP)}
+        expect = {"1.03": (SUP, BSY), "1.15": (BSY, BZ), "3.03": (DUNG, MELO), "3.06": (SUP, DUNG), "3.12": (BZ, SUP)}
         for label, (cur, orig) in expect.items():
             self.assertEqual((rows[label]["current"], rows[label]["original"]), (cur, orig), label)
 
@@ -118,7 +119,7 @@ class TestRepoState(unittest.TestCase):
         s = self._scn("TRADE-A", "TRADE-B", "TRADE-C")
         fold = ls.fold_team(self.i, s, BZ)
         self.assertEqual(sorted(a["n"] for a in fold["in"]), sorted(["Rudy Gobert", "Franz Wagner", "Jalen Williams", "Reed Sheppard", "3.12"]))
-        self.assertEqual(sorted(a["n"] for a in fold["out"]), sorted(["Jamal Murray", "Jalen Duren", "Julius Randle", "1.15", "2.15"]))
+        self.assertEqual(sorted(a["n"] for a in fold["out"]), sorted(["Jamal Murray", "Jalen Duren", "Julius Randle", "1.15", "3.03"]))
         self.assertEqual({p["asset"]["n"]: p["chain"] for p in fold["pass"]},
                          {"1.03": ["Bsy", "Bz", "sup fam"], "3.06": ["Dũng", "Bz", "sup fam"]})
         self.assertEqual(len(fold["tradeIds"]), 3)
@@ -150,7 +151,7 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual(w, [])  # 2-for-2 once the Gordon amendment is in (3.03 is not part of the trade)
         self.assertEqual(self.i["tradeIndex"]["TRADE-D"]["status"], "PROPOSED")
 
-    def test_trade_d_gordon_amendment_and_3_03_stays_with_melo(self):
+    def test_trade_d_gordon_amendment_and_3_03_not_in_trade(self):
         base = ls.initial_state(self.i)
         legs = {(a["type"], a.get("playerKey") or a["pickId"], a["from"], a["to"]) for a in self.i["tradeIndex"]["TRADE-D"]["assets"]}
         self.assertEqual(len(legs), 4)  # Buzelis, 1.05, Sengun + Gordon; 3.03 is NOT part of the trade
@@ -161,8 +162,9 @@ class TestRepoState(unittest.TestCase):
         again = ls.resolve(self.i, ["TRADE-D", "TRADE-D"], "SCENARIO")
         self.assertEqual(ls.team_players(self.i, once, melo).count("478.p.5295"), 1)
         self.assertNotIn("478.p.5295", ls.team_players(self.i, once, lc))
-        self.assertEqual(ls.team_picks(once, melo).count("2026-R3-03"), 1)
         self.assertNotIn("2026-R3-03", ls.team_picks(once, lc))
+        self.assertNotIn("2026-R3-03", ls.team_picks(once, melo))
+        self.assertEqual(once["pickOwner"]["2026-R3-03"], BZ)  # Bz holds it since the last-season swap
         self.assertEqual(ls.team_cap(self.i, once, lc), ls.team_cap(self.i, again, lc))
         g = ls.player_cap(self.i, "478.p.5295")
         self.assertEqual(g, 1.0)
@@ -170,7 +172,78 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual(ls.team_cap(self.i, once, melo), ls.team_cap(self.i, base, melo) - 16 + 32 + g)
         official = ls.resolve(self.i, [], "OFFICIAL")
         self.assertEqual(official["playerOwner"], base["playerOwner"])
-        self.assertEqual(official["pickOwner"]["2026-R3-03"], melo)
+        self.assertEqual(official["pickOwner"]["2026-R3-03"], BZ)
+
+    # ----- historical (last-season) swaps, baked into the baseline
+    def test_historical_swaps_in_the_baseline(self):
+        o = ls.resolve(self.i, [], "OFFICIAL")
+        MAX, HC = "franchise-07", "franchise-05"
+        owner = o["pickOwner"]
+        self.assertEqual((owner["2026-R2-15"], owner["2026-R3-03"]), (MELO, BZ))
+        self.assertEqual((owner["2026-R2-07"], owner["2026-R3-05"]), (HC, MAX))
+        def rounds(f):
+            return sorted(int(k.split("-R")[1][0]) for k, v in owner.items() if v == f)
+        self.assertEqual(rounds(MELO), [1, 2, 2])
+        self.assertEqual(rounds(BZ), [1, 3, 3])
+        self.assertEqual(rounds(HC), [1, 2, 2])
+        self.assertEqual(rounds(MAX), [1, 3, 3])
+        self.assertNotIn("2026-R2-15", ls.team_picks(o, BZ))
+        # original owner is preserved, history is tagged historical
+        self.assertEqual(self.i["pickIndex"]["2026-R2-15"]["originalOwner"], BZ)
+        self.assertEqual(self.i["pickIndex"]["2026-R3-03"]["originalOwner"], MELO)
+        row = {r["pickId"]: r for r in ls.pick_table(self.i, o)}["2026-R3-03"]
+        self.assertEqual((row["original"], row["current"]), (MELO, BZ))
+        self.assertTrue(row["history"][0]["historical"])
+
+    def test_ownership_integrity_audit_all_sixteen_teams(self):
+        for sel in ([], ["TRADE-A"], ["TRADE-B"], ["TRADE-A", "TRADE-B", "TRADE-C"], ["TRADE-D"],
+                    ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D"]):
+            s = ls.resolve(self.i, sel, "SCENARIO" if sel else "OFFICIAL")
+            all_ids = sorted(p["pickId"] for p in self.i["picks"]["picks"])
+            self.assertEqual(len(all_ids), 48)
+            self.assertEqual(sorted(s["pickOwner"]), all_ids)
+            listed = [pid for f in self.i["franchises"] for pid in ls.team_picks(s, f)]
+            self.assertEqual(sorted(listed), all_ids, sel)  # each pick exactly once across the 16 inventories
+            self.assertEqual(sum(len(ls.team_picks(s, f)) for f in self.i["franchises"]), 48)
+
+    def test_trade_b_corrected_and_chain_still_executes(self):
+        b = self.i["tradeIndex"]["TRADE-B"]
+        legs = {(a.get("playerKey") or a["pickId"], a["from"], a["to"]) for a in b["assets"]}
+        self.assertEqual(legs, {("478.p.6550", DUNG, BZ), ("2026-R3-06", DUNG, BZ), ("478.p.6703", BZ, DUNG), ("2026-R3-03", BZ, DUNG)})
+        self.assertEqual(b["status"], "PROPOSED")
+        base = ls.resolve(self.i, [], "OFFICIAL")
+        self.assertIn("2026-R3-03", ls.team_picks(base, BZ))
+        s = self._scn("TRADE-B")
+        self.assertIn("2026-R3-03", ls.team_picks(s, DUNG))
+        self.assertIn("2026-R3-06", ls.team_picks(s, BZ))
+        full = self._scn("TRADE-A", "TRADE-B", "TRADE-C")
+        self.assertTrue(all(r["applied"] and not r["errors"] for r in full["tradeResults"]))
+        self.assertEqual([t for t in self.i["tradeIndex"]["TRADE-C"]["dependsOn"]], ["TRADE-A", "TRADE-B"])
+
+    def test_invalid_transfers_are_rejected(self):
+        # Bz no longer owns 2.15 (Melo does): the OLD Trade B leg must be refused, never silently applied
+        import copy
+        inp = copy.deepcopy(self.i)
+        for a in inp["tradeIndex"]["TRADE-B"]["assets"]:
+            if a.get("pickId") == "2026-R3-03":
+                a["pickId"] = "2026-R2-15"
+        s = ls.resolve(inp, ["TRADE-B"], "SCENARIO")
+        r = s["tradeResults"][0]
+        self.assertFalse(r["applied"])
+        self.assertEqual(r["errors"][0]["code"], "NOT_OWNED")
+        self.assertEqual(r["errors"][0]["detail"]["actualOwner"], MELO)
+        self.assertEqual(s["pickOwner"]["2026-R2-15"], MELO)
+        # a bad historical record is a structural error
+        bad = copy.deepcopy(self.i)
+        bad["picks"]["historicalTransfers"][0]["assets"][0]["from"] = BSY
+        with self.assertRaises(ls.StateError):
+            ls.validate_inputs(bad)
+
+    def test_historical_moves_are_not_shown_as_scenario_moves(self):
+        v = ls.scenario_view(self.i, [])
+        self.assertEqual(v["picks"], [])
+        v = ls.scenario_view(self.i, ["TRADE-B"])
+        self.assertEqual(sorted(p["label"] for p in v["picks"]), ["3.03", "3.06"])
 
     def test_pre_draft_window_trade_limit_is_surfaced_for_bz(self):
         s = self._scn("TRADE-A", "TRADE-B", "TRADE-C")

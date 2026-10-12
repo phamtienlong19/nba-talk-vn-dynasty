@@ -135,6 +135,9 @@ def cmd_baseline(args):
     registry = ls._load(ls.REGISTRY_PATH)
     franchises = ls._load(os.path.join(DATA_DIR, "franchises.json"))["franchises"]
     freeze, picks = build_baseline(html, registry, franchises)
+    prior = ls._load(os.path.join(DATA_DIR, "picks.json")).get("historicalTransfers")
+    if prior:  # completed swaps are history, not derivable from the board: never drop them on a rebuild
+        picks["historicalTransfers"] = prior
     _write(freeze_path, freeze)
     _write(os.path.join(DATA_DIR, "picks.json"), picks)
     print(f"baseline: {sum(len(t['keepers']) for t in freeze['teams'])} projected keepers, {len(picks['picks'])} picks")
