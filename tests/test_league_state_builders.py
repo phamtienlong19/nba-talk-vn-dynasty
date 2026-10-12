@@ -81,7 +81,8 @@ class TestKeeperLockWorkflow(unittest.TestCase):
         a = bls.build_baseline(html, r, fr)
         self.assertEqual(a, bls.build_baseline(html, r, fr))
         self.assertEqual(a[0]["teams"], ls._load(os.path.join(ls.DATA_DIR, "keeper_freeze.json"))["teams"])
-        self.assertEqual(a[1], ls._load(os.path.join(ls.DATA_DIR, "picks.json")))
+        stored = ls._load(os.path.join(ls.DATA_DIR, "picks.json"))
+        self.assertEqual(a[1]["picks"], stored["picks"])  # historicalTransfers are recorded history, not board-derived
 
 
 class TestPageScript(unittest.TestCase):

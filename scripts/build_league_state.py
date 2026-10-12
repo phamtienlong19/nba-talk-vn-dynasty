@@ -65,8 +65,13 @@ def parse_board(index_html: str):
                       "text": text.group(1) if text else "#ffffff", "kept": kept})
     panel = index_html[index_html.index('id="draft-order"'):index_html.index('id="rosters-a"')]
     picks = []
-    for m in re.finditer(r'<div class="pick-slot">(\d+)\.(\d+)</div>\s*<div class="pick-team"><span class="pick-chip"[^>]*>(.*?)</span>', panel, re.S):
-        picks.append((int(m.group(1)), int(m.group(2)), html_lib.unescape(m.group(3)).strip()))
+    by_short = {t["short"].upper(): t["name"] for t in teams}
+    for m in re.finditer(r'<div class="pick-slot">(\d+)\.(\d+)</div>\s*<div class="pick-team"><span class="pick-chip"[^>]*>(.*?)</span></div>\s*<div class="pick-note">(.*?)</div>', panel, re.S):
+        chip = html_lib.unescape(m.group(3)).strip()
+        via = re.search(r'VIA ([^<]+)<', m.group(4))
+        if via:  # the ledger shows the CURRENT owner; "VIA X" names the slot's original team
+            chip = by_short[html_lib.unescape(via.group(1)).strip().upper()]
+        picks.append((int(m.group(1)), int(m.group(2)), chip))
     return teams, picks
 
 
@@ -135,6 +140,9 @@ def cmd_baseline(args):
     registry = ls._load(ls.REGISTRY_PATH)
     franchises = ls._load(os.path.join(DATA_DIR, "franchises.json"))["franchises"]
     freeze, picks = build_baseline(html, registry, franchises)
+    prior = ls._load(os.path.join(DATA_DIR, "picks.json")).get("historicalTransfers")
+    if prior:  # completed swaps are history, not derivable from the board: never drop them on a rebuild
+        picks["historicalTransfers"] = prior
     _write(freeze_path, freeze)
     _write(os.path.join(DATA_DIR, "picks.json"), picks)
     print(f"baseline: {sum(len(t['keepers']) for t in freeze['teams'])} projected keepers, {len(picks['picks'])} picks")

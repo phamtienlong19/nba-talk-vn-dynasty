@@ -93,6 +93,7 @@ def validate_inputs(inputs: dict) -> None:
     for p in inputs["picks"]["picks"]:
         if p["originalOwner"] not in inputs["franchises"]:
             raise StateError(f"pick {p['pickId']} has unknown original owner")
+    apply_historical_transfers(inputs, {p["pickId"]: p["originalOwner"] for p in inputs["picks"]["picks"]}, {})
     ids = [t["tradeId"] for t in inputs["trades"]["trades"]]
     if len(ids) != len(set(ids)):
         raise StateError("duplicate tradeId in trades.json")
@@ -133,10 +134,30 @@ def describe_asset(inputs: dict, asset: dict) -> dict:
 
 
 # ----------------------------------------------------------------- state
+def apply_historical_transfers(inputs: dict, pick_owner: dict, history: dict) -> None:
+    """Replay already-completed (pre-draft, last-season) pick swaps recorded in picks.json over the original
+    owners. Each swap must move a pick FROM its then-current owner; the original owner is never overwritten.
+    Entries are tagged historical so scenario views do not present them as simulated moves."""
+    for tr in inputs["picks"].get("historicalTransfers", []):
+        for a in tr["assets"]:
+            pid = a["pickId"]
+            if pid not in pick_owner:
+                raise StateError(f"{tr['transferId']}: unknown pick {pid}")
+            if pick_owner[pid] != a["from"]:
+                raise StateError(f"{tr['transferId']}: {pid} is owned by {pick_owner[pid]}, not {a['from']}")
+            if a["to"] not in inputs["franchises"]:
+                raise StateError(f"{tr['transferId']}: unknown franchise {a['to']}")
+            pick_owner[pid] = a["to"]
+            history.setdefault(f"pick:{pid}", []).append(
+                {"tradeId": tr["transferId"], "from": a["from"], "to": a["to"], "historical": True})
+
+
 def initial_state(inputs: dict) -> dict:
     player_owner = {k["playerKey"]: t["franchiseId"] for t in inputs["freeze"]["teams"] for k in t["keepers"]}
     pick_owner = {p["pickId"]: p["originalOwner"] for p in inputs["picks"]["picks"]}
-    return {"playerOwner": player_owner, "pickOwner": pick_owner, "history": {}, "completedPicks": {},
+    history: dict = {}
+    apply_historical_transfers(inputs, pick_owner, history)
+    return {"playerOwner": player_owner, "pickOwner": pick_owner, "history": history, "completedPicks": {},
             "draftedPlayers": {}, "tradeResults": [], "activeTradeIds": [], "applied": set()}
 
 
@@ -400,7 +421,7 @@ def pick_table(inputs, state):
         hist = state["history"].get(aid, [])
         rows.append({"pickId": p["pickId"], "label": pick_label(p), "original": p["originalOwner"],
                      "current": state["pickOwner"][p["pickId"]], "moved": bool(hist),
-                     "history": [{"tradeId": h["tradeId"], "from": h["from"], "to": h["to"]} for h in hist],
+                     "history": [{"tradeId": h["tradeId"], "from": h["from"], "to": h["to"], "historical": bool(h.get("historical"))} for h in hist],
                      "completed": p["pickId"] in state["completedPicks"]})
     return rows
 
@@ -430,7 +451,7 @@ def scenario_view(inputs, selected):
         "selected": sorted(selected),
         "trades": {r["tradeId"]: {k: r[k] for k in ("valid", "applied", "errors", "warnings", "teams")} for r in state["tradeResults"]},
         "teams": teams,
-        "picks": [r for r in pick_table(inputs, state) if r["moved"]],
+        "picks": [r for r in pick_table(inputs, state) if any(not h["historical"] for h in r["history"])],
         "windowWarnings": state["windowWarnings"],
     }
 

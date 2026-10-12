@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "note": "originalOwner = owner at the keeper baseline; current owner is DERIVED from the trade ledger.",
+  "note": "originalOwner = the slot's original team (never overwritten). historicalTransfers = already-completed swaps replayed into the baseline; further changes are derived from the trade ledger.",
   "picks": [
     {
       "pickId": "2026-R1-01",
@@ -289,6 +289,42 @@
       "round": 3,
       "slot": 16,
       "originalOwner": "franchise-16"
+    }
+  ],
+  "historicalTransfers": [
+    {
+      "transferId": "LAST-SEASON-SWAP-A",
+      "label": "Melo ↔ Bz (R2/R3 swap, completed last season)",
+      "note": "Melo received Bz's original R2 pick; Bz received Melo's original R3 pick.",
+      "assets": [
+        {
+          "pickId": "2026-R2-15",
+          "from": "franchise-15",
+          "to": "franchise-03"
+        },
+        {
+          "pickId": "2026-R3-03",
+          "from": "franchise-03",
+          "to": "franchise-15"
+        }
+      ]
+    },
+    {
+      "transferId": "LAST-SEASON-SWAP-B",
+      "label": "HCMC ↔ Maxfixe (R2/R3 swap, completed last season)",
+      "note": "HCMC received Maxfixe's original R2 pick; Maxfixe received HCMC's original R3 pick.",
+      "assets": [
+        {
+          "pickId": "2026-R2-07",
+          "from": "franchise-07",
+          "to": "franchise-05"
+        },
+        {
+          "pickId": "2026-R3-05",
+          "from": "franchise-05",
+          "to": "franchise-07"
+        }
+      ]
     }
   ]
 }
