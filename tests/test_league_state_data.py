@@ -195,6 +195,17 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual((row["original"], row["current"]), (MELO, BZ))
         self.assertTrue(row["history"][0]["historical"])
 
+    def test_draft_order_ledger_shows_current_owner_and_via(self):
+        panel = _html()
+        panel = panel[panel.index('id="draft-order"'):panel.index('id="rosters-a"')]
+        got = {m.group(1): (re.sub(r"<.*?>", "", m.group(2)).strip(), re.sub(r"<.*?>", "", m.group(3)).strip())
+               for m in re.finditer(r'<div class="pick-slot">([\d.]+)</div>\s*<div class="pick-team">(.*?)</div>\s*<div class="pick-note">(.*?)</div>', panel, re.S)}
+        self.assertEqual(got["2.15"], ("MeloBB", "VIA BZ"))
+        self.assertEqual(got["3.03"][1], "VIA MELO")
+        self.assertEqual(got["2.07"][1], "VIA MAXFIXE")
+        self.assertEqual(got["3.05"][1], "VIA HCMC")
+        self.assertEqual(sum(1 for v in got.values() if v[1].startswith("VIA")), 4)
+
     def test_ownership_integrity_audit_all_sixteen_teams(self):
         for sel in ([], ["TRADE-A"], ["TRADE-B"], ["TRADE-A", "TRADE-B", "TRADE-C"], ["TRADE-D"],
                     ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D"]):
