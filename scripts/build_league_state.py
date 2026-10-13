@@ -130,6 +130,62 @@ def build_baseline(index_html: str, registry: dict, franchises: list) -> tuple[d
                     "picks": pick_rows}
 
 
+LEDGER_ROW_RE = re.compile(r'(<div class="pick-slot">(\d+)\.(\d+)</div>\n<div class="pick-team">)(<span class="pick-chip"[^>]*>.*?</span>)(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
+VIA_RE = re.compile(r'<span class="pick-extra">VIA [^<]*</span>')
+
+
+def sync_ledger(index_html: str, inputs: dict) -> str:
+    """Rewrite the first-page draft-order ledger from the OFFICIAL state: each row shows the team that
+    currently owns the pick and, when that is not the slot's original team, a `VIA <original>` pill.
+    Idempotent. Slot positions, lottery pills and every other row element are untouched."""
+    official = ls.resolve(inputs, (), "OFFICIAL")
+    teams, _ = parse_board(index_html)
+    fid_by_short = {t["short"]: t["franchiseId"] for t in inputs["freeze"]["teams"]}
+    short_by_fid = {v: k for k, v in fid_by_short.items()}
+    a, b = index_html.index('id="draft-order"'), index_html.index('id="rosters-a"')
+    panel = index_html[a:b]
+    # one chip per team (round-independent): taken from any row that currently shows that team
+    chip_of = {}
+    for m in LEDGER_ROW_RE.finditer(panel):
+        chip = m.group(4)
+        text = html_lib.unescape(re.sub(r"<[^>]+>", "", chip)).strip()
+        try:
+            chip_of.setdefault(_team_for_chip(text, teams), chip)
+        except ValueError:
+            pass
+    order = [t["franchiseId"] for t in inputs["freeze"]["teams"]]
+    def row(m):
+        rnd, slot = int(m.group(2)), int(m.group(3))
+        pid = f"2026-R{rnd}-{slot:02d}"
+        owner, orig = official["pickOwner"][pid], inputs["pickIndex"][pid]["originalOwner"]
+        note = VIA_RE.sub("", m.group(6))
+        if owner != orig:
+            note += f'<span class="pick-extra">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>'
+        return m.group(1) + chip_of[order.index(owner)] + m.group(5) + note + m.group(7)
+    return index_html[:a] + LEDGER_ROW_RE.sub(row, panel) + index_html[b:]
+
+
+def cmd_sync_ledger(args):
+    with open(INDEX_HTML, encoding="utf-8") as f:
+        html = f.read()
+    new = sync_ledger(html, ls.load_inputs())
+    with open(INDEX_HTML, "w", encoding="utf-8") as f:
+        f.write(new)
+    print("draft-order ledger synced to the official state")
+
+
+def cmd_snapshot(args):
+    """Write an immutable checkpoint of the OFFICIAL (post-trade) state next to the keeper-freeze one."""
+    kind = args.kind
+    path = os.path.join(DATA_DIR, "snapshots", f"{kind}.json")
+    if os.path.exists(path):
+        print(f"{kind} snapshot already exists -- not overwritten (immutable).")
+        return
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    _write(path, ls.make_snapshot(ls.load_inputs(), kind))
+    print(f"{kind} snapshot written")
+
+
 def cmd_baseline(args):
     freeze_path = os.path.join(DATA_DIR, "keeper_freeze.json")
     if os.path.exists(freeze_path) and ls._load(freeze_path).get("status") == "locked":
@@ -270,6 +326,10 @@ def main():
     lk.add_argument("--note", default=None)
     lk.set_defaults(fn=cmd_lock)
     sub.add_parser("embed").set_defaults(fn=cmd_embed)
+    sub.add_parser("sync-ledger").set_defaults(fn=cmd_sync_ledger)
+    sn = sub.add_parser("snapshot")
+    sn.add_argument("kind", choices=ls.SNAPSHOT_KINDS)
+    sn.set_defaults(fn=cmd_snapshot)
     args = ap.parse_args()
     args.fn(args)
 

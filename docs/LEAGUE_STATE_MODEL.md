@@ -74,3 +74,13 @@ python3 scripts/build_league_state.py embed        # refresh page data
 
 Pick timer, on-the-clock flow, draft confirm / undo, live ticker, Messenger
 copy, shared realtime backend, draft-order chips showing "via", snapshot UI.
+
+## Processed pre-draft trades (2026-10-13)
+
+TRADE-A..F were promoted to `OFFICIAL` as one batch (`execution.batch = 2026-10-13-pre-draft`), replayed once in `order`
+(dependencies first) over the locked freeze + historical pick swaps. Nothing is stored as a result, so rebuilds cannot
+double-apply; an official trade that fails validation raises `StateError` instead of being dropped. `resolve(..., "SCENARIO")`
+refuses to select an OFFICIAL trade. Pre-trade state: `snapshots/KEEPER_FREEZE.json`; post-trade checkpoint:
+`snapshots/PRE_DRAFT_LOCK.json`. `audit_official()` reconciles ownership/caps and reports rule violations (roster > 9,
+pre-draft trade limit) without correcting them. `build_league_state.py sync-ledger` keeps the first-page draft-order
+ledger (current owner + `VIA <original>`) in step with the official state.

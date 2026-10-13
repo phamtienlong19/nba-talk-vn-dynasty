@@ -9,6 +9,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 import build_fa_draft_pool as pool  # noqa: E402
 import build_league_state as bls  # noqa: E402
 import league_state as ls  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _proposed import proposed_inputs  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 BSY, DUNG, LC, MELO, SUP, BZ = ("franchise-01", "franchise-06", "franchise-04", "franchise-03", "franchise-12", "franchise-15")
@@ -22,7 +24,8 @@ def _html():
 class TestRepoState(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.i = ls.load_inputs()
+        cls.o = ls.load_inputs()          # production: trades are OFFICIAL
+        cls.i = proposed_inputs(cls.o)    # same definitions, selectable -> exercises the scenario engine
 
     def _scn(self, *ids):
         return ls.resolve(self.i, list(ids), "SCENARIO")
@@ -69,11 +72,19 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual(self.i["pickIndex"]["2026-R1-03"]["originalOwner"], BSY)
         self.assertEqual(self.i["pickIndex"]["2026-R1-15"]["originalOwner"], BZ)
 
-    def test_trade_ledger_is_all_proposed_nothing_official(self):
-        self.assertEqual({t["status"] for t in self.i["trades"]["trades"]}, {"PROPOSED"})
-        official = ls.resolve(self.i, [], "OFFICIAL")
-        self.assertEqual(official["activeTradeIds"], [])
-        self.assertEqual(official["pickOwner"]["2026-R1-03"], BSY)
+    def test_trade_ledger_is_official_and_processed_once_in_dependency_order(self):
+        self.assertEqual({t["status"] for t in self.o["trades"]["trades"]}, {"OFFICIAL"})
+        official = ls.resolve(self.o, [], "OFFICIAL")
+        self.assertEqual(official["activeTradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E", "TRADE-F"])
+        self.assertTrue(all(r["applied"] and not r["errors"] for r in official["tradeResults"]))
+        self.assertEqual(len(official["tradeResults"]), 6)  # each transaction executed exactly once
+        self.assertEqual(official["pickOwner"]["2026-R1-03"], SUP)  # Bsy -> Bz (A) -> sup fam (C)
+        # repeated resolution is a pure replay: identical, never cumulative
+        again = ls.resolve(self.o, [], "OFFICIAL")
+        self.assertEqual((official["playerOwner"], official["pickOwner"]), (again["playerOwner"], again["pickOwner"]))
+        # a processed trade cannot be re-applied as a scenario on top of the new baseline
+        with self.assertRaises(ls.StateError):
+            ls.resolve(self.o, ["TRADE-A"], "SCENARIO")
 
     # ----- Trades A / B / C
     def test_trade_a_ownership(self):
@@ -149,7 +160,7 @@ class TestRepoState(unittest.TestCase):
         self.assertTrue(d["applied"])  # still visualisable
         w = [x for x in d["warnings"] if x["code"] == "ASSET_COUNT_UNBALANCED"]
         self.assertEqual(w, [])  # 2-for-2 once the Gordon amendment is in (3.03 is not part of the trade)
-        self.assertEqual(self.i["tradeIndex"]["TRADE-D"]["status"], "PROPOSED")
+        self.assertEqual(self.o["tradeIndex"]["TRADE-D"]["status"], "OFFICIAL")
 
     def test_trade_d_gordon_amendment_and_3_03_not_in_trade(self):
         base = ls.initial_state(self.i)
@@ -176,7 +187,7 @@ class TestRepoState(unittest.TestCase):
 
     # ----- historical (last-season) swaps, baked into the baseline
     def test_historical_swaps_in_the_baseline(self):
-        o = ls.resolve(self.i, [], "OFFICIAL")
+        o = ls.initial_state(self.i)  # keeper freeze + completed last-season swaps, before any 2026 trade
         MAX, HC = "franchise-07", "franchise-05"
         owner = o["pickOwner"]
         self.assertEqual((owner["2026-R2-15"], owner["2026-R3-03"]), (MELO, BZ))
@@ -195,120 +206,44 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual((row["original"], row["current"]), (MELO, BZ))
         self.assertTrue(row["history"][0]["historical"])
 
-    def test_draft_order_ledger_shows_current_owner_and_via(self):
+    def test_draft_order_ledger_shows_official_owner_and_via(self):
         panel = _html()
         panel = panel[panel.index('id="draft-order"'):panel.index('id="rosters-a"')]
-        got = {m.group(1): (re.sub(r"<.*?>", "", m.group(2)).strip(), re.sub(r"<.*?>", "", m.group(3)).strip())
-               for m in re.finditer(r'<div class="pick-slot">([\d.]+)</div>\s*<div class="pick-team">(.*?)</div>\s*<div class="pick-note">(.*?)</div>', panel, re.S)}
-        self.assertEqual(got["2.15"], ("MeloBB", "VIA BZ"))
-        self.assertEqual(got["3.03"][1], "VIA MELO")
-        self.assertEqual(got["2.07"][1], "VIA MAXFIXE")
-        self.assertEqual(got["3.05"][1], "VIA HCMC")
-        self.assertEqual(sum(1 for v in got.values() if v[1].startswith("VIA")), 4)
+        official = ls.resolve(self.o, [], "OFFICIAL")
+        shorts = {t["franchiseId"]: t["short"] for t in self.o["freeze"]["teams"]}
+        rows = re.findall(r'<div class="pick-slot">(\d+)\.(\d+)</div>\s*<div class="pick-team">(.*?)</div>\s*<div class="pick-note">(.*?)</div>', panel, re.S)
+        self.assertEqual(len(rows), 48)
+        teams, _ = bls.parse_board(_html())
+        moved = 0
+        for rnd, slot, chip, note in rows:
+            pid = f"2026-R{rnd}-{int(slot):02d}"
+            text = re.sub(r"<.*?>", "", chip).replace("\U0001F451", "").strip()
+            owner = official["pickOwner"][pid]
+            self.assertEqual(bls._team_for_chip(text, teams), list(shorts).index(owner), pid)
+            via = re.search(r"VIA ([^<]+)<", note)
+            orig = self.o["pickIndex"][pid]["originalOwner"]
+            if owner != orig:
+                moved += 1
+                self.assertEqual(via.group(1).strip(), shorts[orig].upper(), pid)
+            else:
+                self.assertIsNone(via, pid)
+        self.assertEqual(moved, sum(1 for p, o in official["pickOwner"].items() if o != self.o["pickIndex"][p]["originalOwner"]))
+        self.assertEqual(moved, 11)
+        self.assertEqual(bls.sync_ledger(_html(), self.o), _html())  # page ledger is in sync (idempotent)
 
-    # ----- Trade F: CrazyCat <-> HCMC
-    def test_trade_f_definition_and_ownership_at_baseline(self):
-        CC, HC = "franchise-02", "franchise-05"
-        f = self.i["tradeIndex"]["TRADE-F"]
-        self.assertEqual((f["status"], f["dependsOn"]), ("PROPOSED", []))
-        legs = {(a.get("playerKey") or a["pickId"], a["from"], a["to"]) for a in f["assets"]}
-        self.assertEqual(legs, {("478.p.6016", HC, CC), ("478.p.10115", HC, CC), ("2026-R2-07", HC, CC),
-                                ("478.p.6417", CC, HC), ("2026-R1-04", CC, HC), ("2026-R2-02", CC, HC)})
-        self.assertEqual(len(f["assets"]), 6)  # three each way
-        base = ls.resolve(self.i, [], "OFFICIAL")
-        self.assertEqual(base["pickOwner"]["2026-R2-07"], HC)  # via the last-season Maxfixe swap
-        self.assertEqual(self.i["pickIndex"]["2026-R2-07"]["originalOwner"], "franchise-07")
-
-    def test_trade_f_applies_cleanly_and_updates_both_teams(self):
-        CC, HC = "franchise-02", "franchise-05"
-        base = ls.initial_state(self.i)
-        s = self._scn("TRADE-F")
-        r = s["tradeResults"][0]
-        self.assertTrue(r["applied"] and not r["errors"])
-        self.assertEqual([w["code"] for w in r["warnings"]], ["ROSTER_COUNT_ABOVE_9"])  # CrazyCat 10; counts are 3-for-3
-        self.assertEqual(ls.team_cap(self.i, s, CC), ls.team_cap(self.i, base, CC) + 38 + 1 - 9)
-        self.assertEqual(ls.team_cap(self.i, s, HC), ls.team_cap(self.i, base, HC) - 38 - 1 + 9)
-        self.assertEqual((len(ls.team_players(self.i, s, CC)), len(ls.team_players(self.i, s, HC))), (10, 8))
-        self.assertEqual(ls.team_picks(s, CC), ["2026-R2-07", "2026-R3-02"])
-        self.assertEqual(ls.team_picks(s, HC), ["2026-R1-04", "2026-R1-06", "2026-R2-02", "2026-R2-05"])
-        for pid in ("2026-R2-07", "2026-R1-04", "2026-R2-02"):  # identities unchanged
-            self.assertIn(pid, self.i["pickIndex"])
-        self.assertEqual(self.i["pickIndex"]["2026-R1-04"]["originalOwner"], CC)
-
-    def test_trade_f_is_reversible_and_leaves_other_trades_alone(self):
-        before = ls.resolve(self.i, ["TRADE-A", "TRADE-B", "TRADE-C"], "SCENARIO")
-        with_f = ls.resolve(self.i, ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-F"], "SCENARIO")
-        again = ls.resolve(self.i, ["TRADE-A", "TRADE-B", "TRADE-C"], "SCENARIO")
-        self.assertEqual(before["playerOwner"], again["playerOwner"])
-        self.assertEqual(before["pickOwner"], again["pickOwner"])
-        for k in ("franchise-15", "franchise-06", "franchise-12", "franchise-04"):  # Bz, Dung, sup fam, LC unaffected
-            self.assertEqual(ls.team_players(self.i, before, k), ls.team_players(self.i, with_f, k))
-            self.assertEqual(ls.team_picks(before, k), ls.team_picks(with_f, k))
-        self.assertTrue(all(r["applied"] for r in with_f["tradeResults"]))
-
-    def test_trade_f_cannot_move_assets_the_sender_lacks(self):
-        import copy
-        inp = copy.deepcopy(self.i)
-        for a in inp["tradeIndex"]["TRADE-F"]["assets"]:
-            if a.get("pickId") == "2026-R2-07":
-                a["from"] = "franchise-07"  # Maxfixe's ORIGINAL slot holder no longer owns it
-        r = ls.resolve(inp, ["TRADE-F"], "SCENARIO")["tradeResults"][0]
-        self.assertFalse(r["applied"])
-        self.assertTrue(r["errors"])
-
-    # ----- Trade E: Bz <-> LC (Wagner to LC, White to Bz); needs Trade B
-    def test_trade_e_definition(self):
-        e = self.i["tradeIndex"]["TRADE-E"]
-        self.assertEqual((e["status"], e["dependsOn"], sorted(e["participants"])), ("PROPOSED", ["TRADE-B"], sorted([BZ, LC])))
-        legs = {(a["playerKey"], a["from"], a["to"]) for a in e["assets"]}
-        self.assertEqual(legs, {("478.p.6550", BZ, LC), ("478.p.5842", LC, BZ)})  # Wagner, White: stable ids; no picks
-        self.assertEqual(self.i["registry"]["478.p.5842"]["name"], "Derrick White")
-        self.assertEqual(self.i["tradeIndex"]["TRADE-B"]["dependsOn"], [])  # Trade B untouched
-        self.assertEqual(self.i["tradeIndex"]["TRADE-C"]["dependsOn"], ["TRADE-A", "TRADE-B"])
-
-    def test_trade_e_blocked_without_trade_b_and_never_takes_wagner_from_dung(self):
-        s = self._scn("TRADE-E")
-        r = s["tradeResults"][0]
-        self.assertFalse(r["applied"])
-        self.assertEqual([x["code"] for x in r["errors"]], ["BROKEN_DEPENDENCY"])
-        self.assertEqual(s["playerOwner"]["478.p.6550"], DUNG)   # not moved directly Dung -> LC
-        self.assertEqual(s["playerOwner"]["478.p.5842"], LC)
-
-    def test_trade_e_chain_moves_wagner_dung_bz_lc_once(self):
-        s = self._scn("TRADE-B", "TRADE-E")
-        self.assertTrue(all(r["applied"] and not r["errors"] for r in s["tradeResults"]))
-        self.assertEqual([(h["from"], h["to"]) for h in s["history"]["player:478.p.6550"]], [(DUNG, BZ), (BZ, LC)])
-        self.assertEqual(ls.team_players(self.i, s, LC).count("478.p.6550"), 1)
-        self.assertEqual(ls.team_players(self.i, s, BZ).count("478.p.5842"), 1)
-        self.assertNotIn("478.p.6550", ls.team_players(self.i, s, BZ))
-        base = ls.initial_state(self.i)
-        wag, white = ls.player_cap(self.i, "478.p.6550"), ls.player_cap(self.i, "478.p.5842")
-        self.assertEqual((wag, white), (21.0, 26.0))
-        # Bz: +Wagner -Duren (Trade B) +White -Wagner (Trade E); LC: +Wagner -White
-        self.assertEqual(ls.team_cap(self.i, s, BZ), ls.team_cap(self.i, base, BZ) + wag - 27 + white - wag)
-        self.assertEqual(ls.team_cap(self.i, s, LC), ls.team_cap(self.i, base, LC) + wag - white)
-
-    def test_trade_e_does_not_touch_picks_or_other_trades(self):
-        plain = self._scn("TRADE-B")
-        both = self._scn("TRADE-B", "TRADE-E")
-        self.assertEqual(plain["pickOwner"], both["pickOwner"])
-        d_alone, d_with_e = self._scn("TRADE-D"), self._scn("TRADE-B", "TRADE-D", "TRADE-E")
-        self.assertEqual(d_alone["tradeResults"][0]["teams"][LC]["playerCapDelta"], d_with_e["tradeResults"][1]["teams"][LC]["playerCapDelta"])
-        self.assertEqual({t["tradeId"] for t in self.i["trades"]["trades"]}, {"TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E", "TRADE-F"})
-
-    def test_every_combination_is_consistent(self):
-        ids = [t["tradeId"] for t in ls.selectable_trades(self.i)]
-        base = ls.initial_state(self.i)
-        for n in range(len(ids) + 1):
-            for combo in __import__("itertools").combinations(ids, n):
-                s = ls.resolve(self.i, list(combo), "SCENARIO" if combo else "OFFICIAL")
-                players = [k for f in self.i["franchises"] for k in ls.team_players(self.i, s, f)]
-                self.assertEqual(len(players), len(set(players)), combo)
-                self.assertEqual(len(players), len(base["playerOwner"]), combo)
-                self.assertEqual(sum(len(ls.team_picks(s, f)) for f in self.i["franchises"]), 48, combo)
-                if "TRADE-E" in combo and "TRADE-B" not in combo:
-                    e = [r for r in s["tradeResults"] if r["tradeId"] == "TRADE-E"][0]
-                    self.assertFalse(e["applied"], combo)
+    def test_official_reconciliation_audit(self):
+        a = ls.audit_official(self.o)
+        self.assertTrue(all(a["checks"].values()), a["checks"])
+        t = {v["short"]: (v["cap"], v["count"]) for v in a["teams"].values()}
+        self.assertEqual(t, {"Bsy": (178, 9), "CrazyCat": (131, 10), "Melo": (155, 10), "LC": (153, 8), "HCMC": (137, 8),
+                             "Dũng": (132, 9), "Maxfixe": (129, 9), "DHA": (154, 9), "Đạt": (174, 9), "DonTrick": (120, 9),
+                             "Thịnh": (177, 9), "sup fam": (131, 8), "Quân": (160, 9), "TuLy": (146, 9), "Bz": (156, 10), "TT": (174, 9)})
+        # violations are surfaced, not corrected
+        codes = sorted({v["code"] for v in a["violations"]})
+        self.assertIn("ROSTER_COUNT_ABOVE_9", codes)
+        self.assertIn("PRE_DRAFT_TRADE_LIMIT", codes)
+        self.assertEqual(sorted(v["detail"]["team"] for v in a["violations"] if v["code"] == "FINAL_ROSTER_ABOVE_9"), ["Bz", "CrazyCat", "Melo"])
+        self.assertEqual([v["code"] for v in a["violations"] if v["code"].startswith("CAP_OVER")], [])
 
     def test_ownership_integrity_audit_all_sixteen_teams(self):
         for sel in ([], ["TRADE-A"], ["TRADE-B"], ["TRADE-A", "TRADE-B", "TRADE-C"], ["TRADE-D"],
@@ -325,8 +260,8 @@ class TestRepoState(unittest.TestCase):
         b = self.i["tradeIndex"]["TRADE-B"]
         legs = {(a.get("playerKey") or a["pickId"], a["from"], a["to"]) for a in b["assets"]}
         self.assertEqual(legs, {("478.p.6550", DUNG, BZ), ("2026-R3-06", DUNG, BZ), ("478.p.6703", BZ, DUNG), ("2026-R3-03", BZ, DUNG)})
-        self.assertEqual(b["status"], "PROPOSED")
-        base = ls.resolve(self.i, [], "OFFICIAL")
+        self.assertEqual(self.o["tradeIndex"]["TRADE-B"]["status"], "OFFICIAL")
+        base = ls.initial_state(self.i)
         self.assertIn("2026-R3-03", ls.team_picks(base, BZ))
         s = self._scn("TRADE-B")
         self.assertIn("2026-R3-03", ls.team_picks(s, DUNG))
@@ -406,11 +341,13 @@ class TestEmbeddedPageData(unittest.TestCase):
 
     def test_all_scenario_combinations_are_present(self):
         self.assertEqual(len(self.data["scenarios"]), 2 ** len(ls.selectable_trades(self.i)))
-        self.assertIn("TRADE-A,TRADE-B,TRADE-C", self.data["scenarios"])
+        self.assertEqual(list(self.data["scenarios"]), [""])  # every trade is official: no selectable combinations remain
 
     def test_official_view_has_no_movement_and_scenario_view_has_it(self):
-        self.assertEqual(self.data["scenarios"][""]["teams"], {})
-        self.assertIn(BZ, self.data["scenarios"]["TRADE-A,TRADE-B,TRADE-C"]["teams"])
+        view = self.data["scenarios"][""]
+        self.assertEqual(sorted(view["teams"]), sorted(["franchise-01", "franchise-02", "franchise-03", "franchise-04",
+                                                        "franchise-05", "franchise-06", "franchise-12", "franchise-15"]))
+        self.assertEqual(view["teams"][BZ]["fold"]["tradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-E"])
 
     def test_legal_universe_is_larger_than_the_recommendation_board(self):
         rows = self.data["available"]["rows"]

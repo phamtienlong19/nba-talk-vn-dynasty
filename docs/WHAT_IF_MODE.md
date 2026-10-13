@@ -28,3 +28,5 @@ Manual swaps in the UI recompute cap/compliance only and live in page memory.
 
 Official board JS gets only the mode button/banner hooks; the What-If page is `<section id="what-if">` and its cards are
 `<article>` so Scenario Mode's `section.team-card` rewriter can never touch them.
+
+**Baseline note:** What If models the keeper deadline, so its OFFICIAL side is the locked keeper freeze (pre-trade). It does not apply the later official pre-draft trades.

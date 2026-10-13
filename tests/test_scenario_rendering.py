@@ -9,6 +9,8 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 import league_state as ls  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _proposed import proposed_inputs  # noqa: E402
 import refresh_team_cap_summary as cap_summary  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -37,7 +39,8 @@ class TestCapStatusModel(unittest.TestCase):
         self.assertEqual(ls.NEAR_CEILING_ROOM, cap_summary.NEAR_THRESHOLD)
 
     def test_scenario_teams_are_classified(self):
-        s = {k: ls.team_report(self.i, ls.resolve(self.i, ABC + ["TRADE-D"], "SCENARIO"), k) for k in (SUP, BSY, DUNG, BZ)}
+        pi = proposed_inputs(self.i)
+        s = {k: ls.team_report(pi, ls.resolve(pi, ABC + ["TRADE-D"], "SCENARIO"), k) for k in (SUP, BSY, DUNG, BZ)}
         self.assertEqual((s[BSY]["cap"], s[BSY]["status"]), (178, "AT_CEILING"))
         self.assertEqual((s[SUP]["cap"], s[SUP]["status"]), (131, "AT_FLOOR"))
         self.assertEqual((s[DUNG]["cap"], s[DUNG]["status"]), (132, "IN_RANGE"))
@@ -51,7 +54,7 @@ class TestCapStatusModel(unittest.TestCase):
 class TestScenarioStateIsOneObject(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.i = ls.load_inputs()
+        cls.i = proposed_inputs()
         cls.base = ls.initial_state(cls.i)
         cls.state = ls.resolve(cls.i, ABC, "SCENARIO")
         cls.sup = ls.team_report(cls.i, cls.state, SUP, cls.base)
@@ -126,69 +129,65 @@ def _read(card):
 
 @unittest.skipUnless(_chrome(), "no headless Chrome available")
 class TestRenderedCards(unittest.TestCase):
+    """Default (OFFICIAL) page = locked freeze + the processed official trades, rendered by the same derived-state path."""
+
     @classmethod
     def setUpClass(cls):
-        base = "file://" + os.path.abspath(INDEX)
-        cls.official = _dump(base)
-        cls.scenario = _dump(base + "?mode=scenario&trades=" + ",".join(ABC))
+        cls.official = _dump("file://" + os.path.abspath(INDEX))
         with open(INDEX, encoding="utf-8") as f:
             cls.static = f.read()
+        cls.i = ls.load_inputs()
+        cls.state = ls.resolve(cls.i, (), "OFFICIAL")
+        cls.base = ls.initial_state(cls.i)
+        cls.shorts = {t["franchiseId"]: t["short"] for t in cls.i["freeze"]["teams"]}
 
-    def test_scenario_cards_render_derived_state_not_the_official_roster(self):
-        sup = _read(_card(self.scenario, "sup fam"))
+    def test_default_view_renders_the_post_trade_official_state_for_all_16_teams(self):
+        for fid, short in self.shorts.items():
+            rep = ls.team_report(self.i, self.state, fid, self.base)
+            c = _read(_card(self.official, short))
+            self.assertEqual(sorted(c["names"]), sorted(r["n"] for r in rep["roster"]), short)
+            self.assertEqual(c["rows"], rep["count"], short)
+            self.assertEqual(float(c["cap"]), rep["cap"], short)
+            self.assertEqual(c["picks"], " · ".join(rep["picks"]), short)
+
+    def test_known_post_trade_rosters(self):
+        sup = _read(_card(self.official, "sup fam"))
         self.assertNotIn("Jalen Williams", sup["names"])
-        self.assertNotIn("Reed Sheppard", sup["names"])
         self.assertIn("Julius Randle", sup["names"])
-        self.assertEqual((sup["cap"], sup["ceiling"], sup["rows"]), ("131", "178", 8))
-        self.assertEqual(sup["gap"], "AT FLOOR")
-        self.assertEqual(sup["picks"], "1.03 · 1.14 · 2.12 · 3.06")
-        bsy = _read(_card(self.scenario, "Bsy"))
-        self.assertEqual((bsy["cap"], bsy["gap"]), ("178", "AT CEILING"))
-        self.assertIn("Jamal Murray", bsy["names"])
-        self.assertNotIn("Rudy Gobert", bsy["names"])
-        self.assertEqual(_read(_card(self.scenario, "Dũng"))["cap"], "132")
+        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("131", 8, "AT FLOOR"))
+        bz = _read(_card(self.official, "Bz"))
+        self.assertIn("Derrick White", bz["names"])
+        self.assertNotIn("Franz Wagner", bz["names"])
+        self.assertEqual(sum(1 for n in bz["names"] if n == "Derrick White"), 1)
+        melo = _read(_card(self.official, "Melo"))
+        self.assertIn("Aaron Gordon", melo["names"])
+        self.assertEqual(melo["picks"], "2.03 · 2.15")
 
-    def test_no_card_mixes_an_official_roster_with_a_scenario_cap(self):
-        for short in ("Bsy", "Dũng", "sup fam", "Bz"):
-            c = _read(_card(self.scenario, short))
-            caps = [float(x) for x in re.findall(r'<div class="cap">([\d.]+)</div>', _card(self.scenario, short))]
-            self.assertEqual(sum(caps), float(c["cap"]), short)
-            self.assertEqual(len(caps), c["rows"], short)
+    def test_untraded_teams_are_untouched(self):
+        for short in ("Quân", "DonTrick", "Thịnh", "TT"):
+            self.assertEqual(_read(_card(self.official, short))["names"], _read(_card(self.static, short))["names"], short)
 
-    def test_unaffected_teams_are_untouched_in_scenario(self):
-        self.assertEqual(_read(_card(self.scenario, "Quân")), _read(_card(self.official, "Quân")))
+    def test_cards_show_movement_from_the_keeper_freeze(self):
+        card = _card(self.official, "Bz")
+        self.assertIn("KEEPER FREEZE", card)
+        self.assertIn("OFFICIAL TRADES", card)
+        self.assertIn("KEEPER-FREEZE CUTS", card)
+        self.assertNotIn("KEEPER-FREEZE CUTS", _card(self.official, "Quân"))
 
-    def test_official_mode_restores_the_canonical_rosters_exactly(self):
-        for short in ("Bsy", "Dũng", "sup fam", "Bz", "LC", "Melo"):
-            static = _read(_card(self.static, short))
-            rendered = _read(_card(self.official, short))
-            self.assertEqual(rendered["names"], static["names"], short)
-            self.assertEqual((rendered["cap"], rendered["gap"], rendered["picks"]), (static["cap"], static["gap"], static["picks"]), short)
-        body = self.official.split("<body", 1)[1].split('<script id="league-app">')[0]
-        self.assertNotIn('class="scn-strip"', body)
-        self.assertNotIn("scn-card", body)
+    def test_trade_lab_lists_every_transaction_as_official_and_not_selectable(self):
+        lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
+        self.assertEqual(lab.count('class="chip ok">OFFICIAL<'), 6)
+        self.assertEqual(len(re.findall(r'<input type="checkbox"[^>]*disabled', lab)), 6)
 
-    def test_every_owned_pick_is_listed_and_never_clipped(self):
-        i = ls.load_inputs()
-        state = ls.resolve(i, ABC, "SCENARIO")
-        shorts = {t["franchiseId"]: t["short"] for t in i["freeze"]["teams"]}
-        for fid, short in shorts.items():
-            want = " · ".join(ls.pick_label(i["pickIndex"][k]) for k in ls.team_picks(state, fid))
-            self.assertEqual(_read(_card(self.scenario, short))["picks"], want, short)
+    def test_public_ui_says_keepers_are_locked(self):
+        m = re.search(r'id="lab-keeper-status">(.*?)</span>', self.official)
+        self.assertEqual(m.group(1), "KEEPERS LOCKED · OFFICIAL")
+        self.assertNotIn("NOT FROZEN", self.official.split("<body", 1)[1].split('<script id="league-app">')[0])
+
+    def test_pick_pill_never_clips(self):
         css = re.search(r"\.picks-tag\{background:#edf2f9[^}]*\}", self.static).group(0)
         for bad in ("nowrap", "ellipsis", "overflow:hidden"):
             self.assertNotIn(bad, css)
-
-    def test_public_ui_says_keepers_are_locked(self):
-        for dom in (self.official, self.scenario):
-            m = re.search(r'id="lab-keeper-status">(.*?)</span>', dom)
-            self.assertEqual(m.group(1), "KEEPERS LOCKED · OFFICIAL")
-            self.assertNotIn("NOT FROZEN", dom.split("<body", 1)[1].split('<script id="league-app">')[0])
-
-    def test_keeper_freeze_cuts_label_only_on_changed_cards(self):
-        self.assertIn("KEEPER-FREEZE CUTS", _card(self.scenario, "sup fam"))
-        self.assertNotIn("KEEPER-FREEZE CUTS", _card(self.scenario, "Quân"))
-        self.assertNotIn("KEEPER-FREEZE CUTS", _card(self.official, "sup fam"))
 
 
 if __name__ == "__main__":

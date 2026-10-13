@@ -8,6 +8,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 import build_league_state as bls  # noqa: E402
 import league_state as ls  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _proposed import proposed_inputs  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 SEA, DHA, BSY, TULY = "franchise-11", "franchise-08", "franchise-01", "franchise-14"
@@ -84,9 +86,17 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
         self.assertEqual(cp["teams"]["franchise-02"]["status"], "UNDER_FLOOR")
         self.assertTrue(cp["provenance"]["declaration"])
 
-    def test_snapshot_file_reproduces_from_the_locked_inputs(self):
+    def test_snapshot_files_are_the_recoverable_pre_and_post_trade_checkpoints(self):
         with open(os.path.join(ls.DATA_DIR, "snapshots", "KEEPER_FREEZE.json"), encoding="utf-8") as f:
-            self.assertEqual(json.load(f), ls.make_snapshot(self.i, "KEEPER_FREEZE"))
+            pre = json.load(f)
+        with open(os.path.join(ls.DATA_DIR, "snapshots", "PRE_DRAFT_LOCK.json"), encoding="utf-8") as f:
+            post = json.load(f)
+        # pre-trade ownership is recoverable and still equals the locked freeze + historical swaps
+        self.assertEqual(pre["playerOwner"], dict(sorted(ls.initial_state(self.i)["playerOwner"].items())))
+        self.assertEqual(pre["pickOwner"], dict(sorted(ls.initial_state(self.i)["pickOwner"].items())))
+        self.assertEqual(pre["teamCaps"], {f: ls.team_cap(self.i, ls.initial_state(self.i), f) for f in sorted(self.i["franchises"])})
+        # post-trade checkpoint reproduces from the locked inputs + official trades
+        self.assertEqual(post, ls.make_snapshot(self.i, "PRE_DRAFT_LOCK"))
 
     # ----- availability / recommendation derive from the locked baseline
     def test_new_cuts_are_available_and_new_keepers_are_not(self):
@@ -117,36 +127,37 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
 
     # ----- Trade Lab rebased on the locked baseline
     def test_trade_lab_cap_before_derives_from_the_locked_freeze(self):
-        s = ls.resolve(self.i, ["TRADE-A"], "SCENARIO")
+        s = ls.resolve(proposed_inputs(self.i), ["TRADE-A"], "SCENARIO")
         r = s["tradeResults"][0]
         self.assertEqual(r["teams"][BSY]["capBefore"], self.i["freeze"]["checkpoint"]["teams"][BSY]["keeperCap"])
         self.assertEqual((r["teams"][BSY]["capBefore"], r["teams"][BSY]["playerCapDelta"], r["teams"][BSY]["capAfter"]), (149, 29, 178))
         self.assertEqual(r["teams"]["franchise-15"]["capBefore"], 173)
 
     def test_bsy_scenario_uses_the_new_roster_not_the_old_one(self):
-        s = ls.resolve(self.i, ["TRADE-A"], "SCENARIO")
-        roster = {r["n"] for r in ls.team_report(self.i, s, BSY)["roster"]}
+        s = ls.resolve(proposed_inputs(self.i), ["TRADE-A"], "SCENARIO")
+        roster = {r["n"] for r in ls.team_report(proposed_inputs(self.i), s, BSY)["roster"]}
         self.assertIn("Dennis Schröder", roster)
         self.assertNotIn("Collin Sexton", roster)
         self.assertIn("Jamal Murray", roster)
         self.assertNotIn("Rudy Gobert", roster)
 
-    def test_official_mode_is_unchanged_by_proposed_trades_and_scenarios_still_apply(self):
-        off = ls.resolve(self.i, ["TRADE-A", "TRADE-B", "TRADE-C"], "OFFICIAL")
+    def test_proposed_trades_never_change_official_mode_and_scenarios_still_apply(self):
+        pi = proposed_inputs(self.i)
+        off = ls.resolve(pi, ["TRADE-A", "TRADE-B", "TRADE-C"], "OFFICIAL")  # PROPOSED trades are ignored in OFFICIAL mode
         self.assertEqual(off["playerOwner"], self.base["playerOwner"])
         self.assertEqual(off["pickOwner"], self.base["pickOwner"])
-        scn = ls.resolve(self.i, ["TRADE-A", "TRADE-B", "TRADE-C"], "SCENARIO")
+        scn = ls.resolve(proposed_inputs(self.i), ["TRADE-A", "TRADE-B", "TRADE-C"], "SCENARIO")
         self.assertTrue(all(r["applied"] for r in scn["tradeResults"]))
-        self.assertEqual(ls.team_cap(self.i, scn, "franchise-15"), 151)
+        self.assertEqual(ls.team_cap(proposed_inputs(self.i), scn, "franchise-15"), 151)
 
     def test_other_trade_scenarios_rederive_from_the_same_baseline(self):
-        d = ls.resolve(self.i, ["TRADE-D"], "SCENARIO")["tradeResults"][0]
+        d = ls.resolve(proposed_inputs(self.i), ["TRADE-D"], "SCENARIO")["tradeResults"][0]
         self.assertEqual((d["teams"]["franchise-04"]["capBefore"], d["teams"]["franchise-03"]["capBefore"]), (175, 138))
-        for views in (self.data["scenarios"],):
-            self.assertEqual(views, ls.enumerate_scenarios(self.i))
+        self.assertEqual(self.data["scenarios"], ls.enumerate_scenarios(self.i))
 
-    def test_no_trade_is_official(self):
-        self.assertEqual({t["status"] for t in self.i["trades"]["trades"]}, {"PROPOSED"})
+    def test_every_staged_trade_is_official_and_recorded_as_processed(self):
+        self.assertEqual({t["status"] for t in self.i["trades"]["trades"]}, {"OFFICIAL"})
+        self.assertEqual([t["execution"]["batch"] for t in self.i["trades"]["trades"]], ["2026-10-13-pre-draft"] * 6)
 
     def test_public_wording_says_the_keeper_layer_is_locked_not_projected(self):
         js = re.search(r'<script id="league-app">(.*?)</script>', self.html, re.S).group(1)

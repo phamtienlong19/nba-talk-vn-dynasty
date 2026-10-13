@@ -347,7 +347,10 @@ def resolve(inputs: dict, selected=(), mode: str = "OFFICIAL") -> dict:
     state = initial_state(inputs)
     state["activeTradeIds"] = [t["tradeId"] for t in active]
     for t in active:
-        _apply_trade(inputs, state, t, active_ids)
+        res = _apply_trade(inputs, state, t, active_ids)
+        if t["status"] == "OFFICIAL" and not res["applied"]:
+            # An official transaction must never be silently dropped: surface the exact blocker.
+            raise StateError(f"official trade {t['tradeId']} failed validation: {res['errors']}")
     apply_draft_events(inputs, state)
 
     # Global governance note: pre-draft window allows 1 trade per team (a trade may involve 2+ teams).
@@ -464,6 +467,48 @@ def enumerate_scenarios(inputs):
             v = scenario_view(inputs, list(combo))
             views[v["key"]] = v
     return views
+
+
+# ------------------------------------------------------------------ audit
+def audit_official(inputs: dict) -> dict:
+    """Reconcile the OFFICIAL state (freeze + historical swaps + official trades): hard integrity checks that must
+    all hold, plus rule violations REPORTED (never silently corrected)."""
+    state = resolve(inputs, (), "OFFICIAL")
+    base = initial_state(inputs)
+    all_picks = sorted(p["pickId"] for p in inputs["picks"]["picks"])
+    listed_picks = sorted(k for f in inputs["franchises"] for k in team_picks(state, f))
+    listed_players = sorted(k for f in inputs["franchises"] for k in team_players(inputs, state, f))
+    teams = {}
+    for f in sorted(inputs["franchises"]):
+        roster = team_roster(inputs, state, f)
+        teams[f] = {"short": inputs["shorts"][f], "cap": team_cap(inputs, state, f), "sumOfPlayers": sum(r["c"] for r in roster),
+                    "count": len(roster), "picks": [pick_label(inputs["pickIndex"][p]) for p in team_picks(state, f)]}
+    floor, ceiling = cap_band(inputs)
+    checks = {
+        "everyPlayerHasOneOwner": len(listed_players) == len(set(listed_players)) == len(state["playerOwner"]) == len(base["playerOwner"]),
+        "everyPickHasOneOwner": listed_picks == all_picks and len(all_picks) == 48,
+        "everyOfficialTradeApplied": all(r["applied"] and not r["errors"] for r in state["tradeResults"])
+                                     and [r["tradeId"] for r in state["tradeResults"]] == state["activeTradeIds"],
+        "dependenciesBeforeDependents": all(inputs["tradeIndex"][d]["order"] < inputs["tradeIndex"][t]["order"]
+                                            for t in state["activeTradeIds"] for d in inputs["tradeIndex"][t].get("dependsOn", [])),
+        "capEqualsSumOfPlayers": all(v["cap"] == v["sumOfPlayers"] for v in teams.values()),
+        "playerPoolUnchanged": set(state["playerOwner"]) == set(base["playerOwner"]),
+        "tradesBalanced": not [w for r in state["tradeResults"] for w in r["warnings"] if w["code"] == "ASSET_COUNT_UNBALANCED"],
+    }
+    violations = []
+    for r in state["tradeResults"]:
+        for w in r["warnings"]:
+            if w["code"] != "ASSET_COUNT_UNBALANCED":
+                violations.append({"tradeId": r["tradeId"], **w})
+    violations += [{"tradeId": None, **w} for w in state["windowWarnings"]]
+    for f, v in teams.items():
+        if v["cap"] > ceiling:
+            violations.append({"code": "CAP_OVER_CEILING", "detail": {"team": v["short"], "cap": v["cap"], "ceiling": ceiling}})
+        if v["cap"] < floor:
+            violations.append({"code": "CAP_UNDER_FLOOR", "detail": {"team": v["short"], "cap": v["cap"], "floor": floor}})
+        if v["count"] > MAX_KEEPERS:
+            violations.append({"code": "FINAL_ROSTER_ABOVE_9", "detail": {"team": v["short"], "count": v["count"]}})
+    return {"checks": checks, "violations": violations, "teams": teams, "tradeOrder": state["activeTradeIds"]}
 
 
 # -------------------------------------------------------------- snapshots

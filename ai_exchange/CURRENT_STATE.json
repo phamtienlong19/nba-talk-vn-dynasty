@@ -146,6 +146,23 @@
       ],
       "officialStateModified": false,
       "headline": "Oct 8 band recomputes to 131-178 (unchanged); same keepers: 11 within / 4 below floor / 1 above ceiling (Dat 180); only Dat changes in REDO; FA 60 delta: +Collin Gillespie / -Yves Missi"
+    },
+    "officialTrades": {
+      "batch": "2026-10-13-pre-draft",
+      "processed": [
+        "TRADE-A",
+        "TRADE-B",
+        "TRADE-C",
+        "TRADE-D",
+        "TRADE-E",
+        "TRADE-F"
+      ],
+      "preTradeSnapshot": "data/2026-27/snapshots/KEEPER_FREEZE.json",
+      "postTradeSnapshot": "data/2026-27/snapshots/PRE_DRAFT_LOCK.json",
+      "openGovernanceFlags": [
+        "Bz, Melo, CrazyCat finish with 10 players (> 9)",
+        "Bz in 4 and LC in 2 pre-draft trades (limit 1 per team)"
+      ]
     }
   }
 }

@@ -63,7 +63,7 @@ function header(){
   var p2=h("span",{class:"meta-pill meta-pill-cap"},[h("span",{class:"pill-k",text:"CAP"}),h("span",{class:"pill-v",text:capTxt}),
     help("band",b.formulaMatchesOfficial?"Recomputed from the snapshot with the same top-144 benchmark model ("+b.whatIf.benchmark+" → floor "+b.whatIf.rawFloor+", ceiling "+b.whatIf.rawCeiling+"). The rounded band equals the official 131–178 band, so nothing moves.":
       "Recomputed from the snapshot with the same top-144 benchmark model: benchmark "+b.whatIf.benchmark+", floor "+b.whatIf.rawFloor+", ceiling "+b.whatIf.rawCeiling+". Differs from the official band; the official band is untouched.")]);
-  var p3=h("span",{class:"meta-pill"},["SIMULATION · OFFICIAL RECORD UNCHANGED",help("sim","Keeper selections, salaries, cuts, picks, lottery and the official FA/DRAFT 60 are read-only inputs here. Nothing on this page is written back; leaving What If shows the unchanged official board.")]);
+  var p3=h("span",{class:"meta-pill"},["SIMULATION · OFFICIAL RECORD UNCHANGED",help("sim","OFFICIAL here means the locked keeper freeze (before the pre-draft trades). Keeper selections, salaries, cuts, picks, lottery and the official FA/DRAFT 60 are read-only inputs here. Nothing on this page is written back; leaving What If shows the unchanged official board.")]);
   bar.appendChild(p1);bar.appendChild(p2);bar.appendChild(p3);
   if(W.order.length>1){var sel=h("select",{"aria-label":"Snapshot"});W.order.forEach(function(id){var o=h("option",{value:id,text:fdate(W.snapshots[id].meta.effectiveDate)});if(id===S.snap)o.selected=true;sel.appendChild(o);});
     sel.addEventListener("change",function(){S.snap=sel.value;S.open={};S.animate=true;render();});bar.appendChild(sel);}
