@@ -206,6 +206,59 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual(got["3.05"][1], "VIA HCMC")
         self.assertEqual(sum(1 for v in got.values() if v[1].startswith("VIA")), 4)
 
+    # ----- Trade E: Bz <-> LC (Wagner to LC, White to Bz); needs Trade B
+    def test_trade_e_definition(self):
+        e = self.i["tradeIndex"]["TRADE-E"]
+        self.assertEqual((e["status"], e["dependsOn"], sorted(e["participants"])), ("PROPOSED", ["TRADE-B"], sorted([BZ, LC])))
+        legs = {(a["playerKey"], a["from"], a["to"]) for a in e["assets"]}
+        self.assertEqual(legs, {("478.p.6550", BZ, LC), ("478.p.5842", LC, BZ)})  # Wagner, White: stable ids; no picks
+        self.assertEqual(self.i["registry"]["478.p.5842"]["name"], "Derrick White")
+        self.assertEqual(self.i["tradeIndex"]["TRADE-B"]["dependsOn"], [])  # Trade B untouched
+        self.assertEqual(self.i["tradeIndex"]["TRADE-C"]["dependsOn"], ["TRADE-A", "TRADE-B"])
+
+    def test_trade_e_blocked_without_trade_b_and_never_takes_wagner_from_dung(self):
+        s = self._scn("TRADE-E")
+        r = s["tradeResults"][0]
+        self.assertFalse(r["applied"])
+        self.assertEqual([x["code"] for x in r["errors"]], ["BROKEN_DEPENDENCY"])
+        self.assertEqual(s["playerOwner"]["478.p.6550"], DUNG)   # not moved directly Dung -> LC
+        self.assertEqual(s["playerOwner"]["478.p.5842"], LC)
+
+    def test_trade_e_chain_moves_wagner_dung_bz_lc_once(self):
+        s = self._scn("TRADE-B", "TRADE-E")
+        self.assertTrue(all(r["applied"] and not r["errors"] for r in s["tradeResults"]))
+        self.assertEqual([(h["from"], h["to"]) for h in s["history"]["player:478.p.6550"]], [(DUNG, BZ), (BZ, LC)])
+        self.assertEqual(ls.team_players(self.i, s, LC).count("478.p.6550"), 1)
+        self.assertEqual(ls.team_players(self.i, s, BZ).count("478.p.5842"), 1)
+        self.assertNotIn("478.p.6550", ls.team_players(self.i, s, BZ))
+        base = ls.initial_state(self.i)
+        wag, white = ls.player_cap(self.i, "478.p.6550"), ls.player_cap(self.i, "478.p.5842")
+        self.assertEqual((wag, white), (21.0, 26.0))
+        # Bz: +Wagner -Duren (Trade B) +White -Wagner (Trade E); LC: +Wagner -White
+        self.assertEqual(ls.team_cap(self.i, s, BZ), ls.team_cap(self.i, base, BZ) + wag - 27 + white - wag)
+        self.assertEqual(ls.team_cap(self.i, s, LC), ls.team_cap(self.i, base, LC) + wag - white)
+
+    def test_trade_e_does_not_touch_picks_or_other_trades(self):
+        plain = self._scn("TRADE-B")
+        both = self._scn("TRADE-B", "TRADE-E")
+        self.assertEqual(plain["pickOwner"], both["pickOwner"])
+        d_alone, d_with_e = self._scn("TRADE-D"), self._scn("TRADE-B", "TRADE-D", "TRADE-E")
+        self.assertEqual(d_alone["tradeResults"][0]["teams"][LC]["playerCapDelta"], d_with_e["tradeResults"][1]["teams"][LC]["playerCapDelta"])
+        self.assertEqual({t["tradeId"] for t in self.i["trades"]["trades"]}, {"TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E"})
+
+    def test_every_combination_is_consistent(self):
+        ids = [t["tradeId"] for t in ls.selectable_trades(self.i)]
+        base = ls.initial_state(self.i)
+        for n in range(len(ids) + 1):
+            for combo in __import__("itertools").combinations(ids, n):
+                s = ls.resolve(self.i, list(combo), "SCENARIO" if combo else "OFFICIAL")
+                players = [k for f in self.i["franchises"] for k in ls.team_players(self.i, s, f)]
+                self.assertEqual(len(players), len(set(players)), combo)
+                self.assertEqual(len(players), len(base["playerOwner"]), combo)
+                self.assertEqual(sum(len(ls.team_picks(s, f)) for f in self.i["franchises"]), 48, combo)
+                if "TRADE-E" in combo and "TRADE-B" not in combo:
+                    self.assertFalse(s["tradeResults"][-1]["applied"], combo)
+
     def test_ownership_integrity_audit_all_sixteen_teams(self):
         for sel in ([], ["TRADE-A"], ["TRADE-B"], ["TRADE-A", "TRADE-B", "TRADE-C"], ["TRADE-D"],
                     ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D"]):
