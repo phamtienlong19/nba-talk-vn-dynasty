@@ -37,6 +37,7 @@ body{font-family:"Inter","Helvetica Neue",Arial,sans-serif;
   font-weight:400;
   -webkit-font-smoothing:antialiased;
 }
+span.num{font-family:"Roboto Mono",ui-monospace,Menlo,monospace!important;font-weight:inherit!important;font-size:inherit!important;letter-spacing:0!important;display:inline!important;margin:0!important;padding:0!important;border:0!important;background:none!important;color:inherit!important;text-transform:none!important}
 .yicon{width:15px;height:15px;fill:currentColor;display:inline-block;vertical-align:-2px;flex:0 0 auto}
 .topbar{
   position:sticky;top:0;z-index:100;
@@ -1610,6 +1611,7 @@ function render(){
   root.appendChild(S.view==="same"?viewSame():S.view==="redo"?viewRedo():viewFa());
   if(S.flash){var f=root.querySelector(".player-row[data-k=\""+(S.flashKey||"")+"\"]");if(f&&!reduce)f.classList.add("flash");S.flash=null;S.flashKey=null;}
   S.animate=false;
+  if(window.NBA_MONO)window.NBA_MONO(root);
   window.scrollTo(0,y);}
 function setActive(on){
   if(on===S.on)return;
@@ -1631,6 +1633,18 @@ var T={}; D.teams.forEach(function(t){T[t.id]=t;});
 var TR={}; D.trades.forEach(function(t){TR[t.id]=t;});
 var S={mode:"OFFICIAL",sel:{}};
 function h(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==="class")e.className=attrs[k];else if(k==="text")e.textContent=attrs[k];else e.setAttribute(k,attrs[k]);}(kids||[]).forEach(function(c){if(c!=null)e.appendChild(typeof c==="string"?document.createTextNode(c):c);});return e;}
+
+/* every digit run that is not already set in Roboto Mono gets wrapped in .num (Roboto Mono); idempotent */
+function monoDigits(root){
+ var w=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT,null),hit=[],n;
+ while((n=w.nextNode())){var p=n.parentElement;
+  if(!p||!/\d/.test(n.nodeValue)||/^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE)$/.test(p.tagName)||p.closest(".num"))continue;
+  if(/Roboto Mono/.test(getComputedStyle(p).fontFamily))continue;hit.push(n);}
+ hit.forEach(function(t){var parts=t.nodeValue.split(/(\d+(?:[.,]\d+)*)/),f=document.createDocumentFragment();
+  parts.forEach(function(x,k){if(!x)return;if(k%2){var sp=document.createElement("span");sp.className="num";sp.textContent=x;f.appendChild(sp);}else f.appendChild(document.createTextNode(x));});
+  t.parentNode.replaceChild(f,t);});
+}
+window.NBA_MONO=monoDigits;
 function money(n){return "$"+(Math.round(n*100)/100);}
 function sgn(n){return (n>0?"+":n<0?"−":"")+Math.abs(Math.round(n*100)/100);}
 function cr(t){return t&&t.crown?"\uD83D\uDC51 ":"";}
@@ -1675,8 +1689,12 @@ function renderMode(){
  document.title=(scn?"SCENARIO — ":wi?"WHAT IF — ":"")+"NBA Talk VN Dynasty";
 }
 /* ---------- Trade Lab ---------- */
+function labClear(){return !D.trades.some(function(t){return t.status==="PROPOSED"||t.status==="AGREED";});}
+function labEmpty(box,txt){box.appendChild(h("div",{class:"lab-card"},[h("span",{class:"none",text:txt})]));}
+var LAB_MSG="Trade Lab is clear. Every staged transaction has been processed into the official state — see the team cards and Picks.";
 function renderTrades(){
  var box=document.getElementById("lab-trades");box.textContent="";var v=view();
+ if(labClear()){labEmpty(box,LAB_MSG);document.getElementById("lab-window").textContent="";return;}
  D.trades.forEach(function(t){
   var selectable=t.status==="PROPOSED"||t.status==="AGREED";
   var on=!!S.sel[t.id]&&S.mode==="SCENARIO";
@@ -1703,6 +1721,7 @@ function fmtAsset(a){return a.t==="p"?h("li",null,[a.n+" ",h("small",{text:money
 function assetCol(cls,title,items,render){var ul=h("ul");if(!items.length)ul.appendChild(h("li",{class:"none",text:"—"}));items.forEach(function(i){ul.appendChild(render(i));});return h("div",{class:"asset-col "+cls},[h("h5",{text:title}),ul]);}
 function renderFolds(){
  var box=document.getElementById("lab-folds");box.textContent="";var v=view();
+ if(labClear()){labEmpty(box,"Nothing staged.");return;}
  var ids=Object.keys(v.teams);
  if(!ids.length){box.appendChild(h("div",{class:"lab-card"},[h("span",{class:"none",text:S.mode==="SCENARIO"?"Select a proposed trade to see its resulting rosters, picks and cap.":"No official transactions yet. The keeper baseline is the current state."})]));return;}
  ids.forEach(function(id){var tm=v.teams[id],f=tm.fold;
@@ -1732,6 +1751,7 @@ function renderFolds(){
 }
 function renderCompare(){
  var box=document.getElementById("lab-compare");box.textContent="";var v=view();
+ if(labClear()){labEmpty(box,"Nothing to compare.");return;}
  var rows=D.teams.map(function(t){var o=D.official.teams[t.id],s=v.teams[t.id]||o;return {t:t,o:o,s:s,m:!!v.teams[t.id]&&v.teams[t.id].cap!==o.cap};});
  var tb=h("table",{class:"cmp"},[h("tr",null,[h("th",{text:"TEAM"}),h("th",{text:"OFFICIAL"}),h("th",{text:S.mode==="SCENARIO"?"SCENARIO":"CURRENT"}),h("th",{text:"Δ"}),h("th",{text:"STATUS"})])]);
  rows.forEach(function(r){var st=ST[r.s.status],dl=r.s.cap-r.o.cap;
@@ -1797,7 +1817,7 @@ function renderTeamCards(){
   function line(l,items){if(items.length)mv.appendChild(h("div",{text:l+" "+items.join(" · ")}));}
   line("IN +",f.in.map(function(a){return a.t==="p"?a.n:"Pick "+a.n;}));
   line("OUT −",f.out.map(function(a){return a.t==="p"?a.n:"Pick "+a.n;}));
-  line("↔ pass-through",f.pass.map(function(p){return "Pick "+p.asset.n+" ("+p.chain.join("→")+")";}));
+  line("↔ pass-through",f.pass.map(function(p){return (p.asset.t==="p"?p.asset.n:"Pick "+p.asset.n)+" ("+p.chain.join("→")+")";}));
   mv.appendChild(h("div",{class:"none",text:"Explains the roster above. The CUTS list is keeper-freeze history and is not rewritten by trades."}));
   strip.appendChild(h("details",null,[h("summary",{text:"View movement"}),mv]));
   var head=card.querySelector("header");if(head)head.insertAdjacentElement("afterend",strip);
@@ -1827,7 +1847,7 @@ function renderAvail(){
  f.slice(0,60).forEach(function(r){body.appendChild(h("tr",null,[h("td",{class:"n",text:r[6]?String(r[6]):"—"}),h("td",{class:"p",text:r[1]}),h("td",{text:r[2]||""}),h("td",{class:"hide-m",text:r[3]||""}),h("td",{class:"n",text:"$"+r[4]}),h("td",{class:"n",text:r[5]?"Y! "+r[5]:"—"}),h("td",null,[h("span",{class:"chip",text:r[7]})])]));});
  document.getElementById("avail-more").textContent=f.length>60?"Showing 60 of "+f.length+" — keep typing to narrow.":f.length+" match"+(f.length===1?"":"es");
 }
-function renderAll(){if(window.NBA_WHATIF)window.NBA_WHATIF.setActive(S.mode==="WHATIF");renderMode();renderTrades();renderFolds();renderCompare();renderPicks();renderTeamCards();renderCapPage();syncUrl();}
+function renderAll(){if(window.NBA_WHATIF)window.NBA_WHATIF.setActive(S.mode==="WHATIF");renderMode();renderTrades();renderFolds();renderCompare();renderPicks();renderTeamCards();renderCapPage();syncUrl();monoDigits(document.body);}
 function syncUrl(){try{var ks=key();var q=S.mode==="SCENARIO"?"?mode=scenario"+(ks?"&trades="+ks:""):S.mode==="WHATIF"&&window.NBA_WHATIF?window.NBA_WHATIF.query():location.pathname;history.replaceState(null,"",q+location.hash);}catch(e){}}
 function init(){
  document.getElementById("lab-cap").textContent=D.cap.floor+"–"+D.cap.ceiling;

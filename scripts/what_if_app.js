@@ -266,6 +266,7 @@ function render(){
   root.appendChild(S.view==="same"?viewSame():S.view==="redo"?viewRedo():viewFa());
   if(S.flash){var f=root.querySelector(".player-row[data-k=\""+(S.flashKey||"")+"\"]");if(f&&!reduce)f.classList.add("flash");S.flash=null;S.flashKey=null;}
   S.animate=false;
+  if(window.NBA_MONO)window.NBA_MONO(root);
   window.scrollTo(0,y);}
 function setActive(on){
   if(on===S.on)return;
