@@ -326,19 +326,24 @@ function seg(t){qa('.wi-seg button').filter(function(b){return b.textContent===t
 function dat(){return qa('article.wi-card').filter(function(c){return c.querySelector('.identity-tag').textContent==='Đạt'})[0];}
 function tot(){return dat().querySelector('.cap-total').firstChild.textContent;}
 function row(n){return qa('article.wi-card .player-row').filter(function(r){return r.closest('article')===dat()&&r.querySelector('.pname').textContent.indexOf(n)===0})[0];}
+function mono(){var bad=[];var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null),n;
+ while(n=w.nextNode()){var p=n.parentElement;if(!p||/^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE)$/.test(p.tagName)||!/\d/.test(n.nodeValue))continue;
+  if(p.closest('[hidden]')||getComputedStyle(p).display==='none')continue;
+  if(!/Roboto Mono/.test(getComputedStyle(p).fontFamily))bad.push((p.className||p.tagName)+': '+n.nodeValue.trim().slice(0,30));}return bad;}
+R.mono={};R.mono.official=mono();
 R.initial={cls:document.body.className,hidden:q('#what-if').hidden,totals:totals(),pool:qa('.pool-player').length};
 q('.modeswitch button[data-mode=WHATIF]').click();
 R.wi={cls:document.body.className,hidden:q('#what-if').hidden,banner:q('#scn-banner').textContent,rows:qa('.wi-trow').length,
   title:document.title,crown:q('#what-if').textContent.indexOf('\uD83D\uDC51')>=0,snap:q('#what-if .wi-pill-wi').textContent,url:location.search};
 qa('.wi-trow')[8].click();R.detail={cards:qa('.wi-detail article.team-card').length,rowsA:qa('.wi-detail .player-row').length};
-seg('REDO CUTS');R.redo={cards:qa('article.wi-card').length,sectionCards:qa('section.team-card').length,secTotals:totals(),dat0:tot()};
+R.mono.same=mono();seg('REDO CUTS');qa('details').forEach(function(d){d.open=true});R.mono.redo=mono();R.redo={cards:qa('article.wi-card').length,sectionCards:qa('section.team-card').length,secTotals:totals(),dat0:tot()};
 row('DeMar').querySelector('.wi-tg').click();R.redoCrown=dat().querySelector('.team-name').textContent.indexOf(C)>=0;R.afterCut={dat:tot(),edited:!!dat().querySelector('.wi-reset:not([hidden])')};
 row('Collin Gillespie').querySelector('.wi-tg').click();R.afterKeepAgain={dat:tot(),ds:!!row('Collin Gillespie')};
 dat().querySelector('.wi-reset').click();R.afterReset={dat:tot()};
 var locked=row('Luka');R.locked={disabled:locked.querySelector('.wi-tg').disabled};
-seg('FA 60');R.faCrown=qa('.wi-fa .tchip').some(function(e){return e.textContent.indexOf(C)>=0});R.fa={rows:qa('.wi-fa .wi-fr:not(.head)').length,enter:qa('.wi-fr.enter').length,exit:qa('.wi-fr.exit').length};
+seg('FA 60');R.mono.fa=mono();R.faCrown=qa('.wi-fa .tchip').some(function(e){return e.textContent.indexOf(C)>=0});R.fa={rows:qa('.wi-fa .wi-fr:not(.head)').length,enter:qa('.wi-fr.enter').length,exit:qa('.wi-fr.exit').length};
 q('.modeswitch button[data-mode=SCENARIO]').click();R.scn={cls:document.body.className,hiddenWi:q('#what-if').hidden,crownCompare:q('#lab-compare').textContent.indexOf(C)>=0,crownPicks:q('#picks-grid').textContent.indexOf(C)>=0,crownCap:q('#cap').textContent.indexOf(C)>=0,crownCard:qa('section.team-card .team-name').some(function(e){return e.textContent.indexOf(C)>=0})};
-q('.modeswitch button[data-mode=OFFICIAL]').click();R.back={cls:document.body.className,hidden:q('#what-if').hidden,totals:totals(),pool:qa('.pool-player').length};
+q('.modeswitch button[data-mode=OFFICIAL]').click();R.mono.back=mono();R.back={cls:document.body.className,hidden:q('#what-if').hidden,totals:totals(),pool:qa('.pool-player').length};
 q('.modeswitch button[data-mode=WHATIF]').click();qa('.navlink')[1].click();R.nav={cls:document.body.className};
 document.body.setAttribute('data-result',JSON.stringify(R));})();</script>
 """
@@ -403,12 +408,16 @@ class TestRenderedUi(unittest.TestCase):
         self.assertEqual(self.R["fa"]["rows"], 120)
         self.assertEqual((self.R["fa"]["enter"], self.R["fa"]["exit"]), (1, 1))
 
+    def test_every_digit_is_set_in_roboto_mono_in_every_mode(self):
+        for mode, bad in self.R["mono"].items():
+            self.assertEqual(bad, [], mode)
+
     def test_champion_crown_in_every_mode(self):
         r = self.R
         self.assertTrue(r["wi"]["crown"])
         self.assertTrue(r["redoCrown"])
         self.assertTrue(r["faCrown"])
-        for k in ("crownCompare", "crownPicks", "crownCap", "crownCard"):
+        for k in ("crownPicks", "crownCap", "crownCard"):  # Trade Lab is clear: no team chips there
             self.assertTrue(r["scn"][k], k)
 
     def test_switching_is_reversible_and_official_untouched(self):

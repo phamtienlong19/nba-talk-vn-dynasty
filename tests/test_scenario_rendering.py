@@ -174,10 +174,19 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("KEEPER-FREEZE CUTS", card)
         self.assertNotIn("KEEPER-FREEZE CUTS", _card(self.official, "Quân"))
 
-    def test_trade_lab_lists_every_transaction_as_official_and_not_selectable(self):
+    def test_trade_lab_is_clear_once_everything_is_official(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertEqual(lab.count('class="chip ok">OFFICIAL<'), 6)
-        self.assertEqual(len(re.findall(r'<input type="checkbox"[^>]*disabled', lab)), 6)
+        self.assertIn("Trade Lab is clear", lab)
+        self.assertNotIn('type="checkbox"', lab)
+        self.assertIn("Nothing staged.", self.official)
+        self.assertIn("Nothing to compare.", self.official)
+
+    def test_pass_through_lists_players_by_name_and_picks_with_pick_prefix(self):
+        card = re.sub(r"<[^>]+>", "", _card(self.official, "Bz"))  # digits are wrapped in <span class="num">
+        self.assertIn("Franz Wagner (Dũng→Bz→LC)", card)
+        self.assertNotIn("Pick Franz Wagner", card)
+        self.assertIn("Pick 1.03 (Bsy→Bz→sup fam)", card)
+        self.assertNotRegex(self.static, r'"Pick "\+p\.asset\.n\+" \("')  # old unconditional "Pick " prefix is gone
 
     def test_public_ui_says_keepers_are_locked(self):
         m = re.search(r'id="lab-keeper-status">(.*?)</span>', self.official)
