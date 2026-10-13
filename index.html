@@ -37,6 +37,7 @@ body{font-family:"Inter","Helvetica Neue",Arial,sans-serif;
   font-weight:400;
   -webkit-font-smoothing:antialiased;
 }
+span.numtxt{display:inline!important;white-space:inherit}
 span.num{font-family:"Roboto Mono",ui-monospace,Menlo,monospace!important;font-weight:inherit!important;font-size:inherit!important;letter-spacing:0!important;display:inline!important;margin:0!important;padding:0!important;border:0!important;background:none!important;color:inherit!important;text-transform:none!important}
 .yicon{width:15px;height:15px;fill:currentColor;display:inline-block;vertical-align:-2px;flex:0 0 auto}
 .topbar{
@@ -1640,8 +1641,10 @@ function monoDigits(root){
  while((n=w.nextNode())){var p=n.parentElement;
   if(!p||!/\d/.test(n.nodeValue)||/^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE)$/.test(p.tagName)||p.closest(".num"))continue;
   if(/Roboto Mono/.test(getComputedStyle(p).fontFamily))continue;hit.push(n);}
- hit.forEach(function(t){var parts=t.nodeValue.split(/(\d+(?:[.,]\d+)*)/),f=document.createDocumentFragment();
+ hit.forEach(function(t){var parts=t.nodeValue.split(/(\d+(?:[.,]\d+)*)/),f=document.createDocumentFragment(),disp=getComputedStyle(t.parentElement).display;
   parts.forEach(function(x,k){if(!x)return;if(k%2){var sp=document.createElement("span");sp.className="num";sp.textContent=x;f.appendChild(sp);}else f.appendChild(document.createTextNode(x));});
+  /* in a flex/grid parent, loose text runs become separate items and lose their edge spaces ("RANK 3 BONUS" -> "RANK3BONUS"): keep them in ONE inline item */
+  if(/flex|grid/.test(disp)){var w=document.createElement("span");w.className="numtxt";w.appendChild(f);f=w;}
   t.parentNode.replaceChild(f,t);});
 }
 window.NBA_MONO=monoDigits;
