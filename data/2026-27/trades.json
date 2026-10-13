@@ -192,6 +192,36 @@
           "to": "franchise-03"
         }
       ]
+    },
+    {
+      "tradeId": "TRADE-E",
+      "label": "BZ ↔ LC",
+      "status": "PROPOSED",
+      "order": 5,
+      "dependsOn": [
+        "TRADE-B"
+      ],
+      "participants": [
+        "franchise-15",
+        "franchise-04"
+      ],
+      "note": "Requires Bz to hold Franz Wagner (Trade B) first. Franz Wagner to LC; Derrick White to Bz.",
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.6550",
+          "name": "Franz Wagner",
+          "from": "franchise-15",
+          "to": "franchise-04"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.5842",
+          "name": "Derrick White",
+          "from": "franchise-04",
+          "to": "franchise-15"
+        }
+      ]
     }
   ]
 }
