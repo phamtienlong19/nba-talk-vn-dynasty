@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-13T14:13:39Z
+Generated: 2026-10-13T14:28:16Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/promote-trades-official
-Commit: 019f2b4
+Branch: fix/lab-clear-digits-mono
+Commit: 4ae8e2c
 Base: main
 Working tree: dirty
 
@@ -22,47 +22,49 @@ CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
-HTTP: OK
-Fingerprint: FRESH
+HTTP: FAIL or not yet propagated
+Fingerprint: unknown
 
 ## Changes
 ```
  README.md                                       |    6 +-
- ai_exchange/CURRENT_STATE.json                  |   10 +-
+ ai_exchange/CURRENT_STATE.json                  |   27 +-
  ai_exchange/IMPLEMENTATION_REPORT.md            |   17 +-
- ai_exchange/REVIEW_PACKET.md                    |   88 +-
+ ai_exchange/REVIEW_PACKET.md                    |   90 +-
  config/what_if_assumptions.json                 |   23 +
  data/2026-27/keeper_freeze.json                 |  182 +-
  data/2026-27/picks.json                         |   38 +-
  data/2026-27/snapshots/KEEPER_FREEZE.json       |  359 ++
- data/2026-27/trades.json                        |  101 +-
+ data/2026-27/snapshots/PRE_DRAFT_LOCK.json      |  359 ++
+ data/2026-27/trades.json                        |  145 +-
  data/what_if/snapshots/2026-10-08/players.json  | 4164 +++++++++++++++++++++++
  data/what_if/snapshots/2026-10-08/snapshot.json |   16 +
- docs/LEAGUE_STATE_MODEL.md                      |    6 +-
- docs/WHAT_IF_MODE.md                            |   30 +
- index.html                                      |  512 ++-
+ docs/LEAGUE_STATE_MODEL.md                      |   16 +-
+ docs/WHAT_IF_MODE.md                            |   32 +
+ index.html                                      |  544 ++-
  scripts/build_fa_draft_pool.py                  |    7 +-
- scripts/build_league_state.py                   |   30 +-
- scripts/league_state.py                         |   45 +-
+ scripts/build_league_state.py                   |   90 +-
+ scripts/league_state.py                         |   92 +-
  scripts/what_if.css                             |  137 +
  scripts/what_if.py                              |  523 +++
  scripts/what_if_app.js                          |  280 ++
  tasks/ACTIVE.md                                 |   12 +-
+ tests/_proposed.py                              |   20 +
  tests/test_fa_draft_pool.py                     |    4 +-
- tests/test_final_keeper_freeze.py               |  161 +
+ tests/test_final_keeper_freeze.py               |  172 +
  tests/test_keeper_overrides.py                  |   24 +-
  tests/test_league_state_builders.py             |    9 +-
- tests/test_league_state_data.py                 |  228 +-
- tests/test_scenario_rendering.py                |   17 +
+ tests/test_league_state_data.py                 |  185 +-
+ tests/test_scenario_rendering.py                |  100 +-
  tests/test_what_if.py                           |  425 +++
- 28 files changed, 7288 insertions(+), 166 deletions(-)
+ 30 files changed, 7852 insertions(+), 246 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
 - tests: PASS (keeper freeze is LOCKED -- baseline not regenerated (immutable).)
 - Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
-- live HTTP: OK
+- live HTTP: FAIL or not yet propagated
 
 ## Canonical State
 Roster baseline: 16 franchises, 232 assignments
@@ -78,6 +80,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - data/2026-27/keeper_freeze.json
 - data/2026-27/picks.json
 - data/2026-27/snapshots/KEEPER_FREEZE.json
+- data/2026-27/snapshots/PRE_DRAFT_LOCK.json
 - data/2026-27/trades.json
 - data/what_if/snapshots/2026-10-08/players.json
 - data/what_if/snapshots/2026-10-08/snapshot.json
@@ -91,6 +94,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - scripts/what_if.py
 - scripts/what_if_app.js
 - tasks/ACTIVE.md
+- tests/_proposed.py
 - tests/test_fa_draft_pool.py
 - tests/test_final_keeper_freeze.py
 - tests/test_keeper_overrides.py
@@ -113,4 +117,4 @@ Playwright screenshots — see `ai_exchange/IMPLEMENTATION_REPORT.md`.
   change to `GUARANTEED_NAMES` in `scripts/build_fa_draft_pool.py`.
 
 ## Suggested Next Step
-Open/update the PR from `feat/promote-trades-official` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `fix/lab-clear-digits-mono` if not already done, then request human/ChatGPT review of this packet.
