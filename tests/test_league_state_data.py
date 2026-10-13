@@ -206,6 +206,56 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual(got["3.05"][1], "VIA HCMC")
         self.assertEqual(sum(1 for v in got.values() if v[1].startswith("VIA")), 4)
 
+    # ----- Trade F: CrazyCat <-> HCMC
+    def test_trade_f_definition_and_ownership_at_baseline(self):
+        CC, HC = "franchise-02", "franchise-05"
+        f = self.i["tradeIndex"]["TRADE-F"]
+        self.assertEqual((f["status"], f["dependsOn"]), ("PROPOSED", []))
+        legs = {(a.get("playerKey") or a["pickId"], a["from"], a["to"]) for a in f["assets"]}
+        self.assertEqual(legs, {("478.p.6016", HC, CC), ("478.p.10115", HC, CC), ("2026-R2-07", HC, CC),
+                                ("478.p.6417", CC, HC), ("2026-R1-04", CC, HC), ("2026-R2-02", CC, HC)})
+        self.assertEqual(len(f["assets"]), 6)  # three each way
+        base = ls.resolve(self.i, [], "OFFICIAL")
+        self.assertEqual(base["pickOwner"]["2026-R2-07"], HC)  # via the last-season Maxfixe swap
+        self.assertEqual(self.i["pickIndex"]["2026-R2-07"]["originalOwner"], "franchise-07")
+
+    def test_trade_f_applies_cleanly_and_updates_both_teams(self):
+        CC, HC = "franchise-02", "franchise-05"
+        base = ls.initial_state(self.i)
+        s = self._scn("TRADE-F")
+        r = s["tradeResults"][0]
+        self.assertTrue(r["applied"] and not r["errors"])
+        self.assertEqual([w["code"] for w in r["warnings"]], ["ROSTER_COUNT_ABOVE_9"])  # CrazyCat 10; counts are 3-for-3
+        self.assertEqual(ls.team_cap(self.i, s, CC), ls.team_cap(self.i, base, CC) + 38 + 1 - 9)
+        self.assertEqual(ls.team_cap(self.i, s, HC), ls.team_cap(self.i, base, HC) - 38 - 1 + 9)
+        self.assertEqual((len(ls.team_players(self.i, s, CC)), len(ls.team_players(self.i, s, HC))), (10, 8))
+        self.assertEqual(ls.team_picks(s, CC), ["2026-R2-07", "2026-R3-02"])
+        self.assertEqual(ls.team_picks(s, HC), ["2026-R1-04", "2026-R1-06", "2026-R2-02", "2026-R2-05"])
+        for pid in ("2026-R2-07", "2026-R1-04", "2026-R2-02"):  # identities unchanged
+            self.assertIn(pid, self.i["pickIndex"])
+        self.assertEqual(self.i["pickIndex"]["2026-R1-04"]["originalOwner"], CC)
+
+    def test_trade_f_is_reversible_and_leaves_other_trades_alone(self):
+        before = ls.resolve(self.i, ["TRADE-A", "TRADE-B", "TRADE-C"], "SCENARIO")
+        with_f = ls.resolve(self.i, ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-F"], "SCENARIO")
+        again = ls.resolve(self.i, ["TRADE-A", "TRADE-B", "TRADE-C"], "SCENARIO")
+        self.assertEqual(before["playerOwner"], again["playerOwner"])
+        self.assertEqual(before["pickOwner"], again["pickOwner"])
+        for k in ("franchise-15", "franchise-06", "franchise-12", "franchise-04"):  # Bz, Dung, sup fam, LC unaffected
+            self.assertEqual(ls.team_players(self.i, before, k), ls.team_players(self.i, with_f, k))
+            self.assertEqual(ls.team_picks(before, k), ls.team_picks(with_f, k))
+        self.assertTrue(all(r["applied"] for r in with_f["tradeResults"]))
+
+    def test_trade_f_cannot_move_assets_the_sender_lacks(self):
+        import copy
+        inp = copy.deepcopy(self.i)
+        for a in inp["tradeIndex"]["TRADE-F"]["assets"]:
+            if a.get("pickId") == "2026-R2-07":
+                a["from"] = "franchise-07"  # Maxfixe's ORIGINAL slot holder no longer owns it
+        r = ls.resolve(inp, ["TRADE-F"], "SCENARIO")["tradeResults"][0]
+        self.assertFalse(r["applied"])
+        self.assertTrue(r["errors"])
+
     # ----- Trade E: Bz <-> LC (Wagner to LC, White to Bz); needs Trade B
     def test_trade_e_definition(self):
         e = self.i["tradeIndex"]["TRADE-E"]
@@ -244,7 +294,7 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual(plain["pickOwner"], both["pickOwner"])
         d_alone, d_with_e = self._scn("TRADE-D"), self._scn("TRADE-B", "TRADE-D", "TRADE-E")
         self.assertEqual(d_alone["tradeResults"][0]["teams"][LC]["playerCapDelta"], d_with_e["tradeResults"][1]["teams"][LC]["playerCapDelta"])
-        self.assertEqual({t["tradeId"] for t in self.i["trades"]["trades"]}, {"TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E"})
+        self.assertEqual({t["tradeId"] for t in self.i["trades"]["trades"]}, {"TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E", "TRADE-F"})
 
     def test_every_combination_is_consistent(self):
         ids = [t["tradeId"] for t in ls.selectable_trades(self.i)]
@@ -257,7 +307,8 @@ class TestRepoState(unittest.TestCase):
                 self.assertEqual(len(players), len(base["playerOwner"]), combo)
                 self.assertEqual(sum(len(ls.team_picks(s, f)) for f in self.i["franchises"]), 48, combo)
                 if "TRADE-E" in combo and "TRADE-B" not in combo:
-                    self.assertFalse(s["tradeResults"][-1]["applied"], combo)
+                    e = [r for r in s["tradeResults"] if r["tradeId"] == "TRADE-E"][0]
+                    self.assertFalse(e["applied"], combo)
 
     def test_ownership_integrity_audit_all_sixteen_teams(self):
         for sel in ([], ["TRADE-A"], ["TRADE-B"], ["TRADE-A", "TRADE-B", "TRADE-C"], ["TRADE-D"],

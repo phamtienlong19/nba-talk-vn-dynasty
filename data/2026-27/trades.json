@@ -222,6 +222,62 @@
           "to": "franchise-15"
         }
       ]
+    },
+    {
+      "tradeId": "TRADE-F",
+      "label": "CRAZYCAT ↔ HCMC",
+      "status": "PROPOSED",
+      "order": 6,
+      "dependsOn": [],
+      "participants": [
+        "franchise-02",
+        "franchise-05"
+      ],
+      "note": "Trae Young + Podziemski + 2.07 (HCMC's via the last-season swap) to CrazyCat; Quickley + 1.04 + 2.02 to HCMC. PROPOSED.",
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.6016",
+          "name": "Trae Young",
+          "from": "franchise-05",
+          "to": "franchise-02"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10115",
+          "name": "Brandin Podziemski",
+          "from": "franchise-05",
+          "to": "franchise-02"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R2-07",
+          "name": "2.07",
+          "from": "franchise-05",
+          "to": "franchise-02"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.6417",
+          "name": "Immanuel Quickley",
+          "from": "franchise-02",
+          "to": "franchise-05"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R1-04",
+          "name": "1.04",
+          "from": "franchise-02",
+          "to": "franchise-05"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R2-02",
+          "name": "2.02",
+          "from": "franchise-02",
+          "to": "franchise-05"
+        }
+      ]
     }
   ]
 }
