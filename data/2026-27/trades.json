@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "note": "Atomic transactions. Only status OFFICIAL mutates canonical state; PROPOSED/AGREED mutate scenario state only. Each asset: {type, playerKey|pickId, from, to}. `dependsOn` lists trades that must be active and applied first.",
+  "note": "Atomic transactions. Only status OFFICIAL mutates canonical state; PROPOSED/AGREED mutate scenario state only. Each asset: {type, playerKey|pickId, from, to}. `dependsOn` lists trades that must be active and applied first. Official trades are replayed ONCE, in `order`, over the locked keeper freeze + historical pick transfers; nothing is stored as a result. Batch 2026-10-13-pre-draft promoted TRADE-A..F to OFFICIAL; the pre-trade state remains in snapshots/KEEPER_FREEZE.json.",
   "statuses": [
     "PROPOSED",
     "AGREED",
@@ -11,7 +11,7 @@
     {
       "tradeId": "TRADE-A",
       "label": "BZ ↔ BSY",
-      "status": "PROPOSED",
+      "status": "OFFICIAL",
       "order": 1,
       "dependsOn": [],
       "participants": [
@@ -48,19 +48,23 @@
           "from": "franchise-15",
           "to": "franchise-01"
         }
-      ]
+      ],
+      "execution": {
+        "batch": "2026-10-13-pre-draft",
+        "processedInOrder": 1
+      }
     },
     {
       "tradeId": "TRADE-B",
       "label": "BZ ↔ DŨNG",
-      "status": "PROPOSED",
+      "status": "OFFICIAL",
       "order": 2,
       "dependsOn": [],
       "participants": [
         "franchise-15",
         "franchise-06"
       ],
-      "note": "Franz Wagner + 3.06 to Bz; Duren + 3.03 (Melo's original R3, held by Bz since the last-season swap) to Dũng. PROPOSED pending Dũng's agreement.",
+      "note": "Franz Wagner + 3.06 to Bz; Duren + 3.03 (Melo's original R3, held by Bz since the last-season swap) to Dũng.",
       "assets": [
         {
           "type": "player",
@@ -90,12 +94,16 @@
           "from": "franchise-15",
           "to": "franchise-06"
         }
-      ]
+      ],
+      "execution": {
+        "batch": "2026-10-13-pre-draft",
+        "processedInOrder": 2
+      }
     },
     {
       "tradeId": "TRADE-C",
       "label": "BZ ↔ SUP FAM",
-      "status": "PROPOSED",
+      "status": "OFFICIAL",
       "order": 3,
       "dependsOn": [
         "TRADE-A",
@@ -149,19 +157,23 @@
           "from": "franchise-15",
           "to": "franchise-12"
         }
-      ]
+      ],
+      "execution": {
+        "batch": "2026-10-13-pre-draft",
+        "processedInOrder": 3
+      }
     },
     {
       "tradeId": "TRADE-D",
       "label": "LC ↔ MELO",
-      "status": "PROPOSED",
+      "status": "OFFICIAL",
       "order": 4,
       "dependsOn": [],
       "participants": [
         "franchise-04",
         "franchise-03"
       ],
-      "note": "PROPOSED / NOT FINAL. Not promoted automatically.",
+      "note": "Buzelis + 1.05 to LC; Şengün + Aaron Gordon to Melo. 3.03 is not part of this trade.",
       "assets": [
         {
           "type": "player",
@@ -191,12 +203,16 @@
           "from": "franchise-04",
           "to": "franchise-03"
         }
-      ]
+      ],
+      "execution": {
+        "batch": "2026-10-13-pre-draft",
+        "processedInOrder": 4
+      }
     },
     {
       "tradeId": "TRADE-E",
       "label": "BZ ↔ LC",
-      "status": "PROPOSED",
+      "status": "OFFICIAL",
       "order": 5,
       "dependsOn": [
         "TRADE-B"
@@ -221,19 +237,23 @@
           "from": "franchise-04",
           "to": "franchise-15"
         }
-      ]
+      ],
+      "execution": {
+        "batch": "2026-10-13-pre-draft",
+        "processedInOrder": 5
+      }
     },
     {
       "tradeId": "TRADE-F",
       "label": "CRAZYCAT ↔ HCMC",
-      "status": "PROPOSED",
+      "status": "OFFICIAL",
       "order": 6,
       "dependsOn": [],
       "participants": [
         "franchise-02",
         "franchise-05"
       ],
-      "note": "Trae Young + Podziemski + 2.07 (HCMC's via the last-season swap) to CrazyCat; Quickley + 1.04 + 2.02 to HCMC. PROPOSED.",
+      "note": "Trae Young + Podziemski + 2.07 (HCMC's via the last-season swap) to CrazyCat; Quickley + 1.04 + 2.02 to HCMC.",
       "assets": [
         {
           "type": "player",
@@ -277,7 +297,11 @@
           "from": "franchise-02",
           "to": "franchise-05"
         }
-      ]
+      ],
+      "execution": {
+        "batch": "2026-10-13-pre-draft",
+        "processedInOrder": 6
+      }
     }
   ]
 }
