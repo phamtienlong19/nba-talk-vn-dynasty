@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "source": "league draft results as confirmed by the commissioner; first 34 selections (through 3.02)",
+  "source": "league draft results as confirmed by the commissioner; first 36 selections (through 3.04)",
   "note": "Authoritative input for scripts/import_draft_results.py, which resolves names against the Yahoo player master and appends DRAFT_PICK events to draft_state.json idempotently. Rookie flags come from this record.",
   "results": [
     {
@@ -171,6 +171,16 @@
     {
       "pickId": "2026-R3-02",
       "player": "Jusuf Nurkić",
+      "rookie": false
+    },
+    {
+      "pickId": "2026-R3-03",
+      "player": "Egor Dëmin",
+      "rookie": false
+    },
+    {
+      "pickId": "2026-R3-04",
+      "player": "Dillon Brooks",
       "rookie": false
     }
   ]
