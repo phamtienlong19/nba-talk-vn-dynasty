@@ -106,9 +106,13 @@ def _chrome():
 
 
 def _dump(url):
-    out = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--dump-dom", url],
-                         capture_output=True, text=True, timeout=90)
-    return out.stdout
+    cmd = [_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--dump-dom", url]
+    for attempt in (1, 2):  # a cold CI runner occasionally stalls headless Chrome past the limit: retry once
+        try:
+            return subprocess.run(cmd, capture_output=True, text=True, timeout=120).stdout
+        except subprocess.TimeoutExpired:
+            if attempt == 2:
+                raise
 
 
 def _card(dom, short):
