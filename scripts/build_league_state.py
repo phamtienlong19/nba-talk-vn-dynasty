@@ -132,7 +132,7 @@ def build_baseline(index_html: str, registry: dict, franchises: list) -> tuple[d
 
 LEDGER_ROW_RE = re.compile(r'(<div class="pick-slot">(\d+)\.(\d+)</div>\n<div class="pick-team">)(<span class="pick-chip"[^>]*>.*?</span>)(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
 VIA_RE = re.compile(r'<span class="pick-extra">VIA [^<]*</span>')
-SEL_RE = re.compile(r'<span class="pick-extra pick-(?:sel|r|hold)">[^<]*</span>')
+SEL_RE = re.compile(r'<span class="pick-extra pick-(?:sel|r|hold)">.*?</span>')
 DRAFT_STATUS_BEGIN, DRAFT_STATUS_END = "<!--DRAFT-STATUS-BEGIN-->", "<!--DRAFT-STATUS-END-->"
 
 
@@ -168,42 +168,90 @@ def sync_ledger(index_html: str, inputs: dict) -> str:
             note += f'<span class="pick-extra">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>'
         if pid in done:
             d = done[pid]
-            note += f'<span class="pick-extra pick-sel">{html_lib.escape(d["name"])}</span>'
-            if d["rookie"]:
-                note += '<span class="pick-extra pick-r">R</span>'
+            cap = int(d["cap"]) if float(d["cap"]).is_integer() else d["cap"]
+            tot = int(d["capAfter"]) if float(d["capAfter"]).is_integer() else d["capAfter"]
+            note += (f'<span class="pick-extra pick-sel">{html_lib.escape(d["name"])}'
+                     + ('<i class="pick-r">R</i>' if d["rookie"] else "")
+                     + f'<em>+{cap} → {tot}</em></span>')
         elif pid in held:
             note += '<span class="pick-extra pick-hold">OWNERSHIP HOLD</span>'
         return m.group(1) + chip_of[order.index(owner)] + m.group(5) + note + m.group(7)
     panel = LEDGER_ROW_RE.sub(row, panel)
-    panel = _draft_status_block(panel, summary, chip_of, order, short_by_fid, inputs)
+    cur = summary["cursor"]
+    best = best_available(inputs, index_html, official, cur["room"] if cur else None)
+    panel = _draft_room_block(panel, summary, chip_of, order, inputs, best)
     return index_html[:a] + panel + index_html[b:]
 
 
-def _draft_status_block(panel: str, summary: dict, chip_of: dict, order: list, short_by_fid: dict, inputs: dict) -> str:
-    """The 'draft room' strip at the top of the Draft Order page: on the clock, latest pick, counts, holds."""
+def board_final(inputs: dict, index_html: str, official: dict, yahoo_path: str = CANONICAL_YAHOO_PATH):
+    """(all candidates, the FA/DRAFT 60 in order) for the CURRENT state: drafted players are already gone."""
+    yahoo = pool.load_yahoo_players(yahoo_path)
+    dyn, dyn_max = pool.load_dynasty_rankings()
+    drafted = {pool.normalize_name(ls.player_name(inputs, c["playerKey"])) for c in official["completedPicks"].values()}
+    cands = pool.build_candidates(index_html, yahoo, dyn, dyn_max, rookie_names=pool.load_rookie_names(),
+                                  draft_years=pool.load_draft_years(), drafted=drafted)
+    return cands, pool.sort_and_truncate(cands)
+
+
+def best_available(inputs: dict, index_html: str, official: dict, clock_room, n: int = 8) -> list:
+    """Top remaining prospects in the board's own order (CAP first). `fits` is relative to the team on the clock."""
+    _, final = board_final(inputs, index_html, official)
+    return [{"rank": i, "name": c.name, "pos": c.pos, "nba": c.nba, "cap": c.cap, "rookie": c.rookie,
+             "fits": clock_room is None or c.cap <= clock_room} for i, c in enumerate(final[:n], 1)]
+
+
+def _num(x):
+    return int(x) if float(x).is_integer() else x
+
+
+def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inputs: dict, best: list) -> str:
+    """Broadcast-style draft room at the top of the Draft Order page: ticker of picks, on the clock, up next,
+    best available, holds. Pure function of the derived state."""
+    esc = html_lib.escape
+    teams = {t["franchiseId"]: t for t in inputs["freeze"]["teams"]}
     def chip(fid):
         return chip_of[order.index(fid)]
-    parts = []
-    cur, latest = summary["cursor"], summary["latest"]
+    def dot(fid):
+        t = teams[fid]
+        return f'<span class="dr-dot" style="--team-color:{t["color"]};--team-text:{t["text"]}">{esc(t["short"])}</span>'
+    cur = summary["cursor"]
+    items = "".join(
+        f'<span class="dr-t"><b>{d["label"]}</b>{dot(d["franchiseId"])}<span class="dr-n">{esc(d["name"])}</span>'
+        + ('<i class="pick-r">R</i>' if d["rookie"] else "")
+        + f'<em>+{_num(d["cap"])} → {_num(d["capAfter"])}</em></span>'
+        for d in summary["completed"])
+    dur = max(40, 4 * len(summary["completed"]))
+    ticker = (f'<div class="dr-ticker" aria-label="Selections in pick order" tabindex="0"><div class="dr-track" style="--dr-dur:{dur}s">'
+              f'<div class="dr-run">{items}</div><div class="dr-run" aria-hidden="true">{items}</div></div></div>') if items else ""
+    clock = ""
     if cur:
-        parts.append(f'<div class="ds-cell ds-clock"><span class="ds-k">ON THE CLOCK</span><b>{cur["label"]}</b>{chip(cur["owner"])}'
-                     + ('<span class="pick-extra pick-hold">OWNERSHIP HOLD</span>' if cur["held"] else "") + "</div>")
-    if latest:
-        parts.append(f'<div class="ds-cell"><span class="ds-k">LATEST</span><b>{latest["label"]}</b> {html_lib.escape(latest["name"])}'
-                     + (' <span class="pick-extra pick-r">R</span>' if latest["rookie"] else "")
-                     + f' {chip(latest["franchiseId"])}</div>')
-    parts.append(f'<div class="ds-cell"><span class="ds-k">SELECTED</span><b>{len(summary["completed"])}</b>'
-                 f'<span class="ds-k">REMAINING</span><b>{summary["remaining"]}</b><span class="ds-k">ROOKIES</span><b>{summary["rookies"]}</b></div>')
-    for h in summary["holds"]:
-        parts.append(f'<div class="ds-cell ds-holdcell"><span class="pick-extra pick-hold">OWNERSHIP HOLD</span><b>{h["label"]}</b> '
-                     f'{html_lib.escape(h["reason"])}</div>')
-    block = DRAFT_STATUS_BEGIN + '<div class="draft-status">' + "".join(parts) + "</div>" + DRAFT_STATUS_END
+        hold = '<span class="pick-extra pick-hold">OWNERSHIP HOLD</span>' if cur["held"] else ""
+        clock = (f'<section class="dr-card dr-clock"><span class="ds-k">ON THE CLOCK</span><div class="dr-big"><b>{cur["label"]}</b>{chip(cur["owner"])}{hold}</div>'
+                 f'<div class="dr-line"><span class="ds-k">CAP</span><b>{_num(cur["cap"])}</b><small>/ {_num(summary["cap"]["ceiling"])}</small>'
+                 f'<span class="ds-k">ROOM</span><b>{_num(cur["room"])}</b><span class="ds-k">PICKS LEFT</span><b>{cur["picksLeft"]}</b></div>'
+                 f'<div class="dr-line dr-count"><span class="ds-k">SELECTED</span><b>{len(summary["completed"])}</b>'
+                 f'<span class="ds-k">REMAINING</span><b>{summary["remaining"]}</b><span class="ds-k">ROOKIES</span><b>{summary["rookies"]}</b></div></section>')
+    nxt = "".join(
+        f'<li><b>{u["label"]}</b>{dot(u["owner"])}<span class="dr-room">ROOM {_num(u["room"])}</span>'
+        + ('<span class="pick-extra pick-hold">HOLD</span>' if u["held"] else "") + "</li>" for u in summary["upNext"])
+    upnext = f'<section class="dr-card"><span class="ds-k">UP NEXT</span><ol class="dr-list">{nxt}</ol></section>' if nxt else ""
+    ba = "".join(
+        f'<li class="{"" if b["fits"] else "dr-over"}"><i>{b["rank"]}</i><span class="dr-n">{esc(b["name"])}</span>'
+        + ('<i class="pick-r">R</i>' if b["rookie"] else "")
+        + f'<small>{esc(b["pos"])} · {esc(b["nba"])}</small><b>{_num(b["cap"])}</b>'
+        + ("" if b["fits"] else '<span class="dr-flag">OVER CAP</span>') + "</li>" for b in best)
+    avail = (f'<section class="dr-card"><span class="ds-k">BEST AVAILABLE</span><small class="dr-sub">FA/DRAFT 60 order · CAP first'
+             + (" · flags use the clock team's room" if cur else "") + f'</small><ol class="dr-list dr-best">{ba}</ol></section>') if best else ""
+    holds = "".join(f'<div class="dr-card dr-hold"><span class="pick-extra pick-hold">OWNERSHIP HOLD</span><b>{h["label"]}</b> {esc(h["reason"])}</div>'
+                    for h in summary["holds"])
+    block = (DRAFT_STATUS_BEGIN + '<div class="draft-room">' + ticker + f'<div class="dr-grid">{clock}{upnext}{avail}</div>' + holds
+             + "</div>" + DRAFT_STATUS_END)
     if DRAFT_STATUS_BEGIN in panel:
         x, y = panel.index(DRAFT_STATUS_BEGIN), panel.index(DRAFT_STATUS_END) + len(DRAFT_STATUS_END)
         return panel[:x] + block + panel[y:]
     anchor = '<div class="title">DRAFT ORDER</div>'
     if anchor not in panel:
-        raise ValueError("draft-order panel has no title to anchor the status strip after")
+        raise ValueError("draft-order panel has no title to anchor the draft room after")
     return panel.replace(anchor, anchor + "\n" + block, 1)
 
 
