@@ -134,6 +134,11 @@
       "pickId": "2026-R2-10",
       "player": "Dailyn Swain",
       "reason": "Not in the Yahoo player master (no playerKey / cap); cannot be recorded until a registry entry exists."
+    },
+    {
+      "pickId": "2026-R2-11",
+      "player": "Bennett Stirtz",
+      "reason": "Not in the Yahoo player master (no playerKey / cap); also follows 2.10, and results must be recorded in draft order."
     }
   ]
 }
