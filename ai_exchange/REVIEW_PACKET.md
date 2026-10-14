@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-14T02:39:00Z
+Generated: 2026-10-14T04:10:08Z
 
 ## Task
 Active Task
@@ -10,14 +10,14 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: fix/ledger-row-layout
-Commit: 004fc99
+Commit: 9187896
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/43 (OPEN)
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/43 (MERGED)
 CI: Claude Code Review: completed/success
 
 ## Deployment
@@ -27,16 +27,16 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md    | 84 ++++++++---------------------------------
+ ai_exchange/REVIEW_PACKET.md    | 84 +++++++++--------------------------------
  data/2026-27/draft_results.json | 12 +++++-
  data/2026-27/draft_state.json   | 22 ++++++++++-
  docs/LEAGUE_STATE_MODEL.md      |  2 +-
  index.html                      | 82 +++++++++++++++++++++-------------------
  scripts/build_league_state.py   | 23 ++++++-----
- scripts/league_state.py         | 19 +++++++---
+ scripts/league_state.py         | 25 +++++++++---
  tests/test_fa_draft_pool.py     |  4 +-
- tests/test_league_state_data.py | 72 +++++++++++++++++++----------------
- 9 files changed, 163 insertions(+), 157 deletions(-)
+ tests/test_league_state_data.py | 75 +++++++++++++++++++++---------------
+ 9 files changed, 174 insertions(+), 155 deletions(-)
 ```
 
 ## Validation
