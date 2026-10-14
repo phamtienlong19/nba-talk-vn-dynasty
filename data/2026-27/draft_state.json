@@ -380,6 +380,24 @@
       "playerKey": "478.p.6226",
       "rookie": false,
       "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R3-11",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R3-11",
+      "franchiseId": "franchise-11",
+      "playerKey": "provisional:sergio-de-larrea",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R3-12",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R3-12",
+      "franchiseId": "franchise-15",
+      "playerKey": "478.p.6047",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
     }
   ],
   "holds": [

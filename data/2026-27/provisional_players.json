@@ -24,6 +24,14 @@
       "displayPosition": "PF",
       "cap": 0,
       "provisional": true
+    },
+    {
+      "playerKey": "provisional:sergio-de-larrea",
+      "name": "Sergio de Larrea",
+      "nbaTeam": "DAL",
+      "displayPosition": "PG",
+      "cap": 0,
+      "provisional": true
     }
   ]
 }
