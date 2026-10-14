@@ -64,7 +64,9 @@ def load_inputs(data_dir: str = DATA_DIR, registry_path: str = REGISTRY_PATH, po
     inputs["shorts"] = {t["franchiseId"]: t["short"] for t in inputs["freeze"]["teams"]}
     inputs["pickIndex"] = {p["pickId"]: p for p in inputs["picks"]["picks"]}
     inputs["tradeIndex"] = {t["tradeId"]: t for t in inputs["trades"]["trades"]}
-    inputs["extraPlayers"] = {}  # playerKey -> {name, cap} for Yahoo-missing players added at draft time
+    # playerKey -> {name, nbaTeam, displayPosition, cap} for drafted players Yahoo does not list yet (provisional, cap 0)
+    prov = os.path.join(data_dir, "provisional_players.json")
+    inputs["extraPlayers"] = {p["playerKey"]: p for p in _load(prov)["players"]} if os.path.exists(prov) else {}
     validate_inputs(inputs)
     return inputs
 
@@ -372,8 +374,8 @@ def draft_summary(inputs: dict, state: dict) -> dict:
                          "name": player_name(inputs, c["playerKey"]), "cap": cap, "capBefore": before, "capAfter": running[f],
                          "room": ceiling - running[f], "status": cap_status(inputs, running[f]),
                          "rookie": bool(ev.get("rookie")),
-                         "pos": (inputs["registry"].get(c["playerKey"], {}).get("displayPosition") or "").replace(",", "/"),
-                         "nba": inputs["registry"].get(c["playerKey"], {}).get("nbaTeam", "")})
+                         "pos": ((inputs["registry"].get(c["playerKey"]) or inputs["extraPlayers"].get(c["playerKey"]) or {}).get("displayPosition") or "").replace(",", "/"),
+                         "nba": (inputs["registry"].get(c["playerKey"]) or inputs["extraPlayers"].get(c["playerKey"]) or {}).get("nbaTeam", "")})
     holds_raw = active_holds(inputs)
     held_ids = {h["pickId"] for h in holds_raw}
     holds = [{"pickId": h["pickId"], "label": pick_label(inputs["pickIndex"][h["pickId"]]), "reason": h["reason"],

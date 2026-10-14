@@ -571,6 +571,10 @@ def drafted_names(draft_path: str = DRAFT_STATE, registry_path: str = REGISTRY) 
             events = json.load(f).get("events", [])
         with open(registry_path, encoding="utf-8") as f:
             names = {p["playerKey"]: p["name"] for p in json.load(f)["players"]}
+        prov = os.path.join(os.path.dirname(draft_path), "provisional_players.json")  # drafted, not yet in Yahoo
+        if os.path.exists(prov):
+            with open(prov, encoding="utf-8") as f:
+                names.update({p["playerKey"]: p["name"] for p in json.load(f)["players"]})
     except OSError:
         return set()
     return {normalize_name(names[e["playerKey"]]) for e in events if e["playerKey"] in names}

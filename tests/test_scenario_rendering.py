@@ -154,7 +154,7 @@ class TestRenderedCards(unittest.TestCase):
         sup = _read(_card(self.official, "sup fam"))
         self.assertNotIn("Jalen Williams", sup["names"])
         self.assertIn("Julius Randle", sup["names"])
-        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("141", 10, "37 ROOM"))  # post-trade 131 + drafted Wilson ($10) & Flemings ($0)
+        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("141", 11, "37 ROOM"))  # post-trade 131 + drafted Wilson ($10) & Flemings ($0)
         bz = _read(_card(self.official, "Bz"))
         self.assertIn("Derrick White", bz["names"])
         self.assertNotIn("Franz Wagner", bz["names"])

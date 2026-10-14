@@ -227,6 +227,33 @@
       "playerKey": "478.p.4901",
       "rookie": false,
       "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-10",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-10",
+      "franchiseId": "franchise-10",
+      "playerKey": "provisional:dailyn-swain",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-11",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-11",
+      "franchiseId": "franchise-11",
+      "playerKey": "provisional:bennett-stirtz",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-12",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-12",
+      "franchiseId": "franchise-12",
+      "playerKey": "478.p.10570",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
     }
   ],
   "holds": [

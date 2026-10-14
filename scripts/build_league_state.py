@@ -371,7 +371,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         seen_norm.add(key)
     extras = []
     for key, c in sorted(src_by_norm.items()):
-        if key in seen_norm or key in {pool.normalize_name(inputs['registry'][k]['name']) for k in owned}:
+        if key in seen_norm or key in {pool.normalize_name(ls.player_name(inputs, k)) for k in owned}:
             continue
         if key in board_rank or c.name in pool.CURATED_ROOKIE_OVERLAY:
             rows.append([f"curated:{key}", c.name, c.nba, c.pos, c.cap, None, board_rank.get(key), "R" if c.rookie else "FA"])
