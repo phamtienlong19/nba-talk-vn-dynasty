@@ -54,7 +54,7 @@ def build_events(inputs: dict, results: dict, existing: list) -> list:
         pid = r["pickId"]
         if pid != order[i]:
             raise ImportError_(f"results must follow the draft order: position {i + 1} is {order[i]}, got {pid}")
-        player = resolve_name(inputs["registry"], r["player"])
+        player = resolve_name({**inputs["registry"], **inputs["extraPlayers"]}, r["player"])
         key = player["playerKey"]
         if pid in by_pick:
             if by_pick[pid]["playerKey"] != key:

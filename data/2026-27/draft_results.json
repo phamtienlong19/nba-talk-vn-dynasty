@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "source": "league draft results as confirmed by the commissioner; first 23 selections (through 2.07)",
+  "source": "league draft results as confirmed by the commissioner; first 29 selections (through 2.13)",
   "note": "Authoritative input for scripts/import_draft_results.py, which resolves names against the Yahoo player master and appends DRAFT_PICK events to draft_state.json idempotently. Rookie flags come from this record.",
   "results": [
     {
@@ -117,6 +117,36 @@
       "pickId": "2026-R2-07",
       "player": "Morez Johnson Jr.",
       "rookie": true
+    },
+    {
+      "pickId": "2026-R2-08",
+      "player": "Gui Santos",
+      "rookie": false
+    },
+    {
+      "pickId": "2026-R2-09",
+      "player": "Tobias Harris",
+      "rookie": false
+    },
+    {
+      "pickId": "2026-R2-10",
+      "player": "Dailyn Swain",
+      "rookie": true
+    },
+    {
+      "pickId": "2026-R2-11",
+      "player": "Bennett Stirtz",
+      "rookie": true
+    },
+    {
+      "pickId": "2026-R2-12",
+      "player": "Allen Graves",
+      "rookie": true
+    },
+    {
+      "pickId": "2026-R2-13",
+      "player": "Quentin Grimes",
+      "rookie": false
     }
   ]
 }
