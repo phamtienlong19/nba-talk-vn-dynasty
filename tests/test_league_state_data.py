@@ -436,12 +436,17 @@ class TestDraftRoom(unittest.TestCase):
         pt = ls.pick_table(self.i, s)
         self.assertEqual(len([r for r in pt if r["pickId"] == "2026-R2-07"]), 1)
 
-    def test_confirming_the_amendment_after_the_pick_was_used_fails_loudly(self):
+    def test_confirming_the_amendment_moves_the_pick_owner_but_not_the_selected_player(self):
         import copy
         c = copy.deepcopy(self.i)
         c["tradeIndex"]["TRADE-F-AMEND"]["status"] = "OFFICIAL"
-        with self.assertRaises(ls.StateError):   # 2.07 was already used by CrazyCat: the amendment must be re-scoped first
-            ls.resolve(c, (), "OFFICIAL")
+        s = ls.resolve(c, (), "OFFICIAL")
+        self.assertEqual(s["pickOwner"]["2026-R2-07"], "franchise-05")            # pick record -> HCMC
+        self.assertEqual(s["playerOwner"]["478.p.10572"], "franchise-02")          # Morez Johnson Jr. stays with CrazyCat
+        self.assertEqual(s["playerOwner"]["478.p.10444"], "franchise-02")          # Derik Queen -> CrazyCat
+        self.assertEqual(len(s["completedPicks"]), 23)                             # no selection undone
+        self.assertEqual(s["draftConflicts"], [{"pickId": "2026-R2-07", "selector": "franchise-02", "scenarioOwner": "franchise-05"}])
+        self.assertTrue(all(ls.audit_official(c)["checks"].values()))
 
     def test_page_ledger_and_picks_agree(self):
         panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
