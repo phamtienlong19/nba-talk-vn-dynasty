@@ -213,6 +213,18 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
     best available, holds. Pure function of the derived state."""
     esc = html_lib.escape
     teams = {t["franchiseId"]: t for t in inputs["freeze"]["teams"]}
+    if not summary["remaining"]:  # draft over: the live room is shelved, leaving a one-line completion summary
+        last = summary["latest"]
+        t = teams[last["franchiseId"]]
+        block = (DRAFT_STATUS_BEGIN + '<div class="draft-room draft-done"><span class="ds-k">DRAFT COMPLETE</span>'
+                 f'<span><b>{summary["total"]}</b> of <b>{summary["total"]}</b> selections</span>'
+                 f'<span><b>{summary["rookies"]}</b> rookies</span>'
+                 f'<span>final pick <b>{last["label"]}</b> {esc(last["name"])} · {esc(t["short"])}</span></div>' + DRAFT_STATUS_END)
+        if DRAFT_STATUS_BEGIN in panel:
+            x, y = panel.index(DRAFT_STATUS_BEGIN), panel.index(DRAFT_STATUS_END) + len(DRAFT_STATUS_END)
+            return panel[:x] + block + panel[y:]
+        anchor = '<div class="title">DRAFT ORDER</div>'
+        return panel.replace(anchor, anchor + "\n" + block, 1)
     def chip(fid):
         return chip_of[order.index(fid)]
     def dot(fid):

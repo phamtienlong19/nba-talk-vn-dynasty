@@ -390,7 +390,7 @@ def draft_summary(inputs: dict, state: dict) -> dict:
         return {"pickId": p["pickId"], "label": pick_label(p), "owner": o, "held": p["pickId"] in held_ids,
                 "cap": running[o], "room": ceiling - running[o], "picksLeft": left.get(o, 0)}
     cur = pending[0] if pending else None
-    return {"status": inputs["draft"].get("status"), "completed": done, "total": len(order), "remaining": len(pending),
+    return {"status": "COMPLETE" if not pending else (inputs["draft"].get("status") or "IN_PROGRESS"), "completed": done, "total": len(order), "remaining": len(pending),
             "rookies": sum(1 for d in done if d["rookie"]), "cap": {"floor": floor, "ceiling": ceiling},
             "cursor": slot(cur) if cur else None, "upNext": [slot(p) for p in pending[1:6]],
             "latest": done[-1] if done else None, "holds": holds}
