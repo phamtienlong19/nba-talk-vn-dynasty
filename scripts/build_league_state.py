@@ -366,7 +366,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         key = pool.normalize_name(p["name"])
         c = src_by_norm.get(key)
         src = (c.src_team if c is not None and c.src == "cut" else ("R" if c is not None and c.rookie else "FA"))
-        rows.append([p["playerKey"], p["name"], p["nbaTeam"], p["displayPosition"], p["projectedAuctionValue"],
+        rows.append([p["playerKey"], p["name"], p["nbaTeam"], (p["displayPosition"] or "").replace(",", "/"), p["projectedAuctionValue"],
                      p["oRank"], board_rank.get(key), src])
         seen_norm.add(key)
     extras = []

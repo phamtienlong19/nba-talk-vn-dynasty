@@ -361,7 +361,7 @@ def draft_summary(inputs: dict, state: dict) -> dict:
                          "name": player_name(inputs, c["playerKey"]), "cap": cap, "capBefore": before, "capAfter": running[f],
                          "room": ceiling - running[f], "status": cap_status(inputs, running[f]),
                          "rookie": bool(ev.get("rookie")),
-                         "pos": inputs["registry"].get(c["playerKey"], {}).get("displayPosition", ""),
+                         "pos": (inputs["registry"].get(c["playerKey"], {}).get("displayPosition") or "").replace(",", "/"),
                          "nba": inputs["registry"].get(c["playerKey"], {}).get("nbaTeam", "")})
     holds_raw = active_holds(inputs)
     held_ids = {h["pickId"] for h in holds_raw}

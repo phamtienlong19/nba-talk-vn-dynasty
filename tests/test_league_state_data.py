@@ -322,6 +322,12 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual([e["pickId"] for e in ev], order[:22])
         self.assertEqual([c["label"] for c in self.d["completed"]][:3], ["1.01", "1.02", "1.03"])
 
+    def test_eligible_positions_use_slashes_not_commas(self):
+        for c in self.d["completed"]:
+            self.assertNotIn(",", c["pos"], c["name"])
+        self.assertTrue(any("/" in c["pos"] for c in self.d["completed"]))
+        self.assertFalse([r for r in self.data["available"]["rows"] if "," in (r[3] or "")])
+
     def test_state_summary(self):
         d = self.d
         self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (22, 26, 48, 11))
