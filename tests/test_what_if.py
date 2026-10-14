@@ -331,7 +331,7 @@ function mono(){var bad=[];var w=document.createTreeWalker(document.body,NodeFil
  while(n=w.nextNode()){var p=n.parentElement;if(!p||/^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE)$/.test(p.tagName)||!/\d/.test(n.nodeValue))continue;
   if(p.closest('[hidden]')||getComputedStyle(p).display==='none')continue;
   if(!/Roboto Mono/.test(getComputedStyle(p).fontFamily))bad.push((p.className||p.tagName)+': '+n.nodeValue.trim().slice(0,30));}return bad;}
-R.mono={};R.mono.official=mono();
+R.mono={};R.mono.official=mono();R.bonus=qa('.pick-extra').map(function(e){return e.innerText}).filter(function(t){return /BONUS/.test(t)});R.spaces=qa('.numtxt').every(function(e){return e.parentElement&&true});
 R.initial={cls:document.body.className,hidden:q('#what-if').hidden,totals:totals(),pool:qa('.pool-player').length};
 q('.modeswitch button[data-mode=WHATIF]').click();
 R.wi={cls:document.body.className,hidden:q('#what-if').hidden,banner:q('#scn-banner').textContent,rows:qa('.wi-trow').length,
@@ -408,6 +408,9 @@ class TestRenderedUi(unittest.TestCase):
     def test_fa_view_marks_entrants_and_exits(self):
         self.assertEqual(self.R["fa"]["rows"], 120)
         self.assertEqual((self.R["fa"]["enter"], self.R["fa"]["exit"]), (1, 1))
+
+    def test_wrapping_digits_never_eats_spaces_in_flex_items(self):
+        self.assertEqual(self.R["bonus"], ["RANK 3 BONUS", "RANK 4 BONUS"])
 
     def test_every_digit_is_set_in_roboto_mono_in_every_mode(self):
         for mode, bad in self.R["mono"].items():
