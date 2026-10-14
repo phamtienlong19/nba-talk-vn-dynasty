@@ -217,10 +217,10 @@ class TestRepoState(unittest.TestCase):
         moved = 0
         for rnd, slot, chip, note in rows:
             pid = f"2026-R{rnd}-{int(slot):02d}"
-            text = re.sub(r"<.*?>", "", chip).replace("\U0001F451", "").strip()
+            text = re.sub(r"<.*?>", "", re.sub(r'<span class="pick-tags">.*', "", chip, flags=re.S)).replace("\U0001F451", "").strip()
             owner = official["pickOwner"][pid]
             self.assertEqual(bls._team_for_chip(text, teams), list(shorts).index(owner), pid)
-            via = re.search(r"VIA ([^<]+)<", note)
+            via = re.search(r"VIA ([^<]+)<", chip + note)
             orig = self.o["pickIndex"][pid]["originalOwner"]
             if owner != orig:
                 moved += 1
@@ -235,9 +235,9 @@ class TestRepoState(unittest.TestCase):
         a = ls.audit_official(self.o)
         self.assertTrue(all(a["checks"].values()), a["checks"])
         t = {v["short"]: (v["cap"], v["count"]) for v in a["teams"].values()}
-        # post-trade caps + the 21 drafted players (counts include draftees)
+        # post-trade caps + the 22 drafted players (counts include draftees)
         self.assertEqual(t, {"Bsy": (178, 11), "CrazyCat": (131, 10), "Melo": (157, 11), "LC": (161, 11), "HCMC": (145, 12),
-                             "Dũng": (132, 10), "Maxfixe": (149, 10), "DHA": (154, 10), "Đạt": (174, 10), "DonTrick": (123, 10),
+                             "Dũng": (132, 11), "Maxfixe": (149, 10), "DHA": (154, 10), "Đạt": (174, 10), "DonTrick": (123, 10),
                              "Thịnh": (177, 10), "sup fam": (141, 10), "Quân": (163, 10), "TuLy": (148, 10), "Bz": (156, 10), "TT": (174, 10)})
         # violations are surfaced, not corrected
         codes = sorted({v["code"] for v in a["violations"]})
@@ -315,18 +315,18 @@ class TestDraftRoom(unittest.TestCase):
 
     def test_exactly_21_unique_selections_in_draft_order(self):
         ev = self.i["draft"]["events"]
-        self.assertEqual(len(ev), 21)
-        self.assertEqual(len({e["playerKey"] for e in ev}), 21)
-        self.assertEqual(len({e["pickId"] for e in ev}), 21)
+        self.assertEqual(len(ev), 22)
+        self.assertEqual(len({e["playerKey"] for e in ev}), 22)
+        self.assertEqual(len({e["pickId"] for e in ev}), 22)
         order = [p["pickId"] for p in sorted(self.i["picks"]["picks"], key=lambda p: (p["round"], p["slot"]))]
-        self.assertEqual([e["pickId"] for e in ev], order[:21])
+        self.assertEqual([e["pickId"] for e in ev], order[:22])
         self.assertEqual([c["label"] for c in self.d["completed"]][:3], ["1.01", "1.02", "1.03"])
 
     def test_state_summary(self):
         d = self.d
-        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (21, 27, 48, 11))
-        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("2.06", "franchise-06"))  # Dũng owns 2.06
-        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("2.05", "Aday Mara"))
+        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (22, 26, 48, 11))
+        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("2.07", "franchise-02"))  # CrazyCat owns 2.07 (held)
+        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("2.06", "Tari Eason"))
         self.assertEqual(d["status"], "IN_PROGRESS")
 
     def test_selecting_franchise_is_the_post_trade_pick_owner(self):
@@ -432,17 +432,17 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual(ls.active_holds(c), [])
         self.assertEqual(s["pickOwner"]["2026-R2-07"], "franchise-05")
         self.assertEqual(s["playerOwner"]["478.p.10444"], "franchise-02")
-        self.assertEqual(len(s["completedPicks"]), 21)          # no selection undone
+        self.assertEqual(len(s["completedPicks"]), 22)          # no selection undone
         self.assertEqual(ls.audit_official(c)["checks"]["everyOfficialTradeApplied"], True)
 
     def test_page_ledger_and_picks_agree(self):
         panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
         self.assertIn("ON THE CLOCK", panel)
-        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+2\.06")
+        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+2\.07")
         self.assertIn("Neemias Queta", panel)
-        self.assertEqual(panel.count("pick-sel"), 21)
+        self.assertEqual(panel.count("pick-sel"), 22)
         pills = re.findall(r'<span class="pick-extra pick-sel">.*?</span>', panel, re.S)
-        self.assertEqual(len(pills), 21)
+        self.assertEqual(len(pills), 22)
         self.assertEqual(sum('pick-r"' in x for x in pills), 11)  # eleven rookie badges
         self.assertTrue(all("→" in x for x in pills))            # every pick shows cap and running total
         for part in ("dr-ticker", "dr-clock", "dr-list", "dr-best"):

@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-14T02:02:50Z
+Generated: 2026-10-14T02:19:08Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/draft-room-view
-Commit: a1c40fc
+Branch: fix/ledger-row-layout
+Commit: a1144e1
 Base: main
-Working tree: clean
+Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/41 (OPEN)
-CI: validate: in_progress/
+PR: none
+CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,41 +27,7 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- README.md                                       |    6 +-
- ai_exchange/CURRENT_STATE.json                  |   39 +-
- ai_exchange/IMPLEMENTATION_REPORT.md            |   17 +-
- ai_exchange/REVIEW_PACKET.md                    |  104 +-
- config/what_if_assumptions.json                 |   23 +
- data/2026-27/draft_results.json                 |  112 +
- data/2026-27/draft_state.json                   |  205 +-
- data/2026-27/keeper_freeze.json                 |  182 +-
- data/2026-27/picks.json                         |   38 +-
- data/2026-27/snapshots/KEEPER_FREEZE.json       |  359 ++
- data/2026-27/snapshots/PRE_DRAFT_LOCK.json      |  359 ++
- data/2026-27/trades.json                        |  175 +-
- data/what_if/snapshots/2026-10-08/players.json  | 4164 +++++++++++++++++++++++
- data/what_if/snapshots/2026-10-08/snapshot.json |   16 +
- docs/LEAGUE_STATE_MODEL.md                      |   27 +-
- docs/WHAT_IF_MODE.md                            |   32 +
- index.html                                      |  690 +++-
- scripts/build_fa_draft_pool.py                  |   30 +-
- scripts/build_league_state.py                   |  187 +-
- scripts/import_draft_results.py                 |   98 +
- scripts/league_state.py                         |  163 +-
- scripts/what_if.css                             |  137 +
- scripts/what_if.py                              |  523 +++
- scripts/what_if_app.js                          |  281 ++
- tasks/ACTIVE.md                                 |   12 +-
- tests/_proposed.py                              |   40 +
- tests/test_fa_draft_pool.py                     |    9 +-
- tests/test_final_keeper_freeze.py               |  177 +
- tests/test_keeper_overrides.py                  |   29 +-
- tests/test_league_state_builders.py             |    9 +-
- tests/test_league_state_data.py                 |  338 +-
- tests/test_scenario_rendering.py                |  117 +-
- tests/test_seattle_keeper_ceiling.py            |    5 +-
- tests/test_what_if.py                           |  438 +++
- 34 files changed, 8857 insertions(+), 284 deletions(-)
+
 ```
 
 ## Validation
@@ -76,40 +42,7 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
-- README.md
-- ai_exchange/CURRENT_STATE.json
-- ai_exchange/IMPLEMENTATION_REPORT.md
-- ai_exchange/REVIEW_PACKET.md
-- config/what_if_assumptions.json
-- data/2026-27/draft_results.json
-- data/2026-27/draft_state.json
-- data/2026-27/keeper_freeze.json
-- data/2026-27/picks.json
-- data/2026-27/snapshots/KEEPER_FREEZE.json
-- data/2026-27/snapshots/PRE_DRAFT_LOCK.json
-- data/2026-27/trades.json
-- data/what_if/snapshots/2026-10-08/players.json
-- data/what_if/snapshots/2026-10-08/snapshot.json
-- docs/LEAGUE_STATE_MODEL.md
-- docs/WHAT_IF_MODE.md
-- index.html
-- scripts/build_fa_draft_pool.py
-- scripts/build_league_state.py
-- scripts/import_draft_results.py
-- scripts/league_state.py
-- scripts/what_if.css
-- scripts/what_if.py
-- scripts/what_if_app.js
-- tasks/ACTIVE.md
-- tests/_proposed.py
-- tests/test_fa_draft_pool.py
-- tests/test_final_keeper_freeze.py
-- tests/test_keeper_overrides.py
-- tests/test_league_state_builders.py
-- tests/test_league_state_data.py
-- tests/test_scenario_rendering.py
-- tests/test_seattle_keeper_ceiling.py
-- tests/test_what_if.py
+(none)
 
 ## Issues
 None. Visual review (desktop + mobile) was run this session via headless
@@ -125,4 +58,4 @@ Playwright screenshots — see `ai_exchange/IMPLEMENTATION_REPORT.md`.
   change to `GUARANTEED_NAMES` in `scripts/build_fa_draft_pool.py`.
 
 ## Suggested Next Step
-Open/update the PR from `feat/draft-room-view` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `fix/ledger-row-layout` if not already done, then request human/ChatGPT review of this packet.
