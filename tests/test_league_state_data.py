@@ -73,7 +73,7 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual(self.i["pickIndex"]["2026-R1-15"]["originalOwner"], BZ)
 
     def test_trade_ledger_is_official_and_processed_once_in_dependency_order(self):
-        self.assertEqual({t["status"] for t in self.o["trades"]["trades"]}, {"OFFICIAL"})
+        self.assertEqual({t["status"] for t in self.o["trades"]["trades"] if not t.get("amends")}, {"OFFICIAL"})
         official = ls.resolve(self.o, [], "OFFICIAL")
         self.assertEqual(official["activeTradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E", "TRADE-F"])
         self.assertTrue(all(r["applied"] and not r["errors"] for r in official["tradeResults"]))
@@ -235,9 +235,10 @@ class TestRepoState(unittest.TestCase):
         a = ls.audit_official(self.o)
         self.assertTrue(all(a["checks"].values()), a["checks"])
         t = {v["short"]: (v["cap"], v["count"]) for v in a["teams"].values()}
-        self.assertEqual(t, {"Bsy": (178, 9), "CrazyCat": (131, 10), "Melo": (155, 10), "LC": (153, 8), "HCMC": (137, 8),
-                             "Dũng": (132, 9), "Maxfixe": (129, 9), "DHA": (154, 9), "Đạt": (174, 9), "DonTrick": (120, 9),
-                             "Thịnh": (177, 9), "sup fam": (131, 8), "Quân": (160, 9), "TuLy": (146, 9), "Bz": (156, 10), "TT": (174, 9)})
+        # post-trade caps + the 19 drafted players (counts include draftees)
+        self.assertEqual(t, {"Bsy": (178, 11), "CrazyCat": (131, 10), "Melo": (157, 11), "LC": (161, 10), "HCMC": (145, 11),
+                             "Dũng": (132, 10), "Maxfixe": (149, 10), "DHA": (154, 10), "Đạt": (174, 10), "DonTrick": (123, 10),
+                             "Thịnh": (177, 10), "sup fam": (141, 10), "Quân": (163, 10), "TuLy": (148, 10), "Bz": (156, 10), "TT": (174, 10)})
         # violations are surfaced, not corrected
         codes = sorted({v["code"] for v in a["violations"]})
         self.assertIn("ROSTER_COUNT_ABOVE_9", codes)
@@ -300,6 +301,151 @@ class TestRepoState(unittest.TestCase):
         self.assertEqual([w["detail"]["team"] for w in s["windowWarnings"]], ["Bz"])
 
 
+class TestDraftRoom(unittest.TestCase):
+    """First 19 confirmed selections + the staged CrazyCat-HCMC amendment + the 2.07 hold."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.i = ls.load_inputs()
+        cls.o = ls.resolve(cls.i, (), "OFFICIAL")
+        cls.d = ls.draft_summary(cls.i, cls.o)
+        cls.html = _html()
+        m = re.search(r'<script type="application/json" id="league-data">(.*?)</script>', cls.html, re.S)
+        cls.data = json.loads(m.group(1).replace("<\\/", "</"))
+
+    def test_exactly_19_unique_selections_in_draft_order(self):
+        ev = self.i["draft"]["events"]
+        self.assertEqual(len(ev), 19)
+        self.assertEqual(len({e["playerKey"] for e in ev}), 19)
+        self.assertEqual(len({e["pickId"] for e in ev}), 19)
+        order = [p["pickId"] for p in sorted(self.i["picks"]["picks"], key=lambda p: (p["round"], p["slot"]))]
+        self.assertEqual([e["pickId"] for e in ev], order[:19])
+        self.assertEqual([c["label"] for c in self.d["completed"]][:3], ["1.01", "1.02", "1.03"])
+
+    def test_state_summary(self):
+        d = self.d
+        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (19, 29, 48, 9))
+        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("2.04", "franchise-04"))  # LC owns 2.04
+        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("2.03", "Neemias Queta"))
+        self.assertEqual(d["status"], "IN_PROGRESS")
+
+    def test_selecting_franchise_is_the_post_trade_pick_owner(self):
+        got = {c["label"]: self.i["shorts"][c["franchiseId"]] for c in self.d["completed"]}
+        self.assertEqual(got["1.03"], "sup fam")                      # Caleb Wilson
+        self.assertEqual((got["1.01"], got["1.05"], got["1.04"], got["1.06"], got["2.02"], got["2.03"]),
+                         ("Maxfixe", "LC", "HCMC", "HCMC", "HCMC", "Melo"))
+        for c in self.d["completed"]:
+            self.assertEqual(self.o["playerOwner"][c["playerKey"]], c["franchiseId"])
+            self.assertEqual(self.o["pickOwner"][c["pickId"]], c["franchiseId"])
+
+    def test_names_ids_salaries_and_rookie_flags(self):
+        by = {c["label"]: c for c in self.d["completed"]}
+        self.assertEqual((by["1.03"]["name"], by["1.03"]["playerKey"], by["1.03"]["cap"]), ("Caleb Wilson", "478.p.10595", 10.0))
+        self.assertEqual((by["1.01"]["cap"], by["1.06"]["name"], by["1.06"]["cap"]), (20.0, "Day'Ron Sharpe", 6.0))
+        self.assertEqual(sorted(c["label"] for c in self.d["completed"] if c["rookie"]),
+                         ["1.01", "1.02", "1.03", "1.04", "1.05", "1.07", "1.13", "1.14", "2.02"])
+        rookies = pool.load_rookie_names()
+        for c in self.d["completed"]:
+            self.assertEqual(c["rookie"], pool.normalize_name(c["name"]) in rookies, c["name"])  # agrees with the rookie source
+
+    def test_drafted_players_leave_the_pool_and_join_rosters(self):
+        avail = {r[1] for r in self.data["available"]["rows"]}
+        board = set(re.findall(r'<div class="pool-player">(.*?)</div>', self.html))
+        for c in self.d["completed"]:
+            self.assertNotIn(c["name"], avail)
+            self.assertNotIn(c["name"], board)
+            self.assertIn(c["playerKey"], ls.team_players(self.i, self.o, c["franchiseId"]))
+        self.assertEqual(len(board), 60)  # the 60 is refilled from the next-best remaining players
+
+    def test_caps_include_the_draftees(self):
+        base = ls.resolve(dict(self.i, draft={**self.i["draft"], "events": []}), (), "OFFICIAL")
+        for fid in self.i["franchises"]:
+            add = sum(c["cap"] for c in self.d["completed"] if c["franchiseId"] == fid)
+            self.assertEqual(ls.team_cap(self.i, self.o, fid), ls.team_cap(self.i, base, fid) + add, fid)
+        self.assertEqual(ls.team_cap(self.i, self.o, "franchise-07"), 129 + 20)  # Maxfixe + Boozer
+
+    def test_import_is_idempotent_and_rejects_contradictions(self):
+        import copy
+        import import_draft_results as imp
+        results = ls._load(imp.RESULTS_PATH)
+        ev = self.i["draft"]["events"]
+        self.assertEqual(imp.build_events(self.i, results, ev), ev)           # re-import: no change, no double selection
+        self.assertEqual(imp.build_events(self.i, results, []), ev)           # from scratch: identical events
+        bad = copy.deepcopy(results)
+        bad["results"][0]["player"] = "AJ Dybantsa"
+        with self.assertRaises(imp.ImportError_):
+            imp.build_events(self.i, bad, ev)                                  # contradicts the recorded 1.01
+        dup = copy.deepcopy(results)
+        dup["results"].append({"pickId": "2026-R2-04", "player": "Cameron Boozer", "rookie": True})
+        with self.assertRaises(imp.ImportError_):
+            imp.build_events(self.i, dup, ev)                                  # a player cannot be picked twice
+        skip = copy.deepcopy(results)
+        skip["results"][3], skip["results"][4] = skip["results"][4], skip["results"][3]
+        with self.assertRaises(imp.ImportError_):
+            imp.build_events(self.i, skip, [])                                 # order must be preserved
+        with self.assertRaises(imp.ImportError_):
+            imp.resolve_name(self.i["registry"], "Nobody Real")
+
+    def test_pick_2_07_is_on_hold_and_cannot_be_recorded(self):
+        self.assertEqual([h["label"] for h in self.d["holds"]], ["2.07"])
+        self.assertEqual(self.d["holds"][0]["waitingOn"], "TRADE-F-AMEND")
+        self.assertEqual(self.o["pickOwner"]["2026-R2-07"], "franchise-02")   # ledger NOT silently reassigned
+        import copy
+        bad = copy.deepcopy(self.i)
+        bad["draft"]["events"].append({"eventId": "x", "type": "DRAFT_PICK", "pickId": "2026-R2-07", "franchiseId": "franchise-02",
+                                       "playerKey": "478.p.6733-none", "rookie": False})
+        with self.assertRaises(ls.StateError):
+            ls.resolve(bad, (), "OFFICIAL")
+        self.assertIn("OWNERSHIP HOLD", self.html)
+
+    def test_amendment_is_staged_not_applied(self):
+        a = self.i["tradeIndex"]["TRADE-F-AMEND"]
+        self.assertEqual((a["status"], a["amends"], a["dependsOn"], a["pendingConfirmation"]), ("PROPOSED", "TRADE-F", ["TRADE-F"], True))
+        legs = {(x.get("playerKey") or x["pickId"], x["from"], x["to"]) for x in a["assets"]}
+        self.assertEqual(legs, {("2026-R2-07", "franchise-02", "franchise-05"), ("478.p.10444", "franchise-05", "franchise-02")})
+        self.assertEqual(self.i["registry"]["478.p.10444"]["name"], "Derik Queen")
+        self.assertEqual(self.o["playerOwner"]["478.p.10444"], "franchise-05")  # HCMC still owns Queen officially
+        self.assertEqual([r["tradeId"] for r in self.o["tradeResults"]].count("TRADE-F"), 1)
+        # nothing else depends on 2.07 or Queen
+        others = [t["tradeId"] for t in self.i["trades"]["trades"] if t["tradeId"] not in ("TRADE-F", "TRADE-F-AMEND")
+                  and any((x.get("pickId") == "2026-R2-07" or x.get("playerKey") == "478.p.10444") for x in t["assets"])]
+        self.assertEqual(others, [])
+
+    def test_amendment_preview_is_a_correction_not_a_replay(self):
+        s = ls.resolve(self.i, ["TRADE-F-AMEND"], "SCENARIO")
+        self.assertTrue(all(r["applied"] and not r["errors"] for r in s["tradeResults"]))
+        self.assertEqual([r["tradeId"] for r in s["tradeResults"]].count("TRADE-F"), 1)   # TRADE-F not replayed
+        self.assertEqual((s["pickOwner"]["2026-R2-07"], s["playerOwner"]["478.p.10444"]), ("franchise-05", "franchise-02"))
+        for fid, delta in (("franchise-02", +5), ("franchise-05", -5)):
+            self.assertEqual(ls.team_cap(self.i, s, fid), ls.team_cap(self.i, self.o, fid) + delta)
+        # earlier results stand: 1.04 and 2.02 still belong to HCMC's selections
+        self.assertEqual({c["label"]: c["franchiseId"] for c in self.d["completed"]}["1.04"], "franchise-05")
+        self.assertEqual(s["windowWarnings"], ls.resolve(self.i, (), "OFFICIAL")["windowWarnings"])  # a correction is not a new trade
+        pt = ls.pick_table(self.i, s)
+        self.assertEqual(len([r for r in pt if r["pickId"] == "2026-R2-07"]), 1)
+
+    def test_confirming_the_amendment_lifts_the_hold_and_keeps_audit_clean(self):
+        import copy
+        c = copy.deepcopy(self.i)
+        c["tradeIndex"]["TRADE-F-AMEND"]["status"] = "OFFICIAL"
+        s = ls.resolve(c, (), "OFFICIAL")
+        self.assertEqual(ls.active_holds(c), [])
+        self.assertEqual(s["pickOwner"]["2026-R2-07"], "franchise-05")
+        self.assertEqual(s["playerOwner"]["478.p.10444"], "franchise-02")
+        self.assertEqual(len(s["completedPicks"]), 19)          # no selection undone
+        self.assertEqual(ls.audit_official(c)["checks"]["everyOfficialTradeApplied"], True)
+
+    def test_page_ledger_and_picks_agree(self):
+        panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
+        self.assertIn("ON THE CLOCK", panel)
+        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+2\.04")
+        self.assertIn("Neemias Queta", panel)
+        self.assertEqual(panel.count("pick-sel"), 19)
+        self.assertEqual(panel.count('pick-r"'), 9)  # nine rookie badges (the LATEST pick, Queta, is not a rookie)
+        self.assertEqual(bls.sync_ledger(self.html, self.i), self.html)
+        self.assertEqual(self.data["draft"], ls.draft_summary(self.i, self.o))
+
+
 class TestEmbeddedPageData(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -341,12 +487,11 @@ class TestEmbeddedPageData(unittest.TestCase):
 
     def test_all_scenario_combinations_are_present(self):
         self.assertEqual(len(self.data["scenarios"]), 2 ** len(ls.selectable_trades(self.i)))
-        self.assertEqual(list(self.data["scenarios"]), [""])  # every trade is official: no selectable combinations remain
+        self.assertEqual(list(self.data["scenarios"]), ["", "TRADE-F-AMEND"])  # only the staged amendment is selectable
 
     def test_official_view_has_no_movement_and_scenario_view_has_it(self):
         view = self.data["scenarios"][""]
-        self.assertEqual(sorted(view["teams"]), sorted(["franchise-01", "franchise-02", "franchise-03", "franchise-04",
-                                                        "franchise-05", "franchise-06", "franchise-12", "franchise-15"]))
+        self.assertEqual(sorted(view["teams"]), sorted(self.i["franchises"]))  # trade teams + every drafting team
         self.assertEqual(view["teams"][BZ]["fold"]["tradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-E"])
 
     def test_legal_universe_is_larger_than_the_recommendation_board(self):

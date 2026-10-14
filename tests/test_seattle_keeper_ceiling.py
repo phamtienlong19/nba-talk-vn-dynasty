@@ -6,6 +6,8 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 import build_fa_draft_pool as pool  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _proposed import predraft_index_html  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -47,7 +49,8 @@ class TestSeattleKeeperSetAtCorrectedCeiling(unittest.TestCase):
         self.assertEqual(caps, sorted(caps, reverse=True))
 
     def test_downstream_pool_follows_the_new_keeper_set(self):
-        block = self.html[self.html.index('<div class="pool-grid">'):self.html.index('<section class="page" id="cap">')]
+        pre = predraft_index_html()
+        block = pre[pre.index('<div class="pool-grid">'):pre.index('<section class="page" id="cap">')]
         self.assertNotIn("Porziņģis", block)
         m = re.search(r'<div class="pool-player">Davion Mitchell</div><div class="pool-nba">([^<]*)</div>'
                       r'<div class="pool-cap">3</div><div class="pool-src"><span class="src src-cut">Thịnh</span>', block)

@@ -302,6 +302,38 @@
         "batch": "2026-10-13-pre-draft",
         "processedInOrder": 6
       }
+    },
+    {
+      "tradeId": "TRADE-F-AMEND",
+      "label": "CRAZYCAT ↔ HCMC · AMENDMENT",
+      "status": "PROPOSED",
+      "order": 7,
+      "dependsOn": [
+        "TRADE-F"
+      ],
+      "amends": "TRADE-F",
+      "pendingConfirmation": true,
+      "participants": [
+        "franchise-02",
+        "franchise-05"
+      ],
+      "note": "PENDING CONFIRMATION. Corrects completed TRADE-F by replacing pick 2.07 with Derik Queen: 2.07 CrazyCat → HCMC, Derik Queen HCMC → CrazyCat. All other TRADE-F components stand. Confirm by setting status OFFICIAL (a correction, not a replay).",
+      "assets": [
+        {
+          "type": "pick",
+          "pickId": "2026-R2-07",
+          "name": "2.07",
+          "from": "franchise-02",
+          "to": "franchise-05"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10444",
+          "name": "Derik Queen",
+          "from": "franchise-05",
+          "to": "franchise-02"
+        }
+      ]
     }
   ]
 }

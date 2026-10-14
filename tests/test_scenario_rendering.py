@@ -119,7 +119,7 @@ def _card(dom, short):
 
 
 def _read(card):
-    names = [html_lib.unescape(re.sub(r"<span.*?</span>", "", n)).strip() for n in re.findall(r'<div class="pname">(.*?)</div>', card, re.S)]
+    names = [html_lib.unescape(n.split("<span")[0]).strip() for n in re.findall(r'<div class="pname">(.*?)</div>', card, re.S)]
     cap = re.search(r'<div class="cap-total">(.*?)<span>/(\d+)</span>', card, re.S)
     return {"names": names, "cap": cap.group(1), "ceiling": cap.group(2),
             "gap": re.search(r'<div class="gap-big">(.*?)</div>', card).group(1),
@@ -154,7 +154,7 @@ class TestRenderedCards(unittest.TestCase):
         sup = _read(_card(self.official, "sup fam"))
         self.assertNotIn("Jalen Williams", sup["names"])
         self.assertIn("Julius Randle", sup["names"])
-        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("131", 8, "AT FLOOR"))
+        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("141", 10, "37 ROOM"))  # post-trade 131 + drafted Wilson ($10) & Flemings ($0)
         bz = _read(_card(self.official, "Bz"))
         self.assertIn("Derrick White", bz["names"])
         self.assertNotIn("Franz Wagner", bz["names"])
@@ -163,23 +163,29 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("Aaron Gordon", melo["names"])
         self.assertEqual(melo["picks"], "2.03 · 2.15")
 
-    def test_untraded_teams_are_untouched(self):
+    def test_untraded_teams_keep_their_keepers_and_add_only_draftees(self):
+        drafted = {c["name"] for c in ls.draft_summary(self.i, self.state)["completed"]}
         for short in ("Quân", "DonTrick", "Thịnh", "TT"):
-            self.assertEqual(_read(_card(self.official, short))["names"], _read(_card(self.static, short))["names"], short)
+            now = _read(_card(self.official, short))["names"]
+            before = _read(_card(self.static, short))["names"]
+            self.assertEqual(sorted(n for n in now if n not in drafted), sorted(before), short)
+            self.assertTrue(set(now) - set(before) <= drafted, short)
 
     def test_cards_show_movement_from_the_keeper_freeze(self):
         card = _card(self.official, "Bz")
         self.assertIn("KEEPER FREEZE", card)
-        self.assertIn("OFFICIAL TRADES", card)
+        self.assertIn("OFFICIAL STATE", card)
         self.assertIn("KEEPER-FREEZE CUTS", card)
-        self.assertNotIn("KEEPER-FREEZE CUTS", _card(self.official, "Quân"))
+        self.assertIn("DRAFTED +", _card(self.official, "Quân"))  # every team has drafted: movement lists the draftees
 
-    def test_trade_lab_is_clear_once_everything_is_official(self):
+    def test_trade_lab_shows_only_the_staged_amendment(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertIn("Trade Lab is clear", lab)
-        self.assertNotIn('type="checkbox"', lab)
-        self.assertIn("Nothing staged.", self.official)
-        self.assertIn("Nothing to compare.", self.official)
+        self.assertEqual(lab.count('class="trade-title"'), 1)
+        self.assertIn("CRAZYCAT ↔ HCMC · AMENDMENT", lab)
+        self.assertIn("PENDING CONFIRMATION", lab)
+        self.assertIn('<input type="checkbox">', lab)                 # selectable preview, not applied
+        self.assertNotIn("Trade Lab is clear", lab)
+        self.assertIn("Tick a staged transaction", self.official)
 
     def test_pass_through_lists_players_by_name_and_picks_with_pick_prefix(self):
         card = re.sub(r"<[^>]+>", "", _card(self.official, "Bz"))  # digits are wrapped in <span class="num">

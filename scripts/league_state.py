@@ -307,10 +307,15 @@ def _apply_trade(inputs, state, trade, active_ids):
 
 def apply_draft_events(inputs, state):
     """Append-only DRAFT_PICK events: roster, availability, cap, pick completion, cursor."""
+    held = {h["pickId"]: h for h in active_holds(inputs)}
     for ev in inputs["draft"].get("events", []):
         if ev["type"] != "DRAFT_PICK":
             raise StateError(f"unsupported draft event type {ev['type']}")
         pid, fid, key = ev["pickId"], ev["franchiseId"], ev["playerKey"]
+        if pid in held:
+            raise StateError(f"{pid}: on commissioner hold ({held[pid]['reason']}); resolve before recording its selection")
+        if pid not in inputs["pickIndex"]:
+            raise StateError(f"{pid}: unknown pick")
         if state["pickOwner"].get(pid) != fid:
             raise StateError(f"{pid}: {fid} does not currently own this pick")
         if pid in state["completedPicks"]:
@@ -320,6 +325,40 @@ def apply_draft_events(inputs, state):
         state["playerOwner"][key] = fid
         state["completedPicks"][pid] = {"franchiseId": fid, "playerKey": key, "eventId": ev.get("eventId")}
         state["draftedPlayers"][key] = pid
+
+
+def active_holds(inputs: dict) -> list:
+    """Commissioner holds on picks whose ownership is unresolved. A hold lifts once the transaction it waits on is
+    decided (OFFICIAL or VOID); until then the pick cannot be recorded."""
+    out = []
+    for h in inputs["draft"].get("holds", []):
+        t = inputs["tradeIndex"].get(h.get("waitingOn"))
+        if t is None or t["status"] not in ("OFFICIAL", "VOID"):
+            out.append(h)
+    return out
+
+
+def draft_summary(inputs: dict, state: dict) -> dict:
+    """Everything the draft room shows, derived from the events + the post-trade pick ledger."""
+    order = sorted(inputs["picks"]["picks"], key=lambda p: (p["round"], p["slot"]))
+    done = []
+    for p in order:
+        c = state["completedPicks"].get(p["pickId"])
+        if c:
+            ev = next(e for e in inputs["draft"]["events"] if e["pickId"] == p["pickId"])
+            done.append({"pickId": p["pickId"], "label": pick_label(p), "franchiseId": c["franchiseId"], "playerKey": c["playerKey"],
+                         "name": player_name(inputs, c["playerKey"]), "cap": player_cap(inputs, c["playerKey"]),
+                         "rookie": bool(ev.get("rookie")),
+                         "pos": inputs["registry"].get(c["playerKey"], {}).get("displayPosition", ""),
+                         "nba": inputs["registry"].get(c["playerKey"], {}).get("nbaTeam", "")})
+    cur = draft_cursor(inputs, state)
+    holds = [{"pickId": h["pickId"], "label": pick_label(inputs["pickIndex"][h["pickId"]]), "reason": h["reason"],
+              "waitingOn": h.get("waitingOn"), "owner": state["pickOwner"][h["pickId"]]} for h in active_holds(inputs)]
+    return {"status": inputs["draft"].get("status"), "completed": done, "total": len(order), "remaining": len(order) - len(done),
+            "rookies": sum(1 for d in done if d["rookie"]),
+            "cursor": None if cur is None else {"pickId": cur, "label": pick_label(inputs["pickIndex"][cur]), "owner": state["pickOwner"][cur],
+                                                "held": cur in {h["pickId"] for h in holds}},
+            "latest": done[-1] if done else None, "holds": holds}
 
 
 def draft_cursor(inputs, state):
@@ -356,6 +395,8 @@ def resolve(inputs: dict, selected=(), mode: str = "OFFICIAL") -> dict:
     # Global governance note: pre-draft window allows 1 trade per team (a trade may involve 2+ teams).
     counts = {}
     for t in active:
+        if t.get("amends"):  # a correction to an earlier trade is not a new pre-draft trade
+            continue
         for f in t["participants"]:
             counts[f] = counts.get(f, 0) + 1
     state["windowWarnings"] = [
@@ -442,7 +483,8 @@ def scenario_view(inputs, selected):
     """Compact, JSON-serialisable result of one scenario (what the page renders)."""
     state = resolve(inputs, selected, "SCENARIO" if selected else "OFFICIAL")
     base = initial_state(inputs)
-    moved_teams = sorted({f for r in state["tradeResults"] if r["applied"] for f in r["teams"]})
+    moved_teams = sorted({f for r in state["tradeResults"] if r["applied"] for f in r["teams"]}
+                         | {c["franchiseId"] for c in state["completedPicks"].values()})
     teams = {}
     for fid in moved_teams:
         rep = team_report(inputs, state, fid, base)
@@ -485,14 +527,18 @@ def audit_official(inputs: dict) -> dict:
                     "count": len(roster), "picks": [pick_label(inputs["pickIndex"][p]) for p in team_picks(state, f)]}
     floor, ceiling = cap_band(inputs)
     checks = {
-        "everyPlayerHasOneOwner": len(listed_players) == len(set(listed_players)) == len(state["playerOwner"]) == len(base["playerOwner"]),
+        "everyPlayerHasOneOwner": len(listed_players) == len(set(listed_players)) == len(state["playerOwner"])
+                                  == len(base["playerOwner"]) + len(state["draftedPlayers"]),
+        "everyDraftSelectionOnceAndOwnedByThePickOwner": len(state["completedPicks"]) == len(state["draftedPlayers"]) == len(inputs["draft"].get("events", []))
+                                  and all(state["playerOwner"][c["playerKey"]] == c["franchiseId"] == state["pickOwner"][pid]
+                                          for pid, c in state["completedPicks"].items()),
         "everyPickHasOneOwner": listed_picks == all_picks and len(all_picks) == 48,
         "everyOfficialTradeApplied": all(r["applied"] and not r["errors"] for r in state["tradeResults"])
                                      and [r["tradeId"] for r in state["tradeResults"]] == state["activeTradeIds"],
         "dependenciesBeforeDependents": all(inputs["tradeIndex"][d]["order"] < inputs["tradeIndex"][t]["order"]
                                             for t in state["activeTradeIds"] for d in inputs["tradeIndex"][t].get("dependsOn", [])),
         "capEqualsSumOfPlayers": all(v["cap"] == v["sumOfPlayers"] for v in teams.values()),
-        "playerPoolUnchanged": set(state["playerOwner"]) == set(base["playerOwner"]),
+        "playerPoolUnchanged": set(state["playerOwner"]) - set(state["draftedPlayers"]) == set(base["playerOwner"]),
         "tradesBalanced": not [w for r in state["tradeResults"] for w in r["warnings"] if w["code"] == "ASSET_COUNT_UNBALANCED"],
     }
     violations = []
@@ -506,8 +552,9 @@ def audit_official(inputs: dict) -> dict:
             violations.append({"code": "CAP_OVER_CEILING", "detail": {"team": v["short"], "cap": v["cap"], "ceiling": ceiling}})
         if v["cap"] < floor:
             violations.append({"code": "CAP_UNDER_FLOOR", "detail": {"team": v["short"], "cap": v["cap"], "floor": floor}})
-        if v["count"] > MAX_KEEPERS:
-            violations.append({"code": "FINAL_ROSTER_ABOVE_9", "detail": {"team": v["short"], "count": v["count"]}})
+        held_players = v["count"] - sum(1 for k in team_players(inputs, state, f) if k in state["draftedPlayers"])
+        if held_players > MAX_KEEPERS:  # the 9-keeper limit counts kept/traded players, not draftees
+            violations.append({"code": "FINAL_ROSTER_ABOVE_9", "detail": {"team": v["short"], "count": held_players}})
     return {"checks": checks, "violations": violations, "teams": teams, "tradeOrder": state["activeTradeIds"]}
 
 
