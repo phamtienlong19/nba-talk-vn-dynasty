@@ -235,10 +235,10 @@ class TestRepoState(unittest.TestCase):
         a = ls.audit_official(self.o)
         self.assertTrue(all(a["checks"].values()), a["checks"])
         t = {v["short"]: (v["cap"], v["count"]) for v in a["teams"].values()}
-        # post-trade caps + the 40 drafted players (counts include draftees)
+        # post-trade caps + the 44 drafted players (counts include draftees)
         self.assertEqual(t, {"Bsy": (178, 12), "CrazyCat": (135, 12), "Melo": (156, 12), "LC": (162, 12), "HCMC": (145, 12),
-                             "Dũng": (132, 12), "Maxfixe": (149, 12), "DHA": (154, 12), "Đạt": (174, 11), "DonTrick": (123, 11),
-                             "Thịnh": (177, 11), "sup fam": (141, 12), "Quân": (163, 11), "TuLy": (148, 11), "Bz": (156, 10), "TT": (174, 11)})
+                             "Dũng": (132, 12), "Maxfixe": (149, 12), "DHA": (154, 12), "Đạt": (174, 12), "DonTrick": (124, 12),
+                             "Thịnh": (177, 12), "sup fam": (141, 12), "Quân": (163, 11), "TuLy": (148, 11), "Bz": (156, 11), "TT": (174, 11)})
         # violations are surfaced, not corrected
         codes = sorted({v["code"] for v in a["violations"]})
         self.assertIn("ROSTER_COUNT_ABOVE_9", codes)
@@ -313,13 +313,13 @@ class TestDraftRoom(unittest.TestCase):
         m = re.search(r'<script type="application/json" id="league-data">(.*?)</script>', cls.html, re.S)
         cls.data = json.loads(m.group(1).replace("<\\/", "</"))
 
-    def test_exactly_40_unique_selections_in_draft_order(self):
+    def test_exactly_44_unique_selections_in_draft_order(self):
         ev = self.i["draft"]["events"]
-        self.assertEqual(len(ev), 40)
-        self.assertEqual(len({e["playerKey"] for e in ev}), 40)
-        self.assertEqual(len({e["pickId"] for e in ev}), 40)
+        self.assertEqual(len(ev), 44)
+        self.assertEqual(len({e["playerKey"] for e in ev}), 44)
+        self.assertEqual(len({e["pickId"] for e in ev}), 44)
         order = [p["pickId"] for p in sorted(self.i["picks"]["picks"], key=lambda p: (p["round"], p["slot"]))]
-        self.assertEqual([e["pickId"] for e in ev], order[:40])
+        self.assertEqual([e["pickId"] for e in ev], order[:44])
         self.assertEqual([c["label"] for c in self.d["completed"]][:3], ["1.01", "1.02", "1.03"])
 
     def test_eligible_positions_use_slashes_not_commas(self):
@@ -330,7 +330,7 @@ class TestDraftRoom(unittest.TestCase):
 
     def test_provisional_players_not_yet_in_yahoo_are_cap_zero_and_flagged(self):
         extra = self.i["extraPlayers"]
-        self.assertEqual(sorted(p["name"] for p in extra.values()), ["Bennett Stirtz", "Dailyn Swain", "Hannes Steinbach"])
+        self.assertEqual(sorted(p["name"] for p in extra.values()), ["Bennett Stirtz", "Dailyn Swain", "Hannes Steinbach", "Sergio de Larrea"])
         for k, p in extra.items():
             self.assertTrue(k.startswith("provisional:") and p["provisional"] and p["cap"] == 0)
             self.assertNotIn(k, self.i["registry"])
@@ -340,9 +340,9 @@ class TestDraftRoom(unittest.TestCase):
 
     def test_state_summary(self):
         d = self.d
-        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (40, 8, 48, 16))
-        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("3.09", "franchise-09"))  # Đạt owns 3.09
-        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("3.08", "Nikola Vučević"))
+        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (44, 4, 48, 17))
+        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("3.13", "franchise-13"))  # Quân owns 3.13
+        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("3.12", "Mitchell Robinson"))
         self.assertEqual(d["status"], "IN_PROGRESS")
 
     def test_selecting_franchise_is_the_post_trade_pick_owner(self):
@@ -359,7 +359,7 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual((by["1.03"]["name"], by["1.03"]["playerKey"], by["1.03"]["cap"]), ("Caleb Wilson", "478.p.10595", 10.0))
         self.assertEqual((by["1.01"]["cap"], by["1.06"]["name"], by["1.06"]["cap"]), (20.0, "Day'Ron Sharpe", 6.0))
         self.assertEqual(sorted(c["label"] for c in self.d["completed"] if c["rookie"]),
-                         ["1.01", "1.02", "1.03", "1.04", "1.05", "1.07", "1.13", "1.14", "2.02", "2.04", "2.05", "2.07", "2.10", "2.11", "2.12", "2.16"])
+                         ["1.01", "1.02", "1.03", "1.04", "1.05", "1.07", "1.13", "1.14", "2.02", "2.04", "2.05", "2.07", "2.10", "2.11", "2.12", "2.16", "3.11"])
         rookies = pool.load_rookie_names()
         for c in self.d["completed"]:
             self.assertEqual(c["rookie"], pool.normalize_name(c["name"]) in rookies, c["name"])  # agrees with the rookie source
@@ -454,19 +454,19 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual(s["pickOwner"]["2026-R2-07"], "franchise-05")            # pick record -> HCMC
         self.assertEqual(s["playerOwner"]["478.p.10572"], "franchise-02")          # Morez Johnson Jr. stays with CrazyCat
         self.assertEqual(s["playerOwner"]["478.p.10444"], "franchise-02")          # Derik Queen -> CrazyCat
-        self.assertEqual(len(s["completedPicks"]), 40)                             # no selection undone
+        self.assertEqual(len(s["completedPicks"]), 44)                             # no selection undone
         self.assertEqual(s["draftConflicts"], [{"pickId": "2026-R2-07", "selector": "franchise-02", "scenarioOwner": "franchise-05"}])
         self.assertTrue(all(ls.audit_official(c)["checks"].values()))
 
     def test_page_ledger_and_picks_agree(self):
         panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
         self.assertIn("ON THE CLOCK", panel)
-        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+3\.09")
+        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+3\.13")
         self.assertIn("Neemias Queta", panel)
-        self.assertEqual(panel.count("pick-sel"), 40)
+        self.assertEqual(panel.count("pick-sel"), 44)
         pills = re.findall(r'<span class="pick-extra pick-sel">.*?</span>', panel, re.S)
-        self.assertEqual(len(pills), 40)
-        self.assertEqual(sum('pick-r"' in x for x in pills), 16)  # sixteen rookie badges
+        self.assertEqual(len(pills), 44)
+        self.assertEqual(sum('pick-r"' in x for x in pills), 17)  # seventeen rookie badges
         self.assertTrue(all("→" in x for x in pills))            # every pick shows cap and running total
         for part in ("dr-ticker", "dr-clock", "dr-list", "dr-best"):
             self.assertIn(part, panel)
