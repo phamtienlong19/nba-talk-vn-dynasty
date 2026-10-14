@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "status": "IN_PROGRESS",
+  "status": "COMPLETE",
   "note": "Append-only DRAFT_PICK events. Each event {eventId,type:DRAFT_PICK,pickId,franchiseId,playerKey,timestamp}. The engine derives roster, availability, cap, pick completion and the draft cursor from these -- no other draft state exists.",
   "events": [
     {
@@ -406,6 +406,33 @@
       "franchiseId": "franchise-13",
       "playerKey": "478.p.6408",
       "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R3-14",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R3-14",
+      "franchiseId": "franchise-14",
+      "playerKey": "478.p.10282",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R3-15",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R3-15",
+      "franchiseId": "franchise-15",
+      "playerKey": "provisional:cameron-carr",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R3-16",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R3-16",
+      "franchiseId": "franchise-16",
+      "playerKey": "provisional:nate-ament",
+      "rookie": true,
       "source": "commissioner-confirmed draft results"
     }
   ],

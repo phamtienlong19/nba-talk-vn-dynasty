@@ -32,6 +32,22 @@
       "displayPosition": "PG",
       "cap": 0,
       "provisional": true
+    },
+    {
+      "playerKey": "provisional:cameron-carr",
+      "name": "Cameron Carr",
+      "nbaTeam": "LAL",
+      "displayPosition": "SG",
+      "cap": 0,
+      "provisional": true
+    },
+    {
+      "playerKey": "provisional:nate-ament",
+      "name": "Nate Ament",
+      "nbaTeam": "MIL",
+      "displayPosition": "SF",
+      "cap": 0,
+      "provisional": true
     }
   ]
 }

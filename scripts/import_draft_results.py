@@ -52,6 +52,8 @@ def build_events(inputs: dict, results: dict, existing: list) -> list:
     new = []
     for i, r in enumerate(results["results"]):
         pid = r["pickId"]
+        if i >= len(order):
+            raise ImportError_(f"more results than draft slots ({len(order)})")
         if pid != order[i]:
             raise ImportError_(f"results must follow the draft order: position {i + 1} is {order[i]}, got {pid}")
         player = resolve_name({**inputs["registry"], **inputs["extraPlayers"]}, r["player"])
