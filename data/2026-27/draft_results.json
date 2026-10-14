@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "source": "league draft results as confirmed by the commissioner; first 30 selections (through 2.14)",
+  "source": "league draft results as confirmed by the commissioner; first 31 selections (through 2.15)",
   "note": "Authoritative input for scripts/import_draft_results.py, which resolves names against the Yahoo player master and appends DRAFT_PICK events to draft_state.json idempotently. Rookie flags come from this record.",
   "results": [
     {
@@ -151,6 +151,11 @@
     {
       "pickId": "2026-R2-14",
       "player": "Scotty Pippen Jr.",
+      "rookie": false
+    },
+    {
+      "pickId": "2026-R2-15",
+      "player": "Jrue Holiday",
       "rookie": false
     }
   ]
