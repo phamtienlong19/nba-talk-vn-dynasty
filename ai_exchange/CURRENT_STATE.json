@@ -163,6 +163,18 @@
         "Bz, Melo, CrazyCat finish with 10 players (> 9)",
         "Bz in 4 and LC in 2 pre-draft trades (limit 1 per team)"
       ]
+    },
+    "draft": {
+      "status": "IN_PROGRESS",
+      "selections": 19,
+      "next": "2.04",
+      "remaining": 29,
+      "rookies": 9,
+      "hold": {
+        "pick": "2.07",
+        "waitingOn": "TRADE-F-AMEND",
+        "state": "PENDING CONFIRMATION"
+      }
     }
   }
 }

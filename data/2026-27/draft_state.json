@@ -1,6 +1,185 @@
 {
-    "season": "2026-27",
-    "status": "PRE_DRAFT",
-    "note": "Append-only DRAFT_PICK events. Each event {eventId,type:DRAFT_PICK,pickId,franchiseId,playerKey,timestamp}. The engine derives roster, availability, cap, pick completion and the draft cursor from these -- no other draft state exists.",
-    "events": []
+  "season": "2026-27",
+  "status": "IN_PROGRESS",
+  "note": "Append-only DRAFT_PICK events. Each event {eventId,type:DRAFT_PICK,pickId,franchiseId,playerKey,timestamp}. The engine derives roster, availability, cap, pick completion and the draft cursor from these -- no other draft state exists.",
+  "events": [
+    {
+      "eventId": "DRAFT-2026-R1-01",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-01",
+      "franchiseId": "franchise-07",
+      "playerKey": "478.p.10592",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-02",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-02",
+      "franchiseId": "franchise-04",
+      "playerKey": "478.p.10599",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-03",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-03",
+      "franchiseId": "franchise-12",
+      "playerKey": "478.p.10595",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-04",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-04",
+      "franchiseId": "franchise-05",
+      "playerKey": "478.p.10590",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-05",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-05",
+      "franchiseId": "franchise-04",
+      "playerKey": "478.p.10582",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-06",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-06",
+      "franchiseId": "franchise-05",
+      "playerKey": "478.p.6571",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-07",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-07",
+      "franchiseId": "franchise-06",
+      "playerKey": "478.p.10571",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-08",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-08",
+      "franchiseId": "franchise-08",
+      "playerKey": "478.p.6173",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-09",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-09",
+      "franchiseId": "franchise-14",
+      "playerKey": "478.p.5640",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-10",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-10",
+      "franchiseId": "franchise-13",
+      "playerKey": "478.p.6596",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-11",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-11",
+      "franchiseId": "franchise-09",
+      "playerKey": "478.p.5069",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-12",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-12",
+      "franchiseId": "franchise-10",
+      "playerKey": "478.p.6551",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-13",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-13",
+      "franchiseId": "franchise-11",
+      "playerKey": "478.p.10576",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-14",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-14",
+      "franchiseId": "franchise-12",
+      "playerKey": "478.p.10574",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-15",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-15",
+      "franchiseId": "franchise-01",
+      "playerKey": "478.p.6733",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R1-16",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R1-16",
+      "franchiseId": "franchise-16",
+      "playerKey": "478.p.6577",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-01",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-01",
+      "franchiseId": "franchise-01",
+      "playerKey": "478.p.6406",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-02",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-02",
+      "franchiseId": "franchise-05",
+      "playerKey": "478.p.10585",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-03",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-03",
+      "franchiseId": "franchise-03",
+      "playerKey": "478.p.6581",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    }
+  ],
+  "holds": [
+    {
+      "pickId": "2026-R2-07",
+      "waitingOn": "TRADE-F-AMEND",
+      "reason": "Ownership unconfirmed: CrazyCat-HCMC amendment would move 2.07 to HCMC (Derik Queen to CrazyCat). Commissioner must confirm or reject before its selection is recorded."
+    }
+  ]
 }

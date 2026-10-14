@@ -114,7 +114,8 @@ class TestOfficialProtection(unittest.TestCase):
         _, r = built()
         with open(INDEX, encoding="utf-8") as f:
             html = f.read()
-        board = [html_lib.unescape(n) for n in re.findall(r'<div class="pool-player">(.*?)</div>', wi.strip_block(html))]
+        from _proposed import predraft_index_html
+        board = [html_lib.unescape(n) for n in re.findall(r'<div class="pool-player">(.*?)</div>', wi.strip_block(predraft_index_html()))]
         self.assertEqual([x["n"] for x in r["fa"]["official"]], board)
 
     def test_official_prices_are_the_frozen_checkpoint(self):

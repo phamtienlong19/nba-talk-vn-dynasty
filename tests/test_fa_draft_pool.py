@@ -5,6 +5,8 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _proposed import predraft_index_html  # noqa: E402
 import build_fa_draft_pool as pool  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -28,8 +30,7 @@ MERIT_ONLY_CURATED_ROOKIE_NAMES = [
 
 
 def _read_index_html():
-    with open(INDEX_HTML, encoding="utf-8") as f:
-        return f.read()
+    return predraft_index_html(INDEX_HTML)  # the published board now excludes drafted players
 
 
 def _pool_block(index_html):

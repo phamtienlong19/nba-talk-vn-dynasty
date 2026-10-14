@@ -96,12 +96,14 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
         self.assertEqual(pre["pickOwner"], dict(sorted(ls.initial_state(self.i)["pickOwner"].items())))
         self.assertEqual(pre["teamCaps"], {f: ls.team_cap(self.i, ls.initial_state(self.i), f) for f in sorted(self.i["franchises"])})
         # post-trade checkpoint reproduces from the locked inputs + official trades
-        self.assertEqual(post, ls.make_snapshot(self.i, "PRE_DRAFT_LOCK"))
+        before_draft = dict(self.i)
+        before_draft["draft"] = {**self.i["draft"], "events": []}  # PRE_DRAFT_LOCK predates the first selection
+        self.assertEqual(post, ls.make_snapshot(before_draft, "PRE_DRAFT_LOCK"))
 
     # ----- availability / recommendation derive from the locked baseline
     def test_new_cuts_are_available_and_new_keepers_are_not(self):
         keys = {r[1] for r in self.data["available"]["rows"]}
-        for cut in ("Royce O'Neale", "Jusuf Nurkić", "Jakob Poeltl", "Collin Sexton", "Max Christie"):
+        for cut in ("Royce O'Neale", "Jusuf Nurkić", "Collin Sexton", "Max Christie"):  # Poeltl was drafted at 1.09
             self.assertIn(cut, keys, cut)
         for kept in ("Isaiah Jackson", "Bilal Coulibaly", "Jonathan Kuminga", "Dennis Schröder", "Kelly Oubre Jr."):
             self.assertNotIn(kept, keys, kept)
@@ -113,7 +115,7 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
     def test_nurkic_and_poeltl_cut_sources_and_cap_first_order(self):
         rows = {r[1]: r for r in self.data["available"]["rows"]}
         self.assertEqual((rows["Jusuf Nurkić"][7], rows["Jusuf Nurkić"][4]), ("DHA", 4.0))
-        self.assertEqual((rows["Jakob Poeltl"][7], rows["Jakob Poeltl"][4]), ("DHA", 2.0))
+        self.assertNotIn("Jakob Poeltl", rows)  # DHA's cut was selected at 1.09: no longer available
         on_board = sorted((r for r in self.data["available"]["rows"] if r[6]), key=lambda r: r[6])
         caps = [r[4] for r in on_board]
         self.assertEqual(caps, sorted(caps, reverse=True))  # recommendation board still CAP-first
@@ -156,8 +158,11 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
         self.assertEqual(self.data["scenarios"], ls.enumerate_scenarios(self.i))
 
     def test_every_staged_trade_is_official_and_recorded_as_processed(self):
-        self.assertEqual({t["status"] for t in self.i["trades"]["trades"]}, {"OFFICIAL"})
-        self.assertEqual([t["execution"]["batch"] for t in self.i["trades"]["trades"]], ["2026-10-13-pre-draft"] * 6)
+        done = [t for t in self.i["trades"]["trades"] if not t.get("amends")]
+        self.assertEqual({t["status"] for t in done}, {"OFFICIAL"})
+        self.assertEqual([t["execution"]["batch"] for t in done], ["2026-10-13-pre-draft"] * 6)
+        amend = self.i["tradeIndex"]["TRADE-F-AMEND"]  # staged, NOT official until the commissioner confirms
+        self.assertEqual((amend["status"], amend["pendingConfirmation"]), ("PROPOSED", True))
 
     def test_public_wording_says_the_keeper_layer_is_locked_not_projected(self):
         js = re.search(r'<script id="league-app">(.*?)</script>', self.html, re.S).group(1)

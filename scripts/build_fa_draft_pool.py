@@ -332,11 +332,15 @@ def pos_from_eligible(eligible):
 
 def build_candidates(index_html: str, yahoo_by_norm: dict, dynasty_by_norm: dict | None = None,
                       dynasty_rank_max: int | None = None, rookie_names: set | None = None,
-                      draft_years: dict | None = None, kept: set | None = None, cuts: list | None = None):
+                      draft_years: dict | None = None, kept: set | None = None, cuts: list | None = None,
+                      drafted: set | None = None):
     # `kept` (normalized names) / `cuts` ([{name, cap, team}]) default to what the
     # keeper board in index_html shows; the What-If layer passes hypothetical ones.
     if kept is None or cuts is None:
         kept, cuts = parse_team_cards(index_html)
+    # players already selected in the live draft are no longer available to anyone
+    kept = set(kept) | set(drafted or ())
+    cuts = [c for c in cuts if normalize_name(c["name"]) not in (drafted or ())]
     rookie_names = rookie_names or set()
     draft_years = draft_years or {}
 
@@ -556,12 +560,29 @@ def splice_pool_into_index(index_html: str, pool_html: str) -> str:
     return index_html[:start] + replacement + index_html[end:]
 
 
+DRAFT_STATE = os.path.join(REPO_ROOT, "data", "2026-27", "draft_state.json")
+REGISTRY = os.path.join(REPO_ROOT, "data", "yahoo", "player_registry.json")
+
+
+def drafted_names(draft_path: str = DRAFT_STATE, registry_path: str = REGISTRY) -> set:
+    """Normalized names of every player already selected in the live draft (DRAFT_PICK events)."""
+    try:
+        with open(draft_path, encoding="utf-8") as f:
+            events = json.load(f).get("events", [])
+        with open(registry_path, encoding="utf-8") as f:
+            names = {p["playerKey"]: p["name"] for p in json.load(f)["players"]}
+    except OSError:
+        return set()
+    return {normalize_name(names[e["playerKey"]]) for e in events if e["playerKey"] in names}
+
+
 def build(index_html: str, yahoo_players_path: str = YAHOO_NORMALIZED,
           dynasty_rankings_path: str = DYNASTY_RANKINGS) -> tuple[str, list]:
     yahoo_by_norm = load_yahoo_players(yahoo_players_path)
     dynasty_by_norm, dynasty_rank_max = load_dynasty_rankings(dynasty_rankings_path)
     candidates = build_candidates(index_html, yahoo_by_norm, dynasty_by_norm, dynasty_rank_max,
-                                  rookie_names=load_rookie_names(), draft_years=load_draft_years())
+                                  rookie_names=load_rookie_names(), draft_years=load_draft_years(),
+                                  drafted=drafted_names())
     ranked = sort_and_truncate(candidates)
     pool_html = render_pool_html(ranked)
     new_html = splice_pool_into_index(index_html, pool_html)

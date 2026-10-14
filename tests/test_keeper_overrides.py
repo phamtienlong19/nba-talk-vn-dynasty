@@ -1,8 +1,11 @@
 import os
 import re
+import sys
 import unittest
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _proposed import predraft_index_html  # noqa: E402
 
 
 def _card(html, tag):
@@ -32,7 +35,7 @@ class TestExplicitKeeperOverrides(unittest.TestCase):
     def setUpClass(cls):
         with open(os.path.join(REPO_ROOT, "index.html"), encoding="utf-8") as f:
             cls.html = f.read()
-        cls.pool = _pool(cls.html)
+        cls.pool = _pool(predraft_index_html())  # pre-draft board: drafted players are excluded from the published one
 
     def test_kratos_keeps_wiggins_and_cuts_queta(self):
         card = _card(self.html, "TT")

@@ -132,6 +132,8 @@ def build_baseline(index_html: str, registry: dict, franchises: list) -> tuple[d
 
 LEDGER_ROW_RE = re.compile(r'(<div class="pick-slot">(\d+)\.(\d+)</div>\n<div class="pick-team">)(<span class="pick-chip"[^>]*>.*?</span>)(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
 VIA_RE = re.compile(r'<span class="pick-extra">VIA [^<]*</span>')
+SEL_RE = re.compile(r'<span class="pick-extra pick-(?:sel|r|hold)">[^<]*</span>')
+DRAFT_STATUS_BEGIN, DRAFT_STATUS_END = "<!--DRAFT-STATUS-BEGIN-->", "<!--DRAFT-STATUS-END-->"
 
 
 def sync_ledger(index_html: str, inputs: dict) -> str:
@@ -154,15 +156,55 @@ def sync_ledger(index_html: str, inputs: dict) -> str:
         except ValueError:
             pass
     order = [t["franchiseId"] for t in inputs["freeze"]["teams"]]
+    summary = ls.draft_summary(inputs, official)
+    done = {d["pickId"]: d for d in summary["completed"]}
+    held = {h["pickId"]: h for h in summary["holds"]}
     def row(m):
         rnd, slot = int(m.group(2)), int(m.group(3))
         pid = f"2026-R{rnd}-{slot:02d}"
         owner, orig = official["pickOwner"][pid], inputs["pickIndex"][pid]["originalOwner"]
-        note = VIA_RE.sub("", m.group(6))
+        note = SEL_RE.sub("", VIA_RE.sub("", m.group(6)))
         if owner != orig:
             note += f'<span class="pick-extra">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>'
+        if pid in done:
+            d = done[pid]
+            note += f'<span class="pick-extra pick-sel">{html_lib.escape(d["name"])}</span>'
+            if d["rookie"]:
+                note += '<span class="pick-extra pick-r">R</span>'
+        elif pid in held:
+            note += '<span class="pick-extra pick-hold">OWNERSHIP HOLD</span>'
         return m.group(1) + chip_of[order.index(owner)] + m.group(5) + note + m.group(7)
-    return index_html[:a] + LEDGER_ROW_RE.sub(row, panel) + index_html[b:]
+    panel = LEDGER_ROW_RE.sub(row, panel)
+    panel = _draft_status_block(panel, summary, chip_of, order, short_by_fid, inputs)
+    return index_html[:a] + panel + index_html[b:]
+
+
+def _draft_status_block(panel: str, summary: dict, chip_of: dict, order: list, short_by_fid: dict, inputs: dict) -> str:
+    """The 'draft room' strip at the top of the Draft Order page: on the clock, latest pick, counts, holds."""
+    def chip(fid):
+        return chip_of[order.index(fid)]
+    parts = []
+    cur, latest = summary["cursor"], summary["latest"]
+    if cur:
+        parts.append(f'<div class="ds-cell ds-clock"><span class="ds-k">ON THE CLOCK</span><b>{cur["label"]}</b>{chip(cur["owner"])}'
+                     + ('<span class="pick-extra pick-hold">OWNERSHIP HOLD</span>' if cur["held"] else "") + "</div>")
+    if latest:
+        parts.append(f'<div class="ds-cell"><span class="ds-k">LATEST</span><b>{latest["label"]}</b> {html_lib.escape(latest["name"])}'
+                     + (' <span class="pick-extra pick-r">R</span>' if latest["rookie"] else "")
+                     + f' {chip(latest["franchiseId"])}</div>')
+    parts.append(f'<div class="ds-cell"><span class="ds-k">SELECTED</span><b>{len(summary["completed"])}</b>'
+                 f'<span class="ds-k">REMAINING</span><b>{summary["remaining"]}</b><span class="ds-k">ROOKIES</span><b>{summary["rookies"]}</b></div>')
+    for h in summary["holds"]:
+        parts.append(f'<div class="ds-cell ds-holdcell"><span class="pick-extra pick-hold">OWNERSHIP HOLD</span><b>{h["label"]}</b> '
+                     f'{html_lib.escape(h["reason"])}</div>')
+    block = DRAFT_STATUS_BEGIN + '<div class="draft-status">' + "".join(parts) + "</div>" + DRAFT_STATUS_END
+    if DRAFT_STATUS_BEGIN in panel:
+        x, y = panel.index(DRAFT_STATUS_BEGIN), panel.index(DRAFT_STATUS_END) + len(DRAFT_STATUS_END)
+        return panel[:x] + block + panel[y:]
+    anchor = '<div class="title">DRAFT ORDER</div>'
+    if anchor not in panel:
+        raise ValueError("draft-order panel has no title to anchor the status strip after")
+    return panel.replace(anchor, anchor + "\n" + block, 1)
 
 
 def cmd_sync_ledger(args):
@@ -252,12 +294,14 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
             recv.setdefault(a["to"], []).append(ls.describe_asset(inputs, a))
         trades.append({"id": t["tradeId"], "label": t.get("label"), "status": t["status"], "order": t["order"],
                        "dependsOn": t.get("dependsOn", []), "participants": t["participants"],
-                       "receives": recv, "note": t.get("note")})
+                       "receives": recv, "note": t.get("note"),
+                       "pending": bool(t.get("pendingConfirmation")), "amends": t.get("amends")})
     # available universe: registry + curated Yahoo-missing prospects, minus kept (official state)
     yahoo = pool.load_yahoo_players(yahoo_path)
     dyn, dyn_max = pool.load_dynasty_rankings()
+    drafted = {pool.normalize_name(ls.player_name(inputs, c["playerKey"])) for c in official["completedPicks"].values()}
     cands = pool.build_candidates(index_html, yahoo, dyn, dyn_max, rookie_names=pool.load_rookie_names(),
-                                  draft_years=pool.load_draft_years())
+                                  draft_years=pool.load_draft_years(), drafted=drafted)
     final = pool.sort_and_truncate(cands)
     board_rank = {pool.normalize_name(c.name): i for i, c in enumerate(final, 1)}
     src_by_norm = {k: c for k, c in cands.items()}
@@ -289,6 +333,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         "official": {"teams": official_teams, "picks": ls.pick_table(inputs, official),
                      "windowWarnings": official["windowWarnings"], "tradeIds": official["activeTradeIds"]},
         "trades": trades,
+        "draft": ls.draft_summary(inputs, official),
         "scenarios": ls.enumerate_scenarios(inputs),
         "available": {"cols": ["key", "name", "nba", "pos", "cap", "yahooOr", "board", "src"], "rows": rows,
                       "curatedYahooMissing": extras},

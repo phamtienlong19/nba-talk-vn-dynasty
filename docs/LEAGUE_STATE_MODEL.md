@@ -84,3 +84,14 @@ refuses to select an OFFICIAL trade. Pre-trade state: `snapshots/KEEPER_FREEZE.j
 `snapshots/PRE_DRAFT_LOCK.json`. `audit_official()` reconciles ownership/caps and reports rule violations (roster > 9,
 pre-draft trade limit) without correcting them. `build_league_state.py sync-ledger` keeps the first-page draft-order
 ledger (current owner + `VIA <original>`) in step with the official state.
+
+## Live draft (from 2026-10-14)
+
+`data/2026-27/draft_results.json` is the commissioner-confirmed record; `scripts/import_draft_results.py` resolves names
+against the Yahoo player master and appends `DRAFT_PICK` events to `draft_state.json` idempotently (rejects contradictions,
+repeat players, out-of-order results and held picks). The selecting franchise is the CURRENT owner in the post-trade pick
+ledger. Roster, cap, availability, pick completion and the on-the-clock cursor are derived. `draft_state.holds` blocks recording
+a pick whose ownership is unresolved until the transaction it waits on is decided: 2.07 is held on `TRADE-F-AMEND`
+(CrazyCat ↔ HCMC amendment: 2.07 CrazyCat → HCMC, Derik Queen HCMC → CrazyCat), staged as PROPOSED + `pendingConfirmation`.
+Confirm = set its status to `OFFICIAL` (a correction replayed once, not a re-run of TRADE-F). `sync-ledger` renders the
+Draft Order status strip (on the clock / latest / counts / holds) and per-pick selections; the FA/DRAFT 60 excludes drafted players.
