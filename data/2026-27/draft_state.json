@@ -173,6 +173,24 @@
       "playerKey": "478.p.6581",
       "rookie": false,
       "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-04",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-04",
+      "franchiseId": "franchise-04",
+      "playerKey": "478.p.10588",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-05",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-05",
+      "franchiseId": "franchise-05",
+      "playerKey": "478.p.10579",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
     }
   ],
   "holds": [
