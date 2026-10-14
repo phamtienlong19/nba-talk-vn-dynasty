@@ -441,7 +441,13 @@ class TestDraftRoom(unittest.TestCase):
         self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+2\.04")
         self.assertIn("Neemias Queta", panel)
         self.assertEqual(panel.count("pick-sel"), 19)
-        self.assertEqual(panel.count('pick-r"'), 9)  # nine rookie badges (the LATEST pick, Queta, is not a rookie)
+        pills = re.findall(r'<span class="pick-extra pick-sel">.*?</span>', panel, re.S)
+        self.assertEqual(len(pills), 19)
+        self.assertEqual(sum('pick-r"' in x for x in pills), 9)  # nine rookie badges (the LATEST pick, Queta, is not a rookie)
+        self.assertTrue(all("→" in x for x in pills))            # every pick shows cap and running total
+        for part in ("dr-ticker", "dr-clock", "dr-list", "dr-best"):
+            self.assertIn(part, panel)
+        self.assertEqual(panel.count('class="dr-run"'), 2)      # duplicated run for the seamless loop
         self.assertEqual(bls.sync_ledger(self.html, self.i), self.html)
         self.assertEqual(self.data["draft"], ls.draft_summary(self.i, self.o))
 
