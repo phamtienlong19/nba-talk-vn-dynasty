@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-14T01:32:04Z
+Generated: 2026-10-13T14:41:24Z
 
 ## Task
 Active Task
@@ -9,7 +9,7 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/draft-first-19
+Branch: fix/mono-digits-flex-spacing
 Commit: 4168978
 Base: main
 Working tree: dirty
@@ -117,4 +117,4 @@ Playwright screenshots — see `ai_exchange/IMPLEMENTATION_REPORT.md`.
   change to `GUARANTEED_NAMES` in `scripts/build_fa_draft_pool.py`.
 
 ## Suggested Next Step
-Open/update the PR from `feat/draft-first-19` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `fix/mono-digits-flex-spacing` if not already done, then request human/ChatGPT review of this packet.
