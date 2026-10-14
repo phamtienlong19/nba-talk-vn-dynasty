@@ -305,8 +305,10 @@ def _apply_trade(inputs, state, trade, active_ids):
     return result
 
 
-def apply_draft_events(inputs, state):
-    """Append-only DRAFT_PICK events: roster, availability, cap, pick completion, cursor."""
+def apply_draft_events(inputs, state, tolerant=False):
+    """Append-only DRAFT_PICK events: roster, availability, cap, pick completion, cursor. `tolerant` (hypothetical
+    scenarios only): a scenario that would move an already-used pick away from its selector records a conflict in
+    state["draftConflicts"] instead of failing -- the selection itself is history and is never undone."""
     held = {h["pickId"]: h for h in active_holds(inputs)}
     for ev in inputs["draft"].get("events", []):
         if ev["type"] != "DRAFT_PICK":
@@ -317,7 +319,10 @@ def apply_draft_events(inputs, state):
         if pid not in inputs["pickIndex"]:
             raise StateError(f"{pid}: unknown pick")
         if state["pickOwner"].get(pid) != fid:
-            raise StateError(f"{pid}: {fid} does not currently own this pick")
+            if tolerant:
+                state.setdefault("draftConflicts", []).append({"pickId": pid, "selector": fid, "scenarioOwner": state["pickOwner"].get(pid)})
+            else:
+                raise StateError(f"{pid}: {fid} does not currently own this pick")
         if pid in state["completedPicks"]:
             raise StateError(f"{pid}: pick already used")
         if key in state["playerOwner"]:
@@ -329,9 +334,11 @@ def apply_draft_events(inputs, state):
 
 def active_holds(inputs: dict) -> list:
     """Commissioner holds on picks whose ownership is unresolved. A hold lifts once the transaction it waits on is
-    decided (OFFICIAL or VOID); until then the pick cannot be recorded."""
+    decided (OFFICIAL or VOID) or the commissioner releases it (`released`); until then the pick cannot be recorded."""
     out = []
     for h in inputs["draft"].get("holds", []):
+        if h.get("released"):  # commissioner released the pick for its CURRENT owner; the transaction stays pending
+            continue
         t = inputs["tradeIndex"].get(h.get("waitingOn"))
         if t is None or t["status"] not in ("OFFICIAL", "VOID"):
             out.append(h)
@@ -412,7 +419,7 @@ def resolve(inputs: dict, selected=(), mode: str = "OFFICIAL") -> dict:
         if t["status"] == "OFFICIAL" and not res["applied"]:
             # An official transaction must never be silently dropped: surface the exact blocker.
             raise StateError(f"official trade {t['tradeId']} failed validation: {res['errors']}")
-    apply_draft_events(inputs, state)
+    apply_draft_events(inputs, state, tolerant=bool(chosen))
 
     # Global governance note: pre-draft window allows 1 trade per team (a trade may involve 2+ teams).
     counts = {}

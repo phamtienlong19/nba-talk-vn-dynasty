@@ -200,13 +200,24 @@
       "playerKey": "478.p.6707",
       "rookie": false,
       "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-07",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-07",
+      "franchiseId": "franchise-02",
+      "playerKey": "478.p.10572",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
     }
   ],
   "holds": [
     {
       "pickId": "2026-R2-07",
       "waitingOn": "TRADE-F-AMEND",
-      "reason": "Ownership unconfirmed: CrazyCat-HCMC amendment would move 2.07 to HCMC (Derik Queen to CrazyCat). Commissioner must confirm or reject before its selection is recorded."
+      "reason": "Ownership unconfirmed: CrazyCat-HCMC amendment would move 2.07 to HCMC (Derik Queen to CrazyCat). Commissioner must confirm or reject before its selection is recorded.",
+      "released": true,
+      "releasedNote": "Commissioner (chat, 2026-10-14): Morez Johnson Jr. is the 2.07 selection and belongs to CrazyCat for now. CrazyCat and HCMC are expanding their deal (Zion and 2.07 in the mix); TRADE-F-AMEND stays PENDING and must be re-scoped before it can be confirmed."
     }
   ]
 }

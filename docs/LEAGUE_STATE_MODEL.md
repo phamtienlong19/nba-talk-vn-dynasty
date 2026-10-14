@@ -93,5 +93,5 @@ repeat players, out-of-order results and held picks). The selecting franchise is
 ledger. Roster, cap, availability, pick completion and the on-the-clock cursor are derived. `draft_state.holds` blocks recording
 a pick whose ownership is unresolved until the transaction it waits on is decided: 2.07 is held on `TRADE-F-AMEND`
 (CrazyCat ↔ HCMC amendment: 2.07 CrazyCat → HCMC, Derik Queen HCMC → CrazyCat), staged as PROPOSED + `pendingConfirmation`.
-Confirm = set its status to `OFFICIAL` (a correction replayed once, not a re-run of TRADE-F). `sync-ledger` renders the
+Confirm = set its status to `OFFICIAL` (a correction replayed once, not a re-run of TRADE-F). The commissioner has since **released** the 2.07 hold (`released: true`) so CrazyCat's selection (Morez Johnson Jr.) is recorded for the current owner; the amendment stays PROPOSED and, because 2.07 is now used, confirming it as written fails loudly in OFFICIAL (scenarios report `draftConflicts`) until it is re-scoped for the expanded CrazyCat–HCMC deal. `sync-ledger` renders the
 Draft Order status strip (on the clock / latest / counts / holds) and per-pick selections; the FA/DRAFT 60 excludes drafted players.

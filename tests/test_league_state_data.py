@@ -235,8 +235,8 @@ class TestRepoState(unittest.TestCase):
         a = ls.audit_official(self.o)
         self.assertTrue(all(a["checks"].values()), a["checks"])
         t = {v["short"]: (v["cap"], v["count"]) for v in a["teams"].values()}
-        # post-trade caps + the 22 drafted players (counts include draftees)
-        self.assertEqual(t, {"Bsy": (178, 11), "CrazyCat": (131, 10), "Melo": (157, 11), "LC": (161, 11), "HCMC": (145, 12),
+        # post-trade caps + the 23 drafted players (counts include draftees)
+        self.assertEqual(t, {"Bsy": (178, 11), "CrazyCat": (131, 11), "Melo": (157, 11), "LC": (161, 11), "HCMC": (145, 12),
                              "Dũng": (132, 11), "Maxfixe": (149, 10), "DHA": (154, 10), "Đạt": (174, 10), "DonTrick": (123, 10),
                              "Thịnh": (177, 10), "sup fam": (141, 10), "Quân": (163, 10), "TuLy": (148, 10), "Bz": (156, 10), "TT": (174, 10)})
         # violations are surfaced, not corrected
@@ -313,13 +313,13 @@ class TestDraftRoom(unittest.TestCase):
         m = re.search(r'<script type="application/json" id="league-data">(.*?)</script>', cls.html, re.S)
         cls.data = json.loads(m.group(1).replace("<\\/", "</"))
 
-    def test_exactly_21_unique_selections_in_draft_order(self):
+    def test_exactly_23_unique_selections_in_draft_order(self):
         ev = self.i["draft"]["events"]
-        self.assertEqual(len(ev), 22)
-        self.assertEqual(len({e["playerKey"] for e in ev}), 22)
-        self.assertEqual(len({e["pickId"] for e in ev}), 22)
+        self.assertEqual(len(ev), 23)
+        self.assertEqual(len({e["playerKey"] for e in ev}), 23)
+        self.assertEqual(len({e["pickId"] for e in ev}), 23)
         order = [p["pickId"] for p in sorted(self.i["picks"]["picks"], key=lambda p: (p["round"], p["slot"]))]
-        self.assertEqual([e["pickId"] for e in ev], order[:22])
+        self.assertEqual([e["pickId"] for e in ev], order[:23])
         self.assertEqual([c["label"] for c in self.d["completed"]][:3], ["1.01", "1.02", "1.03"])
 
     def test_eligible_positions_use_slashes_not_commas(self):
@@ -330,9 +330,9 @@ class TestDraftRoom(unittest.TestCase):
 
     def test_state_summary(self):
         d = self.d
-        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (22, 26, 48, 11))
-        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("2.07", "franchise-02"))  # CrazyCat owns 2.07 (held)
-        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("2.06", "Tari Eason"))
+        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (23, 25, 48, 12))
+        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("2.08", "franchise-08"))  # DHA owns 2.08
+        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("2.07", "Morez Johnson Jr."))
         self.assertEqual(d["status"], "IN_PROGRESS")
 
     def test_selecting_franchise_is_the_post_trade_pick_owner(self):
@@ -349,7 +349,7 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual((by["1.03"]["name"], by["1.03"]["playerKey"], by["1.03"]["cap"]), ("Caleb Wilson", "478.p.10595", 10.0))
         self.assertEqual((by["1.01"]["cap"], by["1.06"]["name"], by["1.06"]["cap"]), (20.0, "Day'Ron Sharpe", 6.0))
         self.assertEqual(sorted(c["label"] for c in self.d["completed"] if c["rookie"]),
-                         ["1.01", "1.02", "1.03", "1.04", "1.05", "1.07", "1.13", "1.14", "2.02", "2.04", "2.05"])
+                         ["1.01", "1.02", "1.03", "1.04", "1.05", "1.07", "1.13", "1.14", "2.02", "2.04", "2.05", "2.07"])
         rookies = pool.load_rookie_names()
         for c in self.d["completed"]:
             self.assertEqual(c["rookie"], pool.normalize_name(c["name"]) in rookies, c["name"])  # agrees with the rookie source
@@ -392,17 +392,22 @@ class TestDraftRoom(unittest.TestCase):
         with self.assertRaises(imp.ImportError_):
             imp.resolve_name(self.i["registry"], "Nobody Real")
 
-    def test_pick_2_07_is_on_hold_and_cannot_be_recorded(self):
-        self.assertEqual([h["label"] for h in self.d["holds"]], ["2.07"])
-        self.assertEqual(self.d["holds"][0]["waitingOn"], "TRADE-F-AMEND")
-        self.assertEqual(self.o["pickOwner"]["2026-R2-07"], "franchise-02")   # ledger NOT silently reassigned
+    def test_pick_2_07_released_for_its_current_owner_while_the_amendment_stays_pending(self):
+        raw = self.i["draft"]["holds"]
+        self.assertEqual([(h["pickId"], h["waitingOn"], h.get("released")) for h in raw], [("2026-R2-07", "TRADE-F-AMEND", True)])
+        self.assertEqual(self.d["holds"], [])                                   # nothing blocks the draft any more
+        self.assertEqual(self.o["pickOwner"]["2026-R2-07"], "franchise-02")      # CrazyCat owns 2.07 for now
+        sel = {c["label"]: c for c in self.d["completed"]}["2.07"]
+        self.assertEqual((sel["name"], sel["franchiseId"], sel["rookie"]), ("Morez Johnson Jr.", "franchise-02", True))
+        self.assertEqual(self.i["tradeIndex"]["TRADE-F-AMEND"]["status"], "PROPOSED")  # amendment untouched
+        panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
+        self.assertNotIn("OWNERSHIP HOLD", panel)
+        # an un-released hold still blocks recording
         import copy
         bad = copy.deepcopy(self.i)
-        bad["draft"]["events"].append({"eventId": "x", "type": "DRAFT_PICK", "pickId": "2026-R2-07", "franchiseId": "franchise-02",
-                                       "playerKey": "478.p.6733-none", "rookie": False})
+        bad["draft"]["holds"][0]["released"] = False
         with self.assertRaises(ls.StateError):
             ls.resolve(bad, (), "OFFICIAL")
-        self.assertIn("OWNERSHIP HOLD", self.html)
 
     def test_amendment_is_staged_not_applied(self):
         a = self.i["tradeIndex"]["TRADE-F-AMEND"]
@@ -419,6 +424,7 @@ class TestDraftRoom(unittest.TestCase):
 
     def test_amendment_preview_is_a_correction_not_a_replay(self):
         s = ls.resolve(self.i, ["TRADE-F-AMEND"], "SCENARIO")
+        self.assertEqual(s["draftConflicts"], [{"pickId": "2026-R2-07", "selector": "franchise-02", "scenarioOwner": "franchise-05"}])
         self.assertTrue(all(r["applied"] and not r["errors"] for r in s["tradeResults"]))
         self.assertEqual([r["tradeId"] for r in s["tradeResults"]].count("TRADE-F"), 1)   # TRADE-F not replayed
         self.assertEqual((s["pickOwner"]["2026-R2-07"], s["playerOwner"]["478.p.10444"]), ("franchise-05", "franchise-02"))
@@ -430,26 +436,22 @@ class TestDraftRoom(unittest.TestCase):
         pt = ls.pick_table(self.i, s)
         self.assertEqual(len([r for r in pt if r["pickId"] == "2026-R2-07"]), 1)
 
-    def test_confirming_the_amendment_lifts_the_hold_and_keeps_audit_clean(self):
+    def test_confirming_the_amendment_after_the_pick_was_used_fails_loudly(self):
         import copy
         c = copy.deepcopy(self.i)
         c["tradeIndex"]["TRADE-F-AMEND"]["status"] = "OFFICIAL"
-        s = ls.resolve(c, (), "OFFICIAL")
-        self.assertEqual(ls.active_holds(c), [])
-        self.assertEqual(s["pickOwner"]["2026-R2-07"], "franchise-05")
-        self.assertEqual(s["playerOwner"]["478.p.10444"], "franchise-02")
-        self.assertEqual(len(s["completedPicks"]), 22)          # no selection undone
-        self.assertEqual(ls.audit_official(c)["checks"]["everyOfficialTradeApplied"], True)
+        with self.assertRaises(ls.StateError):   # 2.07 was already used by CrazyCat: the amendment must be re-scoped first
+            ls.resolve(c, (), "OFFICIAL")
 
     def test_page_ledger_and_picks_agree(self):
         panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
         self.assertIn("ON THE CLOCK", panel)
-        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+2\.07")
+        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+2\.08")
         self.assertIn("Neemias Queta", panel)
-        self.assertEqual(panel.count("pick-sel"), 22)
+        self.assertEqual(panel.count("pick-sel"), 23)
         pills = re.findall(r'<span class="pick-extra pick-sel">.*?</span>', panel, re.S)
-        self.assertEqual(len(pills), 22)
-        self.assertEqual(sum('pick-r"' in x for x in pills), 11)  # eleven rookie badges
+        self.assertEqual(len(pills), 23)
+        self.assertEqual(sum('pick-r"' in x for x in pills), 12)  # twelve rookie badges
         self.assertTrue(all("→" in x for x in pills))            # every pick shows cap and running total
         for part in ("dr-ticker", "dr-clock", "dr-list", "dr-best"):
             self.assertIn(part, panel)

@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-14T02:21:43Z
+Generated: 2026-10-14T02:34:53Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: fix/ledger-row-layout
-Commit: 501e44d
+Commit: 6e978ef
 Base: main
 Working tree: dirty
 
@@ -27,14 +27,15 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md    | 85 +++++------------------------------------
+ ai_exchange/REVIEW_PACKET.md    | 84 ++++++++---------------------------------
  data/2026-27/draft_results.json |  7 +++-
  data/2026-27/draft_state.json   |  9 +++++
- index.html                      | 82 +++++++++++++++++++++------------------
- scripts/build_league_state.py   | 21 ++++++----
+ index.html                      | 82 +++++++++++++++++++++-------------------
+ scripts/build_league_state.py   | 23 ++++++-----
+ scripts/league_state.py         |  2 +-
  tests/test_fa_draft_pool.py     |  4 +-
- tests/test_league_state_data.py | 30 +++++++--------
- 7 files changed, 99 insertions(+), 139 deletions(-)
+ tests/test_league_state_data.py | 36 ++++++++++--------
+ 8 files changed, 113 insertions(+), 134 deletions(-)
 ```
 
 ## Validation
@@ -54,6 +55,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - data/2026-27/draft_state.json
 - index.html
 - scripts/build_league_state.py
+- scripts/league_state.py
 - tests/test_fa_draft_pool.py
 - tests/test_league_state_data.py
 
