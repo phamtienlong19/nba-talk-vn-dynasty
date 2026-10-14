@@ -263,6 +263,15 @@
       "playerKey": "478.p.6567",
       "rookie": false,
       "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-14",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-14",
+      "franchiseId": "franchise-14",
+      "playerKey": "478.p.6757",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
     }
   ],
   "holds": [
