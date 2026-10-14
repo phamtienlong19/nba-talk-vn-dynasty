@@ -98,12 +98,15 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
         # post-trade checkpoint reproduces from the locked inputs + official trades
         before_draft = dict(self.i)
         before_draft["draft"] = {**self.i["draft"], "events": []}  # PRE_DRAFT_LOCK predates the first selection
+        kept = [t for t in self.i["trades"]["trades"] if t["tradeId"] != "TRADE-D-AMEND"]  # post-lock commissioner clarification
+        before_draft["trades"] = {**self.i["trades"], "trades": kept}
+        before_draft["tradeIndex"] = {t["tradeId"]: t for t in kept}
         self.assertEqual(post, ls.make_snapshot(before_draft, "PRE_DRAFT_LOCK"))
 
     # ----- availability / recommendation derive from the locked baseline
     def test_new_cuts_are_available_and_new_keepers_are_not(self):
         keys = {r[1] for r in self.data["available"]["rows"]}
-        for cut in ("Royce O'Neale", "Jusuf Nurkić", "Collin Sexton", "Max Christie"):  # Poeltl was drafted at 1.09
+        for cut in ("Royce O'Neale", "Collin Sexton", "Max Christie"):  # Poeltl (1.09) and Nurkić (3.02) were drafted
             self.assertIn(cut, keys, cut)
         for kept in ("Isaiah Jackson", "Bilal Coulibaly", "Jonathan Kuminga", "Dennis Schröder", "Kelly Oubre Jr."):
             self.assertNotIn(kept, keys, kept)
@@ -114,12 +117,11 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
 
     def test_nurkic_and_poeltl_cut_sources_and_cap_first_order(self):
         rows = {r[1]: r for r in self.data["available"]["rows"]}
-        self.assertEqual((rows["Jusuf Nurkić"][7], rows["Jusuf Nurkić"][4]), ("DHA", 4.0))
+        self.assertNotIn("Jusuf Nurkić", rows)  # DHA's cut was selected at 3.02: no longer available
         self.assertNotIn("Jakob Poeltl", rows)  # DHA's cut was selected at 1.09: no longer available
         on_board = sorted((r for r in self.data["available"]["rows"] if r[6]), key=lambda r: r[6])
         caps = [r[4] for r in on_board]
         self.assertEqual(caps, sorted(caps, reverse=True))  # recommendation board still CAP-first
-        self.assertIn("Jusuf Nurkić", [r[1] for r in on_board])
 
     def test_cuts_lists_are_cap_descending_on_every_card(self):
         for card in re.findall(r'<section class="team-card[^"]*".*?</section>', self.html, re.S):

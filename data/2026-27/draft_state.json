@@ -281,6 +281,33 @@
       "playerKey": "478.p.4622",
       "rookie": false,
       "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R2-16",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R2-16",
+      "franchiseId": "franchise-16",
+      "playerKey": "provisional:hannes-steinbach",
+      "rookie": true,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R3-01",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R3-01",
+      "franchiseId": "franchise-01",
+      "playerKey": "478.p.10296",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
+    },
+    {
+      "eventId": "DRAFT-2026-R3-02",
+      "type": "DRAFT_PICK",
+      "pickId": "2026-R3-02",
+      "franchiseId": "franchise-02",
+      "playerKey": "478.p.5327",
+      "rookie": false,
+      "source": "commissioner-confirmed draft results"
     }
   ],
   "holds": [

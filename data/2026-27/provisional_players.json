@@ -1,7 +1,29 @@
 {
   "note": "Drafted players that are not yet in the Yahoo player master (data/yahoo/player_registry.json). Provisional: cap is 0 (drafted rookies carry +0 so far) and team/position come from the dynasty consensus list. Once Yahoo adds a player, draft_state events must be re-keyed to the Yahoo playerKey and the entry deleted here.",
   "players": [
-    {"playerKey": "provisional:dailyn-swain", "name": "Dailyn Swain", "nbaTeam": "CHI", "displayPosition": "SF", "cap": 0, "provisional": true},
-    {"playerKey": "provisional:bennett-stirtz", "name": "Bennett Stirtz", "nbaTeam": "OKC", "displayPosition": "PG", "cap": 0, "provisional": true}
+    {
+      "playerKey": "provisional:dailyn-swain",
+      "name": "Dailyn Swain",
+      "nbaTeam": "CHI",
+      "displayPosition": "SF",
+      "cap": 0,
+      "provisional": true
+    },
+    {
+      "playerKey": "provisional:bennett-stirtz",
+      "name": "Bennett Stirtz",
+      "nbaTeam": "OKC",
+      "displayPosition": "PG",
+      "cap": 0,
+      "provisional": true
+    },
+    {
+      "playerKey": "provisional:hannes-steinbach",
+      "name": "Hannes Steinbach",
+      "nbaTeam": "CHA",
+      "displayPosition": "PF",
+      "cap": 0,
+      "provisional": true
+    }
   ]
 }
