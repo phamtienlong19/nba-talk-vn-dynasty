@@ -306,7 +306,9 @@ def _apply_trade(inputs, state, trade, active_ids):
 
 
 def apply_draft_events(inputs, state):
-    """Append-only DRAFT_PICK events: roster, availability, cap, pick completion, cursor."""
+    """Append-only DRAFT_PICK events: roster, availability, cap, pick completion, cursor. A trade that
+    later moves an already-used pick (e.g. the 2.07 amendment) updates the pick's recorded owner only: the selection
+    stays with whoever made it and the difference is listed in state["draftConflicts"] -- history is never undone."""
     held = {h["pickId"]: h for h in active_holds(inputs)}
     for ev in inputs["draft"].get("events", []):
         if ev["type"] != "DRAFT_PICK":
@@ -317,7 +319,14 @@ def apply_draft_events(inputs, state):
         if pid not in inputs["pickIndex"]:
             raise StateError(f"{pid}: unknown pick")
         if state["pickOwner"].get(pid) != fid:
-            raise StateError(f"{pid}: {fid} does not currently own this pick")
+            past = {inputs["pickIndex"][pid]["originalOwner"]}
+            for tid in state["activeTradeIds"]:
+                for x in inputs["tradeIndex"][tid]["assets"]:
+                    if x.get("pickId") == pid:
+                        past |= {x["from"], x["to"]}
+            if fid not in past:
+                raise StateError(f"{pid}: {fid} does not currently own this pick")
+            state.setdefault("draftConflicts", []).append({"pickId": pid, "selector": fid, "scenarioOwner": state["pickOwner"].get(pid)})
         if pid in state["completedPicks"]:
             raise StateError(f"{pid}: pick already used")
         if key in state["playerOwner"]:
@@ -329,9 +338,11 @@ def apply_draft_events(inputs, state):
 
 def active_holds(inputs: dict) -> list:
     """Commissioner holds on picks whose ownership is unresolved. A hold lifts once the transaction it waits on is
-    decided (OFFICIAL or VOID); until then the pick cannot be recorded."""
+    decided (OFFICIAL or VOID) or the commissioner releases it (`released`); until then the pick cannot be recorded."""
     out = []
     for h in inputs["draft"].get("holds", []):
+        if h.get("released"):  # commissioner released the pick for its CURRENT owner; the transaction stays pending
+            continue
         t = inputs["tradeIndex"].get(h.get("waitingOn"))
         if t is None or t["status"] not in ("OFFICIAL", "VOID"):
             out.append(h)
@@ -361,7 +372,7 @@ def draft_summary(inputs: dict, state: dict) -> dict:
                          "name": player_name(inputs, c["playerKey"]), "cap": cap, "capBefore": before, "capAfter": running[f],
                          "room": ceiling - running[f], "status": cap_status(inputs, running[f]),
                          "rookie": bool(ev.get("rookie")),
-                         "pos": inputs["registry"].get(c["playerKey"], {}).get("displayPosition", ""),
+                         "pos": (inputs["registry"].get(c["playerKey"], {}).get("displayPosition") or "").replace(",", "/"),
                          "nba": inputs["registry"].get(c["playerKey"], {}).get("nbaTeam", "")})
     holds_raw = active_holds(inputs)
     held_ids = {h["pickId"] for h in holds_raw}
@@ -551,8 +562,10 @@ def audit_official(inputs: dict) -> dict:
     checks = {
         "everyPlayerHasOneOwner": len(listed_players) == len(set(listed_players)) == len(state["playerOwner"])
                                   == len(base["playerOwner"]) + len(state["draftedPlayers"]),
-        "everyDraftSelectionOnceAndOwnedByThePickOwner": len(state["completedPicks"]) == len(state["draftedPlayers"]) == len(inputs["draft"].get("events", []))
-                                  and all(state["playerOwner"][c["playerKey"]] == c["franchiseId"] == state["pickOwner"][pid]
+        "everyDraftSelectionOnceAndKeptBySelector": len(state["completedPicks"]) == len(state["draftedPlayers"]) == len(inputs["draft"].get("events", []))
+                                  and all(state["playerOwner"][c["playerKey"]] == c["franchiseId"]
+                                          and (c["franchiseId"] == state["pickOwner"][pid]
+                                               or pid in {x["pickId"] for x in state.get("draftConflicts", [])})  # a later trade moved the used pick: owner label only
                                           for pid, c in state["completedPicks"].items()),
         "everyPickHasOneOwner": listed_picks == all_picks and len(all_picks) == 48,
         "everyOfficialTradeApplied": all(r["applied"] and not r["errors"] for r in state["tradeResults"])

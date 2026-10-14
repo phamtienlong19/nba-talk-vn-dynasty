@@ -152,7 +152,9 @@ class TestCrownMarker(unittest.TestCase):
         self.assertIn(f'<b>{pool.CROWN}{pool.DEFENDING_CHAMPION_SHORT_NAME}</b>', self.html)
 
     def test_crown_does_not_appear_on_other_teams(self):
-        crown_count = self.html.count(pool.CROWN)
+        # the live draft room (ticker / up-next) legitimately repeats the champion's crowned chip; count the rest
+        html = re.sub(r"<!--DRAFT-STATUS-BEGIN-->.*?<!--DRAFT-STATUS-END-->", "", self.html, flags=re.S)
+        crown_count = html.count(pool.CROWN)
         # draft order (3 picks) + keeper card + cap row = 5, always present.
         # + 1 more FA/DRAFT pool src tag, ONLY if one of the champion's own
         # cut players naturally clears the top 60 this cycle (varies with

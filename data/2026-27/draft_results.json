@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "source": "league draft results as confirmed by the commissioner; first 21 selections (through 2.05)",
+  "source": "league draft results as confirmed by the commissioner; first 23 selections (through 2.07)",
   "note": "Authoritative input for scripts/import_draft_results.py, which resolves names against the Yahoo player master and appends DRAFT_PICK events to draft_state.json idempotently. Rookie flags come from this record.",
   "results": [
     {
@@ -106,6 +106,16 @@
     {
       "pickId": "2026-R2-05",
       "player": "Aday Mara",
+      "rookie": true
+    },
+    {
+      "pickId": "2026-R2-06",
+      "player": "Tari Eason",
+      "rookie": false
+    },
+    {
+      "pickId": "2026-R2-07",
+      "player": "Morez Johnson Jr.",
       "rookie": true
     }
   ]

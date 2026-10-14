@@ -66,9 +66,9 @@ def parse_board(index_html: str):
     panel = index_html[index_html.index('id="draft-order"'):index_html.index('id="rosters-a"')]
     picks = []
     by_short = {t["short"].upper(): t["name"] for t in teams}
-    for m in re.finditer(r'<div class="pick-slot">(\d+)\.(\d+)</div>\s*<div class="pick-team"><span class="pick-chip"[^>]*>(.*?)</span></div>\s*<div class="pick-note">(.*?)</div>', panel, re.S):
+    for m in re.finditer(r'<div class="pick-slot">(\d+)\.(\d+)</div>\s*<div class="pick-team"><span class="pick-chip"[^>]*>(.*?)</span>(.*?)</div>\s*<div class="pick-note">(.*?)</div>', panel, re.S):
         chip = html_lib.unescape(m.group(3)).strip()
-        via = re.search(r'VIA ([^<]+)<', m.group(4))
+        via = re.search(r'VIA ([^<]+)<', m.group(4) + m.group(5))
         if via:  # the ledger shows the CURRENT owner; "VIA X" names the slot's original team
             chip = by_short[html_lib.unescape(via.group(1)).strip().upper()]
         picks.append((int(m.group(1)), int(m.group(2)), chip))
@@ -130,7 +130,9 @@ def build_baseline(index_html: str, registry: dict, franchises: list) -> tuple[d
                     "picks": pick_rows}
 
 
-LEDGER_ROW_RE = re.compile(r'(<div class="pick-slot">(\d+)\.(\d+)</div>\n<div class="pick-team">)(<span class="pick-chip"[^>]*>.*?</span>)(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
+LEDGER_ROW_RE = re.compile(r'(<div class="pick-slot">(\d+)\.(\d+)</div>\n<div class="pick-team">)(<span class="pick-chip"[^>]*>.*?</span>)'
+                           r'(<span class="pick-tags">(?:<span class="pick-extra[^"]*">[^<]*</span>)*</span>)?(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
+BASE_TAG_RE = re.compile(r'<span class="pick-extra">(?!VIA )[^<]*</span>')
 VIA_RE = re.compile(r'<span class="pick-extra">VIA [^<]*</span>')
 SEL_RE = re.compile(r'<span class="pick-extra pick-(?:sel|r|hold)">.*?</span>')
 DRAFT_STATUS_BEGIN, DRAFT_STATUS_END = "<!--DRAFT-STATUS-BEGIN-->", "<!--DRAFT-STATUS-END-->"
@@ -163,9 +165,10 @@ def sync_ledger(index_html: str, inputs: dict) -> str:
         rnd, slot = int(m.group(2)), int(m.group(3))
         pid = f"2026-R{rnd}-{slot:02d}"
         owner, orig = official["pickOwner"][pid], inputs["pickIndex"][pid]["originalOwner"]
-        note = SEL_RE.sub("", VIA_RE.sub("", m.group(6)))
+        tags = list(dict.fromkeys(BASE_TAG_RE.findall((m.group(5) or "") + m.group(7))))  # LOTTERY / RANK n BONUS stay
         if owner != orig:
-            note += f'<span class="pick-extra">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>'
+            tags.append(f'<span class="pick-extra">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>')
+        note = ""
         if pid in done:
             d = done[pid]
             cap = int(d["cap"]) if float(d["cap"]).is_integer() else d["cap"]
@@ -174,8 +177,9 @@ def sync_ledger(index_html: str, inputs: dict) -> str:
                      + ('<i class="pick-r">R</i>' if d["rookie"] else "")
                      + f'<em>+{cap} → {tot}</em></span>')
         elif pid in held:
-            note += '<span class="pick-extra pick-hold">OWNERSHIP HOLD</span>'
-        return m.group(1) + chip_of[order.index(owner)] + m.group(5) + note + m.group(7)
+            tags.append('<span class="pick-extra pick-hold">OWNERSHIP HOLD</span>')
+        tag_html = f'<span class="pick-tags">{"".join(tags)}</span>' if tags else ""
+        return m.group(1) + chip_of[order.index(owner)] + tag_html + m.group(6) + note + m.group(8)
     panel = LEDGER_ROW_RE.sub(row, panel)
     cur = summary["cursor"]
     best = best_available(inputs, index_html, official, cur["room"] if cur else None)
@@ -213,7 +217,8 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
         return chip_of[order.index(fid)]
     def dot(fid):
         t = teams[fid]
-        return f'<span class="dr-dot" style="--team-color:{t["color"]};--team-text:{t["text"]}">{esc(t["short"])}</span>'
+        crown = pool.CROWN if t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME else ""
+        return f'<span class="dr-dot" style="--team-color:{t["color"]};--team-text:{t["text"]}">{crown}{esc(t["short"])}</span>'
     cur = summary["cursor"]
     items = "".join(
         f'<span class="dr-t"><b>{d["label"]}</b>{dot(d["franchiseId"])}<span class="dr-n">{esc(d["name"])}</span>'
@@ -361,7 +366,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         key = pool.normalize_name(p["name"])
         c = src_by_norm.get(key)
         src = (c.src_team if c is not None and c.src == "cut" else ("R" if c is not None and c.rookie else "FA"))
-        rows.append([p["playerKey"], p["name"], p["nbaTeam"], p["displayPosition"], p["projectedAuctionValue"],
+        rows.append([p["playerKey"], p["name"], p["nbaTeam"], (p["displayPosition"] or "").replace(",", "/"), p["projectedAuctionValue"],
                      p["oRank"], board_rank.get(key), src])
         seen_norm.add(key)
     extras = []
