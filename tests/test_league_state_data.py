@@ -235,8 +235,8 @@ class TestRepoState(unittest.TestCase):
         a = ls.audit_official(self.o)
         self.assertTrue(all(a["checks"].values()), a["checks"])
         t = {v["short"]: (v["cap"], v["count"]) for v in a["teams"].values()}
-        # post-trade caps + the 19 drafted players (counts include draftees)
-        self.assertEqual(t, {"Bsy": (178, 11), "CrazyCat": (131, 10), "Melo": (157, 11), "LC": (161, 10), "HCMC": (145, 11),
+        # post-trade caps + the 21 drafted players (counts include draftees)
+        self.assertEqual(t, {"Bsy": (178, 11), "CrazyCat": (131, 10), "Melo": (157, 11), "LC": (161, 11), "HCMC": (145, 12),
                              "Dũng": (132, 10), "Maxfixe": (149, 10), "DHA": (154, 10), "Đạt": (174, 10), "DonTrick": (123, 10),
                              "Thịnh": (177, 10), "sup fam": (141, 10), "Quân": (163, 10), "TuLy": (148, 10), "Bz": (156, 10), "TT": (174, 10)})
         # violations are surfaced, not corrected
@@ -313,20 +313,20 @@ class TestDraftRoom(unittest.TestCase):
         m = re.search(r'<script type="application/json" id="league-data">(.*?)</script>', cls.html, re.S)
         cls.data = json.loads(m.group(1).replace("<\\/", "</"))
 
-    def test_exactly_19_unique_selections_in_draft_order(self):
+    def test_exactly_21_unique_selections_in_draft_order(self):
         ev = self.i["draft"]["events"]
-        self.assertEqual(len(ev), 19)
-        self.assertEqual(len({e["playerKey"] for e in ev}), 19)
-        self.assertEqual(len({e["pickId"] for e in ev}), 19)
+        self.assertEqual(len(ev), 21)
+        self.assertEqual(len({e["playerKey"] for e in ev}), 21)
+        self.assertEqual(len({e["pickId"] for e in ev}), 21)
         order = [p["pickId"] for p in sorted(self.i["picks"]["picks"], key=lambda p: (p["round"], p["slot"]))]
-        self.assertEqual([e["pickId"] for e in ev], order[:19])
+        self.assertEqual([e["pickId"] for e in ev], order[:21])
         self.assertEqual([c["label"] for c in self.d["completed"]][:3], ["1.01", "1.02", "1.03"])
 
     def test_state_summary(self):
         d = self.d
-        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (19, 29, 48, 9))
-        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("2.04", "franchise-04"))  # LC owns 2.04
-        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("2.03", "Neemias Queta"))
+        self.assertEqual((len(d["completed"]), d["remaining"], d["total"], d["rookies"]), (21, 27, 48, 11))
+        self.assertEqual((d["cursor"]["label"], d["cursor"]["owner"]), ("2.06", "franchise-06"))  # Dũng owns 2.06
+        self.assertEqual((d["latest"]["label"], d["latest"]["name"]), ("2.05", "Aday Mara"))
         self.assertEqual(d["status"], "IN_PROGRESS")
 
     def test_selecting_franchise_is_the_post_trade_pick_owner(self):
@@ -343,7 +343,7 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual((by["1.03"]["name"], by["1.03"]["playerKey"], by["1.03"]["cap"]), ("Caleb Wilson", "478.p.10595", 10.0))
         self.assertEqual((by["1.01"]["cap"], by["1.06"]["name"], by["1.06"]["cap"]), (20.0, "Day'Ron Sharpe", 6.0))
         self.assertEqual(sorted(c["label"] for c in self.d["completed"] if c["rookie"]),
-                         ["1.01", "1.02", "1.03", "1.04", "1.05", "1.07", "1.13", "1.14", "2.02"])
+                         ["1.01", "1.02", "1.03", "1.04", "1.05", "1.07", "1.13", "1.14", "2.02", "2.04", "2.05"])
         rookies = pool.load_rookie_names()
         for c in self.d["completed"]:
             self.assertEqual(c["rookie"], pool.normalize_name(c["name"]) in rookies, c["name"])  # agrees with the rookie source
@@ -432,16 +432,22 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual(ls.active_holds(c), [])
         self.assertEqual(s["pickOwner"]["2026-R2-07"], "franchise-05")
         self.assertEqual(s["playerOwner"]["478.p.10444"], "franchise-02")
-        self.assertEqual(len(s["completedPicks"]), 19)          # no selection undone
+        self.assertEqual(len(s["completedPicks"]), 21)          # no selection undone
         self.assertEqual(ls.audit_official(c)["checks"]["everyOfficialTradeApplied"], True)
 
     def test_page_ledger_and_picks_agree(self):
         panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
         self.assertIn("ON THE CLOCK", panel)
-        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+2\.04")
+        self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+2\.06")
         self.assertIn("Neemias Queta", panel)
-        self.assertEqual(panel.count("pick-sel"), 19)
-        self.assertEqual(panel.count('pick-r"'), 9)  # nine rookie badges (the LATEST pick, Queta, is not a rookie)
+        self.assertEqual(panel.count("pick-sel"), 21)
+        pills = re.findall(r'<span class="pick-extra pick-sel">.*?</span>', panel, re.S)
+        self.assertEqual(len(pills), 21)
+        self.assertEqual(sum('pick-r"' in x for x in pills), 11)  # eleven rookie badges
+        self.assertTrue(all("→" in x for x in pills))            # every pick shows cap and running total
+        for part in ("dr-ticker", "dr-clock", "dr-list", "dr-best"):
+            self.assertIn(part, panel)
+        self.assertEqual(panel.count('class="dr-run"'), 2)      # duplicated run for the seamless loop
         self.assertEqual(bls.sync_ledger(self.html, self.i), self.html)
         self.assertEqual(self.data["draft"], ls.draft_summary(self.i, self.o))
 
@@ -518,7 +524,7 @@ class TestEmbeddedPageData(unittest.TestCase):
         by_rank = {int(r): h.unescape(n) for r, n in pool_names}
         for row in self.data["available"]["rows"]:
             if row[6] is not None:
-                self.assertEqual(by_rank[row[6]], row[1])
+                self.assertEqual(pool.normalize_name(by_rank[row[6]]), pool.normalize_name(row[1]))
 
     def test_page_exposes_the_new_surfaces_and_existing_ones_remain(self):
         for anchor in ('id="trade-lab"', 'id="picks"', 'id="draft-pool"', 'id="cap"', 'id="rosters-a"', 'id="draft-order"'):

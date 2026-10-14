@@ -339,25 +339,47 @@ def active_holds(inputs: dict) -> list:
 
 
 def draft_summary(inputs: dict, state: dict) -> dict:
-    """Everything the draft room shows, derived from the events + the post-trade pick ledger."""
+    """Everything the draft room shows, derived from the events + the post-trade pick ledger.
+
+    Each completed pick carries the selecting team's RUNNING cap: capBefore -> capAfter, where the starting point is the
+    team's post-trade cap before any draftee and each draftee adds his frozen Yahoo salary in pick order."""
     order = sorted(inputs["picks"]["picks"], key=lambda p: (p["round"], p["slot"]))
+    floor, ceiling = cap_band(inputs)
+    drafted_caps = {}
+    for c in state["completedPicks"].values():
+        drafted_caps[c["franchiseId"]] = drafted_caps.get(c["franchiseId"], 0) + player_cap(inputs, c["playerKey"])
+    running = {f: team_cap(inputs, state, f) - drafted_caps.get(f, 0) for f in inputs["franchises"]}
     done = []
     for p in order:
         c = state["completedPicks"].get(p["pickId"])
         if c:
             ev = next(e for e in inputs["draft"]["events"] if e["pickId"] == p["pickId"])
-            done.append({"pickId": p["pickId"], "label": pick_label(p), "franchiseId": c["franchiseId"], "playerKey": c["playerKey"],
-                         "name": player_name(inputs, c["playerKey"]), "cap": player_cap(inputs, c["playerKey"]),
+            f, cap = c["franchiseId"], player_cap(inputs, c["playerKey"])
+            before = running[f]
+            running[f] = before + cap
+            done.append({"pickId": p["pickId"], "label": pick_label(p), "franchiseId": f, "playerKey": c["playerKey"],
+                         "name": player_name(inputs, c["playerKey"]), "cap": cap, "capBefore": before, "capAfter": running[f],
+                         "room": ceiling - running[f], "status": cap_status(inputs, running[f]),
                          "rookie": bool(ev.get("rookie")),
                          "pos": inputs["registry"].get(c["playerKey"], {}).get("displayPosition", ""),
                          "nba": inputs["registry"].get(c["playerKey"], {}).get("nbaTeam", "")})
-    cur = draft_cursor(inputs, state)
+    holds_raw = active_holds(inputs)
+    held_ids = {h["pickId"] for h in holds_raw}
     holds = [{"pickId": h["pickId"], "label": pick_label(inputs["pickIndex"][h["pickId"]]), "reason": h["reason"],
-              "waitingOn": h.get("waitingOn"), "owner": state["pickOwner"][h["pickId"]]} for h in active_holds(inputs)]
-    return {"status": inputs["draft"].get("status"), "completed": done, "total": len(order), "remaining": len(order) - len(done),
-            "rookies": sum(1 for d in done if d["rookie"]),
-            "cursor": None if cur is None else {"pickId": cur, "label": pick_label(inputs["pickIndex"][cur]), "owner": state["pickOwner"][cur],
-                                                "held": cur in {h["pickId"] for h in holds}},
+              "waitingOn": h.get("waitingOn"), "owner": state["pickOwner"][h["pickId"]]} for h in holds_raw]
+    left = {}
+    pending = [p for p in order if p["pickId"] not in state["completedPicks"]]
+    for p in pending:
+        left[state["pickOwner"][p["pickId"]]] = left.get(state["pickOwner"][p["pickId"]], 0) + 1
+
+    def slot(p):
+        o = state["pickOwner"][p["pickId"]]
+        return {"pickId": p["pickId"], "label": pick_label(p), "owner": o, "held": p["pickId"] in held_ids,
+                "cap": running[o], "room": ceiling - running[o], "picksLeft": left.get(o, 0)}
+    cur = pending[0] if pending else None
+    return {"status": inputs["draft"].get("status"), "completed": done, "total": len(order), "remaining": len(pending),
+            "rookies": sum(1 for d in done if d["rookie"]), "cap": {"floor": floor, "ceiling": ceiling},
+            "cursor": slot(cur) if cur else None, "upNext": [slot(p) for p in pending[1:6]],
             "latest": done[-1] if done else None, "holds": holds}
 
 
