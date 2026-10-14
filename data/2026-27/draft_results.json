@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "source": "league draft results as confirmed by the commissioner; first 38 selections (through 3.06)",
+  "source": "league draft results as confirmed by the commissioner; first 40 selections (through 3.08)",
   "note": "Authoritative input for scripts/import_draft_results.py, which resolves names against the Yahoo player master and appends DRAFT_PICK events to draft_state.json idempotently. Rookie flags come from this record.",
   "results": [
     {
@@ -191,6 +191,16 @@
     {
       "pickId": "2026-R3-06",
       "player": "Joan Beringer",
+      "rookie": false
+    },
+    {
+      "pickId": "2026-R3-07",
+      "player": "Rui Hachimura",
+      "rookie": false
+    },
+    {
+      "pickId": "2026-R3-08",
+      "player": "Nikola Vučević",
       "rookie": false
     }
   ]
