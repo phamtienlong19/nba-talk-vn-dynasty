@@ -160,8 +160,9 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn("Franz Wagner", bz["names"])
         self.assertEqual(sum(1 for n in bz["names"] if n == "Derrick White"), 1)
         melo = _read(_card(self.official, "Melo"))
-        self.assertIn("Aaron Gordon", melo["names"])
-        self.assertEqual(melo["picks"], "2.03 · 2.15")
+        self.assertNotIn("Aaron Gordon", melo["names"])   # commissioner clarification (TRADE-D-AMEND): Gordon stays with LC
+        self.assertIn("Aaron Gordon", _read(_card(self.official, "LC"))["names"])
+        self.assertEqual(melo["picks"], "2.03 · 2.15 · 3.04")  # Melo holds LC's 3.04
 
     def test_untraded_teams_keep_their_keepers_and_add_only_draftees(self):
         drafted = {c["name"] for c in ls.draft_summary(self.i, self.state)["completed"]}

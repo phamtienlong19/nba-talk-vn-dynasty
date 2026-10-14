@@ -334,6 +334,41 @@
           "to": "franchise-02"
         }
       ]
+    },
+    {
+      "tradeId": "TRADE-D-AMEND",
+      "label": "LC ↔ MELO · AMENDMENT",
+      "status": "OFFICIAL",
+      "order": 8,
+      "dependsOn": [
+        "TRADE-D"
+      ],
+      "amends": "TRADE-D",
+      "participants": [
+        "franchise-04",
+        "franchise-03"
+      ],
+      "note": "Commissioner clarification (relayed 2026-10-14): Aaron Gordon stays with LC and Melo holds LC's 3.04. Corrects completed TRADE-D (Gordon was to go to Melo): Gordon Melo → LC, 3.04 LC → Melo. All other TRADE-D components stand. A correction, not a replay.",
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.5295",
+          "name": "Aaron Gordon",
+          "from": "franchise-03",
+          "to": "franchise-04"
+        },
+        {
+          "type": "pick",
+          "pickId": "2026-R3-04",
+          "name": "3.04",
+          "from": "franchise-04",
+          "to": "franchise-03"
+        }
+      ],
+      "execution": {
+        "batch": "2026-10-14-commissioner-clarification",
+        "processedInOrder": 8
+      }
     }
   ]
 }
