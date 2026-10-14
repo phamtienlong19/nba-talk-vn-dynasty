@@ -219,9 +219,9 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
         f'<span class="dr-t"><b>{d["label"]}</b>{dot(d["franchiseId"])}<span class="dr-n">{esc(d["name"])}</span>'
         + ('<i class="pick-r">R</i>' if d["rookie"] else "")
         + f'<em>+{_num(d["cap"])} → {_num(d["capAfter"])}</em></span>'
-        for d in reversed(summary["completed"]))
+        for d in summary["completed"])
     dur = max(40, 4 * len(summary["completed"]))
-    ticker = (f'<div class="dr-ticker" aria-label="Recent selections, latest first" tabindex="0"><div class="dr-track" style="--dr-dur:{dur}s">'
+    ticker = (f'<div class="dr-ticker" aria-label="Selections in pick order" tabindex="0"><div class="dr-track" style="--dr-dur:{dur}s">'
               f'<div class="dr-run">{items}</div><div class="dr-run" aria-hidden="true">{items}</div></div></div>') if items else ""
     clock = ""
     if cur:

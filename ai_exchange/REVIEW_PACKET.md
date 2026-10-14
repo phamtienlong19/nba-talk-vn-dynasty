@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-14T01:47:03Z
+Generated: 2026-10-14T01:49:04Z
 
 ## Task
 Active Task
@@ -10,15 +10,15 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/draft-room-view
-Commit: b50622a
+Commit: 436c541
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: none
-CI: no runs found for this branch
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/41 (OPEN)
+CI: validate: in_progress/
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -30,7 +30,7 @@ Fingerprint: FRESH
  README.md                                       |    6 +-
  ai_exchange/CURRENT_STATE.json                  |   39 +-
  ai_exchange/IMPLEMENTATION_REPORT.md            |   17 +-
- ai_exchange/REVIEW_PACKET.md                    |   94 +-
+ ai_exchange/REVIEW_PACKET.md                    |  100 +-
  config/what_if_assumptions.json                 |   23 +
  data/2026-27/draft_results.json                 |  102 +
  data/2026-27/draft_state.json                   |  187 +-
@@ -43,11 +43,11 @@ Fingerprint: FRESH
  data/what_if/snapshots/2026-10-08/snapshot.json |   16 +
  docs/LEAGUE_STATE_MODEL.md                      |   27 +-
  docs/WHAT_IF_MODE.md                            |   32 +
- index.html                                      |  630 +++-
+ index.html                                      |  666 +++-
  scripts/build_fa_draft_pool.py                  |   30 +-
- scripts/build_league_state.py                   |  139 +-
+ scripts/build_league_state.py                   |  187 +-
  scripts/import_draft_results.py                 |   98 +
- scripts/league_state.py                         |  141 +-
+ scripts/league_state.py                         |  163 +-
  scripts/what_if.css                             |  137 +
  scripts/what_if.py                              |  523 +++
  scripts/what_if_app.js                          |  281 ++
@@ -57,11 +57,11 @@ Fingerprint: FRESH
  tests/test_final_keeper_freeze.py               |  177 +
  tests/test_keeper_overrides.py                  |   29 +-
  tests/test_league_state_builders.py             |    9 +-
- tests/test_league_state_data.py                 |  330 +-
+ tests/test_league_state_data.py                 |  336 +-
  tests/test_scenario_rendering.py                |  117 +-
  tests/test_seattle_keeper_ceiling.py            |    5 +-
  tests/test_what_if.py                           |  435 +++
- 34 files changed, 8682 insertions(+), 280 deletions(-)
+ 34 files changed, 8801 insertions(+), 279 deletions(-)
 ```
 
 ## Validation
