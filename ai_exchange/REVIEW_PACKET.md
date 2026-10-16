@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-16T04:45:22Z
+Generated: 2026-10-16T04:51:19Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/season-ops
-Commit: b884f42
+Commit: 85effd0
 Base: main
 Working tree: dirty
 
@@ -39,7 +39,7 @@ Fingerprint: FRESH
  data/2026-27/rosters/team_map.json                 |  145 +++
  data/2026-27/salary_freeze.json                    |  618 +++++++++++
  data/2026-27/season_transactions.json              |  132 +++
- data/2026-27/snapshots/POST_DRAFT.json             |  414 ++++++++
+ data/2026-27/snapshots/POST_DRAFT.json             |  414 +++++++
  data/2026-27/trades.json                           |   10 +-
  docs/LEAGUE_STATE_MODEL.md                         |    6 +
  docs/OPEN_RULE_QUESTIONS.md                        |   16 +
@@ -47,7 +47,7 @@ Fingerprint: FRESH
  docs/SEASON_STATE_MODEL.md                         |   69 ++
  docs/YAHOO_API_FEASIBILITY.md                      |   99 ++
  docs/examples/roster_snapshot_example.csv          |  193 ++++
- index.html                                         | 1123 +++++++++++---------
+ index.html                                         | 1131 +++++++++++---------
  scripts/build_fa_draft_pool.py                     |    6 +-
  scripts/build_league_state.py                      |   76 +-
  scripts/import_rosters.py                          |  346 ++++++
@@ -57,11 +57,11 @@ Fingerprint: FRESH
  tests/test_final_keeper_freeze.py                  |   11 +-
  tests/test_keeper_overrides.py                     |    5 +-
  tests/test_league_state_data.py                    |   54 +-
- tests/test_scenario_rendering.py                   |   89 +-
+ tests/test_scenario_rendering.py                   |  102 +-
  tests/test_season_ops.py                           |  413 +++++++
  tests/test_seattle_keeper_ceiling.py               |    3 +-
  tests/test_what_if.py                              |    4 +-
- 34 files changed, 5138 insertions(+), 780 deletions(-)
+ 34 files changed, 5158 insertions(+), 781 deletions(-)
 ```
 
 ## Validation

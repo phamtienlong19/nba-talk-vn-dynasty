@@ -171,7 +171,7 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
 
     def test_public_wording_says_the_keeper_layer_is_locked_not_projected(self):
         js = re.search(r'<script id="league-app">(.*?)</script>', self.html, re.S).group(1)
-        self.assertIn("ROSTERS VERIFIED", js)  # in-season the pill reports the verified roster snapshot
+        self.assertIn("✓ ROSTERS", js)  # in-season the pill reports the verified roster snapshot
         self.assertEqual(self.data["keeperStatus"], "locked")
         static = self.html.split('<script id="league-app">')[0]
         self.assertNotIn("PROJECTED (NOT FROZEN)", static)

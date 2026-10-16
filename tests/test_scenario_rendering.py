@@ -177,15 +177,14 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_cards_show_in_season_movement_from_the_post_draft_roster(self):
         card = _card(self.official, "Bz")
-        self.assertIn("POST-DRAFT", card)
-        self.assertIn(">CURRENT<", card)
-        self.assertIn("KEEPER-FREEZE CUTS", card)
+        self.assertIn("vs draft", card)                     # delta against the post-draft roster
+        self.assertIn("KEEPER-FREEZE CUTS", card)           # kept in the DOM, hidden in-season
         cc = re.sub(r"<[^>]+>", "", _card(self.official, "CrazyCat"))
-        self.assertIn("IN +Zion Williamson", cc)             # the completed in-season trade, applied once
-        self.assertIn("OUT −Morez Johnson Jr.R2.07 CrazyCat", cc)  # rookie chip + where he was drafted
+        self.assertIn("INZion Williamson", cc)               # the completed in-season trade, applied once
+        self.assertIn("OUTMorez Johnson Jr.R2.07 CrazyCat", cc)  # rookie chip + where he was drafted
         self.assertNotIn("Morez Johnson Jr.", _read(_card(self.official, "CrazyCat"))["names"])
         self.assertIn("Morez Johnson Jr.", _read(_card(self.official, "HCMC"))["names"])
-        self.assertIn("DRAFTED +", _card(self.official, "Quân"))  # every team has drafted: movement lists the draftees
+        self.assertIn(">DRAFTED<", _card(self.official, "Quân"))  # every team has drafted: movement lists the draftees
 
     def test_in_season_acquisitions_are_styled_apart_from_own_draftees(self):
         def row(short, name):
@@ -213,14 +212,18 @@ class TestRenderedCards(unittest.TestCase):
         text = re.sub(r"<[^>]+>", " ", lab)
         for name in ("Stephon Castle", "Cedric Coward", "Victor Wembanyama", "Nikola Jokić"):
             self.assertIn(name, text)
-        self.assertIn("PAYROLL", text)                                # each side shows its payroll change
+        self.assertRegex(text, r"178\s*→\s*175")                     # each side shows its payroll change
         self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
         self.assertNotIn("AMENDMENT", lab)                             # withdrawn: not actionable
         done = re.search(r'id="lab-done">(.*?)</details>', self.official, re.S).group(1)
         self.assertEqual(done.count('class="tcard done'), 1)
         self.assertIn("Morez Johnson Jr.", done)
-        self.assertIn("COMPLETED", done)
-        self.assertIn("WITHDRAWN", done)                               # listed only as history
+        self.assertIn("✓ DONE", done)
+        self.assertNotIn("WITHDRAWN", done)                            # withdrawn entries are not shown
+        hist = re.sub(r"<[^>]+>", " ", done.split("Pre-draft")[1])
+        self.assertIn("Alperen Şengün", hist)                          # LC ↔ Melo shown as one aggregated trade:
+        self.assertNotIn("Aaron Gordon", hist)                         # Gordon moved and moved back nets out
+        self.assertRegex(hist, r"Alperen Şengün\s+3\.\s*04")
 
     def test_scenario_movement_credits_the_drafting_team(self):
         scn = _dump("file://" + os.path.abspath(INDEX) + "?mode=scenario&trades=PROP-2026-001")
@@ -228,11 +231,11 @@ class TestRenderedCards(unittest.TestCase):
         drafted = re.search(r'<div class="mv-dr">(.*?)</div>', mv, re.S).group(1)
         self.assertNotIn("Joan Beringer", drafted)          # drafted by sup fam at 3.06, not by Bsy
         self.assertIn("Aaron Nesmith", drafted)             # Bsy's own 2.01 pick
-        in_line = re.search(r'<div class="mv-dr"><span>IN \+</span>(.*?)</div>', mv, re.S).group(1)
+        in_line = re.search(r'<span class="mv-l">IN</span>(.*?)</div>', mv, re.S).group(1)
         self.assertIn("Cedric Coward", in_line)
         self.assertRegex(in_line, r'Joan Beringer</span>.*?class="mv-pk"[^>]*>3\.<span class="num">06</span> sup fam|Joan Beringer</span>.*?3.*?06.*?sup fam')
         sup = re.search(r'<div class="mv">(.*?)</details>', _card(scn, "sup fam"), re.S).group(1)
-        self.assertRegex(sup, r'<span>OUT −</span>.*?Joan Beringer')
+        self.assertRegex(sup, r'<span class="mv-l">OUT</span>.*?Joan Beringer')
 
     def test_traded_rookie_keeps_rookie_styling_in_summaries(self):
         mv = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "HCMC"), re.S).group(1)
@@ -241,7 +244,7 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn('class="src src-r"', morez.group(1))
         self.assertIn("CrazyCat", morez.group(1))
         cc = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "CrazyCat"), re.S).group(1)
-        self.assertRegex(cc, r'<span>OUT −</span><span class="mv-pl rk"><span>Morez Johnson Jr\.</span>')
+        self.assertRegex(cc, r'<span class="mv-l">OUT</span><span class="mv-items"><span class="mv-pl rk"><span>Morez Johnson Jr\.</span>')
         scn = _dump("file://" + os.path.abspath(INDEX) + "?mode=scenario&trades=PROP-2026-001")
         folds = re.search(r'id="lab-folds">(.*)', scn, re.S).group(1)
         self.assertIn('<span class="mv-pl"><span>Joan Beringer</span>', folds)  # veteran draftee: slot, no purple
@@ -260,10 +263,10 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_public_ui_shows_the_verified_roster_snapshot(self):
         m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill cap-rule"', self.official)
-        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "ROSTERS VERIFIED 2026-10-14 · DRAFT NIGHT + 1 TRADE")
+        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 14 · +1 TRADE")
         rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
         self.assertEqual(len(rules), 4)
-        self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "CAP = TOP 9 SALARIES · IL INCLUDED" for r in rules), rules)
+        self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 $ COUNT · IL ✓" for r in rules), rules)
         self.assertNotIn("NOT FROZEN", self.official.split("<body", 1)[1].split('<script id="league-app">')[0])
 
     def test_pick_pill_never_clips(self):

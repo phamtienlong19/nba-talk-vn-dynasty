@@ -226,10 +226,10 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
     if not summary["remaining"]:  # draft over: the live room is shelved, leaving a one-line completion summary
         last = summary["latest"]
         t = teams[last["franchiseId"]]
-        block = (DRAFT_STATUS_BEGIN + '<div class="draft-room draft-done"><span class="ds-k">DRAFT COMPLETE</span>'
-                 f'<span><b>{summary["total"]}</b> of <b>{summary["total"]}</b> selections</span>'
-                 f'<span><b>{summary["rookies"]}</b> rookies</span>'
-                 f'<span>final pick <b>{last["label"]}</b> {esc(last["name"])} · {esc(t["short"])}</span></div>' + DRAFT_STATUS_END)
+        block = (DRAFT_STATUS_BEGIN + '<div class="draft-room draft-done"><span class="ds-k">✓ DRAFT COMPLETE</span>'
+                 f'<span><b>{summary["total"]}</b>/<b>{summary["total"]}</b> picks</span>'
+                 f'<span><b>{summary["rookies"]}</b> <i class="pick-r">R</i></span>'
+                 f'<span>last <b>{last["label"]}</b> {esc(last["name"])} · {esc(t["short"])}</span></div>' + DRAFT_STATUS_END)
         if DRAFT_STATUS_BEGIN in panel:
             x, y = panel.index(DRAFT_STATUS_BEGIN), panel.index(DRAFT_STATUS_END) + len(DRAFT_STATUS_END)
             return panel[:x] + block + panel[y:]
@@ -343,6 +343,31 @@ def cmd_lock(args):
     print(f"keepers LOCKED ({locked['lockDigest'][:12]})")
 
 
+def public_pre_draft(trades: list) -> list:
+    """What the league sees of the pre-draft ledger: withdrawn/void entries hidden, and every OFFICIAL amendment
+    folded into the trade it amends as one net trade (a leg moved and moved back cancels out). The ledger file keeps
+    the amendment record for audit; ownership is identical either way."""
+    out, by_id = [], {t["tradeId"]: t for t in trades}
+    amends = {}
+    for t in trades:
+        if t["status"] == "OFFICIAL" and t.get("amends") in by_id:
+            amends.setdefault(t["amends"], []).append(t)
+    for t in trades:
+        if t["status"] == "VOID" or (t["status"] == "OFFICIAL" and t.get("amends") in by_id):
+            continue
+        if t["tradeId"] in amends:
+            net = {}
+            for x in [t] + amends[t["tradeId"]]:
+                for a in x["assets"]:
+                    aid = ls.asset_id(a)
+                    first = net.get(aid, (a["from"], None, a))[0]
+                    net[aid] = (first, a["to"], a)
+            assets = [{**a, "from": f, "to": to} for f, to, a in net.values() if f != to]
+            t = {**t, "assets": assets, "aggregated": [x["tradeId"] for x in amends[t["tradeId"]]]}
+        out.append(t)
+    return out
+
+
 # ------------------------------------------------------------- embedding
 def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_YAHOO_PATH) -> dict:
     floor, ceiling = ls.cap_band(inputs)
@@ -383,6 +408,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
 
     # Internal working notes (data provenance, direction checks, corrections) stay in the repo data files and are
     # deliberately NOT published: the page shows what moves, the status and the cap effect only.
+    pre_draft = public_pre_draft(pre_draft)
     for t in season_txns + pre_draft:
         recv = {}
         for a in ls.trade_assets(t):
