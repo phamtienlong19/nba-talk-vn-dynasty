@@ -105,7 +105,7 @@ function cardA(t){
     h("div",{class:"team-id"},[h("div",{class:"team-name",text:(t.crown?CROWN:"")+t.name}),h("div",{class:"team-meta"},[h("span",{class:"identity-tag",text:t.short}),h("span",{class:"picks-tag",text:"OFFICIAL "+a.official+" → "+a.whatIf+" ("+sgn(a.delta)+")"})])]),box]));
   card.appendChild(h("div",{class:"table-head"},[h("span",{text:"POS"}),h("span",{text:"PLAYER"}),h("span",{text:"OFFICIAL"}),h("span",{text:S.snapShort}),h("span",{text:"Δ"})]));
   var host=h("div",{class:"players"});
-  t.players.filter(function(p){return p.k0;}).forEach(function(p){
+  t.players.filter(function(p){return p.k0;}).sort(function(a,b2){return b2.c1-a.c1||b2.c0-a.c0||(a.n<b2.n?-1:1);}).forEach(function(p){
     var d=p.c1-p.c0,big=Math.abs(d)>=3;
     var row=h("div",{class:"player-row"+(big?" big "+dcls(d):"")});
     row.appendChild(h("div",{class:"pos",text:p.pos}));

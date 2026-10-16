@@ -338,7 +338,7 @@ R.wi={cls:document.body.className,hidden:q('#what-if').hidden,banner:q('#scn-ban
   title:document.title,crown:q('#what-if').textContent.indexOf('\uD83D\uDC51')>=0,snap:q('#what-if .wi-pill-wi').textContent,url:location.search};
 qa('.wi-trow')[8].click();R.detail={cards:qa('.wi-detail article.team-card').length,rowsA:qa('.wi-detail .player-row').length};
 R.mono.same=mono();seg('REDO CUTS');qa('details').forEach(function(d){d.open=true});R.mono.redo=mono();R.redo={cards:qa('article.wi-card').length,sectionCards:qa('section.team-card').length,secTotals:totals(),dat0:tot()};
-row('DeMar').querySelector('.wi-tg').click();R.redoCrown=dat().querySelector('.team-name').textContent.indexOf(C)>=0;R.afterCut={dat:tot(),edited:!!dat().querySelector('.wi-reset:not([hidden])')};
+row('Collin Gillespie').querySelector('.wi-tg').click();R.redoCrown=dat().querySelector('.team-name').textContent.indexOf(C)>=0;R.afterCut={dat:tot(),edited:!!dat().querySelector('.wi-reset:not([hidden])')};
 row('Collin Gillespie').querySelector('.wi-tg').click();R.afterKeepAgain={dat:tot(),ds:!!row('Collin Gillespie')};
 dat().querySelector('.wi-reset').click();R.afterReset={dat:tot()};
 var locked=row('Luka');R.locked={disabled:locked.querySelector('.wi-tg').disabled};
@@ -383,7 +383,7 @@ class TestRenderedUi(unittest.TestCase):
         self.assertFalse(w["hidden"])
         self.assertIn("GIẢ ĐỊNH", w["banner"])
         self.assertIn("NOT OFFICIAL", w["banner"])
-        self.assertIn("8 OCT 2026", w["snap"])
+        self.assertIn("16 OCT 2026", w["snap"])
         self.assertEqual(w["rows"], 16)
         self.assertTrue(w["crown"])
         self.assertTrue(w["title"].startswith("WHAT IF"))
@@ -397,17 +397,17 @@ class TestRenderedUi(unittest.TestCase):
         self.assertEqual(r["cards"], 16)
         self.assertEqual(r["sectionCards"], 16)
         self.assertEqual(r["secTotals"], self.R["initial"]["totals"])
-        self.assertEqual(r["dat0"], "178")
+        self.assertEqual(r["dat0"], "175")
 
     def test_manual_swap_recomputes_and_resets(self):
-        self.assertEqual(self.R["afterCut"]["dat"], "173")  # 178 - DeRozan 5
+        self.assertEqual(self.R["afterCut"]["dat"], "174")  # 175 - Gillespie 1
         self.assertTrue(self.R["afterCut"]["edited"])
-        self.assertEqual(self.R["afterReset"]["dat"], "178")
+        self.assertEqual(self.R["afterReset"]["dat"], "175")
         self.assertTrue(self.R["locked"]["disabled"])
 
     def test_fa_view_marks_entrants_and_exits(self):
         self.assertEqual(self.R["fa"]["rows"], 120)
-        self.assertEqual((self.R["fa"]["enter"], self.R["fa"]["exit"]), (1, 1))
+        self.assertEqual((self.R["fa"]["enter"], self.R["fa"]["exit"]), (11, 11))
 
     def test_wrapping_digits_never_eats_spaces_in_flex_items(self):
         self.assertEqual(self.R["bonus"], ["RANK 3 BONUS", "RANK 4 BONUS"])
