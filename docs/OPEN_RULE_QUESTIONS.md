@@ -69,3 +69,19 @@ per Section 15's reporting requirement: `./refresh-yahoo.sh` will report
 `MATCH` until Yahoo's live projections drift from the currently published
 snapshot, at which point a commissioner decision is needed before
 re-publishing a new cap range.
+
+## In-season cap questions (added 2026-10-16)
+
+- **Which salaries count toward the cap? — RESOLVED 2026-10-16 (league owner):**
+  only the **top 9 salaries** on a roster count, **IL or not**. Recorded in
+  `config/cap_policy.json` (`payrollCounting`) and applied to current-season
+  payroll, Trade Lab scenarios, the in-season trade check and cap-checkpoint
+  findings. Draft-night history keeps the all-player totals recorded at the time.
+- **Trade-time violation of exactly $5.** The ladder covers "under $5" and "over
+  $5" only; an exactly-$5 violation is shown as commissioner judgment.
+- **Post-trade-deadline checkpoint date.** "During All-Star week"; the exact date
+  is set by the commissioner when recording the checkpoint.
+- **"Demonstrable cap improvement"** (+5W exemption) is described as payroll rising
+  from season start to end via trade or claim. The tool reports the direction
+  (checkpoint vs current/deadline payroll); the exemption decision stays with the
+  commissioner.

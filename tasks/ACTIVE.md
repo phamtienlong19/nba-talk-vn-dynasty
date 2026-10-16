@@ -1,13 +1,13 @@
 # Active Task
 
 No active GitHub Issue. Direct human-requested change, not issue-backed.
-Branch: feat/draft-first-19
-Generated: 2026-10-14T00:00:00Z
+Branch: feat/season-ops
+Generated: 2026-10-16T00:00:00Z
 
 ## Task
 
-Record the first 19 confirmed draft selections (through 2.03) and stage the CrazyCat ↔ HCMC amendment (2.07 → Derik Queen) as PENDING CONFIRMATION; hold 2.07. See `docs/LEAGUE_STATE_MODEL.md`.
+Regular-season maintenance release: history / current-season / scenario layers, in-season trade ledger (Morez ↔ Zion completed; two Bsy proposals), TRADE-F-AMEND withdrawn, DonTrick post-draft cap finding, roster import workflow, Yahoo API feasibility. See `docs/SEASON_STATE_MODEL.md`.
 
 ## Status
 
-Implementation complete; tests + `./validate.sh` pass. PR pending review.
+Implementation complete; tests + `./validate.sh` pass. PR pending review — do not merge without approval.

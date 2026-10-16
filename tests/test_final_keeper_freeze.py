@@ -157,18 +157,21 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
     def test_other_trade_scenarios_rederive_from_the_same_baseline(self):
         d = ls.resolve(proposed_inputs(self.i), ["TRADE-D"], "SCENARIO")["tradeResults"][0]
         self.assertEqual((d["teams"]["franchise-04"]["capBefore"], d["teams"]["franchise-03"]["capBefore"]), (175, 138))
-        self.assertEqual(self.data["scenarios"], ls.enumerate_scenarios(self.i))
+        import season_state as ss  # the page's scenarios are now the in-season Trade Lab (layer C)
+        self.assertEqual(self.data["scenarios"], ss.enumerate_views(ss.load_season(self.i)))
+        self.assertEqual(list(ls.enumerate_scenarios(self.i)), [""])  # no pre-draft trade is selectable any more
 
     def test_every_staged_trade_is_official_and_recorded_as_processed(self):
         done = [t for t in self.i["trades"]["trades"] if not t.get("amends")]
         self.assertEqual({t["status"] for t in done}, {"OFFICIAL"})
         self.assertEqual([t["execution"]["batch"] for t in done], ["2026-10-13-pre-draft"] * 6)
-        amend = self.i["tradeIndex"]["TRADE-F-AMEND"]  # staged, NOT official until the commissioner confirms
-        self.assertEqual((amend["status"], amend["pendingConfirmation"]), ("PROPOSED", True))
+        amend = self.i["tradeIndex"]["TRADE-F-AMEND"]  # never confirmed: withdrawn, superseded by an in-season trade
+        self.assertEqual((amend["status"], amend["voidReason"], amend["supersededBy"]), ("VOID", "WITHDRAWN", "TXN-2026-001"))
+        self.assertNotIn("pendingConfirmation", amend)
 
     def test_public_wording_says_the_keeper_layer_is_locked_not_projected(self):
         js = re.search(r'<script id="league-app">(.*?)</script>', self.html, re.S).group(1)
-        self.assertIn("KEEPERS LOCKED", js)
+        self.assertIn("✓ ROSTERS", js)  # in-season the pill reports the verified roster snapshot
         self.assertEqual(self.data["keeperStatus"], "locked")
         static = self.html.split('<script id="league-app">')[0]
         self.assertNotIn("PROJECTED (NOT FROZEN)", static)

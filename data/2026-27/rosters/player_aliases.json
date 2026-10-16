@@ -1,0 +1,4 @@
+{
+  "note": "Explicit player aliases for scripts/import_rosters.py: an import name or Yahoo key -> canonical playerKey. Add only after review.",
+  "aliases": {}
+}

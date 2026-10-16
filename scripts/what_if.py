@@ -444,12 +444,58 @@ def build_what_if(inputs: dict, snapshot: dict, assumptions: dict | None = None,
     }
 
 
+def build_now(si: dict, current: dict, snapshot: dict, band1: dict, near: int) -> list:
+    """CURRENT-SEASON rosters (season_state layer B) repriced at the snapshot. Players sorted by snapshot salary
+    descending; payroll counts only the top N salaries (config payrollCounting), IL or not -- both for the current
+    frozen salaries and for the snapshot prices. Never touches the post-keeper what-if views."""
+    snap_by_key = {p["playerKey"]: p for p in snapshot["players"]}
+    n = si.get("capCountTop")
+    rookies = {e["playerKey"] for e in si["draft"]["events"] if e.get("rookie")}
+
+    def counted(vals):
+        vals = sorted(vals, reverse=True)
+        return sum(vals[:n]) if n else sum(vals)
+
+    out = []
+    for t in si["freeze"]["teams"]:
+        fid = t["franchiseId"]
+        keys = ls.team_players(si, current, fid)
+        rows = []
+        for k in keys:
+            meta = si["registry"].get(k) or si["extraPlayers"].get(k) or {}
+            sp = snap_by_key.get(k)
+            c0, c1 = ls.player_cap(si, k), float(sp["capDollars"]) if sp else 0.0
+            rows.append({"k": k, "n": ls.player_name(si, k), "pos": (meta.get("displayPosition") or "").replace(",", "/"),
+                         "nba": (sp or meta).get("nbaTeam", ""), "c0": _num(c0), "c1": _num(c1), "miss": sp is None,
+                         "rk": k in rookies, "s": current.get("slots", {}).get(k)})
+        rows.sort(key=lambda r: (-r["c1"], -r["c0"], r["n"]))
+        for i, r in enumerate(rows):
+            r["x"] = bool(n) and i >= n  # beyond the top N at snapshot prices: not counted
+        cap0, cap1 = counted([r["c0"] for r in rows]), counted([r["c1"] for r in rows])
+        out.append({"id": fid, "short": t["short"], "name": t.get("teamName") or si["franchises"][fid]["displayName"],
+                    "color": t["color"], "text": t["text"], "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME,
+                    "players": rows,
+                    "a": {"official": _num(cap0), "whatIf": _num(cap1), "delta": _num(cap1 - cap0),
+                          "toFloor": _num(max(0, band1["floor"] - cap1)), "room": _num(band1["ceiling"] - cap1),
+                          "status": classify(cap1, band1["floor"], band1["ceiling"], near),
+                          "compliance": compliance(cap1, band1["floor"], band1["ceiling"])}})
+    return out
+
+
 def build_page_payload(inputs: dict | None = None, ids: list | None = None, **kw) -> dict:
     inputs = inputs or ls.load_inputs()
     ids = ids or list_snapshots()
     if not ids:
         raise WhatIfError("no what-if snapshots found under data/what_if/snapshots/")
     snaps = {i: build_what_if(inputs, load_snapshot(i), **kw) for i in ids}
+    import season_state as ss  # current teams: an additional view, computed apart from the post-keeper what-if
+    si = ss.load_season(inputs)
+    current = ss.season_state(si)
+    for i in ids:
+        s = snaps[i]
+        s["now"] = {"teams": build_now(si, current, load_snapshot(i), s["band"]["whatIf"], s["band"]["near"]),
+                    "countTop": si.get("capCountTop"),
+                    "rosters": {k: si["rosterSnapshot"].get(k) for k in ("snapshotId", "verifiedAt")}}
     return {"default": ids[-1], "order": ids, "snapshots": snaps}
 
 

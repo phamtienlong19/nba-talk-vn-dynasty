@@ -27,7 +27,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_fa_draft_pool as pool  # noqa: E402
-import league_state as ls  # noqa: E402
+import league_state as ls
+import season_state as ss  # noqa: E402
 
 REPO_ROOT = ls.REPO_ROOT
 INDEX_HTML = os.path.join(REPO_ROOT, "index.html")
@@ -63,7 +64,8 @@ def parse_board(index_html: str):
         kept = [(html_lib.unescape(re.sub(r"<span.*?</span>", "", n)).strip(), float(c)) for n, c in rows]
         teams.append({"name": name, "short": short, "color": color.group(1) if color else "#313844",
                       "text": text.group(1) if text else "#ffffff", "kept": kept})
-    panel = index_html[index_html.index('id="draft-order"'):index_html.index('id="rosters-a"')]
+    a, b = section_span(index_html, "draft-order")
+    panel = index_html[a:b]
     picks = []
     by_short = {t["short"].upper(): t["name"] for t in teams}
     for m in re.finditer(r'<div class="pick-slot">(\d+)\.(\d+)</div>\s*<div class="pick-team"><span class="pick-chip"[^>]*>(.*?)</span>(.*?)</div>\s*<div class="pick-note">(.*?)</div>', panel, re.S):
@@ -131,11 +133,18 @@ def build_baseline(index_html: str, registry: dict, franchises: list) -> tuple[d
 
 
 LEDGER_ROW_RE = re.compile(r'(<div class="pick-slot">(\d+)\.(\d+)</div>\n<div class="pick-team">)(<span class="pick-chip"[^>]*>.*?</span>)'
-                           r'(<span class="pick-tags">(?:<span class="pick-extra[^"]*">[^<]*</span>)*</span>)?(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
+                           r'(<span class="pick-tags">(?:<span class="pick-extra[^"]*"[^>]*>[^<]*</span>)*</span>)?(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
 BASE_TAG_RE = re.compile(r'<span class="pick-extra">(?!VIA )[^<]*</span>')
 VIA_RE = re.compile(r'<span class="pick-extra">VIA [^<]*</span>')
 SEL_RE = re.compile(r'<span class="pick-extra pick-(?:sel|r|hold)">.*?</span>')
 DRAFT_STATUS_BEGIN, DRAFT_STATUS_END = "<!--DRAFT-STATUS-BEGIN-->", "<!--DRAFT-STATUS-END-->"
+
+
+def section_span(index_html: str, section_id: str) -> tuple:
+    """(start, end) of one top-level page section, independent of the order of sections on the page."""
+    a = index_html.index(f'<section class="page" id="{section_id}"')
+    nxt = [i for i in (index_html.find('<section class="page"', a + 1), index_html.find("<!--WHATIF-BEGIN-->", a + 1)) if i > 0]
+    return a, min(nxt) if nxt else len(index_html)
 
 
 def sync_ledger(index_html: str, inputs: dict) -> str:
@@ -146,7 +155,7 @@ def sync_ledger(index_html: str, inputs: dict) -> str:
     teams, _ = parse_board(index_html)
     fid_by_short = {t["short"]: t["franchiseId"] for t in inputs["freeze"]["teams"]}
     short_by_fid = {v: k for k, v in fid_by_short.items()}
-    a, b = index_html.index('id="draft-order"'), index_html.index('id="rosters-a"')
+    a, b = section_span(index_html, "draft-order")
     panel = index_html[a:b]
     # one chip per team (round-independent): taken from any row that currently shows that team
     chip_of = {}
@@ -166,8 +175,9 @@ def sync_ledger(index_html: str, inputs: dict) -> str:
         pid = f"2026-R{rnd}-{slot:02d}"
         owner, orig = official["pickOwner"][pid], inputs["pickIndex"][pid]["originalOwner"]
         tags = list(dict.fromkeys(BASE_TAG_RE.findall((m.group(5) or "") + m.group(7))))  # LOTTERY / RANK n BONUS stay
-        if owner != orig:
-            tags.append(f'<span class="pick-extra">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>')
+        if owner != orig:  # the full ownership chain (the old Picks page detail) rides along as a tooltip
+            chain = " → ".join([short_by_fid[orig]] + [h["to"] and short_by_fid[h["to"]] for h in official["history"].get(f"pick:{pid}", [])])
+            tags.append(f'<span class="pick-extra" title="{html_lib.escape(chain)}">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>')
         note = ""
         if pid in done:
             d = done[pid]
@@ -216,14 +226,14 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
     if not summary["remaining"]:  # draft over: the live room is shelved, leaving a one-line completion summary
         last = summary["latest"]
         t = teams[last["franchiseId"]]
-        block = (DRAFT_STATUS_BEGIN + '<div class="draft-room draft-done"><span class="ds-k">DRAFT COMPLETE</span>'
-                 f'<span><b>{summary["total"]}</b> of <b>{summary["total"]}</b> selections</span>'
-                 f'<span><b>{summary["rookies"]}</b> rookies</span>'
-                 f'<span>final pick <b>{last["label"]}</b> {esc(last["name"])} · {esc(t["short"])}</span></div>' + DRAFT_STATUS_END)
+        block = (DRAFT_STATUS_BEGIN + '<div class="draft-room draft-done"><span class="ds-k">✓ DRAFT COMPLETE</span>'
+                 f'<span><b>{summary["total"]}</b>/<b>{summary["total"]}</b> picks</span>'
+                 f'<span><b>{summary["rookies"]}</b> <i class="pick-r">R</i></span>'
+                 f'<span>last <b>{last["label"]}</b> {esc(last["name"])} · {esc(t["short"])}</span></div>' + DRAFT_STATUS_END)
         if DRAFT_STATUS_BEGIN in panel:
             x, y = panel.index(DRAFT_STATUS_BEGIN), panel.index(DRAFT_STATUS_END) + len(DRAFT_STATUS_END)
             return panel[:x] + block + panel[y:]
-        anchor = '<div class="title">DRAFT ORDER</div>'
+        anchor = '<div class="title">DRAFT ARCHIVE</div>'
         return panel.replace(anchor, anchor + "\n" + block, 1)
     def chip(fid):
         return chip_of[order.index(fid)]
@@ -266,7 +276,7 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
     if DRAFT_STATUS_BEGIN in panel:
         x, y = panel.index(DRAFT_STATUS_BEGIN), panel.index(DRAFT_STATUS_END) + len(DRAFT_STATUS_END)
         return panel[:x] + block + panel[y:]
-    anchor = '<div class="title">DRAFT ORDER</div>'
+    anchor = '<div class="title">DRAFT ARCHIVE</div>'
     if anchor not in panel:
         raise ValueError("draft-order panel has no title to anchor the draft room after")
     return panel.replace(anchor, anchor + "\n" + block, 1)
@@ -333,6 +343,31 @@ def cmd_lock(args):
     print(f"keepers LOCKED ({locked['lockDigest'][:12]})")
 
 
+def public_pre_draft(trades: list) -> list:
+    """What the league sees of the pre-draft ledger: withdrawn/void entries hidden, and every OFFICIAL amendment
+    folded into the trade it amends as one net trade (a leg moved and moved back cancels out). The ledger file keeps
+    the amendment record for audit; ownership is identical either way."""
+    out, by_id = [], {t["tradeId"]: t for t in trades}
+    amends = {}
+    for t in trades:
+        if t["status"] == "OFFICIAL" and t.get("amends") in by_id:
+            amends.setdefault(t["amends"], []).append(t)
+    for t in trades:
+        if t["status"] == "VOID" or (t["status"] == "OFFICIAL" and t.get("amends") in by_id):
+            continue
+        if t["tradeId"] in amends:
+            net = {}
+            for x in [t] + amends[t["tradeId"]]:
+                for a in x["assets"]:
+                    aid = ls.asset_id(a)
+                    first = net.get(aid, (a["from"], None, a))[0]
+                    net[aid] = (first, a["to"], a)
+            assets = [{**a, "from": f, "to": to} for f, to, a in net.values() if f != to]
+            t = {**t, "assets": assets, "aggregated": [x["tradeId"] for x in amends[t["tradeId"]]]}
+        out.append(t)
+    return out
+
+
 # ------------------------------------------------------------- embedding
 def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_YAHOO_PATH) -> dict:
     floor, ceiling = ls.cap_band(inputs)
@@ -351,16 +386,38 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
             p = lookup.get(pool.normalize_name(name))
             if p is not None:
                 board_names[p["playerKey"]] = name
-    official_teams = {t["id"]: ls.team_report(inputs, official, t["id"], base) for t in teams}
+    # layer A (draft-night history) vs layer B (current season) vs layer C (Trade Lab scenarios): see season_state.py
+    history_teams = {t["id"]: ls.team_report(inputs, official, t["id"], base) for t in teams}
+    si = ss.load_season(inputs)
+    views = ss.enumerate_views(si)
+    current = ss.season_state(si)
+    snap = si["rosterSnapshot"]
     trades = []
-    for t in ls.selectable_trades(inputs) + [x for x in inputs["trades"]["trades"] if x["status"] not in ls.SELECTABLE_STATUSES]:
+    season_txns = sorted(si["seasonTxns"], key=lambda t: (t["status"] not in ss.SELECTABLE, t["order"]))
+    pre_draft = sorted(inputs["trades"]["trades"], key=lambda t: t["order"])
+    rookies = {e["playerKey"] for e in inputs["draft"]["events"] if e.get("rookie")}
+    drafted_at = {c["playerKey"]: {"label": c["label"], "by": c["franchiseId"]} for c in ls.draft_summary(inputs, official)["completed"]}
+
+    def card_asset(a):  # what a trade card shows: name, salary, position, NBA team, 2026 rookie
+        d = ls.describe_asset(si, a)
+        if a["type"] == "player":
+            p = si["registry"].get(a["playerKey"]) or si["extraPlayers"].get(a["playerKey"]) or {}
+            d.update({"pos": (p.get("displayPosition") or "").replace(",", "/"), "nba": p.get("nbaTeam") or "",
+                      "rk": a["playerKey"] in rookies, "dr": drafted_at.get(a["playerKey"])})
+        return d
+
+    # Internal working notes (data provenance, direction checks, corrections) stay in the repo data files and are
+    # deliberately NOT published: the page shows what moves, the status and the cap effect only.
+    pre_draft = public_pre_draft(pre_draft)
+    for t in season_txns + pre_draft:
         recv = {}
         for a in ls.trade_assets(t):
-            recv.setdefault(a["to"], []).append(ls.describe_asset(inputs, a))
+            recv.setdefault(a["to"], []).append(card_asset(a))
         trades.append({"id": t["tradeId"], "label": t.get("label"), "status": t["status"], "order": t["order"],
-                       "dependsOn": t.get("dependsOn", []), "participants": t["participants"],
-                       "receives": recv, "note": t.get("note"),
-                       "pending": bool(t.get("pendingConfirmation")), "amends": t.get("amends")})
+                       "phase": t.get("phase", "PRE_DRAFT"), "dependsOn": t.get("dependsOn", []),
+                       "participants": t["participants"], "receives": recv,
+                       "pending": bool(t.get("pendingConfirmation")), "amends": t.get("amends"),
+                       "effectiveAt": t.get("effectiveAt"), "voidReason": t.get("voidReason")})
     # available universe: registry + curated Yahoo-missing prospects, minus kept (official state)
     yahoo = pool.load_yahoo_players(yahoo_path)
     dyn, dyn_max = pool.load_dynasty_rankings()
@@ -370,7 +427,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
     final = pool.sort_and_truncate(cands)
     board_rank = {pool.normalize_name(c.name): i for i, c in enumerate(final, 1)}
     src_by_norm = {k: c for k, c in cands.items()}
-    owned = set(official["playerOwner"])
+    owned = set(current["playerOwner"])
     rows, seen_norm = [], set()
     for p in inputs["registry"].values():
         if p["playerKey"] in owned:
@@ -395,11 +452,20 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         "cap": {"floor": floor, "ceiling": ceiling, "near": ls.NEAR_CEILING_ROOM},
         "boardNames": board_names,
         "teams": teams,
-        "official": {"teams": official_teams, "picks": ls.pick_table(inputs, official),
-                     "windowWarnings": official["windowWarnings"], "tradeIds": official["activeTradeIds"]},
+        # "official" is what the page shows by default: the CURRENT SEASON (verified snapshot + completed transactions)
+        "official": {"teams": views[""]["teams"], "picks": ls.pick_table(inputs, official),
+                     "windowWarnings": [], "tradeIds": current["activeTradeIds"]},
+        "history": {"teams": history_teams, "tradeIds": official["activeTradeIds"],
+                    "checkpoint": {k: ((si["postDraft"] or {}).get("checkpoint") or {}).get(k) for k in ("id", "date")}},
+        "season": {"snapshot": {k: snap.get(k) for k in ("snapshotId", "verifiedAt", "source", "kind")},
+                   "appliedAfterSnapshot": [t["txnId"] for t in ss.pending_completed(si)],
+                   "checkpoints": [{k: c.get(k) for k in ("id", "label", "date", "status")} for c in si["checkpoints"]["checkpoints"]],
+                   "findings": ss.checkpoint_findings(si, current),
+                   "provisional": sorted(si["extraPlayers"]),
+                   "counting": {k: (inputs["policy"].get("payrollCounting") or {}).get(k) for k in ("rule", "n", "includesIL")}},
         "trades": trades,
         "draft": ls.draft_summary(inputs, official),
-        "scenarios": ls.enumerate_scenarios(inputs),
+        "scenarios": views,
         "available": {"cols": ["key", "name", "nba", "pos", "cap", "yahooOr", "board", "src"], "rows": rows,
                       "curatedYahooMissing": extras},
     }

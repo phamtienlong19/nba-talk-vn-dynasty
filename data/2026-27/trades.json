@@ -306,18 +306,17 @@
     {
       "tradeId": "TRADE-F-AMEND",
       "label": "CRAZYCAT ↔ HCMC · AMENDMENT",
-      "status": "PROPOSED",
+      "status": "VOID",
       "order": 7,
       "dependsOn": [
         "TRADE-F"
       ],
       "amends": "TRADE-F",
-      "pendingConfirmation": true,
       "participants": [
         "franchise-02",
         "franchise-05"
       ],
-      "note": "PENDING CONFIRMATION. Corrects completed TRADE-F by replacing pick 2.07 with Derik Queen: 2.07 CrazyCat → HCMC, Derik Queen HCMC → CrazyCat. All other TRADE-F components stand. Confirm by setting status OFFICIAL (a correction, not a replay).",
+      "note": "WITHDRAWN 2026-10-16 (never confirmed; superseded by the separate in-season trade TXN-2026-001, Morez Johnson Jr. <-> Zion Williamson, in data/2026-27/season_transactions.json). Originally staged as: 2.07 CrazyCat -> HCMC, Derik Queen HCMC -> CrazyCat, correcting TRADE-F. TRADE-F itself and the 2.07 selection stand unchanged.",
       "assets": [
         {
           "type": "pick",
@@ -333,7 +332,10 @@
           "from": "franchise-05",
           "to": "franchise-02"
         }
-      ]
+      ],
+      "voidReason": "WITHDRAWN",
+      "withdrawnAt": "2026-10-16",
+      "supersededBy": "TXN-2026-001"
     },
     {
       "tradeId": "TRADE-D-AMEND",

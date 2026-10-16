@@ -6,6 +6,8 @@ import unittest
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _proposed import predraft_index_html  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
+import build_fa_draft_pool as pool  # noqa: E402
 
 
 def _card(html, tag):
@@ -25,7 +27,8 @@ def _cuts(card):
 
 
 def _pool(html):
-    return html[html.index('<div class="pool-grid">'):html.index('<section class="page" id="cap">')]
+    a, b = pool._find_pool_grid_span(html)  # order-independent: the pool-grid up to the next page section
+    return html[a:b]
 
 
 class TestExplicitKeeperOverrides(unittest.TestCase):

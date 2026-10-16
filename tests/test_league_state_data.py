@@ -10,6 +10,12 @@ import build_fa_draft_pool as pool  # noqa: E402
 import build_league_state as bls  # noqa: E402
 import league_state as ls  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+
+def _draft_panel(html):
+    a, b = bls.section_span(html, "draft-order")  # the draft archive, wherever it sits on the page
+    return html[a:b]
+
 from _proposed import proposed_inputs  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -208,7 +214,7 @@ class TestRepoState(unittest.TestCase):
 
     def test_draft_order_ledger_shows_official_owner_and_via(self):
         panel = _html()
-        panel = panel[panel.index('id="draft-order"'):panel.index('id="rosters-a"')]
+        panel = _draft_panel(panel)
         official = ls.resolve(self.o, [], "OFFICIAL")
         shorts = {t["franchiseId"]: t["short"] for t in self.o["freeze"]["teams"]}
         rows = re.findall(r'<div class="pick-slot">(\d+)\.(\d+)</div>\s*<div class="pick-team">(.*?)</div>\s*<div class="pick-note">(.*?)</div>', panel, re.S)
@@ -409,19 +415,27 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual(self.o["pickOwner"]["2026-R2-07"], "franchise-02")      # CrazyCat owns 2.07 for now
         sel = {c["label"]: c for c in self.d["completed"]}["2.07"]
         self.assertEqual((sel["name"], sel["franchiseId"], sel["rookie"]), ("Morez Johnson Jr.", "franchise-02", True))
-        self.assertEqual(self.i["tradeIndex"]["TRADE-F-AMEND"]["status"], "PROPOSED")  # amendment untouched
-        panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
+        self.assertEqual(self.i["tradeIndex"]["TRADE-F-AMEND"]["status"], "VOID")  # amendment since withdrawn
+        panel = _draft_panel(self.html)
         self.assertNotIn("OWNERSHIP HOLD", panel)
         # an un-released hold still blocks recording
         import copy
         bad = copy.deepcopy(self.i)
         bad["draft"]["holds"][0]["released"] = False
+        bad["tradeIndex"]["TRADE-F-AMEND"]["status"] = "PROPOSED"  # a hold waits on an UNDECIDED transaction
         with self.assertRaises(ls.StateError):
             ls.resolve(bad, (), "OFFICIAL")
 
-    def test_amendment_is_staged_not_applied(self):
+    def test_withdrawn_amendment_is_void_and_the_original_trade_stands(self):
         a = self.i["tradeIndex"]["TRADE-F-AMEND"]
-        self.assertEqual((a["status"], a["amends"], a["dependsOn"], a["pendingConfirmation"]), ("PROPOSED", "TRADE-F", ["TRADE-F"], True))
+        self.assertEqual((a["status"], a["amends"], a["voidReason"], a["supersededBy"]), ("VOID", "TRADE-F", "WITHDRAWN", "TXN-2026-001"))
+        self.assertNotIn("TRADE-F-AMEND", [t["tradeId"] for t in ls.selectable_trades(self.i)])  # not actionable
+        with self.assertRaises(ls.StateError):
+            ls.resolve(self.i, ["TRADE-F-AMEND"], "SCENARIO")
+        f = self.i["tradeIndex"]["TRADE-F"]  # the completed pre-draft trade is untouched
+        self.assertEqual(f["status"], "OFFICIAL")
+        self.assertIn(("2026-R2-07", "franchise-02"), {(x.get("pickId"), x["to"]) for x in f["assets"]})
+        self.assertEqual(self.o["pickOwner"]["2026-R2-07"], "franchise-02")
         legs = {(x.get("playerKey") or x["pickId"], x["from"], x["to"]) for x in a["assets"]}
         self.assertEqual(legs, {("2026-R2-07", "franchise-02", "franchise-05"), ("478.p.10444", "franchise-05", "franchise-02")})
         self.assertEqual(self.i["registry"]["478.p.10444"]["name"], "Derik Queen")
@@ -433,7 +447,10 @@ class TestDraftRoom(unittest.TestCase):
         self.assertEqual(others, [])
 
     def test_amendment_preview_is_a_correction_not_a_replay(self):
-        s = ls.resolve(self.i, ["TRADE-F-AMEND"], "SCENARIO")
+        import copy  # mechanism check on a re-staged copy: the real amendment is withdrawn
+        i = copy.deepcopy(self.i)
+        i["tradeIndex"]["TRADE-F-AMEND"]["status"] = "PROPOSED"
+        s = ls.resolve(i, ["TRADE-F-AMEND"], "SCENARIO")
         self.assertEqual(s["draftConflicts"], [{"pickId": "2026-R2-07", "selector": "franchise-02", "scenarioOwner": "franchise-05"}])
         self.assertTrue(all(r["applied"] and not r["errors"] for r in s["tradeResults"]))
         self.assertEqual([r["tradeId"] for r in s["tradeResults"]].count("TRADE-F"), 1)   # TRADE-F not replayed
@@ -463,7 +480,7 @@ class TestDraftRoom(unittest.TestCase):
         part = copy.deepcopy(self.i)
         part["draft"]["events"] = part["draft"]["events"][:45]
         panel = bls.sync_ledger(self.html, part)
-        panel = panel[panel.index('id="draft-order"'):panel.index('id="rosters-a"')]
+        panel = _draft_panel(panel)
         self.assertRegex(re.sub(r"<[^>]+>", " ", panel), r"ON THE CLOCK\s+3\.14")
         for piece in ("dr-ticker", "dr-clock", "dr-list", "dr-best"):
             self.assertIn(piece, panel)
@@ -471,7 +488,7 @@ class TestDraftRoom(unittest.TestCase):
         self.assertNotIn("DRAFT COMPLETE", panel)
 
     def test_page_ledger_and_picks_agree(self):
-        panel = self.html[self.html.index('id="draft-order"'):self.html.index('id="rosters-a"')]
+        panel = _draft_panel(self.html)
         self.assertIn("DRAFT COMPLETE", panel)           # live draft room shelved once the 48th pick is in
         for part in ("dr-ticker", "dr-clock", "dr-list", "dr-best", "ON THE CLOCK"):
             self.assertNotIn(part, panel)
@@ -524,13 +541,18 @@ class TestEmbeddedPageData(unittest.TestCase):
         self.assertEqual(inspect.signature(bls.build_page_data).parameters["yahoo_path"].default, bls.CANONICAL_YAHOO_PATH)
 
     def test_all_scenario_combinations_are_present(self):
-        self.assertEqual(len(self.data["scenarios"]), 2 ** len(ls.selectable_trades(self.i)))
-        self.assertEqual(list(self.data["scenarios"]), ["", "TRADE-F-AMEND"])  # only the staged amendment is selectable
+        self.assertEqual(ls.selectable_trades(self.i), [])  # nothing pre-draft is actionable any more
+        # the Trade Lab enumerates every combination of the in-season proposals (layer C)
+        self.assertEqual(sorted(self.data["scenarios"]), ["", "PROP-2026-001", "PROP-2026-001,PROP-2026-002", "PROP-2026-002"])
 
     def test_official_view_has_no_movement_and_scenario_view_has_it(self):
         view = self.data["scenarios"][""]
         self.assertEqual(sorted(view["teams"]), sorted(self.i["franchises"]))  # trade teams + every drafting team
-        self.assertEqual(view["teams"][BZ]["fold"]["tradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-E"])
+        self.assertEqual(view["teams"][BZ]["fold"]["tradeIds"], [])  # Bz made no in-season move
+        # the default (current-season) view folds only the completed in-season trade, for its two teams
+        self.assertEqual({f: v["fold"]["tradeIds"] for f, v in view["teams"].items() if v["fold"]["tradeIds"]},
+                         {"franchise-02": ["TXN-2026-001"], "franchise-05": ["TXN-2026-001"]})
+        self.assertEqual(self.data["history"]["tradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E", "TRADE-F", "TRADE-D-AMEND"])
 
     def test_legal_universe_is_larger_than_the_recommendation_board(self):
         rows = self.data["available"]["rows"]
@@ -559,10 +581,16 @@ class TestEmbeddedPageData(unittest.TestCase):
                 self.assertEqual(pool.normalize_name(by_rank[row[6]]), pool.normalize_name(row[1]))
 
     def test_page_exposes_the_new_surfaces_and_existing_ones_remain(self):
-        for anchor in ('id="trade-lab"', 'id="picks"', 'id="draft-pool"', 'id="cap"', 'id="rosters-a"', 'id="draft-order"'):
+        for anchor in ('id="trade-lab"', 'id="draft-pool"', 'id="cap"', 'id="rosters-a"', 'id="draft-order"'):
             self.assertIn(anchor, self.html)
-        for label in (">TRADE LAB<", ">PICKS<", ">OFFICIAL<", ">SCENARIO<", 'id="scn-banner"', "SCENARIO VIEW — NOT OFFICIAL"):
+        for label in (">TRADE LAB<", ">TEAMS<", ">CAP<", ">DRAFT<", ">OFFICIAL<", ">SCENARIO<", 'id="scn-banner"', "SCENARIO VIEW — NOT OFFICIAL"):
             self.assertIn(label, self.html + self.js)
+        # in-season: the FA/DRAFT 60 board is retired from view (markup kept for the builder) and the Picks page,
+        # which duplicated the Draft Archive, is gone
+        self.assertIn('<section class="page" id="draft-pool" hidden>', self.html)
+        self.assertNotIn('href="#draft-pool"', self.html)
+        self.assertNotIn('id="picks"', self.html)
+        self.assertNotIn(">PICKS<", self.html)
         self.assertIn('id="avail"', self.html)
         self.assertIn("exports/yahoo_top300_proj_dollar_rank.xlsx", self.html)
 

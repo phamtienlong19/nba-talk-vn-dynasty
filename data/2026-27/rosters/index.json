@@ -1,0 +1,14 @@
+{
+  "season": "2026-27",
+  "current": "snapshots/RS-2026-10-14-DRAFT-NIGHT.json",
+  "history": [
+    {
+      "snapshotId": "RS-2026-10-14-DRAFT-NIGHT",
+      "file": "snapshots/RS-2026-10-14-DRAFT-NIGHT.json",
+      "verifiedAt": "2026-10-14T23:59:59Z",
+      "source": "Official draft-night rosters (keeper freeze + pre-draft trades + 48-pick draft); derived, not a Yahoo export",
+      "digest": "73d8ee2416d623d236b0dde0d32dd68b175eb0d057b7916605092669418e046b",
+      "action": "INIT"
+    }
+  ]
+}

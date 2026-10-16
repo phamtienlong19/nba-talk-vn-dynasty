@@ -70,13 +70,14 @@ function header(){
   return bar;}
 function seg(){
   var wrap=h("div");var g=h("div",{class:"wi-seg",role:"group","aria-label":"What-if view"});
-  [["same","SAME KEEPERS"],["redo","REDO CUTS"],["fa","FA 60"]].forEach(function(v){
+  [["same","SAME KEEPERS"],["redo","REDO CUTS"],["fa","FA 60"]].concat(snap().now?[["now","NOW"]]:[]).forEach(function(v){
     var b=h("button",{type:"button","aria-pressed":S.view===v[0]?"true":"false",text:v[1]});
     b.addEventListener("click",function(){S.view=v[0];S.animate=true;render();syncUrl();});g.appendChild(b);});
   wrap.appendChild(g);
   var tips={same:"Scenario A — every franchise keeps exactly its official nine, repriced at the snapshot. Deterministic.",
             redo:"Scenario B — a projection, not a reconstruction of intent: fewest-change legal keeper sets if managers had known these prices. Equally good alternatives are listed, never hidden.",
-            fa:"The FA/DRAFT 60 rebuilt with the same ranking rules, once with the projected keeper/cut decisions and snapshot prices."};
+            fa:"The FA/DRAFT 60 rebuilt with the same ranking rules, once with the projected keeper/cut decisions and snapshot prices.",
+            now:"Today's rosters (current season) repriced at the snapshot. Sorted by snapshot salary; only the top "+((snap().now||{}).countTop||9)+" salaries count, IL included."};
   wrap.appendChild(help("seg-"+S.view,tips[S.view]));return wrap;}
 
 /* ---------- Scenario A ---------- */
@@ -143,6 +144,62 @@ function viewSame(){
     tr.addEventListener("click",toggle);btn.addEventListener("click",function(e){e.stopPropagation();toggle();});
     tb.appendChild(tr);
     if(open){var dt=h("tr",{class:"wi-detail"},[h("td",{colspan:"6"},[h("div",{class:"wi-cards one"},[cardA(t)])])]);tb.appendChild(dt);}});
+  frag.appendChild(tb);return frag;}
+
+/* ---------- NOW: current-season rosters at snapshot prices (separate from the post-keeper views) ---------- */
+function cardNow(t,idx){
+  var a=t.a,b=band(),st=ST[a.status],N=snap().now.countTop;
+  var card=h("article",{class:"team-card wi-card"});card.style.setProperty("--team-color",t.color);card.style.setProperty("--team-text",t.text);
+  card.appendChild(h("header",{class:"team-head"},[h("div",{class:"team-index",text:(idx<10?"0":"")+idx}),
+    h("div",{class:"team-id"},[h("div",{class:"team-name",text:(t.crown?CROWN:"")+t.name}),h("div",{class:"team-meta"},[h("span",{class:"identity-tag",text:t.short}),h("span",{class:"picks-tag",text:"NOW "+a.official+" → "+a.whatIf+" ("+sgn(a.delta)+")"})])]),
+    h("div",{class:"cap-box "+st[2]},[h("div",{class:"cap-total",text:String(a.whatIf)},[h("span",{text:"/"+b.ceiling})]),h("div",{class:"gap-big",text:gapText(a.status,a.toFloor,a.room)})])]));
+  card.appendChild(h("div",{class:"table-head"},[h("span",{text:"POS"}),h("span",{text:"PLAYER"}),h("span",{text:"NOW"}),h("span",{text:S.snapShort}),h("span",{text:"Δ"})]));
+  var host=h("div",{class:"players"}),div=false;
+  t.players.forEach(function(p){
+    if(p.x&&!div){div=true;host.appendChild(h("div",{class:"nc-div",text:"beyond top "+N+" · not counted"}));}
+    var d=p.c1-p.c0,big=Math.abs(d)>=3;
+    var row=h("div",{class:"player-row"+(big?" big "+dcls(d):"")+(p.x?" nc":"")+(p.rk?" rookie-row":"")});
+    var tags=[];if(p.rk)tags.push(h("span",{class:"wi-tag rk",text:"R"}));if(p.s==="IL"||p.s==="IL+")tags.push(h("span",{class:"il-tag",text:p.s}));
+    if(p.miss)tags.push(h("span",{class:"wi-tag miss",title:"Not in the Yahoo snapshot — counted as $0",text:"∅"}));
+    row.appendChild(h("div",{class:"pos",text:p.pos}));
+    row.appendChild(h("div",{class:"pname",title:p.n,text:p.n},tags));
+    row.appendChild(h("div",{class:"c0",text:String(p.c0)}));
+    var c1=h("div",{class:"c1"});animNum(c1,p.c0,p.c1);row.appendChild(c1);
+    row.appendChild(h("div",{class:"cd "+dcls(d),text:d?sgn(d):"·"}));host.appendChild(row);});
+  card.appendChild(host);
+  card.appendChild(h("div",{class:"wi-foot"},[h("span",{text:"NOW "+a.official}),h("span",{text:"Δ "+sgn(a.delta)}),h("span",{text:S.snapShort+" "+a.whatIf+" / "+b.ceiling})]));
+  return card;}
+function viewNow(){
+  var s=snap(),b=band(),teams=s.now.teams.slice(),frag=document.createDocumentFragment();
+  var c={WITHIN:0,BELOW_FLOOR:0,ABOVE_CEILING:0};teams.forEach(function(t){c[t.a.compliance]++;});
+  frag.appendChild(h("div",{class:"wi-stats"},[
+    h("div",{class:"wi-stat ok"},[h("b",{text:String(c.WITHIN)}),h("span",{text:"WITHIN BAND"})]),
+    h("div",{class:"wi-stat"+(c.BELOW_FLOOR?" warn":"")},[h("b",{text:String(c.BELOW_FLOOR)}),h("span",{text:"▼ FLOOR "+b.floor})]),
+    h("div",{class:"wi-stat"+(c.ABOVE_CEILING?" bad":"")},[h("b",{text:String(c.ABOVE_CEILING)}),h("span",{text:"▲ CEILING "+b.ceiling})]),
+    h("div",{class:"wi-stat"},[h("b",{text:sgn(teams.reduce(function(n,t){return n+t.a.delta;},0))}),h("span",{text:"NET Δ · TOP "+s.now.countTop})])]));
+  var ord={};teams.forEach(function(t,i){ord[t.id]=i+1;});
+  var by={team:function(){return 0;},inc:function(x,y){return y.a.delta-x.a.delta;},dec:function(x,y){return x.a.delta-y.a.delta;},
+    ceil:function(x,y){return x.a.room-y.a.room;},floor:function(x,y){return Math.abs(x.a.whatIf-b.floor)-Math.abs(y.a.whatIf-b.floor);}};
+  teams.sort(function(x,y){return (by[S.sort]||by.team)(x,y)||(ord[x.id]-ord[y.id]);});
+  var sel=h("select",{"aria-label":"Sort teams"});
+  [["team","Team order"],["inc","Largest increase"],["dec","Largest decrease"],["ceil","Closest to ceiling"],["floor","Closest to floor"]].forEach(function(o){var op=h("option",{value:o[0],text:o[1]});if(o[0]===S.sort)op.selected=true;sel.appendChild(op);});
+  sel.addEventListener("change",function(){S.sort=sel.value;S.animate=false;render();syncUrl();});
+  frag.appendChild(h("label",{class:"wi-ctl"},["SORT ",sel]));
+  var lo=1e9,hi=-1e9;teams.forEach(function(t){lo=Math.min(lo,t.a.official,t.a.whatIf);hi=Math.max(hi,t.a.official,t.a.whatIf);});
+  lo=Math.min(lo,b.floor)-6;hi=Math.max(hi,b.ceiling)+6;
+  var tb=h("table",{class:"wi-table"});
+  tb.appendChild(h("tr",null,[h("th",{text:"TEAM"}),h("th",{text:"NOW"}),h("th",{text:S.snapShort}),h("th",{text:"Δ"}),h("th",{class:"hide-m",text:b.floor+"–"+b.ceiling}),h("th",{text:""})]));
+  teams.forEach(function(t){
+    var a=t.a,key="now|"+t.id,open=!!S.open[key],st=ST[a.status];
+    var btn=h("button",{type:"button",class:"wi-teambtn","aria-expanded":open?"true":"false"},[tchip(t)]);
+    var tr=h("tr",{class:"wi-trow"+(open?" open":"")},[h("td",null,[btn]),h("td",{text:String(a.official)}),h("td"),
+      h("td",null,[h("span",{class:"wi-d "+dcls(a.delta),text:a.delta?sgn(a.delta):"·"})]),h("td",{class:"hide-m"},[trackFor(t,lo,hi)]),
+      h("td",null,[h("span",{class:"wi-comp"},[h("span",{class:"chip "+st[1],text:COMP[a.compliance]}),h("small",{text:gapText(a.status,a.toFloor,a.room)})])])]);
+    var n=h("span",{class:"wi-new"});animNum(n,a.official,a.whatIf);tr.children[2].appendChild(n);
+    function toggle(){S.open[key]=!S.open[key];S.animate=true;render();}
+    tr.addEventListener("click",toggle);btn.addEventListener("click",function(e){e.stopPropagation();toggle();});
+    tb.appendChild(tr);
+    if(open)tb.appendChild(h("tr",{class:"wi-detail"},[h("td",{colspan:"6"},[h("div",{class:"wi-cards one"},[cardNow(t,ord[t.id])])])]));});
   frag.appendChild(tb);return frag;}
 
 /* ---------- Scenario B ---------- */
@@ -263,7 +320,8 @@ function render(){
   S.snapShort=fdate(snap().meta.effectiveDate).replace(/ \d{4}$/,"").toUpperCase();
   root.textContent="";
   root.appendChild(header());root.appendChild(seg());
-  root.appendChild(S.view==="same"?viewSame():S.view==="redo"?viewRedo():viewFa());
+  if(S.view==="now"&&!snap().now)S.view="same";
+  root.appendChild(S.view==="same"?viewSame():S.view==="redo"?viewRedo():S.view==="now"?viewNow():viewFa());
   if(S.flash){var f=root.querySelector(".player-row[data-k=\""+(S.flashKey||"")+"\"]");if(f&&!reduce)f.classList.add("flash");S.flash=null;S.flashKey=null;}
   S.animate=false;
   if(window.NBA_MONO)window.NBA_MONO(root);
@@ -274,7 +332,7 @@ function setActive(on){
   if(on){S.animate=true;render();window.scrollTo(0,0);}else{root.textContent="";}}
 function syncUrl(){try{document.dispatchEvent(new Event("whatif:change"));}catch(e){}}
 function query(){return S.on?"?mode=whatif&view="+S.view+(S.sort!=="team"?"&sort="+S.sort:"")+(W.order.length>1?"&snap="+S.snap:""):"";}
-function restore(qs){var v=qs.get("view");if(v==="same"||v==="redo"||v==="fa")S.view=v;var so=qs.get("sort");if(so)S.sort=so;var sn=qs.get("snap");if(sn&&W.snapshots[sn])S.snap=sn;}
+function restore(qs){var v=qs.get("view");if(v==="same"||v==="redo"||v==="fa"||v==="now")S.view=v;var so=qs.get("sort");if(so)S.sort=so;var sn=qs.get("snap");if(sn&&W.snapshots[sn])S.snap=sn;}
 var css=document.createElement("style");css.textContent="@keyframes wi-flash{from{background-color:#dfe3ff}to{background-color:transparent}}.wi-card .player-row.flash{animation:wi-flash .7s ease}@media (prefers-reduced-motion:reduce){.wi-card .player-row.flash{animation:none}}";
 document.head.appendChild(css);
 window.NBA_WHATIF={setActive:setActive,isActive:function(){return S.on;},query:query,restore:restore,classify:classify,compliance:compliance,state:S};

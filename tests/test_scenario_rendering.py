@@ -129,7 +129,7 @@ def _read(card):
 
 @unittest.skipUnless(_chrome(), "no headless Chrome available")
 class TestRenderedCards(unittest.TestCase):
-    """Default (OFFICIAL) page = locked freeze + the processed official trades, rendered by the same derived-state path."""
+    """Default page = the CURRENT SEASON (verified roster snapshot + completed in-season trades), same derived-state path."""
 
     @classmethod
     def setUpClass(cls):
@@ -140,10 +140,13 @@ class TestRenderedCards(unittest.TestCase):
         cls.state = ls.resolve(cls.i, (), "OFFICIAL")
         cls.base = ls.initial_state(cls.i)
         cls.shorts = {t["franchiseId"]: t["short"] for t in cls.i["freeze"]["teams"]}
+        import season_state as ss
+        cls.si = ss.load_season(cls.i)
+        cls.cur = ss.season_state(cls.si)
 
-    def test_default_view_renders_the_post_trade_official_state_for_all_16_teams(self):
+    def test_default_view_renders_the_current_season_state_for_all_16_teams(self):
         for fid, short in self.shorts.items():
-            rep = ls.team_report(self.i, self.state, fid, self.base)
+            rep = ls.team_report(self.si, self.cur, fid, self.state)
             c = _read(_card(self.official, short))
             self.assertEqual(sorted(c["names"]), sorted(r["n"] for r in rep["roster"]), short)
             self.assertEqual(c["rows"], rep["count"], short)
@@ -172,32 +175,98 @@ class TestRenderedCards(unittest.TestCase):
             self.assertEqual(sorted(n for n in now if n not in drafted), sorted(before), short)
             self.assertTrue(set(now) - set(before) <= drafted, short)
 
-    def test_cards_show_movement_from_the_keeper_freeze(self):
+    def test_cards_show_in_season_movement_from_the_post_draft_roster(self):
         card = _card(self.official, "Bz")
-        self.assertIn("KEEPER FREEZE", card)
-        self.assertIn("OFFICIAL STATE", card)
-        self.assertIn("KEEPER-FREEZE CUTS", card)
-        self.assertIn("DRAFTED +", _card(self.official, "Quân"))  # every team has drafted: movement lists the draftees
+        self.assertIn("vs draft", card)                     # delta against the post-draft roster
+        self.assertIn("KEEPER-FREEZE CUTS", card)           # kept in the DOM, hidden in-season
+        cc = re.sub(r"<[^>]+>", "", _card(self.official, "CrazyCat"))
+        self.assertIn("INZion Williamson", cc)               # the completed in-season trade, applied once
+        self.assertIn("OUTMorez Johnson Jr.R2.07 CrazyCat", cc)  # rookie chip + where he was drafted
+        self.assertNotIn("Morez Johnson Jr.", _read(_card(self.official, "CrazyCat"))["names"])
+        self.assertIn("Morez Johnson Jr.", _read(_card(self.official, "HCMC"))["names"])
+        self.assertIn(">DRAFTED<", _card(self.official, "Quân"))  # every team has drafted: movement lists the draftees
 
-    def test_trade_lab_shows_only_the_staged_amendment(self):
+    def test_in_season_acquisitions_are_styled_apart_from_own_draftees(self):
+        def row(short, name):
+            card = _card(self.official, short)
+            return next(r for r in re.findall(r'<div class="player-row[^"]*".*?</div></div>|<div class="player-row[^"]*"[^>]*>.*?<div class="cap">.*?</div>', card, re.S)
+                        if f">{name}<" in r or f">{name} <" in r or f"{name}<span" in r)
+        morez = row("HCMC", "Morez Johnson Jr.")        # rookie drafted by CrazyCat, traded to HCMC
+        self.assertRegex(morez, r'class="player-row[^"]*\brow-trade\b')
+        self.assertIn("rookie-row", morez)              # keeps the purple rookie name
+        self.assertIn('class="in-tag dr-other rk"', morez)  # outlined draft slot, not the filled own-draft chip
+        self.assertIn(">2.07<", morez)                  # where he was drafted
+        self.assertIn('class="tr-tag"', morez)
+        zion = row("CrazyCat", "Zion Williamson")
+        self.assertIn("row-trade", zion)
+        self.assertIn('class="tr-tag"', zion)
+        own = row("LC", "AJ Dybantsa")                  # LC's own 1.02 pick
+        self.assertIn('class="in-tag rk"', own)
+        self.assertNotIn("row-trade", own)
+        self.assertNotIn("tr-tag", own)
+
+    def test_trade_lab_separates_proposals_from_completed_trades(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertEqual(lab.count('class="trade-title"'), 1)
-        self.assertIn("CRAZYCAT ↔ HCMC · AMENDMENT", lab)
-        self.assertIn("PENDING CONFIRMATION", lab)
-        self.assertIn('<input type="checkbox">', lab)                 # selectable preview, not applied
-        self.assertNotIn("Trade Lab is clear", lab)
-        self.assertIn("Tick a staged transaction", self.official)
+        self.assertEqual(lab.count('class="tcard prop'), 2)
+        self.assertEqual(lab.count('<input type="checkbox">'), 2)     # selectable previews, not applied
+        text = re.sub(r"<[^>]+>", " ", lab)
+        for name in ("Stephon Castle", "Cedric Coward", "Victor Wembanyama", "Nikola Jokić"):
+            self.assertIn(name, text)
+        self.assertRegex(text, r"178\s*→\s*175")                     # each side shows its payroll change
+        self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
+        self.assertNotIn("AMENDMENT", lab)                             # withdrawn: not actionable
+        done = re.search(r'id="lab-done">(.*?)</details>', self.official, re.S).group(1)
+        self.assertEqual(done.count('class="tcard done'), 1)
+        self.assertIn("Morez Johnson Jr.", done)
+        self.assertIn("✓ DONE", done)
+        self.assertNotIn("WITHDRAWN", done)                            # withdrawn entries are not shown
+        hist = re.sub(r"<[^>]+>", " ", done.split("Pre-draft")[1])
+        self.assertIn("Alperen Şengün", hist)                          # LC ↔ Melo shown as one aggregated trade:
+        self.assertNotIn("Aaron Gordon", hist)                         # Gordon moved and moved back nets out
+        self.assertRegex(hist, r"Alperen Şengün\s+3\.\s*04")
+
+    def test_scenario_movement_credits_the_drafting_team(self):
+        scn = _dump("file://" + os.path.abspath(INDEX) + "?mode=scenario&trades=PROP-2026-001")
+        mv = re.search(r'<div class="mv">(.*?)</details>', _card(scn, "Bsy"), re.S).group(1)
+        drafted = re.search(r'<div class="mv-dr">(.*?)</div>', mv, re.S).group(1)
+        self.assertNotIn("Joan Beringer", drafted)          # drafted by sup fam at 3.06, not by Bsy
+        self.assertIn("Aaron Nesmith", drafted)             # Bsy's own 2.01 pick
+        in_line = re.search(r'<span class="mv-l">IN</span>(.*?)</div>', mv, re.S).group(1)
+        self.assertIn("Cedric Coward", in_line)
+        self.assertRegex(in_line, r'Joan Beringer</span>.*?class="mv-pk"[^>]*>3\.<span class="num">06</span> sup fam|Joan Beringer</span>.*?3.*?06.*?sup fam')
+        sup = re.search(r'<div class="mv">(.*?)</details>', _card(scn, "sup fam"), re.S).group(1)
+        self.assertRegex(sup, r'<span class="mv-l">OUT</span>.*?Joan Beringer')
+
+    def test_traded_rookie_keeps_rookie_styling_in_summaries(self):
+        mv = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "HCMC"), re.S).group(1)
+        morez = re.search(r'<span class="mv-pl rk"><span>Morez Johnson Jr\.</span>(.*?)</span></span>', mv, re.S)
+        self.assertIsNotNone(morez, "Morez must keep the purple rookie label in HCMC's movement summary")
+        self.assertIn('class="src src-r"', morez.group(1))
+        self.assertIn("CrazyCat", morez.group(1))
+        cc = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "CrazyCat"), re.S).group(1)
+        self.assertRegex(cc, r'<span class="mv-l">OUT</span><span class="mv-items"><span class="mv-pl rk"><span>Morez Johnson Jr\.</span>')
+        scn = _dump("file://" + os.path.abspath(INDEX) + "?mode=scenario&trades=PROP-2026-001")
+        folds = re.search(r'id="lab-folds">(.*)', scn, re.S).group(1)
+        self.assertIn('<span class="mv-pl"><span>Joan Beringer</span>', folds)  # veteran draftee: slot, no purple
+
+    def test_internal_notes_are_not_published(self):
+        data = re.search(r'id="league-data">(.*?)</script>', self.static, re.S).group(1)
+        for internal in ("directionCheck", "DISCREPANCY", "ownership-consistent", "Direction verified",
+                         '"note":', '"flag":', "confirmed in chat"):
+            self.assertNotIn(internal, data, internal)
 
     def test_pass_through_lists_players_by_name_and_picks_with_pick_prefix(self):
         card = re.sub(r"<[^>]+>", "", _card(self.official, "Bz"))  # digits are wrapped in <span class="num">
-        self.assertIn("Franz Wagner (Dũng→Bz→LC)", card)
         self.assertNotIn("Pick Franz Wagner", card)
-        self.assertIn("Pick 1.03 (Bsy→Bz→sup fam)", card)
+        self.assertRegex(self.static, r'p\.asset\.t==="p"\?p\.asset\.n:"Pick "\+p\.asset\.n')  # players by name, picks prefixed
         self.assertNotRegex(self.static, r'"Pick "\+p\.asset\.n\+" \("')  # old unconditional "Pick " prefix is gone
 
-    def test_public_ui_says_keepers_are_locked(self):
-        m = re.search(r'id="lab-keeper-status">(.*?)</span>', self.official)
-        self.assertEqual(m.group(1), "KEEPERS LOCKED · OFFICIAL")
+    def test_public_ui_shows_the_verified_roster_snapshot(self):
+        m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill cap-rule"', self.official)
+        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 14 · +1 TRADE")
+        rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
+        self.assertEqual(len(rules), 4)
+        self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 $ COUNT · IL ✓" for r in rules), rules)
         self.assertNotIn("NOT FROZEN", self.official.split("<body", 1)[1].split('<script id="league-app">')[0])
 
     def test_pick_pill_never_clips(self):
