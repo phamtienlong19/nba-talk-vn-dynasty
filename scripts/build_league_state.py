@@ -370,16 +370,28 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
     trades = []
     season_txns = sorted(si["seasonTxns"], key=lambda t: (t["status"] not in ss.SELECTABLE, t["order"]))
     pre_draft = sorted(inputs["trades"]["trades"], key=lambda t: t["order"])
+    rookies = {e["playerKey"] for e in inputs["draft"]["events"] if e.get("rookie")}
+    drafted_at = {c["playerKey"]: {"label": c["label"], "by": c["franchiseId"]} for c in ls.draft_summary(inputs, official)["completed"]}
+
+    def card_asset(a):  # what a trade card shows: name, salary, position, NBA team, 2026 rookie
+        d = ls.describe_asset(si, a)
+        if a["type"] == "player":
+            p = si["registry"].get(a["playerKey"]) or si["extraPlayers"].get(a["playerKey"]) or {}
+            d.update({"pos": (p.get("displayPosition") or "").replace(",", "/"), "nba": p.get("nbaTeam") or "",
+                      "rk": a["playerKey"] in rookies, "dr": drafted_at.get(a["playerKey"])})
+        return d
+
+    # Internal working notes (data provenance, direction checks, corrections) stay in the repo data files and are
+    # deliberately NOT published: the page shows what moves, the status and the cap effect only.
     for t in season_txns + pre_draft:
         recv = {}
         for a in ls.trade_assets(t):
-            recv.setdefault(a["to"], []).append(ls.describe_asset(si, a))
+            recv.setdefault(a["to"], []).append(card_asset(a))
         trades.append({"id": t["tradeId"], "label": t.get("label"), "status": t["status"], "order": t["order"],
                        "phase": t.get("phase", "PRE_DRAFT"), "dependsOn": t.get("dependsOn", []),
-                       "participants": t["participants"], "receives": recv, "note": t.get("note"),
+                       "participants": t["participants"], "receives": recv,
                        "pending": bool(t.get("pendingConfirmation")), "amends": t.get("amends"),
-                       "effectiveAt": t.get("effectiveAt"), "voidReason": t.get("voidReason"),
-                       "flag": (t.get("directionCheck") or {}).get("verified")})
+                       "effectiveAt": t.get("effectiveAt"), "voidReason": t.get("voidReason")})
     # available universe: registry + curated Yahoo-missing prospects, minus kept (official state)
     yahoo = pool.load_yahoo_players(yahoo_path)
     dyn, dyn_max = pool.load_dynasty_rankings()
@@ -418,12 +430,13 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         "official": {"teams": views[""]["teams"], "picks": ls.pick_table(inputs, official),
                      "windowWarnings": [], "tradeIds": current["activeTradeIds"]},
         "history": {"teams": history_teams, "tradeIds": official["activeTradeIds"],
-                    "checkpoint": (si["postDraft"] or {}).get("checkpoint")},
+                    "checkpoint": {k: ((si["postDraft"] or {}).get("checkpoint") or {}).get(k) for k in ("id", "date")}},
         "season": {"snapshot": {k: snap.get(k) for k in ("snapshotId", "verifiedAt", "source", "kind")},
                    "appliedAfterSnapshot": [t["txnId"] for t in ss.pending_completed(si)],
-                   "checkpoints": si["checkpoints"]["checkpoints"], "findings": ss.checkpoint_findings(si, current),
+                   "checkpoints": [{k: c.get(k) for k in ("id", "label", "date", "status")} for c in si["checkpoints"]["checkpoints"]],
+                   "findings": ss.checkpoint_findings(si, current),
                    "provisional": sorted(si["extraPlayers"]),
-                   "counting": inputs["policy"].get("payrollCounting")},
+                   "counting": {k: (inputs["policy"].get("payrollCounting") or {}).get(k) for k in ("rule", "n", "includesIL")}},
         "trades": trades,
         "draft": ls.draft_summary(inputs, official),
         "scenarios": views,

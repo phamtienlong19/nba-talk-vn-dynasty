@@ -195,7 +195,8 @@ class TestRenderedCards(unittest.TestCase):
         morez = row("HCMC", "Morez Johnson Jr.")        # rookie drafted by CrazyCat, traded to HCMC
         self.assertRegex(morez, r'class="player-row[^"]*\brow-trade\b')
         self.assertIn("rookie-row", morez)              # keeps the purple rookie name
-        self.assertIn('class="in-tag dr-other rk"', morez)  # outlined R, not the filled own-draft chip
+        self.assertIn('class="in-tag dr-other rk"', morez)  # outlined draft slot, not the filled own-draft chip
+        self.assertIn(">2.07<", morez)                  # where he was drafted
         self.assertIn('class="tr-tag"', morez)
         zion = row("CrazyCat", "Zion Williamson")
         self.assertIn("row-trade", zion)
@@ -207,18 +208,36 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_trade_lab_separates_proposals_from_completed_trades(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertEqual(lab.count('class="trade-title"'), 2)
-        self.assertIn("BSY ↔ SUP FAM", lab)
-        self.assertIn("BSY ↔ THỊNH", lab)
-        self.assertEqual(lab.count("HYPOTHETICAL"), 2)
+        self.assertEqual(lab.count('class="tcard prop'), 2)
         self.assertEqual(lab.count('<input type="checkbox">'), 2)     # selectable previews, not applied
-        self.assertIn("DIRECTION CHECK", lab)
+        text = re.sub(r"<[^>]+>", " ", lab)
+        for name in ("Stephon Castle", "Cedric Coward", "Victor Wembanyama", "Nikola Jokić"):
+            self.assertIn(name, text)
+        self.assertIn("PAYROLL", text)                                # each side shows its payroll change
+        self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
         self.assertNotIn("AMENDMENT", lab)                             # withdrawn: not actionable
         done = re.search(r'id="lab-done">(.*?)</details>', self.official, re.S).group(1)
-        self.assertIn("MOREZ / ZION", done)
+        self.assertEqual(done.count('class="tcard done'), 1)
+        self.assertIn("Morez Johnson Jr.", done)
         self.assertIn("COMPLETED", done)
         self.assertIn("WITHDRAWN", done)                               # listed only as history
-        self.assertIn("Tick a proposal", self.official)
+
+    def test_scenario_movement_credits_the_drafting_team(self):
+        scn = _dump("file://" + os.path.abspath(INDEX) + "?mode=scenario&trades=PROP-2026-001")
+        mv = re.search(r'<div class="mv">(.*?)</details>', _card(scn, "Bsy"), re.S).group(1)
+        drafted = re.search(r'<div class="mv-dr">(.*?)</div>', mv, re.S).group(1)
+        self.assertNotIn("Joan Beringer", drafted)          # drafted by sup fam at 3.06, not by Bsy
+        self.assertIn("Aaron Nesmith", drafted)             # Bsy's own 2.01 pick
+        ins = re.sub(r"<[^>]+>", "", mv)
+        self.assertIn("IN + Cedric Coward · Joan Beringer (3.06 sup fam)", ins)
+        sup = re.sub(r"<[^>]+>", "", re.search(r'<div class="mv">(.*?)</details>', _card(scn, "sup fam"), re.S).group(1))
+        self.assertIn("OUT − Cedric Coward · Joan Beringer (3.06 sup fam)", sup)
+
+    def test_internal_notes_are_not_published(self):
+        data = re.search(r'id="league-data">(.*?)</script>', self.static, re.S).group(1)
+        for internal in ("directionCheck", "DISCREPANCY", "ownership-consistent", "Direction verified",
+                         '"note":', '"flag":', "confirmed in chat"):
+            self.assertNotIn(internal, data, internal)
 
     def test_pass_through_lists_players_by_name_and_picks_with_pick_prefix(self):
         card = re.sub(r"<[^>]+>", "", _card(self.official, "Bz"))  # digits are wrapped in <span class="num">
