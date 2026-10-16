@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Draft Board — ví dụ / example</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside id="demoWarning" class="demowarn"></aside>
+  <header>
+    <h1 id="title"></h1>
+    <p class="sub"><span id="sub"></span> · <a href="?lang=vi">VI</a> / <a href="?lang=en">EN</a></p>
+    <p id="saveState" class="badge"></p>
+  </header>
+
+  <main>
+    <section id="welcome" hidden>
+      <h2 id="welcomeTitle"></h2>
+      <p id="welcomeText"></p>
+      <label class="button"><span id="pickFilesLabel"></span>
+        <input id="welcomeFiles" type="file" accept=".csv" multiple hidden>
+      </label>
+    </section>
+
+    <section id="problems" class="problems" hidden aria-live="polite"></section>
+
+    <div id="app" hidden>
+      <section id="clock" class="card"></section>
+
+      <section id="controls" class="card">
+        <h2 id="controlsTitle"></h2>
+        <p class="note" id="controlsNote"></p>
+        <div class="row">
+          <button id="undo"></button>
+          <button id="exportCsv"></button>
+          <button id="exportJson"></button>
+          <button id="audit"></button>
+        </div>
+        <div class="row">
+          <label class="button secondary"><span id="importLabel"></span>
+            <input id="importFiles" type="file" accept=".csv" multiple hidden>
+          </label>
+          <button id="reset" class="danger"></button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 id="availTitle"></h2>
+        <div class="row">
+          <input id="search" type="search" autocomplete="off">
+          <select id="posFilter"></select>
+        </div>
+        <ul id="available" class="list"></ul>
+        <p id="availEmpty" hidden></p>
+      </section>
+
+      <section class="card">
+        <h2 id="boardTitle"></h2>
+        <div class="tablewrap"><table id="board"></table></div>
+      </section>
+
+      <section class="card">
+        <h2 id="teamsTitle"></h2>
+        <div id="teams" class="teams"></div>
+      </section>
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+  <script src="draft-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
