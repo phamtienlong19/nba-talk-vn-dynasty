@@ -3,6 +3,16 @@
 This guide takes you from an idea to a small working website at a public web address. You don't need any programming
 experience. You'll use free tools, and you won't need to type commands into a terminal.
 
+> ## Which route is yours?
+>
+> | If you… | Go to |
+> |---|---|
+> | **just want to try AI and publish a first simple website** | Stay here and follow Steps 1–11 below |
+> | **already have a real project idea, for example a basketball tournament draft** | Read [BASKETBALL_DRAFT_FAST_START_VI.md](BASKETBALL_DRAFT_FAST_START_VI.md) (Vietnamese). Come back here only for GitHub/VS Code setup and publishing (Steps 3, 4, 8, 9, 10) |
+> | **already have data in Excel or Google Sheets** | Same fast start, section 3, "Manual entry or import from Excel/Google Sheets?". It shows how to turn a spreadsheet into CSV files with stable IDs and validate them |
+>
+> You don't have to finish the club-directory tutorial first.
+
 **What you'll build:** a club member directory, a page that lists members and lets visitors search and filter them.
 It runs entirely in the browser, with no server, database, login or paid service.
 
@@ -179,8 +189,7 @@ The AI will work for a minute or so. It may ask permission to create files; allo
 
 **If the files aren't there:** see [The AI said it finished but there are no files](#the-ai-said-it-finished-but-there-are-no-files).
 
-> **Your files should look roughly like the reference version** in [Appendix: reference code](#appendix-reference-code).
-> It's tested and works. If the AI struggles, you can copy it instead and carry on with the guide.
+> **Stuck?** A tested reference version of these files is in [`examples/club-directory/v1-first-version/`](examples/club-directory/v1-first-version/). Your AI's version doesn't have to match it exactly; it only has to behave the same way.
 
 ---
 
@@ -324,8 +333,9 @@ The role drop-down should be there.
 - "The AI says it's done", "it works on my computer" and "it's live on the internet" are three different things.
   Check each one.
 
-**Next steps:** read [Building with AI](BUILDING_WITH_AI.md) for the full method (bigger projects, testing, reviewing
-AI mistakes, privacy). Keep [Copy-paste prompts](COPY_PASTE_PROMPTS.md) open while you work.
+**Next steps:** read [Building with AI](BUILDING_WITH_AI.md) for the full method (bigger projects, data, testing, reviewing
+AI mistakes, privacy). Keep [Copy-paste prompts](COPY_PASTE_PROMPTS.md) open while you work. For a real project with
+spreadsheet data, such as a tournament draft, see [BASKETBALL_DRAFT_FAST_START_VI.md](BASKETBALL_DRAFT_FAST_START_VI.md).
 
 ---
 
@@ -451,128 +461,8 @@ Pick **one** AI coding tool and learn it well; you don't need several.
 
 ---
 
-## Appendix: reference code
+## Reference code
 
-A tested version of the first project. Use it to compare with what your AI produced, or copy it if you get stuck.
-Create the three files in your project folder and paste each one in.
-
-**Copy — `index.html`:**
-```html
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Riverside Chess Club — Members</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <h1>Riverside Chess Club</h1>
-    <p class="sub">Member directory · <span id="count"></span></p>
-  </header>
-  <main>
-    <label for="search">Search by name or role</label>
-    <input id="search" type="search" placeholder="e.g. Maya or Captain" autocomplete="off">
-    <ul id="list"></ul>
-    <p id="empty" hidden>No members match your search.</p>
-  </main>
-  <footer>Last updated: 2026-10-16</footer>
-  <script src="app.js"></script>
-</body>
-</html>
-```
-
-**Copy — `style.css`:**
-```css
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; background: #f5f6f8; color: #1d2433; }
-header, main, footer { max-width: 640px; margin: 0 auto; padding: 16px; }
-h1 { margin: 8px 0 0; font-size: 1.6rem; }
-.sub { margin: 4px 0 0; color: #5b6475; }
-label { display: block; font-weight: 600; margin-bottom: 6px; }
-input { width: 100%; padding: 10px 12px; font-size: 1rem; border: 1px solid #c5cbd6; border-radius: 8px; }
-ul { list-style: none; padding: 0; margin: 16px 0; }
-li { background: #fff; border: 1px solid #e2e6ee; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px;
-     display: flex; justify-content: space-between; gap: 12px; }
-.name { font-weight: 600; }
-.role { color: #5b6475; white-space: nowrap; }
-footer { color: #5b6475; font-size: .85rem; }
-```
-
-**Copy — `app.js`:**
-```js
-// Member list. Use made-up names or people who agreed to be listed — this page is public.
-const members = [
-  { name: "Maya Chen", role: "Captain" },
-  { name: "Tom Okafor", role: "Treasurer" },
-  { name: "Lena Novak", role: "Member" },
-  { name: "Sam Rivera", role: "Member" },
-  { name: "Priya Shah", role: "Coach" }
-];
-
-const list = document.getElementById("list");
-const search = document.getElementById("search");
-const empty = document.getElementById("empty");
-const count = document.getElementById("count");
-
-function render() {
-  const q = search.value.trim().toLowerCase();
-  const shown = members.filter(m => (m.name + " " + m.role).toLowerCase().includes(q));
-  list.innerHTML = "";
-  for (const m of shown) {
-    const li = document.createElement("li");
-    li.innerHTML = '<span class="name"></span><span class="role"></span>';
-    li.querySelector(".name").textContent = m.name;
-    li.querySelector(".role").textContent = m.role;
-    list.appendChild(li);
-  }
-  empty.hidden = shown.length > 0;
-  count.textContent = shown.length + " of " + members.length + " members";
-}
-
-search.addEventListener("input", render);
-render();
-```
-
-**Expected result:** "5 of 5 members"; searching "captain" shows only Maya Chen; searching "zzz" shows
-"No members match your search." and "0 of 5 members".
-
-### Reference: the role filter (Step 11)
-
-**In `index.html`**, directly below the `<input id="search" …>` line, add:
-```html
-    <label for="role">Role</label>
-    <select id="role"><option value="">All roles</option></select>
-```
-
-**In `style.css`**, replace the `label` and `input` lines with:
-```css
-label { display: block; font-weight: 600; margin: 12px 0 6px; }
-input, select { width: 100%; padding: 10px 12px; font-size: 1rem; border: 1px solid #c5cbd6; border-radius: 8px; }
-```
-
-**In `app.js`**, add after the line `const count = …`:
-```js
-const role = document.getElementById("role");
-
-// Fill the role menu from the data, so new roles appear automatically.
-for (const r of [...new Set(members.map(m => m.role))].sort()) {
-  const opt = document.createElement("option");
-  opt.value = r;
-  opt.textContent = r;
-  role.appendChild(opt);
-}
-```
-then replace the `const shown = …` line with:
-```js
-  const shown = members.filter(m =>
-    (m.name + " " + m.role).toLowerCase().includes(q) && (role.value === "" || m.role === role.value));
-```
-and add at the end, just above `render();`:
-```js
-role.addEventListener("change", render);
-```
-
-**Expected result:** the drop-down lists All roles, Captain, Coach, Member, Treasurer. Choosing **Member** shows Lena
-Novak and Sam Rivera; then typing "sam" shows only Sam Rivera.
+Tested versions of both stages of the tutorial are in [`examples/club-directory/`](examples/club-directory/):
+`v1-first-version/` (Step 5) and `v2-role-filter/` (Step 11), with the expected results and what changed between them.
+Download this repository as a ZIP (on its GitHub page: **Code → Download ZIP**) to get them.

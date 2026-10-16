@@ -5,6 +5,9 @@ a league tool, a club system, an internal dashboard. It's based on a real projec
 web board and tool set for a 16-team fantasy basketball league. It was built in about five weeks by a league member
 working with AI coding agents. The case studies are from that project; the method applies to unrelated projects too.
 
+> **In a hurry, with a real event to run?** Start with the Vietnamese fast start for a basketball draft,
+> [BASKETBALL_DRAFT_FAST_START_VI.md](BASKETBALL_DRAFT_FAST_START_VI.md), and the tested example in [`examples/draft-board/`](examples/draft-board/README.md).
+
 > **What AI did and didn't do in that project.** AI agents wrote most of the code, tests and documentation. A person
 > chose what to build, gathered the real rules and data, decided every league rule, found several of the most
 > important bugs, judged every screen on a phone, and approved every change. Expect the same split on your projects.
@@ -14,18 +17,21 @@ working with AI coding agents. The case studies are from that project; the metho
 2. [Requirements and scope](#2-requirements-and-scope)
 3. [Plan the first usable version](#3-plan-the-first-usable-version)
 4. [Tools and what each is for](#4-tools-and-what-each-is-for)
-5. [Choosing models and effort](#5-choosing-models-and-effort)
-6. [Writing good requests](#6-writing-good-requests)
-7. [Context: keeping the AI informed without wasting it](#7-context-keeping-the-ai-informed-without-wasting-it)
-8. [Building features](#8-building-features)
-9. [Catching AI mistakes](#9-catching-ai-mistakes)
-10. [Testing and checking](#10-testing-and-checking)
-11. [Reviewing changes and pull requests](#11-reviewing-changes-and-pull-requests)
-12. [Publishing and confirming it's live](#12-publishing-and-confirming-its-live)
-13. [Feedback and iteration](#13-feedback-and-iteration)
-14. [Security, credentials and privacy](#14-security-credentials-and-privacy)
-15. [After launch: maintenance](#15-after-launch-maintenance)
-16. [Small project vs serious project](#16-small-project-vs-serious-project)
+5. [Choosing a toolchain](#5-choosing-a-toolchain)
+6. [Choosing models and effort](#6-choosing-models-and-effort)
+7. [Writing good requests](#7-writing-good-requests)
+8. [Context, tokens and cost](#8-context-tokens-and-cost)
+9. [Data: where it lives and how it gets in](#9-data-where-it-lives-and-how-it-gets-in)
+10. [From a static page to shared state](#10-from-a-static-page-to-shared-state)
+11. [Building features](#11-building-features)
+12. [Catching AI mistakes](#12-catching-ai-mistakes)
+13. [Testing and checking](#13-testing-and-checking)
+14. [Reviewing changes and pull requests](#14-reviewing-changes-and-pull-requests)
+15. [Publishing and confirming it's live](#15-publishing-and-confirming-its-live)
+16. [Feedback and iteration](#16-feedback-and-iteration)
+17. [Security, credentials and privacy](#17-security-credentials-and-privacy)
+18. [After launch: maintenance](#18-after-launch-maintenance)
+19. [Small project vs serious project](#19-small-project-vs-serious-project)
 
 ---
 
@@ -66,6 +72,21 @@ this up front and write it down.
 
 **Do this:** Use the BRIEF prompt in [Copy-paste prompts](COPY_PASTE_PROMPTS.md) and keep the result as `BRIEF.md`
 in your project.
+
+**If you have a business-analyst background, you already own the hardest part.** Your artefacts map directly:
+
+| BA artefact | In an AI-built project it becomes |
+|---|---|
+| Actors, roles | Who may change what (this decides whether you need logins at all) |
+| User stories | The request you give the agent, and your "done when" list |
+| Business rules | Tests and written rules the software must follow. The AI must not invent them |
+| Data dictionary | The CSV/column definitions and stable IDs |
+| Exceptions, edge cases | Edge-case checks (duplicates, undo, bad imports) |
+| Acceptance criteria | Your checklist before you call it done |
+| Non-goals | The "Not doing" list that keeps the first version small |
+
+The skill that matters most is refusing to let the AI guess a rule nobody has decided.
+
 
 ## 3. Plan the first usable version
 
@@ -123,7 +144,61 @@ and its tests once, then just run the script.
 > times, a small import script took each pick, matched the player name to a stable player ID, checked the pick order
 > and owner, and refused duplicates or out-of-order entries.
 
-## 5. Choosing models and effort
+## 5. Choosing a toolchain
+
+There is no single best path. Compare approaches on what *you* need, not on which AI seems smartest.
+
+**A. Browser-based AI app builders** (Lovable, Bolt, Replit and similar). You describe the app in a web page and it builds
+and hosts it. Fastest way to *see* something tonight, with nothing to install. Trade-offs: free allowances are small and
+usage-based (credits or tokens), you see less of what's happening in the code, hosting and any database are tied to
+the platform, and you must check whether you can export the code and keep it in your own GitHub account. Good for a
+sketch you will redo, riskier for something you must rely on at an event.
+
+**B. Repository-based coding agents** (GitHub Copilot agent in VS Code, Claude Code, OpenAI Codex, Cursor and similar).
+The agent works on real files in a folder you own. You get full control of structure, tests, Git history and where it
+is hosted, and you can move to another tool later. Trade-offs: some setup (editor, Git, sign-in), you must check what
+the AI changed, and usage is limited by your plan.
+
+**C. Spreadsheet or no-code first** (Google Sheets, AppSheet and similar). Often the right answer when the data already
+lives in a spreadsheet and you mainly need to view, filter and share it. Multi-user editing and simple rules (for
+example, flagging a duplicate pick with a data-validation rule) are built in. Trade-offs: draft-specific logic,
+presentation and permissions are limited, and you depend on the platform. Ask first whether you need custom code at all.
+
+**D. Chat-generated HTML on simple static hosting.** Ask a chat AI for a single HTML file, save it, host it. Lowest cost
+and complexity, fine for a read-only board. Trade-offs: no version history unless you add Git, becomes hard to change
+as it grows, and static hosting cannot hold shared, changing data.
+
+| You want… | Best fit | Why |
+|---|---|---|
+| A prototype to look at **tonight**, no install | A (or D) | Nothing to set up. Treat the result as a sketch |
+| The **lowest cost** for a small prototype | C or D, then B with a free plan | Spreadsheets and static files cost nothing; free agent plans exist but are limited |
+| To work comfortably **with files** | B | You own the folder, can read diffs, and can switch tools |
+| **Spreadsheet-based administration** by non-technical organizers | C, or B importing CSV | Keep their spreadsheet; add code only for what it can't do |
+| **Long-term control and portability** | B (or D with Git) | The code is yours; no platform lock-in |
+| **Shared, changing data** edited by several people | Anything + a hosted backend | That needs a server that checks permissions and prevents conflicts. See section 10 |
+
+**What was checked on 16 Oct 2026 against official pages** (re-check before relying on any of it; plans change often):
+Claude Code is included in paid Claude plans (Pro is listed at $20/month, or $17/month billed annually), not in the Free plan.
+OpenAI says Codex is included in ChatGPT Free and Go, but the page I checked states usage limits only for Plus and
+Business. Lovable Free: 5 build credits a day, up to 30 a month. Bolt Free: 300K tokens a day and 1M a month, with Bolt
+branding on published sites. GitHub Pages in GitHub Free is for **public** repositories, and the published site is
+public. Netlify's Free plan is credit-limited (production deploys and bandwidth use credits). Google Sheets "Publish to
+the web" republishes changes automatically, which "might take a few minutes", and charts expose their underlying data.
+**Not verified:** GitHub Copilot Free's exact monthly allowance, Replit's free tier, whether Lovable's or Bolt's free plans
+can export to GitHub, and AppSheet pricing.
+
+**A reasonable default** for an organizer with spreadsheet data, a real event and a small budget: a free chat AI to
+write the requirements, then B with whichever agent you already have access to, data kept as CSV files with stable
+IDs, and hosting on a free static host (GitHub Pages, or Netlify/Cloudflare Pages if the repository must stay private;
+check their current terms). Choose differently when: you hate installing software (start with A as a sketch); the
+organizers only want to edit a spreadsheet and view it (C may be enough); or several remote people must record picks live
+(you need a backend, so plan for it and consider help from someone with backend experience).
+
+Don't pick a tool because someone you admire uses it. The NBA Talk project used a chat assistant for planning and Claude
+Code for implementation, but other combinations work too.
+
+
+## 6. Choosing models and effort
 
 Most tools let you choose a model and, sometimes, how much "thinking" it does. Decide by **how uncertain the task
 is × how costly a mistake would be**:
@@ -138,7 +213,7 @@ is × how costly a mistake would be**:
 Don't pay for heavy reasoning on mechanical edits, and don't save money on the logic people will rely on.
 Model names change. Think in tiers (fast / standard / strongest) rather than in specific products.
 
-## 6. Writing good requests
+## 7. Writing good requests
 
 A good request has: **goal**, **where**, **done when**, **don't**, and **report back**.
 
@@ -175,22 +250,117 @@ Report back: which files changed and how you checked it.
 > public. **Lesson:** tell agents to stop and ask when instructions contradict the data, and keep internal notes off
 > user-facing screens.
 
-## 7. Context: keeping the AI informed without wasting it
+## 8. Context, tokens and cost
 
 **Context** is everything the AI currently "knows" in a conversation. It's limited and it costs money. Long chats get
 worse: the AI forgets early decisions or repeats fixed mistakes.
 
 - **Keep durable facts in files, not in chat:** `BRIEF.md` (what and why), an instructions file (rules for agents),
   and `STATE.md` (where things stand: what's done, what's next, open questions).
-- **Start each session** by having the agent read those files instead of the whole project.
+- **Start each session** by having the agent read those files instead of the whole project, and tell it to *search* for
+  the relevant place before opening large files.
+- **Don't paste your whole project into a chat** to ask a small question. Point a coding agent at the folder, or paste
+  only the part that matters.
 - **Start a fresh session** when the task changes, when the chat has been summarised to save space, or when the
   agent repeats a mistake you already corrected.
 - **End each session** by asking the agent to update `STATE.md`.
 
-> **Case study:** several long working sessions on the project ran out of space and had to be summarised. Work
+**Four different costs.** Keep them apart: the **subscription** (money per month), **token or credit use** (how fast
+you run through your allowance), **your time**, and **maintenance later**. Usually your time is the biggest one.
+
+**What actually reduces waste:**
+1. A clear brief with "done when" and "not doing". It prevents the most rework.
+2. Planning in a chat AI (cheap, conversational) and file operations in a coding agent.
+3. One small, checkable change per request.
+4. A **script instead of repetition**: if you would otherwise ask an AI to enter 48 draft picks, ask it once to write an
+   import that checks and loads them.
+5. Batch mechanical edits (rename a column, add rows) into one request instead of many.
+6. A stronger model for high-risk logic (rules, duplicate prevention, import checks) and a cheaper one for wording and colour.
+7. An independent review only for risky changes, not every edit.
+
+**Signs the agent is wasting your allowance:** it "fixes" the same thing repeatedly, changes files you didn't mention,
+reports success without evidence, or keeps asking questions you already answered in the brief. Stop. Restate the problem
+with one concrete example, or start a fresh session with the brief.
+
+**A cheap first evening:**
+1. Free chat AI: interview + brief (one conversation).
+2. Start from a working example folder, or ask an agent for the smallest version.
+3. Run it; check it yourself with real-looking data.
+4. Ask for one or two fixes, each as a single request.
+5. Commit; stop for the night. Don't switch tools mid-way.
+
+> **Case study:** several long working sessions on the NBA Talk project ran out of space and had to be summarised. Work
 > continued smoothly only because the project's state was kept in files, not in the conversation.
 
-## 8. Building features
+
+## 9. Data: where it lives and how it gets in
+
+For anything with a list of people, teams or results, decide the **source of truth**: the one place a fact is kept.
+Then decide how data gets into your app.
+
+| Way in | Fits when | Watch out for |
+|---|---|---|
+| **Typed into a source file** | A small, fixed prototype | Painful when data changes often; typos go unnoticed |
+| **CSV (or Excel exported as CSV) import** | Organizers already keep spreadsheets | Fixed column names; you must check rows before applying them |
+| **Google Sheets as the source** | Non-technical people edit the data | Changes reach a published copy only after you republish, with a delay; a shared sheet is not a permissioned live system |
+| **Database or API** | Several authorized people write the same data, or data syncs automatically | More complexity, maintenance and possibly cost |
+
+**Use stable IDs, not names.** Names repeat, change spelling and accents, and get abbreviated. Give each team and player an ID
+(`T1`, `P07`) and have every other file refer to that ID. Then "this player was already picked" is an exact question.
+
+A tiny, realistic data model for a draft (details and sample files in
+[`examples/draft-board/`](examples/draft-board/README.md)):
+`teams.csv` (`team_id`, `team_name`), `players.csv` (`player_id`, `player_name`, `position`, `eligibility_status`),
+`draft_order.csv` (`overall_pick`, `team_id`), `draft_results.csv` (`overall_pick`, `player_id`, `status`).
+
+**Validate before you apply.** An import should check headers, empty values, duplicate IDs, references to things that
+don't exist, duplicate or out-of-order picks, and malformed quoting, and it should change **nothing** if any check fails.
+Read CSV with a proper parser: a name like `"Tran, Minh"` breaks code that just splits each line on commas.
+
+**Browser rule that surprises beginners:** a page opened by double-clicking (`file://`) usually can't `fetch()` other
+local files. Either choose the files with a file picker, or run a small local server, or publish it (any web address works).
+
+**Write the import once.** The NBA Talk project recorded 48 draft picks in one day through an importer that matched each
+pick to a stable player ID, checked order and ownership, and refused duplicates. Players that the external data source
+hadn't listed yet got explicit "provisional" entries instead of guesses.
+
+**Personal data:** publish only what people agreed to show. Be especially careful with minors. Prefer IDs or nicknames.
+A public page, and the repository behind a free GitHub Pages site, are public.
+
+## 10. From a static page to shared state
+
+Be exact about what each layer can do:
+
+- A **static page** shows information that was published. It's cheap and very reliable.
+- **`localStorage`** remembers things in *one browser on one device*. It survives a refresh. It is **not** shared with
+  another phone or browser, and it can disappear if browser data is cleared.
+- **GitHub Pages and other static hosts** have no place for many people to write data and no login.
+- A **spreadsheet or JSON snapshot** the organizer updates and republishes is a legitimate middle step, but you must
+  know who controls the official result and how long viewers wait for updates.
+- A **hidden "admin" button is not security.** Anything in the page can be found. Permissions must be checked on a server.
+
+A genuinely **live, multi-user** draft needs: one authoritative shared state; authorized organizer actions checked on
+a server; prevention of duplicate picks when two people act at once; saved history and corrections; viewers who refresh or
+subscribe; and recovery after a closed tab or lost connection.
+
+| Stage | What it gives | Where state lives | Server needed? |
+|---|---|---|---|
+| A. Read-only board | Teams, order, sample picks, a shareable link | CSV files in the repository | No |
+| B. One organizer's tracker | Record, undo, prevent duplicates, export | That organizer's browser | No |
+| C. Published results | Latest official results for everyone | Files you update and republish | No (manual, delayed) |
+| D. Authenticated live draft | Several people see and/or record picks in real time | A shared database | **Yes** |
+
+For one venue, A + B + C is usually enough: one organizer's laptop on a screen, results republished after each round.
+Do D only if you truly need remote, simultaneous participants. It is not a beginner prerequisite.
+
+> **Case study: official vs "what if".** NBA Talk kept an official record separate from experimental trade views, so a
+> "what if" could never change real results. In a tournament, keep rehearsal data and real data in different files.
+
+A full worked example (fictional four-team draft, with requirements, data files and a tested prototype) is in
+[`examples/draft-board/`](examples/draft-board/README.md), with a Vietnamese walkthrough in
+[BASKETBALL_DRAFT_FAST_START_VI.md](BASKETBALL_DRAFT_FAST_START_VI.md).
+
+## 11. Building features
 
 One feature per request, one change per save (commit). After each: check it, then commit with a clear note.
 Keep the official record separate from experiments. A "what if we traded…" screen must never alter the real data.
@@ -201,7 +371,7 @@ Give anything that doesn't have an ID yet an explicit "provisional" status rathe
 recent picks and the best players available. After the draft it was archived. It did its job; retiring it was the
 right call, not a failure.
 
-## 9. Catching AI mistakes
+## 12. Catching AI mistakes
 
 AI mistakes come in kinds, and each needs a different response:
 
@@ -225,7 +395,7 @@ AI mistakes come in kinds, and each needs a different response:
 - "Show me the test that would fail if this were wrong."
 - "Show the actual output." Then compare three values against the source yourself.
 
-## 10. Testing and checking
+## 13. Testing and checking
 
 A **test** is a small program that checks your code gives the right answer. Ask the agent to write tests for anything
 involving rules, numbers or data.
@@ -249,7 +419,7 @@ involving rules, numbers or data.
 
 Visual checks matter for screens. They aren't needed for programs without a screen.
 
-## 11. Reviewing changes and pull requests
+## 14. Reviewing changes and pull requests
 
 - A **branch** is a separate copy of your project for one change.
 - A **pull request (PR)** asks to merge that branch into the main version. GitHub shows exactly what changed.
@@ -264,7 +434,7 @@ Visual checks matter for screens. They aren't needed for programs without a scre
 change and the brief, not the conversation that produced it. Ask it how the change could pass the tests and still be
 wrong (REVIEW prompt).
 
-## 12. Publishing and confirming it's live
+## 15. Publishing and confirming it's live
 
 The real sequence has seven distinct steps. Each can succeed while the next fails:
 
@@ -284,7 +454,7 @@ The real sequence has seven distinct steps. Each can succeed while the next fail
 Know how to undo a release before you need to: in GitHub you can **revert** a merged change, which creates a new
 change that reverses it.
 
-## 13. Feedback and iteration
+## 16. Feedback and iteration
 
 - Show the real thing to real users, on their devices, as early as possible.
 - Ask them to **describe** what's wrong rather than prescribe a fix. A screenshot with one sentence is ideal.
@@ -292,18 +462,20 @@ change that reverses it.
 - **Simplifying is progress.** The project later removed a whole page and much of its wording because users found
   it busy. Fewer words and clearer symbols made it better on phones.
 
-## 14. Security, credentials and privacy
+## 17. Security, credentials and privacy
 
 - **Never put passwords, API keys or tokens in your project files or website.** Anything on a free GitHub Pages site,
   and in a public repository, is public. Use your hosting or CI's "secrets" settings for keys.
 - **Personal data:** publish only what people have agreed to. Leave out phone numbers, addresses and emails unless
   that's the point of the site and people have consented.
 - **Check each PR for accidental secrets or personal data** before merging.
+- **Spreadsheet formula injection:** when you export text that users typed into a CSV for Excel or Sheets, a value that starts
+  with `=`, `+`, `-` or `@` can be run as a formula. Export IDs and numbers where you can, or neutralise such values.
 - **Add libraries only when needed**, ask why each is needed, and prefer well-known ones.
 - **Licences:** fonts, images and data have owners. Use open licences or things you have permission to use.
 - **Don't paste confidential material into AI tools** unless your plan and organisation allow it.
 
-## 15. After launch: maintenance
+## 18. After launch: maintenance
 
 Launching creates ongoing work. Write down, for every data source: who updates it, how often, how you'll know it's
 stale, and what happens if access changes.
@@ -314,7 +486,7 @@ stale, and what happens if access changes.
 
 Also note any recurring costs (hosting, subscriptions, your weekly time) and which features are temporary.
 
-## 16. Small project vs serious project
+## 19. Small project vs serious project
 
 | Always (any project) | Only when it matters (others rely on it, rules or money, long life, several agents) |
 |---|---|
