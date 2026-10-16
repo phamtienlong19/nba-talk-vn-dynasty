@@ -27,7 +27,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_fa_draft_pool as pool  # noqa: E402
-import league_state as ls  # noqa: E402
+import league_state as ls
+import season_state as ss  # noqa: E402
 
 REPO_ROOT = ls.REPO_ROOT
 INDEX_HTML = os.path.join(REPO_ROOT, "index.html")
@@ -63,7 +64,8 @@ def parse_board(index_html: str):
         kept = [(html_lib.unescape(re.sub(r"<span.*?</span>", "", n)).strip(), float(c)) for n, c in rows]
         teams.append({"name": name, "short": short, "color": color.group(1) if color else "#313844",
                       "text": text.group(1) if text else "#ffffff", "kept": kept})
-    panel = index_html[index_html.index('id="draft-order"'):index_html.index('id="rosters-a"')]
+    a, b = section_span(index_html, "draft-order")
+    panel = index_html[a:b]
     picks = []
     by_short = {t["short"].upper(): t["name"] for t in teams}
     for m in re.finditer(r'<div class="pick-slot">(\d+)\.(\d+)</div>\s*<div class="pick-team"><span class="pick-chip"[^>]*>(.*?)</span>(.*?)</div>\s*<div class="pick-note">(.*?)</div>', panel, re.S):
@@ -138,6 +140,13 @@ SEL_RE = re.compile(r'<span class="pick-extra pick-(?:sel|r|hold)">.*?</span>')
 DRAFT_STATUS_BEGIN, DRAFT_STATUS_END = "<!--DRAFT-STATUS-BEGIN-->", "<!--DRAFT-STATUS-END-->"
 
 
+def section_span(index_html: str, section_id: str) -> tuple:
+    """(start, end) of one top-level page section, independent of the order of sections on the page."""
+    a = index_html.index(f'<section class="page" id="{section_id}"')
+    nxt = [i for i in (index_html.find('<section class="page"', a + 1), index_html.find("<!--WHATIF-BEGIN-->", a + 1)) if i > 0]
+    return a, min(nxt) if nxt else len(index_html)
+
+
 def sync_ledger(index_html: str, inputs: dict) -> str:
     """Rewrite the first-page draft-order ledger from the OFFICIAL state: each row shows the team that
     currently owns the pick and, when that is not the slot's original team, a `VIA <original>` pill.
@@ -146,7 +155,7 @@ def sync_ledger(index_html: str, inputs: dict) -> str:
     teams, _ = parse_board(index_html)
     fid_by_short = {t["short"]: t["franchiseId"] for t in inputs["freeze"]["teams"]}
     short_by_fid = {v: k for k, v in fid_by_short.items()}
-    a, b = index_html.index('id="draft-order"'), index_html.index('id="rosters-a"')
+    a, b = section_span(index_html, "draft-order")
     panel = index_html[a:b]
     # one chip per team (round-independent): taken from any row that currently shows that team
     chip_of = {}
@@ -223,7 +232,7 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
         if DRAFT_STATUS_BEGIN in panel:
             x, y = panel.index(DRAFT_STATUS_BEGIN), panel.index(DRAFT_STATUS_END) + len(DRAFT_STATUS_END)
             return panel[:x] + block + panel[y:]
-        anchor = '<div class="title">DRAFT ORDER</div>'
+        anchor = '<div class="title">DRAFT ARCHIVE</div>'
         return panel.replace(anchor, anchor + "\n" + block, 1)
     def chip(fid):
         return chip_of[order.index(fid)]
@@ -266,7 +275,7 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
     if DRAFT_STATUS_BEGIN in panel:
         x, y = panel.index(DRAFT_STATUS_BEGIN), panel.index(DRAFT_STATUS_END) + len(DRAFT_STATUS_END)
         return panel[:x] + block + panel[y:]
-    anchor = '<div class="title">DRAFT ORDER</div>'
+    anchor = '<div class="title">DRAFT ARCHIVE</div>'
     if anchor not in panel:
         raise ValueError("draft-order panel has no title to anchor the draft room after")
     return panel.replace(anchor, anchor + "\n" + block, 1)
@@ -351,16 +360,25 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
             p = lookup.get(pool.normalize_name(name))
             if p is not None:
                 board_names[p["playerKey"]] = name
-    official_teams = {t["id"]: ls.team_report(inputs, official, t["id"], base) for t in teams}
+    # layer A (draft-night history) vs layer B (current season) vs layer C (Trade Lab scenarios): see season_state.py
+    history_teams = {t["id"]: ls.team_report(inputs, official, t["id"], base) for t in teams}
+    si = ss.load_season(inputs)
+    views = ss.enumerate_views(si)
+    current = ss.season_state(si)
+    snap = si["rosterSnapshot"]
     trades = []
-    for t in ls.selectable_trades(inputs) + [x for x in inputs["trades"]["trades"] if x["status"] not in ls.SELECTABLE_STATUSES]:
+    season_txns = sorted(si["seasonTxns"], key=lambda t: (t["status"] not in ss.SELECTABLE, t["order"]))
+    pre_draft = sorted(inputs["trades"]["trades"], key=lambda t: t["order"])
+    for t in season_txns + pre_draft:
         recv = {}
         for a in ls.trade_assets(t):
-            recv.setdefault(a["to"], []).append(ls.describe_asset(inputs, a))
+            recv.setdefault(a["to"], []).append(ls.describe_asset(si, a))
         trades.append({"id": t["tradeId"], "label": t.get("label"), "status": t["status"], "order": t["order"],
-                       "dependsOn": t.get("dependsOn", []), "participants": t["participants"],
-                       "receives": recv, "note": t.get("note"),
-                       "pending": bool(t.get("pendingConfirmation")), "amends": t.get("amends")})
+                       "phase": t.get("phase", "PRE_DRAFT"), "dependsOn": t.get("dependsOn", []),
+                       "participants": t["participants"], "receives": recv, "note": t.get("note"),
+                       "pending": bool(t.get("pendingConfirmation")), "amends": t.get("amends"),
+                       "effectiveAt": t.get("effectiveAt"), "voidReason": t.get("voidReason"),
+                       "flag": (t.get("directionCheck") or {}).get("verified")})
     # available universe: registry + curated Yahoo-missing prospects, minus kept (official state)
     yahoo = pool.load_yahoo_players(yahoo_path)
     dyn, dyn_max = pool.load_dynasty_rankings()
@@ -370,7 +388,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
     final = pool.sort_and_truncate(cands)
     board_rank = {pool.normalize_name(c.name): i for i, c in enumerate(final, 1)}
     src_by_norm = {k: c for k, c in cands.items()}
-    owned = set(official["playerOwner"])
+    owned = set(current["playerOwner"])
     rows, seen_norm = [], set()
     for p in inputs["registry"].values():
         if p["playerKey"] in owned:
@@ -395,11 +413,18 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         "cap": {"floor": floor, "ceiling": ceiling, "near": ls.NEAR_CEILING_ROOM},
         "boardNames": board_names,
         "teams": teams,
-        "official": {"teams": official_teams, "picks": ls.pick_table(inputs, official),
-                     "windowWarnings": official["windowWarnings"], "tradeIds": official["activeTradeIds"]},
+        # "official" is what the page shows by default: the CURRENT SEASON (verified snapshot + completed transactions)
+        "official": {"teams": views[""]["teams"], "picks": ls.pick_table(inputs, official),
+                     "windowWarnings": [], "tradeIds": current["activeTradeIds"]},
+        "history": {"teams": history_teams, "tradeIds": official["activeTradeIds"],
+                    "checkpoint": (si["postDraft"] or {}).get("checkpoint")},
+        "season": {"snapshot": {k: snap.get(k) for k in ("snapshotId", "verifiedAt", "source", "kind")},
+                   "appliedAfterSnapshot": [t["txnId"] for t in ss.pending_completed(si)],
+                   "checkpoints": si["checkpoints"]["checkpoints"], "findings": ss.checkpoint_findings(si, current),
+                   "provisional": sorted(si["extraPlayers"])},
         "trades": trades,
         "draft": ls.draft_summary(inputs, official),
-        "scenarios": ls.enumerate_scenarios(inputs),
+        "scenarios": views,
         "available": {"cols": ["key", "name", "nba", "pos", "cap", "yahooOr", "board", "src"], "rows": rows,
                       "curatedYahooMissing": extras},
     }

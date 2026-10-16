@@ -95,3 +95,9 @@ a pick whose ownership is unresolved until the transaction it waits on is decide
 (CrazyCat ↔ HCMC amendment: 2.07 CrazyCat → HCMC, Derik Queen HCMC → CrazyCat), staged as PROPOSED + `pendingConfirmation`.
 Confirm = set its status to `OFFICIAL` (a correction replayed once, not a re-run of TRADE-F). The commissioner has since **released** the 2.07 hold (`released: true`) so CrazyCat's selection (Morez Johnson Jr.) is recorded for the current owner. The amendment stays PROPOSED; if confirmed it moves only the 2.07 pick's recorded owner (to HCMC) and Derik Queen — Morez stays with CrazyCat, as if that part of the trade never happened. Such differences are listed in `state.draftConflicts` (the selector must have held the pick earlier in its trade history; any other mismatch still fails). Drafted players Yahoo does not list yet live in `data/2026-27/provisional_players.json` (key `provisional:*`, cap 0, flagged); once Yahoo adds them, re-key the draft events and delete the entry. `sync-ledger` renders the
 Draft Order status strip (on the clock / latest / counts / holds) and per-pick selections; the FA/DRAFT 60 excludes drafted players.
+
+## Regular season
+
+After the draft the default page view is the current season (verified roster snapshot + completed in-season
+trades); everything above is the historical layer. See `docs/SEASON_STATE_MODEL.md`, `docs/ROSTER_REFRESH.md` and
+`docs/YAHOO_API_FEASIBILITY.md`.

@@ -1,0 +1,23 @@
+{
+  "season": "2026-27",
+  "rule": "Dynasty-Rule-Oct-2025 'Salary Cap Violator' (docs/LEAGUE_RULES_MODEL.md, Cap violation ladder): payroll is checked after the draft and after the trade deadline. Under the floor at BOTH, without demonstrable improvement (payroll up from season start to end via trade or claim): +5W added to the final record. 2nd consecutive season: no add/drop in playoff week 1 and the next 1st-round pick drops one slot; 3rd: no add/drop through the playoffs and Round 1 at the end of its group. In-season adds/drops may leave the band; trades must move toward it.",
+  "checkpoints": [
+    {
+      "id": "POST_DRAFT",
+      "label": "Post-draft",
+      "date": "2026-10-14",
+      "snapshot": "snapshots/POST_DRAFT.json",
+      "status": "RECORDED"
+    },
+    {
+      "id": "POST_TRADE_DEADLINE",
+      "label": "Post-trade-deadline",
+      "date": null,
+      "snapshot": null,
+      "status": "PENDING",
+      "note": "Trade deadline is set during All-Star week. Record this checkpoint from the first verified roster snapshot after the deadline."
+    }
+  ],
+  "commissionerDecisions": [],
+  "note": "Findings are derived from the checkpoint snapshots; a penalty exists only as a recorded commissioner decision in commissionerDecisions."
+}

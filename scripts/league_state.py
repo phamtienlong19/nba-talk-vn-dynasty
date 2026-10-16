@@ -67,6 +67,9 @@ def load_inputs(data_dir: str = DATA_DIR, registry_path: str = REGISTRY_PATH, po
     # playerKey -> {name, nbaTeam, displayPosition, cap} for drafted players Yahoo does not list yet (provisional, cap 0)
     prov = os.path.join(data_dir, "provisional_players.json")
     inputs["extraPlayers"] = {p["playerKey"]: p for p in _load(prov)["players"]} if os.path.exists(prov) else {}
+    # 2026-27 salaries frozen at the end of the draft: payroll never moves when the Yahoo registry is refreshed
+    sal = os.path.join(data_dir, "salary_freeze.json")
+    inputs["salaries"] = _load(sal)["salaries"] if os.path.exists(sal) else {}
     validate_inputs(inputs)
     return inputs
 
@@ -110,6 +113,9 @@ def asset_id(asset: dict) -> str:
 
 
 def player_cap(inputs: dict, player_key: str) -> float:
+    frozen = inputs.get("salaries", {}).get(player_key)
+    if frozen is not None:
+        return float(frozen)
     p = inputs["registry"].get(player_key)
     if p is not None:
         return float(p["projectedAuctionValue"])
@@ -295,7 +301,9 @@ def _apply_trade(inputs, state, trade, active_ids):
                               "roomToCeiling": ceiling - cap_a, "floorStatus": floor_status(inputs, cap_a),
                               "status": cap_status(inputs, cap_a), "toFloor": max(0, floor - cap_a),
                               "countBefore": n_b, "countAfter": n_a}
-        if result["applied"]:
+        if result["applied"] and trade.get("phase") == "IN_SEASON":
+            result["warnings"] += in_season_cap_checks(inputs, f, cap_b, cap_a)
+        elif result["applied"]:
             if cap_a > ceiling:
                 result["warnings"].append({"code": "CAP_OVER_CEILING", "detail": {"team": inputs["shorts"][f], "cap": cap_a, "ceiling": ceiling}})
             elif (cap_b > ceiling and cap_a > cap_b) or (cap_b < floor and cap_a < cap_b):
@@ -305,6 +313,25 @@ def _apply_trade(inputs, state, trade, active_ids):
                     "team": inputs["shorts"][f], "count": n_a, "note": "confirm the final roster-size rule"}})
     state["tradeResults"].append(result)
     return result
+
+
+def in_season_cap_checks(inputs, fid, cap_b, cap_a) -> list:
+    """Trade-time rule (Dynasty-Rule-Oct-2025, 'Trade trong mùa'): adds/drops may leave the band, but a TRADE must
+    move a team toward the floor-ceiling range. A trade that leaves a team outside the band and did not move it toward
+    the band is a violation (the trade is reversible and the size sets the penalty ladder); a team still outside the
+    band after moving toward it is compliant and only noted. Roster count is not checked in-season."""
+    floor, ceiling = cap_band(inputs)
+    team = inputs["shorts"][fid]
+    if floor <= cap_a <= ceiling:
+        return []
+    toward = (cap_b > ceiling and cap_a < cap_b) or (cap_b < floor and cap_a > cap_b)
+    size = (cap_a - ceiling) if cap_a > ceiling else (floor - cap_a)
+    side = "OVER_CEILING" if cap_a > ceiling else "UNDER_FLOOR"
+    if toward:
+        return [{"code": "CAP_STILL_OUTSIDE_BAND", "detail": {"team": team, "before": cap_b, "after": cap_a, "side": side, "by": size}}]
+    ladder = ("UNDER_5" if size < 5 else "OVER_5" if size > 5 else "EXACTLY_5")
+    return [{"code": "CAP_TRADE_LEAVES_BAND", "detail": {"team": team, "before": cap_b, "after": cap_a, "side": side, "by": size,
+                                                         "ladder": ladder, "floor": floor, "ceiling": ceiling}}]
 
 
 def apply_draft_events(inputs, state):

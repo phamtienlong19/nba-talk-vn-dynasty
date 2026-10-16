@@ -1,0 +1,132 @@
+{
+  "season": "2026-27",
+  "note": "In-season transaction ledger (layer B/C; see scripts/season_state.py). COMPLETED = executed in Yahoo and applied once, on top of the latest verified roster snapshot, when effectiveAt is after that snapshot's verifiedAt (a later snapshot already reflects it). PROPOSED/AGREED = Trade Lab scenarios only, never written to state. VOID = withdrawn/rejected. Pre-draft trades stay in trades.json (draft history).",
+  "statuses": [
+    "PROPOSED",
+    "AGREED",
+    "COMPLETED",
+    "VOID"
+  ],
+  "transactions": [
+    {
+      "txnId": "TXN-2026-001",
+      "type": "TRADE",
+      "status": "COMPLETED",
+      "label": "CRAZYCAT ↔ HCMC · MOREZ / ZION",
+      "participants": [
+        "franchise-02",
+        "franchise-05"
+      ],
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.10572",
+          "name": "Morez Johnson Jr.",
+          "from": "franchise-02",
+          "to": "franchise-05"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.6163",
+          "name": "Zion Williamson",
+          "from": "franchise-05",
+          "to": "franchise-02"
+        }
+      ],
+      "effectiveAt": "2026-10-16T00:00:00Z",
+      "recordedAt": "2026-10-16T00:00:00Z",
+      "source": "League owner confirmed in chat on 2026-10-16 that the trade was executed; exact Yahoo processing time not supplied (dated to the report).",
+      "replaces": "TRADE-F-AMEND",
+      "note": "Distinct in-season trade. Ownership verified against the official post-draft roster: CrazyCat owned Morez Johnson Jr. (drafted 2.07), HCMC owned Zion Williamson. TRADE-F and the 2.07 selection are unchanged."
+    },
+    {
+      "txnId": "PROP-2026-001",
+      "type": "TRADE",
+      "status": "PROPOSED",
+      "label": "BSY ↔ SUP FAM",
+      "participants": [
+        "franchise-01",
+        "franchise-12"
+      ],
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.10290",
+          "name": "Stephon Castle",
+          "from": "franchise-01",
+          "to": "franchise-12"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10304",
+          "name": "Ajay Mitchell",
+          "from": "franchise-01",
+          "to": "franchise-12"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10465",
+          "name": "Cedric Coward",
+          "from": "franchise-12",
+          "to": "franchise-01"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10460",
+          "name": "Joan Beringer",
+          "from": "franchise-12",
+          "to": "franchise-01"
+        }
+      ],
+      "recordedAt": "2026-10-16T00:00:00Z",
+      "note": "Castle + Ajay Mitchell for Coward + Beringer. Direction verified against the post-draft roster (Bsy owns Castle and Mitchell; sup fam owns Coward and Beringer)."
+    },
+    {
+      "txnId": "PROP-2026-002",
+      "type": "TRADE",
+      "status": "PROPOSED",
+      "label": "BSY ↔ THỊNH",
+      "participants": [
+        "franchise-01",
+        "franchise-11"
+      ],
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.10094",
+          "name": "Victor Wembanyama",
+          "from": "franchise-01",
+          "to": "franchise-11"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10279",
+          "name": "Jaylon Tyson",
+          "from": "franchise-01",
+          "to": "franchise-11"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.5352",
+          "name": "Nikola Jokić",
+          "from": "franchise-11",
+          "to": "franchise-01"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10313",
+          "name": "Oso Ighodaro",
+          "from": "franchise-11",
+          "to": "franchise-01"
+        }
+      ],
+      "recordedAt": "2026-10-16T00:00:00Z",
+      "directionCheck": {
+        "status": "DISCREPANCY_FLAGGED",
+        "described": "Bsy receives Wembanyama + Tyson; Thịnh receives Jokić + Ighodaro",
+        "verified": "Bsy owns Wembanyama and Tyson; Thịnh owns Jokić and Ighodaro, so the described direction cannot be executed. Staged in the only ownership-consistent direction (Bsy sends Wembanyama + Tyson, receives Jokić + Ighodaro). Confirm with the teams before it moves past PROPOSED."
+      },
+      "note": "Same four players as described; direction corrected to match ownership and flagged for confirmation."
+    }
+  ]
+}

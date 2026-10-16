@@ -541,7 +541,7 @@ def render_pool_html(ranked: list) -> str:
     return f'<div class="pool-grid">{"".join(blocks)}</div>'
 
 
-POOL_GRID_END_ANCHOR = '<section class="page" id="cap">'
+POOL_GRID_END_ANCHOR = '<section class="page"'
 
 
 def _find_pool_grid_span(index_html: str) -> tuple[int, int]:
@@ -550,7 +550,9 @@ def _find_pool_grid_span(index_html: str) -> tuple[int, int]:
     "</div></section>" regex, since that substring also closes every
     individual pool-block and would otherwise match only the first one."""
     start = index_html.index('<div class="pool-grid">')
-    end = index_html.index(POOL_GRID_END_ANCHOR, start)
+    # the next top-level page (or the What-If block), whatever order the sections are in
+    ends = [i for i in (index_html.find(POOL_GRID_END_ANCHOR, start), index_html.find("<!--WHATIF-BEGIN-->", start)) if i > 0]
+    end = min(ends)
     return start, end
 
 

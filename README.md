@@ -5,10 +5,23 @@ Public URL: **https://phamtienlong19.github.io/nba-talk-vn-dynasty/**
 Public, read-only league reference board for the NBA Talk VN Dynasty
 fantasy league. Sections:
 
-- **Draft Order**
-- **Keepers**
-- **FA / Draft Pool**
-- **Cap**
+- **Teams** — current rosters, frozen 2026-27 salaries, payroll vs the 131–178 band
+- **Cap** — payroll, floor gap / ceiling room, cap-checkpoint findings
+- **Trade Lab** — proposals (hypothetical) vs completed in-season trades
+- **FA** — best available free agents
+- **Draft Archive / Picks** — the final 48 selections and pick ownership
+
+## Season maintenance
+
+```bash
+python3 scripts/season_state.py status                       # snapshot, transactions, payroll, findings
+python3 scripts/import_rosters.py export /tmp/rosters.csv    # roster refresh: see docs/ROSTER_REFRESH.md
+python3 scripts/import_rosters.py diff /tmp/rosters.csv --verified-at <ISO> --source "<who/where>"
+python3 scripts/import_rosters.py commit /tmp/rosters.csv --verified-at <ISO> --source "<...>" --reviewed
+python3 scripts/build_league_state.py embed && python3 scripts/what_if.py embed && ./validate.sh
+```
+
+In-season trades: `data/2026-27/season_transactions.json` (`docs/SEASON_STATE_MODEL.md`).
 
 This is a separate project from `nba-talk-vn-lottery` — no runtime
 dependency between the two. This site stays usable if the Lottery

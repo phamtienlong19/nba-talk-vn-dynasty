@@ -69,3 +69,20 @@ per Section 15's reporting requirement: `./refresh-yahoo.sh` will report
 `MATCH` until Yahoo's live projections drift from the currently published
 snapshot, at which point a commissioner decision is needed before
 re-publishing a new cap range.
+
+## In-season cap questions (added 2026-10-16)
+
+- **Do IL / IL+ players count toward salary?** Dynasty-Rule-Oct-2025 does not say.
+  It caps long-term-injured players at 5, requires moving them to IL within 2 days
+  and back within 1 game of clearance, and lets an active-roster "bad contract
+  >$5" be held to "cheat salary" — nothing excludes IL salary from the cap. The
+  tool counts every rostered player (IL included) and shows IL tags; commissioner
+  to confirm.
+- **Trade-time violation of exactly $5.** The ladder covers "under $5" and "over
+  $5" only; an exactly-$5 violation is shown as commissioner judgment.
+- **Post-trade-deadline checkpoint date.** "During All-Star week"; the exact date
+  is set by the commissioner when recording the checkpoint.
+- **"Demonstrable cap improvement"** (+5W exemption) is described as payroll rising
+  from season start to end via trade or claim. The tool reports the direction
+  (checkpoint vs current/deadline payroll); the exemption decision stays with the
+  commissioner.

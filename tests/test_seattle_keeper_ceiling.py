@@ -50,7 +50,8 @@ class TestSeattleKeeperSetAtCorrectedCeiling(unittest.TestCase):
 
     def test_downstream_pool_follows_the_new_keeper_set(self):
         pre = predraft_index_html()
-        block = pre[pre.index('<div class="pool-grid">'):pre.index('<section class="page" id="cap">')]
+        a, b = pool._find_pool_grid_span(pre)
+        block = pre[a:b]
         self.assertNotIn("Porziņģis", block)
         m = re.search(r'<div class="pool-player">Davion Mitchell</div><div class="pool-nba">([^<]*)</div>'
                       r'<div class="pool-cap">3</div><div class="pool-src"><span class="src src-cut">Thịnh</span>', block)
