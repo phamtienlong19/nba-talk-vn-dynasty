@@ -8,7 +8,10 @@ Three layers; code in `scripts/season_state.py`.
 | **B. Current season** | verified rosters + completed in-season trades | latest `rosters/snapshots/*` (via `rosters/index.json`) + COMPLETED rows of `season_transactions.json` dated after it | Each verified import / completed trade |
 | **C. Trade Lab scenario** | B + ticked proposals | PROPOSED / AGREED rows of `season_transactions.json` | Never written; computed per combination |
 
-The page's default ("OFFICIAL") view is layer B. Team cards show movement
+The page's default ("OFFICIAL") view is layer B. Team-card rows: own draftees keep the draft chip (filled
+purple `R · pick` for rookies); players acquired in a completed in-season trade get a blue bar and ⇄ tag; a
+Trade Lab scenario acquisition gets an amber bar; a rookie acquired by trade keeps the purple name with an outlined
+`R` chip (drafted by another team). Team cards show movement
 against the post-draft roster; the Draft Archive and Picks pages show layer A.
 
 ## In-season ledger

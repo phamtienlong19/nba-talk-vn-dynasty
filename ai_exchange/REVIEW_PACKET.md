@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-16T02:55:27Z
+Generated: 2026-10-16T04:36:58Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/season-ops
-Commit: 5f2ddbe
+Commit: 2fbd542
 Base: main
 Working tree: dirty
 
@@ -28,9 +28,10 @@ Fingerprint: FRESH
 ## Changes
 ```
  README.md                                          |   21 +-
- ai_exchange/CURRENT_STATE.json                     |  368 +++----
- ai_exchange/REVIEW_NOTES.md                        |   21 +-
- ai_exchange/REVIEW_PACKET.md                       |   23 +-
+ ai_exchange/CURRENT_STATE.json                     |  369 +++----
+ ai_exchange/REVIEW_NOTES.md                        |   22 +-
+ ai_exchange/REVIEW_PACKET.md                       |   95 +-
+ config/cap_policy.json                             |   10 +-
  data/2026-27/cap_checkpoints.json                  |   23 +
  data/2026-27/rosters/index.json                    |   14 +
  data/2026-27/rosters/player_aliases.json           |    4 +
@@ -41,25 +42,25 @@ Fingerprint: FRESH
  data/2026-27/snapshots/POST_DRAFT.json             |  414 ++++++++
  data/2026-27/trades.json                           |   10 +-
  docs/LEAGUE_STATE_MODEL.md                         |    6 +
- docs/OPEN_RULE_QUESTIONS.md                        |   17 +
+ docs/OPEN_RULE_QUESTIONS.md                        |   16 +
  docs/ROSTER_REFRESH.md                             |   83 ++
- docs/SEASON_STATE_MODEL.md                         |   64 ++
+ docs/SEASON_STATE_MODEL.md                         |   66 ++
  docs/YAHOO_API_FEASIBILITY.md                      |   99 ++
  docs/examples/roster_snapshot_example.csv          |  193 ++++
- index.html                                         |  965 ++++++++++---------
+ index.html                                         |  972 ++++++++++---------
  scripts/build_fa_draft_pool.py                     |    6 +-
- scripts/build_league_state.py                      |   55 +-
+ scripts/build_league_state.py                      |   56 +-
  scripts/import_rosters.py                          |  346 +++++++
- scripts/league_state.py                            |   29 +-
- scripts/season_state.py                            |  372 ++++++++
+ scripts/league_state.py                            |   47 +-
+ scripts/season_state.py                            |  380 ++++++++
  tasks/ACTIVE.md                                    |    8 +-
  tests/test_final_keeper_freeze.py                  |   11 +-
  tests/test_keeper_overrides.py                     |    5 +-
  tests/test_league_state_data.py                    |   44 +-
- tests/test_scenario_rendering.py                   |   49 +-
- tests/test_season_ops.py                           |  368 +++++++
+ tests/test_scenario_rendering.py                   |   52 +-
+ tests/test_season_ops.py                           |  413 ++++++++
  tests/test_seattle_keeper_ceiling.py               |    3 +-
- 32 files changed, 4799 insertions(+), 721 deletions(-)
+ 33 files changed, 4956 insertions(+), 731 deletions(-)
 ```
 
 ## Validation
@@ -78,6 +79,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - ai_exchange/CURRENT_STATE.json
 - ai_exchange/REVIEW_NOTES.md
 - ai_exchange/REVIEW_PACKET.md
+- config/cap_policy.json
 - data/2026-27/cap_checkpoints.json
 - data/2026-27/rosters/index.json
 - data/2026-27/rosters/player_aliases.json

@@ -640,6 +640,16 @@ details.avail>summary::-webkit-details-marker{display:none}
 .in-tag{margin-left:6px;font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;background:#e6f4ec;color:#17734c;border-radius:4px;padding:2px 4px;vertical-align:1px}
 .meta-pill.roster-verified{white-space:normal;text-align:center;line-height:1.35}
 .player-row.nc .cap,.player-row.nc .pname{color:#a3abbb}.player-row.nc .cap{text-decoration:line-through;text-decoration-color:#c8ced9}
+.player-row.row-trade{background:#f1f6ff;box-shadow:inset 3px 0 0 #2f5fd0}
+.player-row.row-scn{background:#fff8e7;box-shadow:inset 3px 0 0 #e0a21b}
+.player-row.row-trade.rookie-row{background:linear-gradient(90deg,#f1f6ff,#faf6ff)}
+.player-row.row-scn.rookie-row{background:linear-gradient(90deg,#fff8e7,#faf6ff)}
+.player-row.rookie-row .pname{color:#5d2796}
+.tr-tag{margin-left:5px;font:800 10px/1 "Inter",Arial,sans-serif;background:#e3ebff;color:#2f4fb0;border-radius:4px;padding:2px 4px;vertical-align:1px}
+.key-pill i{font-style:normal;font-weight:800;border-radius:4px;padding:1px 4px;margin:0 4px 0 0}.key-pill .kp-tr{background:#e3ebff;color:#2f4fb0;border-left:3px solid #2f5fd0}.key-pill .kp-rk{background:#eadffa;color:#5e2c91;margin-left:8px}
+.tr-tag.scn{background:#fff0c9;color:#8a5a00}
+.in-tag.dr-other{background:transparent;border:1px solid #9cd3b5;color:#17734c;padding:1px 3px}
+.in-tag.dr-other.rk{border-color:#c7b0ec;color:#5e2c91}
 .il-tag{margin-left:6px;font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;background:#fff0ef;color:#a62f29;border-radius:4px;padding:2px 4px;vertical-align:1px}
 .lab-card.done{border-left:3px solid #17734c}
 #cap-findings{margin:0 0 12px}
@@ -663,13 +673,11 @@ details.avail>summary::-webkit-details-marker{display:none}
 <a class="navlink" href="#rosters-a">TEAMS</a>
 <a class="navlink" href="#cap">CAP</a>
 <a class="navlink" href="#trade-lab">TRADE LAB</a>
-<a class="navlink" href="#draft-pool">FA</a>
 <a class="navlink" href="#draft-order">DRAFT</a>
-<a class="navlink" href="#picks">PICKS</a>
 <div class="modeswitch" role="group" aria-label="State mode"><button type="button" data-mode="OFFICIAL" class="on">OFFICIAL</button><button type="button" data-mode="SCENARIO">SCENARIO</button><button type="button" data-mode="WHATIF" title="Giả định — post-freeze what-if">WHAT IF</button></div>
 </div><div class="scn-banner" id="scn-banner" hidden></div></div>
 <section class="page" id="rosters-a"><div class="title">TEAMS 1–8</div>
-<div class="meta-strip"><span class="meta-pill meta-pill-cap"><span class="pill-k">CAP</span><span class="pill-v">131–178</span></span><span class="meta-pill roster-verified"></span><span class="meta-pill cap-rule"></span></div>
+<div class="meta-strip"><span class="meta-pill meta-pill-cap"><span class="pill-k">CAP</span><span class="pill-v">131–178</span></span><span class="meta-pill roster-verified"></span><span class="meta-pill cap-rule"></span><span class="meta-pill key-pill"><i class="kp-tr">⇄</i>TRADED IN-SEASON <i class="kp-rk">R</i>ROOKIE</span></div>
 <div class="cards">
 <section class="team-card" style="--team-color:#313844;--team-text:#ffffff">
 <header class="team-head">
@@ -824,7 +832,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 <footer class="cuts"><div class="cuts-label">CUTS</div><div class="cuts-list"><span class="cut-chip">Jusuf Nurkić <strong>4</strong></span><span class="cut-chip">Jakob Poeltl <strong>2</strong></span><span class="cut-chip">Bobby Portis Jr.</span><span class="cut-chip">Jamal Shead</span><span class="cut-chip">Will Richard</span><span class="cut-chip">Taylor Hendricks</span></div></footer>
 </section></div></section>
 <section class="page" id="rosters-b"><div class="title">TEAMS 9–16</div>
-<div class="meta-strip"><span class="meta-pill meta-pill-cap"><span class="pill-k">CAP</span><span class="pill-v">131–178</span></span><span class="meta-pill roster-verified"></span><span class="meta-pill cap-rule"></span></div>
+<div class="meta-strip"><span class="meta-pill meta-pill-cap"><span class="pill-k">CAP</span><span class="pill-v">131–178</span></span><span class="meta-pill roster-verified"></span><span class="meta-pill cap-rule"></span><span class="meta-pill key-pill"><i class="kp-tr">⇄</i>TRADED IN-SEASON <i class="kp-rk">R</i>ROOKIE</span></div>
 <div class="cards">
 <section class="team-card" style="--team-color:#67c4eb;--team-text:#111111">
 <header class="team-head">
@@ -1021,7 +1029,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 <div class="lab-col"><div class="lab-h">2 · Team impact</div><div id="lab-folds"></div></div>
 <div class="lab-col"><div class="lab-h">3 · Current vs scenario</div><div id="lab-compare"></div></div>
 </div></section>
-<section class="page" id="draft-pool"><div class="title">FA / DRAFT 60</div>
+<section class="page" id="draft-pool" hidden><div class="title">FA / DRAFT 60</div>
 <div class="meta-strip"><span class="meta-pill">CAP-ORDERED</span><span class="meta-pill">DYNASTY-AWARE COMPLETION</span></div>
 <details class="avail" id="avail"><summary>ALL AVAILABLE PLAYERS — SEARCH THE FULL SELECTABLE UNIVERSE <span class="chip" id="avail-count"></span></summary>
 <div class="avail-note">The FA / DRAFT 60 below is a <b>recommendation</b>. Every Yahoo-ranked player (expanded to 600) plus approved Yahoo-missing prospects is selectable, minus kept players. Rank “—” = not on the recommendation board.</div>
@@ -1051,17 +1059,17 @@ details.avail>summary::-webkit-details-marker{display:none}
 </div>
 <div class="pick-row">
 <div class="pick-slot">1.03</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#aa8de6;--team-text:#111111">sup fam | Bruised for Boozer</span><span class="pick-tags"><span class="pick-extra">VIA BSY</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#aa8de6;--team-text:#111111">sup fam | Bruised for Boozer</span><span class="pick-tags"><span class="pick-extra" title="Bsy → Bz → sup fam">VIA BSY</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Caleb Wilson<i class="pick-r">R</i><em>+10 → 141</em></span></div>
 </div>
 <div class="pick-row">
 <div class="pick-slot">1.04</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#71d244;--team-text:#111111">HCMC Kindergarten</span><span class="pick-tags"><span class="pick-extra">VIA CRAZYCAT</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#71d244;--team-text:#111111">HCMC Kindergarten</span><span class="pick-tags"><span class="pick-extra" title="CrazyCat → HCMC">VIA CRAZYCAT</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Darryn Peterson<i class="pick-r">R</i><em>+2 → 139</em></span></div>
 </div>
 <div class="pick-row">
 <div class="pick-slot">1.05</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#e6d326;--team-text:#111111">Long con</span><span class="pick-tags"><span class="pick-extra">VIA MELO</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#e6d326;--team-text:#111111">Long con</span><span class="pick-tags"><span class="pick-extra" title="Melo → LC">VIA MELO</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Darius Acuff Jr.<i class="pick-r">R</i><em>+2 → 162</em></span></div>
 </div>
 <div class="pick-row">
@@ -1111,7 +1119,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 </div>
 <div class="pick-row">
 <div class="pick-slot">1.15</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#313844;--team-text:#ffffff">Bsy | GTA San Antonio</span><span class="pick-tags"><span class="pick-extra">VIA BZ</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#313844;--team-text:#ffffff">Bsy | GTA San Antonio</span><span class="pick-tags"><span class="pick-extra" title="Bz → Bsy">VIA BZ</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Moussa Diabaté<em>+0 → 178</em></span></div>
 </div>
 <div class="pick-row">
@@ -1131,7 +1139,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 </div>
 <div class="pick-row">
 <div class="pick-slot">2.02</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#71d244;--team-text:#111111">HCMC Kindergarten</span><span class="pick-tags"><span class="pick-extra">VIA CRAZYCAT</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#71d244;--team-text:#111111">HCMC Kindergarten</span><span class="pick-tags"><span class="pick-extra" title="CrazyCat → HCMC">VIA CRAZYCAT</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Keaton Wagler<i class="pick-r">R</i><em>+0 → 145</em></span></div>
 </div>
 <div class="pick-row">
@@ -1156,7 +1164,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 </div>
 <div class="pick-row">
 <div class="pick-slot">2.07</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#be0f22;--team-text:#ffffff">CrazyCat Damageee</span><span class="pick-tags"><span class="pick-extra">VIA MAXFIXE</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#be0f22;--team-text:#ffffff">CrazyCat Damageee</span><span class="pick-tags"><span class="pick-extra" title="Maxfixe → HCMC → CrazyCat">VIA MAXFIXE</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Morez Johnson Jr.<i class="pick-r">R</i><em>+0 → 131</em></span></div>
 </div>
 <div class="pick-row">
@@ -1196,7 +1204,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 </div>
 <div class="pick-row">
 <div class="pick-slot">2.15</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#c36b18;--team-text:#ffffff">MeloBB</span><span class="pick-tags"><span class="pick-extra">VIA BZ</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#c36b18;--team-text:#ffffff">MeloBB</span><span class="pick-tags"><span class="pick-extra" title="Bz → Melo">VIA BZ</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Jrue Holiday<em>+0 → 156</em></span></div>
 </div>
 <div class="pick-row">
@@ -1221,22 +1229,22 @@ details.avail>summary::-webkit-details-marker{display:none}
 </div>
 <div class="pick-row">
 <div class="pick-slot">3.03</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#178b1e;--team-text:#ffffff">Dũng | Trader by Trade</span><span class="pick-tags"><span class="pick-extra">VIA MELO</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#178b1e;--team-text:#ffffff">Dũng | Trader by Trade</span><span class="pick-tags"><span class="pick-extra" title="Melo → Bz → Dũng">VIA MELO</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Egor Dëmin<em>+0 → 132</em></span></div>
 </div>
 <div class="pick-row">
 <div class="pick-slot">3.04</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#c36b18;--team-text:#ffffff">MeloBB</span><span class="pick-tags"><span class="pick-extra">VIA LC</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#c36b18;--team-text:#ffffff">MeloBB</span><span class="pick-tags"><span class="pick-extra" title="LC → Melo">VIA LC</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Dillon Brooks<em>+0 → 156</em></span></div>
 </div>
 <div class="pick-row">
 <div class="pick-slot">3.05</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#9ae8b6;--team-text:#111111">Poop for Coop</span><span class="pick-tags"><span class="pick-extra">VIA HCMC</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#9ae8b6;--team-text:#111111">Poop for Coop</span><span class="pick-tags"><span class="pick-extra" title="HCMC → Maxfixe">VIA HCMC</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Pelle Larsson<em>+0 → 149</em></span></div>
 </div>
 <div class="pick-row">
 <div class="pick-slot">3.06</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#aa8de6;--team-text:#111111">sup fam | Bruised for Boozer</span><span class="pick-tags"><span class="pick-extra">VIA DŨNG</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#aa8de6;--team-text:#111111">sup fam | Bruised for Boozer</span><span class="pick-tags"><span class="pick-extra" title="Dũng → Bz → sup fam">VIA DŨNG</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Joan Beringer<em>+0 → 141</em></span></div>
 </div>
 <div class="pick-row">
@@ -1266,7 +1274,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 </div>
 <div class="pick-row">
 <div class="pick-slot">3.12</div>
-<div class="pick-team"><span class="pick-chip" style="--team-color:#e47fbe;--team-text:#111111">Bz | Putin the Tank Driver</span><span class="pick-tags"><span class="pick-extra">VIA SUP FAM</span></span></div>
+<div class="pick-team"><span class="pick-chip" style="--team-color:#e47fbe;--team-text:#111111">Bz | Putin the Tank Driver</span><span class="pick-tags"><span class="pick-extra" title="sup fam → Bz">VIA SUP FAM</span></span></div>
 <div class="pick-note"><span class="pick-extra pick-sel">Mitchell Robinson<em>+0 → 156</em></span></div>
 </div>
 <div class="pick-row">
@@ -1294,9 +1302,6 @@ details.avail>summary::-webkit-details-marker{display:none}
 </div>
 </div>
 </section>
-<section class="page" id="picks"><div class="title">PICKS</div>
-<div class="meta-strip"><span class="meta-pill">2026 DRAFT · OWNER AT SELECTION, FROM THE TRADE LEDGER</span><span class="meta-pill" id="picks-mode">OFFICIAL</span><span class="meta-pill">TAP A MOVED PICK FOR ITS HISTORY</span></div>
-<div class="picks-grid" id="picks-grid"></div></section>
 <!--WHATIF-BEGIN--><section class="page" id="what-if" hidden><div class="title">WHAT IF <span class="wi-vi">GIẢ ĐỊNH</span></div><div id="wi-root"></div></section><style id="whatif-css">
 /* ---- WHAT IF / GIẢ ĐỊNH: analytical lens on the same 16 teams. Reuses .team-card, .chip, .tchip, .meta-pill. ---- */
 :root{--wi:#4a56c8;--wi-bg:#eef0fd;--wi-line:#c9cef3;--wi-up:#b4602a;--wi-down:#17734c}
@@ -1723,6 +1728,7 @@ var D=JSON.parse(el.textContent);
 var T={}; D.teams.forEach(function(t){T[t.id]=t;});
 var DR={done:{},hold:{},byKey:{}}; D.draft.completed.forEach(function(c){DR.done[c.pickId]=c;DR.byKey[c.playerKey]=c;}); D.draft.holds.forEach(function(x){DR.hold[x.pickId]=x;});
 var TR={}; D.trades.forEach(function(t){TR[t.id]=t;});
+var TXIN={}; D.trades.forEach(function(t){if(t.phase!=="IN_SEASON"||t.status==="VOID")return;Object.keys(t.receives).forEach(function(to){t.receives[to].forEach(function(a){if(a.t==="p")TXIN[a.k+"|"+to]=t;});});});
 var S={mode:"OFFICIAL",sel:{}};
 function h(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==="class")e.className=attrs[k];else if(k==="text")e.textContent=attrs[k];else e.setAttribute(k,attrs[k]);}(kids||[]).forEach(function(c){if(c!=null)e.appendChild(typeof c==="string"?document.createTextNode(c):c);});return e;}
 
@@ -1878,7 +1884,7 @@ function renderCompare(){
 }
 /* ---------- Picks ---------- */
 function renderPicks(){
- var box=document.getElementById("picks-grid");box.textContent="";var v=view();
+ var box=document.getElementById("picks-grid");if(!box)return;box.textContent="";var v=view();
  var moved={};(v.picks||[]).forEach(function(p){moved[p.pickId]=p;});
  document.getElementById("picks-mode").textContent=S.mode==="SCENARIO"?"SCENARIO — NOT OFFICIAL":"OFFICIAL";
  document.getElementById("picks-mode").className="meta-pill"+(S.mode==="SCENARIO"?" chip scn":"");
@@ -1910,15 +1916,23 @@ function renderTeamCards(){
   card.querySelector(".players").innerHTML=P.players;box.className=P.boxCls;box.querySelector(".cap-total").innerHTML=P.total;box.querySelector(".gap-big").textContent=P.gap;
   if(pt)pt.textContent=P.picks;if(cl)cl.textContent=P.cuts;card.classList.remove("scn-card");
   var t=D.teams.filter(function(x){return x.short===short;})[0];var tm=t&&v.teams[t.id];if(!tm)return;
-  var o=D.official.teams[t.id],f=tm.fold,st=ST[tm.status];
+  var o=D.official.teams[t.id],f=tm.fold,st=ST[tm.status],offIn=(o&&o.inKeys)||[];
   var host=card.querySelector(".players");host.textContent="";
   tm.roster.forEach(function(r){var html=ROWS[D.boardNames[r.k]],row;
    if(html){var tmp=document.createElement("div");tmp.innerHTML=html;row=tmp.firstChild;}
    else{var dm=DR.byKey[r.k]||{};row=h("div",{class:"player-row"},[h("div",{class:"pos",text:dm.pos||""}),h("div",{class:"pname",text:r.n}),h("div",{class:"nba",text:dm.nba||""}),h("div",{class:"cap",text:String(r.c)})]);}
    if(r.s==="IL"||r.s==="IL+")row.querySelector(".pname").appendChild(h("span",{class:"il-tag",text:r.s}));
    if(r.x){row.classList.add("nc");row.title="Outside the top "+D.season.counting.n+" salaries: does not count toward the cap";}
-   if(DR.byKey[r.k]){row.classList.add("row-in");if(DR.byKey[r.k].rookie)row.classList.add("rookie-row");row.querySelector(".pname").appendChild(h("span",{class:"in-tag"+(DR.byKey[r.k].rookie?" rk":""),title:"Drafted at "+DR.byKey[r.k].label,text:DR.byKey[r.k].rookie?"R · "+DR.byKey[r.k].label:DR.byKey[r.k].label}));}
-   else if(tm.inKeys.indexOf(r.k)>=0){row.classList.add("row-in");row.querySelector(".pname").appendChild(h("span",{class:"in-tag",text:"IN"}));}
+   var d=DR.byKey[r.k],own=d&&d.franchiseId===t.id,isIn=tm.inKeys.indexOf(r.k)>=0,pn=row.querySelector(".pname");
+   if(d&&d.rookie)row.classList.add("rookie-row");  /* every 2026 rookie keeps the purple name, wherever he plays */
+   if(own){row.classList.add("row-in");pn.appendChild(h("span",{class:"in-tag"+(d.rookie?" rk":""),title:"Drafted at "+d.label,text:d.rookie?"R · "+d.label:d.label}));}
+   else if(isIn){
+    /* acquired in-season: completed trade (blue) or only in the ticked scenario (amber) */
+    var done=offIn.indexOf(r.k)>=0,tx=TXIN[r.k+"|"+t.id];
+    row.classList.add(done?"row-trade":"row-scn");
+    var why=(tx?tx.label+(tx.effectiveAt?" · "+tx.effectiveAt.slice(0,10):""):"")+(d?" · drafted by "+T[d.franchiseId].short+" at "+d.label:"");
+    if(d&&d.rookie)pn.appendChild(h("span",{class:"in-tag dr-other rk",title:"Rookie drafted by "+T[d.franchiseId].short+" at "+d.label,text:"R"}));
+    pn.appendChild(h("span",{class:"tr-tag"+(done?"":" scn"),title:(done?"Traded in-season: ":"Scenario only: ")+why,"aria-label":done?"traded in-season":"scenario acquisition",text:"⇄"}));}
    host.appendChild(row);});
   box.className="cap-box "+st[2];box.querySelector(".cap-total").innerHTML=money(tm.cap).replace("$","")+"<span>/"+D.cap.ceiling+"</span>";box.querySelector(".gap-big").textContent=stText(tm);
   if(pt)pt.textContent=tm.picks.join(" · ");if(cl)cl.textContent="KEEPER-FREEZE CUTS";

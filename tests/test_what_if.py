@@ -343,7 +343,7 @@ row('Collin Gillespie').querySelector('.wi-tg').click();R.afterKeepAgain={dat:to
 dat().querySelector('.wi-reset').click();R.afterReset={dat:tot()};
 var locked=row('Luka');R.locked={disabled:locked.querySelector('.wi-tg').disabled};
 seg('FA 60');R.mono.fa=mono();R.faCrown=qa('.wi-fa .tchip').some(function(e){return e.textContent.indexOf(C)>=0});R.fa={rows:qa('.wi-fa .wi-fr:not(.head)').length,enter:qa('.wi-fr.enter').length,exit:qa('.wi-fr.exit').length};
-q('.modeswitch button[data-mode=SCENARIO]').click();R.scn={cls:document.body.className,hiddenWi:q('#what-if').hidden,crownCompare:q('#lab-compare').textContent.indexOf(C)>=0,crownPicks:q('#picks-grid').textContent.indexOf(C)>=0,crownCap:q('#cap').textContent.indexOf(C)>=0,crownCard:qa('section.team-card .team-name').some(function(e){return e.textContent.indexOf(C)>=0})};
+q('.modeswitch button[data-mode=SCENARIO]').click();R.scn={cls:document.body.className,hiddenWi:q('#what-if').hidden,crownCompare:q('#lab-compare').textContent.indexOf(C)>=0,crownPicks:q('#draft-order').textContent.indexOf(C)>=0,crownCap:q('#cap').textContent.indexOf(C)>=0,crownCard:qa('section.team-card .team-name').some(function(e){return e.textContent.indexOf(C)>=0})};
 q('.modeswitch button[data-mode=OFFICIAL]').click();R.mono.back=mono();R.back={cls:document.body.className,hidden:q('#what-if').hidden,totals:totals(),pool:qa('.pool-player').length};
 q('.modeswitch button[data-mode=WHATIF]').click();qa('.navlink')[1].click();R.nav={cls:document.body.className};
 document.body.setAttribute('data-result',JSON.stringify(R));})();</script>
@@ -421,7 +421,7 @@ class TestRenderedUi(unittest.TestCase):
         self.assertTrue(r["wi"]["crown"])
         self.assertTrue(r["redoCrown"])
         self.assertTrue(r["faCrown"])
-        for k in ("crownPicks", "crownCap", "crownCard"):  # Trade Lab is clear: no team chips there
+        for k in ("crownPicks", "crownCap", "crownCard"):  # crownPicks = the Draft Archive (the Picks page was merged into it)
             self.assertTrue(r["scn"][k], k)
 
     def test_switching_is_reversible_and_official_untouched(self):

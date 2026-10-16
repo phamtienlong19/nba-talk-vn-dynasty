@@ -133,7 +133,7 @@ def build_baseline(index_html: str, registry: dict, franchises: list) -> tuple[d
 
 
 LEDGER_ROW_RE = re.compile(r'(<div class="pick-slot">(\d+)\.(\d+)</div>\n<div class="pick-team">)(<span class="pick-chip"[^>]*>.*?</span>)'
-                           r'(<span class="pick-tags">(?:<span class="pick-extra[^"]*">[^<]*</span>)*</span>)?(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
+                           r'(<span class="pick-tags">(?:<span class="pick-extra[^"]*"[^>]*>[^<]*</span>)*</span>)?(</div>\n<div class="pick-note">)(.*?)(</div>)', re.S)
 BASE_TAG_RE = re.compile(r'<span class="pick-extra">(?!VIA )[^<]*</span>')
 VIA_RE = re.compile(r'<span class="pick-extra">VIA [^<]*</span>')
 SEL_RE = re.compile(r'<span class="pick-extra pick-(?:sel|r|hold)">.*?</span>')
@@ -175,8 +175,9 @@ def sync_ledger(index_html: str, inputs: dict) -> str:
         pid = f"2026-R{rnd}-{slot:02d}"
         owner, orig = official["pickOwner"][pid], inputs["pickIndex"][pid]["originalOwner"]
         tags = list(dict.fromkeys(BASE_TAG_RE.findall((m.group(5) or "") + m.group(7))))  # LOTTERY / RANK n BONUS stay
-        if owner != orig:
-            tags.append(f'<span class="pick-extra">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>')
+        if owner != orig:  # the full ownership chain (the old Picks page detail) rides along as a tooltip
+            chain = " → ".join([short_by_fid[orig]] + [h["to"] and short_by_fid[h["to"]] for h in official["history"].get(f"pick:{pid}", [])])
+            tags.append(f'<span class="pick-extra" title="{html_lib.escape(chain)}">VIA {html_lib.escape(short_by_fid[orig]).upper()}</span>')
         note = ""
         if pid in done:
             d = done[pid]

@@ -581,10 +581,16 @@ class TestEmbeddedPageData(unittest.TestCase):
                 self.assertEqual(pool.normalize_name(by_rank[row[6]]), pool.normalize_name(row[1]))
 
     def test_page_exposes_the_new_surfaces_and_existing_ones_remain(self):
-        for anchor in ('id="trade-lab"', 'id="picks"', 'id="draft-pool"', 'id="cap"', 'id="rosters-a"', 'id="draft-order"'):
+        for anchor in ('id="trade-lab"', 'id="draft-pool"', 'id="cap"', 'id="rosters-a"', 'id="draft-order"'):
             self.assertIn(anchor, self.html)
-        for label in (">TRADE LAB<", ">PICKS<", ">OFFICIAL<", ">SCENARIO<", 'id="scn-banner"', "SCENARIO VIEW — NOT OFFICIAL"):
+        for label in (">TRADE LAB<", ">TEAMS<", ">CAP<", ">DRAFT<", ">OFFICIAL<", ">SCENARIO<", 'id="scn-banner"', "SCENARIO VIEW — NOT OFFICIAL"):
             self.assertIn(label, self.html + self.js)
+        # in-season: the FA/DRAFT 60 board is retired from view (markup kept for the builder) and the Picks page,
+        # which duplicated the Draft Archive, is gone
+        self.assertIn('<section class="page" id="draft-pool" hidden>', self.html)
+        self.assertNotIn('href="#draft-pool"', self.html)
+        self.assertNotIn('id="picks"', self.html)
+        self.assertNotIn(">PICKS<", self.html)
         self.assertIn('id="avail"', self.html)
         self.assertIn("exports/yahoo_top300_proj_dollar_rank.xlsx", self.html)
 

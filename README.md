@@ -8,8 +8,10 @@ fantasy league. Sections:
 - **Teams** — current rosters, frozen 2026-27 salaries, payroll vs the 131–178 band
 - **Cap** — payroll, floor gap / ceiling room, cap-checkpoint findings
 - **Trade Lab** — proposals (hypothetical) vs completed in-season trades
-- **FA** — best available free agents
-- **Draft Archive / Picks** — the final 48 selections and pick ownership
+- **Draft Archive** — the final 48 selections, who held each pick (tap VIA for the trade chain)
+
+The FA/DRAFT 60 board is retired from view in-season (its markup stays, hidden, for the pool builder and next
+year's draft).
 
 ## Season maintenance
 

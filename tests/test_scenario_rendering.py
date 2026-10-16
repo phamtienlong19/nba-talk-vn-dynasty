@@ -187,6 +187,24 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("Morez Johnson Jr.", _read(_card(self.official, "HCMC"))["names"])
         self.assertIn("DRAFTED +", _card(self.official, "Quân"))  # every team has drafted: movement lists the draftees
 
+    def test_in_season_acquisitions_are_styled_apart_from_own_draftees(self):
+        def row(short, name):
+            card = _card(self.official, short)
+            return next(r for r in re.findall(r'<div class="player-row[^"]*".*?</div></div>|<div class="player-row[^"]*"[^>]*>.*?<div class="cap">.*?</div>', card, re.S)
+                        if f">{name}<" in r or f">{name} <" in r or f"{name}<span" in r)
+        morez = row("HCMC", "Morez Johnson Jr.")        # rookie drafted by CrazyCat, traded to HCMC
+        self.assertRegex(morez, r'class="player-row[^"]*\brow-trade\b')
+        self.assertIn("rookie-row", morez)              # keeps the purple rookie name
+        self.assertIn('class="in-tag dr-other rk"', morez)  # outlined R, not the filled own-draft chip
+        self.assertIn('class="tr-tag"', morez)
+        zion = row("CrazyCat", "Zion Williamson")
+        self.assertIn("row-trade", zion)
+        self.assertIn('class="tr-tag"', zion)
+        own = row("LC", "AJ Dybantsa")                  # LC's own 1.02 pick
+        self.assertIn('class="in-tag rk"', own)
+        self.assertNotIn("row-trade", own)
+        self.assertNotIn("tr-tag", own)
+
     def test_trade_lab_separates_proposals_from_completed_trades(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
         self.assertEqual(lab.count('class="trade-title"'), 2)
