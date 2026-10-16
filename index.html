@@ -639,7 +639,9 @@ details.avail>summary::-webkit-details-marker{display:none}
 .cmp td.st-ceiling{background:#ffe0bd;color:#9c4300}.cmp td.st-over{background:#ffd9d6;color:#8c1d17}.cmp td.st-range{color:#5a6a8c}
 .in-tag{margin-left:6px;font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;background:#e6f4ec;color:#17734c;border-radius:4px;padding:2px 4px;vertical-align:1px}
 .meta-pill.roster-verified,#lab-keeper-status{white-space:normal;text-align:center;line-height:1.35}
-.player-row.nc .cap,.player-row.nc .pname{color:#a3abbb}.player-row.nc .cap{text-decoration:line-through;text-decoration-color:#c8ced9}
+.player-row.nc{opacity:.5}.player-row.nc .cap{font-weight:500}
+.nc-div{display:flex;align-items:center;gap:8px;padding:5px 12px 3px;font:700 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#9aa4b8}
+.nc-div::before,.nc-div::after{content:"";flex:1;border-top:1px dashed #d6dde8}
 .player-row.row-trade{background:#f1f6ff;box-shadow:inset 3px 0 0 #2f5fd0}
 .player-row.row-scn{background:#fff8e7;box-shadow:inset 3px 0 0 #e0a21b}
 .player-row.row-trade.rookie-row{background:linear-gradient(90deg,#f1f6ff,#faf6ff)}
@@ -1984,7 +1986,8 @@ function renderTeamCards(){
    if(html){var tmp=document.createElement("div");tmp.innerHTML=html;row=tmp.firstChild;}
    else{var dm=DR.byKey[r.k]||{};row=h("div",{class:"player-row"},[h("div",{class:"pos",text:dm.pos||""}),h("div",{class:"pname",text:r.n}),h("div",{class:"nba",text:dm.nba||""}),h("div",{class:"cap",text:String(r.c)})]);}
    if(r.s==="IL"||r.s==="IL+")row.querySelector(".pname").appendChild(h("span",{class:"il-tag",text:r.s}));
-   if(r.x){row.classList.add("nc");row.title="Outside the top "+D.season.counting.n+" salaries: does not count toward the cap";}
+   if(r.x){row.classList.add("nc");row.title="Beyond the top "+D.season.counting.n+" salaries: not counted toward the cap";
+    if(!host.querySelector(".nc-div"))host.appendChild(h("div",{class:"nc-div",text:"beyond top "+D.season.counting.n+" · not counted"}));}
    var d=DR.byKey[r.k],own=d&&d.franchiseId===t.id,isIn=tm.inKeys.indexOf(r.k)>=0,pn=row.querySelector(".pname");
    if(d&&d.rookie)row.classList.add("rookie-row");  /* every 2026 rookie keeps the purple name, wherever he plays */
    if(own){row.classList.add("row-in");pn.appendChild(h("span",{class:"in-tag"+(d.rookie?" rk":""),title:"Drafted at "+d.label,text:d.rookie?"R · "+d.label:d.label}));}
