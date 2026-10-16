@@ -181,8 +181,8 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn(">CURRENT<", card)
         self.assertIn("KEEPER-FREEZE CUTS", card)
         cc = re.sub(r"<[^>]+>", "", _card(self.official, "CrazyCat"))
-        self.assertIn("IN + Zion Williamson", cc)            # the completed in-season trade, applied once
-        self.assertIn("OUT − Morez Johnson Jr.", cc)
+        self.assertIn("IN +Zion Williamson", cc)             # the completed in-season trade, applied once
+        self.assertIn("OUT −Morez Johnson Jr.R2.07 CrazyCat", cc)  # rookie chip + where he was drafted
         self.assertNotIn("Morez Johnson Jr.", _read(_card(self.official, "CrazyCat"))["names"])
         self.assertIn("Morez Johnson Jr.", _read(_card(self.official, "HCMC"))["names"])
         self.assertIn("DRAFTED +", _card(self.official, "Quân"))  # every team has drafted: movement lists the draftees
@@ -228,10 +228,23 @@ class TestRenderedCards(unittest.TestCase):
         drafted = re.search(r'<div class="mv-dr">(.*?)</div>', mv, re.S).group(1)
         self.assertNotIn("Joan Beringer", drafted)          # drafted by sup fam at 3.06, not by Bsy
         self.assertIn("Aaron Nesmith", drafted)             # Bsy's own 2.01 pick
-        ins = re.sub(r"<[^>]+>", "", mv)
-        self.assertIn("IN + Cedric Coward · Joan Beringer (3.06 sup fam)", ins)
-        sup = re.sub(r"<[^>]+>", "", re.search(r'<div class="mv">(.*?)</details>', _card(scn, "sup fam"), re.S).group(1))
-        self.assertIn("OUT − Cedric Coward · Joan Beringer (3.06 sup fam)", sup)
+        in_line = re.search(r'<div class="mv-dr"><span>IN \+</span>(.*?)</div>', mv, re.S).group(1)
+        self.assertIn("Cedric Coward", in_line)
+        self.assertRegex(in_line, r'Joan Beringer</span>.*?class="mv-pk"[^>]*>3\.<span class="num">06</span> sup fam|Joan Beringer</span>.*?3.*?06.*?sup fam')
+        sup = re.search(r'<div class="mv">(.*?)</details>', _card(scn, "sup fam"), re.S).group(1)
+        self.assertRegex(sup, r'<span>OUT −</span>.*?Joan Beringer')
+
+    def test_traded_rookie_keeps_rookie_styling_in_summaries(self):
+        mv = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "HCMC"), re.S).group(1)
+        morez = re.search(r'<span class="mv-pl rk"><span>Morez Johnson Jr\.</span>(.*?)</span></span>', mv, re.S)
+        self.assertIsNotNone(morez, "Morez must keep the purple rookie label in HCMC's movement summary")
+        self.assertIn('class="src src-r"', morez.group(1))
+        self.assertIn("CrazyCat", morez.group(1))
+        cc = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "CrazyCat"), re.S).group(1)
+        self.assertRegex(cc, r'<span>OUT −</span><span class="mv-pl rk"><span>Morez Johnson Jr\.</span>')
+        scn = _dump("file://" + os.path.abspath(INDEX) + "?mode=scenario&trades=PROP-2026-001")
+        folds = re.search(r'id="lab-folds">(.*)', scn, re.S).group(1)
+        self.assertIn('<span class="mv-pl"><span>Joan Beringer</span>', folds)  # veteran draftee: slot, no purple
 
     def test_internal_notes_are_not_published(self):
         data = re.search(r'id="league-data">(.*?)</script>', self.static, re.S).group(1)

@@ -678,6 +678,8 @@ details.avail>summary::-webkit-details-marker{display:none}
 .tc-pay .chip{font-size:9px;padding:2px 6px;margin-left:auto}
 .tc-dr{margin-left:5px;font:700 9.5px/1 "Roboto Mono",ui-monospace,Menlo,monospace;color:#17734c;border:1px solid #9cd3b5;border-radius:4px;padding:1px 4px;white-space:nowrap}
 .tc-dr.rk{color:#5e2c91;border-color:#c7b0ec}
+.asset-col li .mv-pl{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap}.asset-col li .mv-pl.rk>span:first-child{color:#5d2796;font-weight:600}
+.asset-col li .mv-pl .src{min-width:0;padding:1px 5px;font-size:9.5px}
 .tc-hist{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:11.5px;padding:6px 0;border-top:1px solid #eef1f6}
 .tc-hs{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap}.tc-sw{color:#8a95b0;font-weight:800}
 @media (max-width:420px){.tc-body{grid-template-columns:minmax(0,1fr)}.tc-swap{transform:rotate(90deg)}}
@@ -1888,7 +1890,11 @@ function renderDone(){
   det.appendChild(row);});
  box.appendChild(det);
 }
-function fmtAsset(a){return a.t==="p"?h("li",null,[a.n+" ",h("small",{text:money(a.c)})]):h("li",null,["Pick "+a.n]);}
+function plLabel(a,cls){/* a player wherever he appears: 2026 rookies keep the purple name + R chip, draftees show their slot */
+ if(a.t!=="p")return h("span",{class:cls||"mv-pl"},["Pick "+a.n]);var d=DR.byKey[a.k];
+ return h("span",{class:(cls||"mv-pl")+(d&&d.rookie?" rk":"")},[h("span",{text:a.n}),d&&d.rookie?h("span",{class:"src src-r",text:"R"}):null,
+  d?h("span",{class:"mv-pk",title:"2026 draft: "+d.label+" by "+T[d.franchiseId].short,text:d.label+" "+T[d.franchiseId].short}):null]);}
+function fmtAsset(a){return a.t==="p"?h("li",null,[plLabel(a)," ",h("small",{text:money(a.c)})]):h("li",null,["Pick "+a.n]);}
 function assetCol(cls,title,items,render){var ul=h("ul");if(!items.length)ul.appendChild(h("li",{class:"none",text:"—"}));items.forEach(function(i){ul.appendChild(render(i));});return h("div",{class:"asset-col "+cls},[h("h5",{text:title}),ul]);}
 function renderFolds(){
  var box=document.getElementById("lab-folds");box.textContent="";var v=view();
@@ -2001,9 +2007,9 @@ function renderTeamCards(){
   function line(l,items){if(items.length)mv.appendChild(h("div",{text:l+" "+items.join(" · ")}));}
   var dr=tm.roster.filter(function(r){return DR.byKey[r.k]&&DR.byKey[r.k].franchiseId===t.id;});  /* own picks only: a draftee acquired by trade is listed under IN + */
   if(dr.length){var dl2=h("div",{class:"mv-dr"},[h("span",{text:"DRAFTED +"})]);dr.forEach(function(r){var d=DR.byKey[r.k];dl2.appendChild(h("span",{class:"mv-pl"+(d.rookie?" rk":"")},[h("span",{text:r.n}),d.rookie?h("span",{class:"src src-r",text:"R"}):null,h("span",{class:"mv-pk",text:d.label})]));});mv.appendChild(dl2);}
-  function mvName(a){if(a.t!=="p")return "Pick "+a.n;var d=DR.byKey[a.k];return a.n+(d?" ("+d.label+" "+T[d.franchiseId].short+")":"");}
-  line("IN +",f.in.map(mvName));
-  line("OUT −",f.out.map(mvName));
+  function plLine(l,items){if(!items.length)return;var row=h("div",{class:"mv-dr"},[h("span",{text:l})]);items.forEach(function(a){row.appendChild(plLabel(a));});mv.appendChild(row);}
+  plLine("IN +",f.in);
+  plLine("OUT −",f.out);
   line("↔ pass-through",f.pass.map(function(p){return (p.asset.t==="p"?p.asset.n:"Pick "+p.asset.n)+" ("+p.chain.join("→")+")";}));
   mv.appendChild(h("div",{class:"none",text:"IN / OUT are in-season moves since the post-draft roster. The CUTS list is keeper-freeze history."}));
   strip.appendChild(h("details",null,[h("summary",{text:"View movement"}),mv]));
