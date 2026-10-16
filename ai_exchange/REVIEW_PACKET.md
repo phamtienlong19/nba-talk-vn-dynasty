@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-16T04:51:19Z
+Generated: 2026-10-16T04:55:33Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/season-ops
-Commit: 85effd0
+Commit: 3d5d89a
 Base: main
 Working tree: dirty
 
@@ -28,7 +28,7 @@ Fingerprint: FRESH
 ## Changes
 ```
  README.md                                          |   23 +-
- ai_exchange/CURRENT_STATE.json                     |  369 ++++---
+ ai_exchange/CURRENT_STATE.json                     |  369 +++---
  ai_exchange/REVIEW_NOTES.md                        |   22 +-
  ai_exchange/REVIEW_PACKET.md                       |   99 +-
  config/cap_policy.json                             |   10 +-
@@ -47,9 +47,9 @@ Fingerprint: FRESH
  docs/SEASON_STATE_MODEL.md                         |   69 ++
  docs/YAHOO_API_FEASIBILITY.md                      |   99 ++
  docs/examples/roster_snapshot_example.csv          |  193 ++++
- index.html                                         | 1131 +++++++++++---------
+ index.html                                         | 1172 +++++++++++---------
  scripts/build_fa_draft_pool.py                     |    6 +-
- scripts/build_league_state.py                      |   76 +-
+ scripts/build_league_state.py                      |  110 +-
  scripts/import_rosters.py                          |  346 ++++++
  scripts/league_state.py                            |   47 +-
  scripts/season_state.py                            |  380 +++++++
@@ -57,11 +57,11 @@ Fingerprint: FRESH
  tests/test_final_keeper_freeze.py                  |   11 +-
  tests/test_keeper_overrides.py                     |    5 +-
  tests/test_league_state_data.py                    |   54 +-
- tests/test_scenario_rendering.py                   |  102 +-
+ tests/test_scenario_rendering.py                   |  111 +-
  tests/test_season_ops.py                           |  413 +++++++
  tests/test_seattle_keeper_ceiling.py               |    3 +-
  tests/test_what_if.py                              |    4 +-
- 34 files changed, 5158 insertions(+), 781 deletions(-)
+ 34 files changed, 5216 insertions(+), 807 deletions(-)
 ```
 
 ## Validation

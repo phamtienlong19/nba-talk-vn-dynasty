@@ -436,3 +436,31 @@ class TestRenderedUi(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNowView(unittest.TestCase):
+    """What-If NOW: current-season rosters at snapshot prices; the post-keeper views are untouched."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.payload = wi.build_page_payload()
+        cls.s = cls.payload["snapshots"][cls.payload["default"]]
+
+    def test_post_keeper_views_are_unchanged(self):
+        plain = wi.build_what_if(ls.load_inputs(), wi.load_snapshot(self.payload["default"]))
+        self.assertEqual({k: v for k, v in self.s.items() if k != "now"}, plain)
+
+    def test_players_sorted_by_snapshot_cap_and_top_nine_counted(self):
+        now = self.s["now"]
+        self.assertEqual(now["countTop"], 9)
+        self.assertEqual(len(now["teams"]), 16)
+        for t in now["teams"]:
+            c1 = [p["c1"] for p in t["players"]]
+            self.assertEqual(c1, sorted(c1, reverse=True), t["short"])
+            self.assertEqual([p["x"] for p in t["players"]], [i >= 9 for i in range(len(t["players"]))], t["short"])
+            self.assertEqual(t["a"]["whatIf"], sum(c1[:9]), t["short"])
+            self.assertEqual(t["a"]["official"], sum(sorted((p["c0"] for p in t["players"]), reverse=True)[:9]), t["short"])
+        cc = next(t for t in now["teams"] if t["short"] == "CrazyCat")
+        self.assertIn("Zion Williamson", [p["n"] for p in cc["players"]])           # current roster, not keepers
+        self.assertNotIn("Morez Johnson Jr.", [p["n"] for p in cc["players"]])
+        self.assertEqual(cc["a"]["official"], 145)                                    # matches the Cap page
