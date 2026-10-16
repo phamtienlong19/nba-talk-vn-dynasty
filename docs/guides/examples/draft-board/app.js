@@ -29,6 +29,7 @@
       saveFail: "KHÔNG LƯU ĐƯỢC trong trình duyệt này (có thể đang ở chế độ riêng tư). Hãy tải kết quả CSV sau mỗi vài pick.", saved: "Đã lưu trong trình duyệt này lúc", notSaved: "Chưa lưu (dữ liệu mẫu). Không chia sẻ với thiết bị khác.", localOnly: "chỉ trong trình duyệt này",
       auditOk: "Kiểm tra xong: không có cầu thủ trùng, không có pick trùng, thứ tự đúng.", problems: "Có lỗi — chưa thay đổi gì:", warnings: "Lưu ý:",
       noUndo: "Chưa có pick nào để hoàn tác.", undone: "Đã hoàn tác pick", picked: "Đã ghi pick",
+      demoWarn: "BẢN DEMO — dữ liệu giả. Pick chỉ lưu trong trình duyệt này, không chia sẻ với ai. Các nút tổ chức KHÔNG có xác thực (ai mở trang cũng bấm được). Không dùng cho giải thật; đừng nhập dữ liệu người thật.",
       footer: "Tất cả cầu thủ và đội là hư cấu. Luật draft thật do ban tổ chức quyết định.", loadFail: "Không tải được thư mục data/. Hãy dùng nút chọn file.",
       err: {
         E_CSV: "{file} dòng {line}: dấu ngoặc kép không được đóng.", E_EMPTY: "{file}: file trống.", E_HEADER: "{file}: thiếu cột — {message}",
@@ -54,6 +55,7 @@
       saveFail: "COULD NOT SAVE in this browser (private mode?). Download the results CSV every few picks.", saved: "Saved in this browser at", notSaved: "Not saved (sample data). Not shared with other devices.", localOnly: "this browser only",
       auditOk: "Check complete: no duplicate players, no duplicate picks, order is correct.", problems: "Problems found — nothing was changed:", warnings: "Notes:",
       noUndo: "No pick to undo.", undone: "Undid pick", picked: "Recorded pick",
+      demoWarn: "DEMO — fictional data. Picks are stored only in this browser and shared with nobody. The organizer controls have NO authentication (anyone who opens the page can press them). Not for a real tournament; don't enter real people's data.",
       footer: "All players and teams are fictional. The real draft rules are the organizer's decision.", loadFail: "Could not load the data/ folder. Use the file picker.",
       err: {
         E_CSV: "{file} line {line}: a quoted value is never closed.", E_EMPTY: "{file}: the file is empty.", E_HEADER: "{file}: {message}",
@@ -149,7 +151,7 @@
   // ---------------------------------------------------------------- render
   function el(tag, text, cls) { const e = document.createElement(tag); if (text !== undefined) e.textContent = text; if (cls) e.className = cls; return e; }
   function render() {
-    $("title").textContent = T.title; $("sub").textContent = T.sub; $("footer").textContent = T.footer;
+    $("demoWarning").textContent = T.demoWarn; $("title").textContent = T.title; $("sub").textContent = T.sub; $("footer").textContent = T.footer;
     document.documentElement.lang = lang;
     document.body.classList.toggle("viewmode", params.get("mode") === "view");
     $("welcome").hidden = !!state; $("app").hidden = !state;

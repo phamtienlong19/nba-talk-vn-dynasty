@@ -11,7 +11,7 @@ không cần biết lập trình. Tài liệu này dùng **dữ liệu giả** (
 - Một **chat AI miễn phí** (ChatGPT, Claude hoặc Gemini) trên trình duyệt — để lên kế hoạch.
 - Trình duyệt Chrome/Edge (có công cụ developer).
 - Một **thư mục dự án** trên máy. Cách nhanh nhất: tải sẵn ví dụ của hướng dẫn này (xem bước 1 bên dưới) — bạn có một bảng draft chạy được sau ~5 phút, **chưa cần AI**.
-- Khi muốn sửa theo ý mình: **VS Code** (miễn phí) + **một** công cụ AI viết code (xem mục 5). GitHub chỉ cần khi bạn muốn đưa lên mạng.
+- Khi muốn sửa theo ý mình: **VS Code** (miễn phí) + **một** công cụ AI viết code (xem mục 5). Cần thêm một tài khoản **GitHub** miễn phí để dùng Copilot Free và để đưa trang lên mạng (tuỳ chọn).
 
 **2. Nên dùng AI nào?** Bắt đầu với thứ bạn **đã có**. Không cần mua nhiều gói.
 - Chưa trả tiền gì: chat AI miễn phí để lên kế hoạch + **GitHub Copilot Free trong VS Code** để viết code (có giới hạn hàng tháng).
@@ -26,11 +26,11 @@ không cần biết lập trình. Tài liệu này dùng **dữ liệu giả** (
 
 **6. Xong buổi đầu bạn có gì?** Một trang chạy trên máy bạn: bảng draft, đội đang đến lượt, danh sách cầu thủ còn lại, ghi pick, hoàn tác, xuất kết quả CSV, và báo lỗi khi file nhập sai. Nếu muốn, đưa lên GitHub Pages thành một đường link xem được.
 
-**7. Chưa có gì (và đừng hứa với ai là có)?**
+**7. Chưa có gì (và đừng hứa với ai là có)? — bản thử ≠ dùng thật cho giải**
 - **Không chia sẻ trực tiếp** giữa nhiều thiết bị: pick được lưu **trong trình duyệt của một máy**.
 - **Không có đăng nhập / phân quyền thật.** Nút ẩn đi không phải là bảo mật.
 - Không có đồng hồ đếm giờ, trao đổi pick, hay cập nhật theo thời gian thực.
-- Chưa dùng được nguyên xi cho giải thật khi chưa diễn tập (mục 7).
+- **Bản này là bản thử, chưa phải công cụ đủ tin cậy cho giải thật.** Muốn dùng thật phải qua danh sách ở mục 7: diễn tập đầy đủ, xuất CSV thường xuyên, bản dự phòng, chạy trên laptop của ban tổ chức, và quyết định rõ ai là người ghi pick chính thức.
 
 Mục tiêu: có kết quả đầu tiên trong khoảng 30–90 phút. Thời gian thật phụ thuộc cài đặt và đăng nhập tài khoản.
 
@@ -39,9 +39,8 @@ Mục tiêu: có kết quả đầu tiên trong khoảng 30–90 phút. Thời g
 ## 1. Tối nay làm gì, theo thứ tự
 
 ### Bước 1 — Xem một bảng draft chạy thật (5–10 phút, chưa cần AI)
-1. Mở trang GitHub của dự án mẫu, bấm **Code → Download ZIP**, giải nén.
-   (Khi tài liệu này đã được gộp vào nhánh chính, thư mục nằm ở `docs/guides/examples/draft-board/`.)
-2. Mở thư mục đó, **bấm đúp `index.html`**.
+1. Tải gói ví dụ [`downloads/draft-board-example.zip`](downloads/draft-board-example.zip) (trên GitHub: mở file rồi bấm biểu tượng tải xuống hoặc *View raw*) và giải nén. Gói chỉ có ví dụ bảng draft + dữ liệu giả + hướng dẫn, không có gì khác của dự án.
+2. Mở thư mục đã giải nén, **bấm đúp `index.html`** (Chrome hoặc Edge). Có file `BAT_DAU_VI.md` trong đó nếu cần xem lại các bước.
 3. Trang sẽ yêu cầu **chọn file CSV**: vào thư mục `data/`, chọn cả 4 file cùng lúc.
 4. Bạn sẽ thấy: Team Rồng đang đến lượt **pick 9**, 4 cầu thủ còn lại. Thử chọn một người → bảng cập nhật → bấm **Hoàn tác pick cuối**.
 
@@ -55,7 +54,7 @@ Mục tiêu: có kết quả đầu tiên trong khoảng 30–90 phút. Thời g
 4. Mở khung Chat, chọn chế độ **Agent** (chế độ sửa được file, không phải chỉ hỏi đáp).
 5. Cài **GitHub Desktop** nếu muốn lưu phiên bản (commit) và đăng lên mạng mà không dùng terminal.
 
-Từng bước có hình thức nhấp chuột chi tiết (bằng tiếng Anh) ở [START_HERE.md](START_HERE.md), Bước 3, 4, 8, 9. Tên nút trong VS Code thay đổi thường xuyên; hãy tìm "Chat" và "Agent".
+Từng bước nhấp chuột chi tiết (bằng tiếng Anh) ở [START_HERE.md](START_HERE.md), Bước 3, 4, 8, 9. Tên nút trong VS Code thay đổi thường xuyên; hãy tìm "Chat" và "Agent".
 
 ### Bước 2 — Lên kế hoạch với chat AI (15–20 phút)
 Dán **Prompt 1** (bên dưới) vào chat AI. Trả lời các câu nó hỏi. Kết quả: một bản yêu cầu một trang. Lưu thành `BRIEF.md`.
@@ -271,4 +270,4 @@ Cuối cùng: viết 5 dòng cách chạy và cách kiểm tra, và liệt kê t
 - [START_HERE.md](START_HERE.md) — lần đầu dùng GitHub, VS Code và đưa trang lên mạng.
 - [BUILDING_WITH_AI.md](BUILDING_WITH_AI.md) — phương pháp đầy đủ, chọn công cụ, dữ liệu, từ tĩnh sang dùng chung, kiểm tra, chi phí.
 - [COPY_PASTE_PROMPTS.md](COPY_PASTE_PROMPTS.md) — thêm prompt cho từng giai đoạn của dự án draft.
-- [Ví dụ draft-board](examples/draft-board/README.md) — mã nguồn và dữ liệu mẫu đã được kiểm thử.
+- [Ví dụ draft-board](examples/draft-board/README.md) — mã nguồn và dữ liệu mẫu đã được kiểm thử; gói tải về: [`downloads/draft-board-example.zip`](downloads/draft-board-example.zip).

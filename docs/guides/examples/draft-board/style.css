@@ -40,3 +40,5 @@ tr.empty td { color: #8a95a8; }
 footer { color: #566177; font-size: .8rem; }
 body.viewmode #controls { display: none; }
 @media (max-width: 480px) { .clock .big { font-size: 1.15rem; } }
+
+.demowarn { background: #fff3d6; border-bottom: 1px solid #ecd28b; padding: 8px 16px; font-size: .82rem; text-align: center; }
