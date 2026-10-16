@@ -5,5 +5,13 @@
   "ceilingOverride": true,
   "overrideReason": "Commissioner confirmed 2026-27 ceiling at 178 after R9 review (formula rounds 177.3875 to 177; official league policy is 178).",
   "approvedFormulaFloor": 131,
-  "approvedFormulaCeiling": 177
+  "approvedFormulaCeiling": 177,
+  "payrollCounting": {
+    "rule": "TOP_N_SALARIES",
+    "n": 9,
+    "includesIL": true,
+    "appliesTo": "2026-27 regular season: current-season payroll, Trade Lab scenarios, in-season trade-time cap check, cap-checkpoint findings",
+    "source": "League owner, 2026-10-16: only the top 9 salaries on a roster count toward the cap, IL or not.",
+    "note": "Draft-night history (keeper freeze, pre-draft trades, draft running totals) keeps the totals as recorded at the time."
+  }
 }

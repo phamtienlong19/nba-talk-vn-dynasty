@@ -31,9 +31,11 @@ Current rows: `TXN-2026-001` CrazyCat ↔ HCMC, Morez Johnson Jr. ↔ Zion Willi
 
 `salary_freeze.json` — 2026-27 salaries frozen when the draft completed (registry
 + provisional, with a digest). `player_cap` reads it first, so a Yahoo refresh
-never changes payroll. Payroll counts every rostered player, including IL / IL+
-(see `docs/OPEN_RULE_QUESTIONS.md`: the rules do not exclude IL from salary; this
-is flagged, not decided). The draft-night 12-player count is not enforced; the
+never changes payroll. **Payroll = the top 9 salaries on the roster, IL / IL+
+included** (league owner, 2026-10-16; `config/cap_policy.json` `payrollCounting`).
+Players beyond the top 9 are greyed out and do not count. This applies to layers
+B and C and to checkpoint findings (re-derived from each checkpoint's frozen
+ownership); layer A keeps the all-player totals recorded at the time. The draft-night 12-player count is not enforced; the
 importer only warns above the 15 roster spots.
 
 ## Trade-time cap rule (in-season)
@@ -55,7 +57,7 @@ under-floor finding stays even if payroll later improves. Status
 also under the floor; the +5W penalty (unless payroll improved via trade or claim)
 is applied only as a recorded `commissionerDecisions` entry, never automatically.
 
-DonTrick: 124 at the post-draft checkpoint, floor 131 → **7 short**. Finding
+DonTrick: 123 counted (top 9) at the post-draft checkpoint, floor 131 → **8 short**. Finding
 recorded, no penalty.
 
 To record the deadline checkpoint: after the deadline, commit a verified roster

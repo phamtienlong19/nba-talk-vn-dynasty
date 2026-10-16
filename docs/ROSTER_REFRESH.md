@@ -49,7 +49,7 @@ DonTrick,provisional:dailyn-swain,,Dailyn Swain,BN
 | Section | Meaning |
 |---|---|
 | ADDED / DROPPED / CHANGED TEAM | ownership changes (affect payroll) |
-| IL MOVE | into / out of IL or IL+ (payroll unchanged; see the IL question) |
+| IL MOVE | into / out of IL or IL+ (payroll unchanged: the top 9 salaries count, IL or not) |
 | LINEUP ONLY | slot change between active / bench positions |
 | TRANSACTION | a COMPLETED in-season trade dated before this snapshot: must be reflected |
 

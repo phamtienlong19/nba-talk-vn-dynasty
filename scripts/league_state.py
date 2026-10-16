@@ -173,8 +173,16 @@ def team_players(inputs, state, fid):
     return sorted(k for k, o in state["playerOwner"].items() if o == fid)
 
 
+def counted_cap(inputs, keys) -> float:
+    """Payroll that counts toward the cap. In the regular season (inputs["capCountTop"], set by season_state from
+    config/cap_policy.json payrollCounting) only the N highest salaries count, IL or not; otherwise every player."""
+    caps = sorted((player_cap(inputs, k) for k in keys), reverse=True)
+    n = inputs.get("capCountTop")
+    return sum(caps[:n]) if n else sum(caps)
+
+
 def team_cap(inputs, state, fid) -> float:
-    return sum(player_cap(inputs, k) for k in team_players(inputs, state, fid))
+    return counted_cap(inputs, team_players(inputs, state, fid))
 
 
 def team_picks(state, fid):
@@ -213,7 +221,11 @@ def cap_status(inputs, cap):
 def team_roster(inputs, state, fid):
     """Derived roster rows (cap desc, then name) -- the single source for roster, cap and count."""
     rows = [{"k": k, "n": player_name(inputs, k), "c": player_cap(inputs, k)} for k in team_players(inputs, state, fid)]
-    return sorted(rows, key=lambda r: (-r["c"], r["n"]))
+    rows = sorted(rows, key=lambda r: (-r["c"], r["n"]))
+    n = inputs.get("capCountTop")
+    for i, r in enumerate(rows):  # salary-descending: under a top-N rule only the first N rows count toward the cap
+        r["x"] = bool(n) and i >= n
+    return rows
 
 
 def _owner(state, asset):
@@ -475,7 +487,7 @@ def team_report(inputs, state, fid, baseline=None):
     baseline = baseline or initial_state(inputs)
     floor, ceiling = cap_band(inputs)
     roster = team_roster(inputs, state, fid)
-    cap = sum(r["c"] for r in roster)  # cap, count and roster all come from this one derived roster
+    cap = sum(r["c"] for r in roster if not r["x"])  # cap, count and roster all come from this one derived roster
     base_keys = set(team_players(inputs, baseline, fid))
     return {"franchiseId": fid, "short": inputs["shorts"][fid], "cap": cap, "room": ceiling - cap,
             "toFloor": max(0, floor - cap), "status": cap_status(inputs, cap),

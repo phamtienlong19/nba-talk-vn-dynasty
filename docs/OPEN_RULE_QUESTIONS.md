@@ -72,12 +72,11 @@ re-publishing a new cap range.
 
 ## In-season cap questions (added 2026-10-16)
 
-- **Do IL / IL+ players count toward salary?** Dynasty-Rule-Oct-2025 does not say.
-  It caps long-term-injured players at 5, requires moving them to IL within 2 days
-  and back within 1 game of clearance, and lets an active-roster "bad contract
-  >$5" be held to "cheat salary" — nothing excludes IL salary from the cap. The
-  tool counts every rostered player (IL included) and shows IL tags; commissioner
-  to confirm.
+- **Which salaries count toward the cap? — RESOLVED 2026-10-16 (league owner):**
+  only the **top 9 salaries** on a roster count, **IL or not**. Recorded in
+  `config/cap_policy.json` (`payrollCounting`) and applied to current-season
+  payroll, Trade Lab scenarios, the in-season trade check and cap-checkpoint
+  findings. Draft-night history keeps the all-player totals recorded at the time.
 - **Trade-time violation of exactly $5.** The ladder covers "under $5" and "over
   $5" only; an exactly-$5 violation is shown as commissioner judgment.
 - **Post-trade-deadline checkpoint date.** "During All-Star week"; the exact date

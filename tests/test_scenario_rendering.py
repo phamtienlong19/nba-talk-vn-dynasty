@@ -209,8 +209,11 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotRegex(self.static, r'"Pick "\+p\.asset\.n\+" \("')  # old unconditional "Pick " prefix is gone
 
     def test_public_ui_shows_the_verified_roster_snapshot(self):
-        m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill"', self.official)
+        m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill cap-rule"', self.official)
         self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "ROSTERS VERIFIED 2026-10-14 · DRAFT NIGHT + 1 TRADE")
+        rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
+        self.assertEqual(len(rules), 4)
+        self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "CAP = TOP 9 SALARIES · IL INCLUDED" for r in rules), rules)
         self.assertNotIn("NOT FROZEN", self.official.split("<body", 1)[1].split('<script id="league-app">')[0])
 
     def test_pick_pill_never_clips(self):

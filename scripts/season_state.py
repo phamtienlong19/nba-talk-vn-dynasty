@@ -68,6 +68,8 @@ def load_season(inputs: dict, data_dir: str = DATA_DIR) -> dict:
     """Attach the season layer to `inputs` (returns a shallow copy; the pre-draft inputs are untouched)."""
     si = dict(inputs)
     si["dataDir"] = data_dir
+    pc = inputs["policy"].get("payrollCounting") or {}
+    si["capCountTop"] = pc.get("n") if pc.get("rule") == "TOP_N_SALARIES" else None
     txn_doc = _load(os.path.join(data_dir, "season_transactions.json"))
     txns = []
     for i, t in enumerate(txn_doc["transactions"]):
@@ -204,7 +206,12 @@ def checkpoint_findings(si, current_state=None) -> list:
     for c in si["checkpoints"]["checkpoints"]:
         if c.get("snapshot"):
             snap = _load(os.path.join(si.get("dataDir", DATA_DIR), c["snapshot"]))
-            recorded[c["id"]] = {"floor": snap["capBand"]["floor"], "caps": snap["teamCaps"]}
+            # payroll re-derived from the checkpoint's frozen OWNERSHIP under the season counting rule (top N salaries)
+            owned = {}
+            for k, f in snap["playerOwner"].items():
+                owned.setdefault(f, []).append(k)
+            recorded[c["id"]] = {"floor": snap["capBand"]["floor"],
+                                 "caps": {f: ls.counted_cap(si, owned.get(f, [])) for f in si["franchises"]}}
     pd = recorded.get("POST_DRAFT")
     if not pd:
         return out
@@ -322,6 +329,7 @@ def make_checkpoint_snapshot(si, checkpoint_id: str, date: str) -> dict:
                            "completedTransactions": [t["txnId"] for t in si["seasonTxns"] if t["status"] == "COMPLETED"]},
             "playerOwner": dict(sorted(cur["playerOwner"].items())),
             "teamCaps": {f: ls.team_cap(si, cur, f) for f in sorted(si["franchises"])},
+            "countingRule": {"rule": "TOP_N_SALARIES", "n": si["capCountTop"]} if si.get("capCountTop") else {"rule": "ALL"},
             "capBand": {"floor": floor, "ceiling": ceiling}}
 
 

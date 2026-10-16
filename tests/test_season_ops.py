@@ -88,8 +88,11 @@ class TestLayers(unittest.TestCase):
         self.assertEqual({(a["playerKey"], a["from"], a["to"]) for a in t["assets"]}, {(MOREZ, CC, HCMC), (ZION, HCMC, CC)})
         self.assertEqual((self.cur["playerOwner"][MOREZ], self.cur["playerOwner"][ZION]), (HCMC, CC))
         self.assertEqual(self.cur["activeTradeIds"].count("TXN-2026-001"), 1)
-        self.assertEqual(ls.team_cap(self.si, self.cur, CC), ls.team_cap(self.i, self.hist, CC) + 12)   # Zion $12 in, Morez $0 out
-        self.assertEqual(ls.team_cap(self.si, self.cur, HCMC), ls.team_cap(self.i, self.hist, HCMC) - 12)
+        # all-player sums move by exactly Zion's $12 (Morez is $0) ...
+        self.assertEqual(sum(ls.player_cap(self.si, k) for k in ls.team_players(self.si, self.cur, CC)),
+                         ls.team_cap(self.i, self.hist, CC) + 12)
+        # ... and counted payroll (top 9 salaries) is CrazyCat 145, HCMC 133
+        self.assertEqual((ls.team_cap(self.si, self.cur, CC), ls.team_cap(self.si, self.cur, HCMC)), (145, 133))
         self.assertNotIn("TXN-2026-001", self.i["tradeIndex"])                      # never part of the pre-draft ledger
 
     def test_completed_trade_with_wrong_owner_is_refused(self):
@@ -149,6 +152,46 @@ class TestLayers(unittest.TestCase):
         self.assertFalse(ss.trade_toward_band(self.si, self.cur, DT, -2)["ok"])
 
 
+class TestTopNineCounting(unittest.TestCase):
+    """League owner, 2026-10-16: only the top 9 salaries on a roster count toward the cap, IL or not."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.i = ls.load_inputs()
+        cls.si = ss.load_season(cls.i)
+        cls.cur = ss.season_state(cls.si)
+
+    def test_policy_and_counted_payroll(self):
+        pc = self.i["policy"]["payrollCounting"]
+        self.assertEqual((pc["rule"], pc["n"], pc["includesIL"]), ("TOP_N_SALARIES", 9, True))
+        self.assertEqual(self.si["capCountTop"], 9)
+        for f in self.si["franchises"]:
+            caps = sorted((ls.player_cap(self.si, k) for k in ls.team_players(self.si, self.cur, f)), reverse=True)
+            self.assertEqual(ls.team_cap(self.si, self.cur, f), sum(caps[:9]))
+            rep = ls.team_report(self.si, self.cur, f, self.cur)
+            self.assertEqual([r["x"] for r in rep["roster"]], [i >= 9 for i in range(len(rep["roster"]))])
+            self.assertEqual(rep["cap"], sum(r["c"] for r in rep["roster"] if not r["x"]))
+        self.assertEqual({self.si["shorts"][f]: ls.team_cap(self.si, self.cur, f) for f in (CC, "franchise-04", DT)},
+                         {"CrazyCat": 145, "LC": 161, "DonTrick": 123})
+
+    def test_il_players_still_count(self):
+        cur = copy.deepcopy(self.cur)
+        top = max(ls.team_players(self.si, cur, BSY), key=lambda k: ls.player_cap(self.si, k))
+        cur["slots"][top] = "IL"
+        self.assertEqual(ls.team_cap(self.si, cur, BSY), ls.team_cap(self.si, self.cur, BSY))
+
+    def test_history_keeps_all_player_totals(self):
+        hist = ls.resolve(self.i, (), "OFFICIAL")
+        self.assertIsNone(self.i.get("capCountTop"))
+        self.assertEqual(ls.team_cap(self.i, hist, DT), 124)          # draft-night record as computed at the time
+        self.assertEqual(ls.draft_summary(self.i, hist)["completed"][-1]["capAfter"], 174)
+
+    def test_trade_check_uses_counted_payroll(self):
+        st = ss.season_state(self.si, ["PROP-2026-002"])
+        r = [x for x in st["tradeResults"] if x["tradeId"] == "PROP-2026-002"][0]
+        self.assertEqual((r["teams"][BSY]["capBefore"], r["teams"][BSY]["capAfter"]), (178, 179))
+
+
 class TestFrozenSalaries(unittest.TestCase):
     def test_payroll_ignores_a_refreshed_yahoo_registry(self):
         i = ls.load_inputs()
@@ -176,8 +219,11 @@ class TestCapCheckpoints(unittest.TestCase):
         self.assertEqual([x["short"] for x in f], ["DonTrick"])
         x = f[0]
         snap = ss._load(ss.POST_DRAFT_PATH)
-        self.assertEqual(x["shortfall"], snap["capBand"]["floor"] - snap["teamCaps"][DT])
-        self.assertEqual((x["capAtCheckpoint"], x["floor"], x["shortfall"], x["checkpointDate"]), (124, 131, 7, "2026-10-14"))
+        dt_keys = [k for k, f in snap["playerOwner"].items() if f == DT]
+        top9 = sum(sorted((ls.player_cap(si, k) for k in dt_keys), reverse=True)[:9])
+        self.assertEqual(x["shortfall"], snap["capBand"]["floor"] - top9)       # from the checkpoint's ownership
+        self.assertEqual((x["capAtCheckpoint"], x["floor"], x["shortfall"], x["checkpointDate"]), (123, 131, 8, "2026-10-14"))
+        self.assertEqual(snap["teamCaps"][DT], 124)  # the checkpoint file itself (all players) is never rewritten
         self.assertEqual((x["status"], x["penalty"], x["direction"]), ("FINDING_RECORDED", None, "UNCHANGED"))
         self.assertFalse(x["deadlineCheckpoint"]["recorded"])
 
@@ -195,19 +241,17 @@ class TestCapCheckpoints(unittest.TestCase):
                                                    {"type": "player", "playerKey": other, "from": partner, "to": DT}]})
             ss._write(os.path.join(td.dir, "season_transactions.json"), doc)
             x = ss.checkpoint_findings(td.si())[0]
-            self.assertEqual((x["short"], x["shortfall"], x["currentCap"], x["direction"]), ("DonTrick", 7, 134, "IMPROVING"))
-            self.assertEqual(x["currentGap"], 0)                    # out of the hole now, finding still on record
+            self.assertEqual((x["short"], x["shortfall"], x["currentCap"], x["direction"]), ("DonTrick", 8, 130, "IMPROVING"))
+            self.assertEqual(x["currentGap"], 1)                    # closer to the floor; the finding stays on record
             # a later post-deadline checkpoint with DonTrick under the floor again -> commissioner review
-            snap = ss._load(os.path.join(td.dir, "snapshots", "POST_DRAFT.json"))
-            snap["checkpoint"] = {"id": "POST_TRADE_DEADLINE", "date": "2027-02-20"}
-            snap["teamCaps"][DT] = 129
+            snap = ss.make_checkpoint_snapshot(td.si(), "POST_TRADE_DEADLINE", "2027-02-20")  # DonTrick at 130
             ss._write(os.path.join(td.dir, "snapshots", "POST_TRADE_DEADLINE.json"), snap)
             cp = ss._load(os.path.join(td.dir, "cap_checkpoints.json"))
             cp["checkpoints"][1].update({"date": "2027-02-20", "snapshot": "snapshots/POST_TRADE_DEADLINE.json", "status": "RECORDED"})
             ss._write(os.path.join(td.dir, "cap_checkpoints.json"), cp)
             x = ss.checkpoint_findings(td.si())[0]
             self.assertEqual((x["status"], x["deadlineCheckpoint"]["cap"], x["improvedSinceCheckpoint"], x["penalty"]),
-                             ("REPEAT_UNDER_FLOOR_REVIEW", 129, True, None))  # improvement noted; nothing applied
+                             ("REPEAT_UNDER_FLOOR_REVIEW", 130, True, None))  # improvement noted; nothing applied
 
 
 class TestCheckpointRecording(unittest.TestCase):
@@ -215,7 +259,8 @@ class TestCheckpointRecording(unittest.TestCase):
         with TempData() as td:
             si = td.si()
             snap = ss.make_checkpoint_snapshot(si, "POST_TRADE_DEADLINE", "2027-02-20")
-            self.assertEqual(snap["teamCaps"][DT], 124)
+            self.assertEqual(snap["teamCaps"][DT], 123)
+            self.assertEqual(snap["countingRule"], {"rule": "TOP_N_SALARIES", "n": 9})
             self.assertEqual(snap["checkpoint"]["completedTransactions"], ["TXN-2026-001"])
             ss._write(os.path.join(td.dir, "snapshots", "POST_TRADE_DEADLINE.json"), snap)
             cp = ss._load(os.path.join(td.dir, "cap_checkpoints.json"))
@@ -240,7 +285,7 @@ class TestRosterImport(unittest.TestCase):
             self.assertEqual([t["txnId"] for t in ss.reflected_completed(si2)], ["TXN-2026-001"])
             cur = ss.season_state(si2)
             self.assertEqual((cur["playerOwner"][MOREZ], cur["playerOwner"][ZION]), (HCMC, CC))
-            self.assertEqual(ls.team_cap(si2, cur, CC), 147)            # exactly once, before and after the import
+            self.assertEqual(ls.team_cap(si2, cur, CC), 145)            # exactly once, before and after the import
 
     def test_diff_categories_and_commit_rollback(self):
         with TempData() as td:
