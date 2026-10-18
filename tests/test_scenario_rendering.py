@@ -157,7 +157,21 @@ class TestRenderedCards(unittest.TestCase):
         sup = _read(_card(self.official, "sup fam"))
         self.assertNotIn("Jalen Williams", sup["names"])
         self.assertIn("Julius Randle", sup["names"])
-        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("141", 12, "37 ROOM"))  # post-trade 131 + drafted Wilson ($10), Flemings, Beringer ($0)
+        # completed Bsy <-> sup fam trade: sup fam 141 -> 144 (Castle $13 + Mitchell $0 in; Coward $10 + Beringer $0 out)
+        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("144", 12, "34 ROOM"))
+        self.assertIn("Stephon Castle", sup["names"])
+        self.assertNotIn("Cedric Coward", sup["names"])
+        bsy = _read(_card(self.official, "Bsy"))
+        self.assertEqual((bsy["cap"], bsy["rows"], bsy["gap"]), ("176", 12, "2 ROOM"))
+        self.assertIn("Cedric Coward", bsy["names"])
+        self.assertIn("Joan Beringer", bsy["names"])
+        self.assertNotIn("Stephon Castle", bsy["names"])
+        for n in ("Nikola Jokić", "Oso Ighodaro", "Victor Wembanyama"):   # completed Bsy <-> Thịnh
+            self.assertIn(n, bsy["names"] if n != "Victor Wembanyama" else _read(_card(self.official, "Thịnh"))["names"])
+        thinh = _read(_card(self.official, "Thịnh"))
+        self.assertEqual((thinh["cap"], thinh["rows"], thinh["gap"]), ("176", 12, "2 ROOM"))
+        self.assertIn("Jaylon Tyson", thinh["names"])
+        self.assertNotIn("Nikola Jokić", thinh["names"])
         bz = _read(_card(self.official, "Bz"))
         self.assertIn("Derrick White", bz["names"])
         self.assertNotIn("Franz Wagner", bz["names"])
@@ -169,7 +183,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_untraded_teams_keep_their_keepers_and_add_only_draftees(self):
         drafted = {c["name"] for c in ls.draft_summary(self.i, self.state)["completed"]}
-        for short in ("Quân", "DonTrick", "Thịnh", "TT"):
+        for short in ("Quân", "DonTrick", "TT"):
             now = _read(_card(self.official, short))["names"]
             before = _read(_card(self.static, short))["names"]
             self.assertEqual(sorted(n for n in now if n not in drafted), sorted(before), short)
@@ -207,17 +221,23 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_trade_lab_separates_proposals_from_completed_trades(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertEqual(lab.count('class="tcard prop'), 2)
-        self.assertEqual(lab.count('<input type="checkbox">'), 2)     # selectable previews, not applied
+        self.assertEqual(lab.count('class="tcard prop'), 0)           # nothing is pending any more
+        self.assertEqual(lab.count('<input type="checkbox">'), 0)
         text = re.sub(r"<[^>]+>", " ", lab)
-        for name in ("Stephon Castle", "Cedric Coward", "Victor Wembanyama", "Nikola Jokić"):
-            self.assertIn(name, text)
-        self.assertRegex(text, r"178\s*→\s*175")                     # each side shows its payroll change
+        self.assertIn("No proposals", text)
+        for name in ("Stephon Castle", "Victor Wembanyama"):
+            self.assertNotIn(name, text)                               # completed trades are not proposals
         self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
         self.assertNotIn("AMENDMENT", lab)                             # withdrawn: not actionable
         done = re.search(r'id="lab-done">(.*?)</details>', self.official, re.S).group(1)
-        self.assertEqual(done.count('class="tcard done'), 1)
+        self.assertEqual(done.count('class="tcard done'), 3)
         self.assertIn("Morez Johnson Jr.", done)
+        self.assertIn("Stephon Castle", done)
+        self.assertIn("Cedric Coward", done)
+        self.assertIn("Nikola Jokić", done)
+        done_text = re.sub(r"<[^>]+>", " ", done)
+        self.assertRegex(done_text, r"178\s*→\s*175")                # Bsy ↔ sup fam
+        self.assertRegex(done_text, r"175\s*→\s*176")                # Bsy ↔ Thịnh, applied after it
         self.assertIn("✓ DONE", done)
         self.assertNotIn("WITHDRAWN", done)                            # withdrawn entries are not shown
         hist = re.sub(r"<[^>]+>", " ", done.split("Pre-draft")[1])
@@ -225,16 +245,16 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn("Aaron Gordon", hist)                         # Gordon moved and moved back nets out
         self.assertRegex(hist, r"Alperen Şengün\s+3\.\s*04")
 
-    def test_scenario_movement_credits_the_drafting_team(self):
-        scn = _dump("file://" + os.path.abspath(INDEX) + "?mode=scenario&trades=PROP-2026-001")
-        mv = re.search(r'<div class="mv">(.*?)</details>', _card(scn, "Bsy"), re.S).group(1)
+    def test_movement_credits_the_drafting_team(self):
+        mv = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "Bsy"), re.S).group(1)
         drafted = re.search(r'<div class="mv-dr">(.*?)</div>', mv, re.S).group(1)
         self.assertNotIn("Joan Beringer", drafted)          # drafted by sup fam at 3.06, not by Bsy
         self.assertIn("Aaron Nesmith", drafted)             # Bsy's own 2.01 pick
         in_line = re.search(r'<span class="mv-l">IN</span>(.*?)</div>', mv, re.S).group(1)
         self.assertIn("Cedric Coward", in_line)
-        self.assertRegex(in_line, r'Joan Beringer</span>.*?class="mv-pk"[^>]*>3\.<span class="num">06</span> sup fam|Joan Beringer</span>.*?3.*?06.*?sup fam')
-        sup = re.search(r'<div class="mv">(.*?)</details>', _card(scn, "sup fam"), re.S).group(1)
+        self.assertIn('<span class="mv-pl"><span>Joan Beringer</span>', in_line)   # veteran draftee: slot + drafter, no purple
+        self.assertRegex(in_line, r'Joan Beringer</span>.*?3.*?06.*?sup fam')
+        sup = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "sup fam"), re.S).group(1)
         self.assertRegex(sup, r'<span class="mv-l">OUT</span>.*?Joan Beringer')
 
     def test_traded_rookie_keeps_rookie_styling_in_summaries(self):
@@ -245,9 +265,6 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("CrazyCat", morez.group(1))
         cc = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "CrazyCat"), re.S).group(1)
         self.assertRegex(cc, r'<span class="mv-l">OUT</span><span class="mv-items"><span class="mv-pl rk"><span>Morez Johnson Jr\.</span>')
-        scn = _dump("file://" + os.path.abspath(INDEX) + "?mode=scenario&trades=PROP-2026-001")
-        folds = re.search(r'id="lab-folds">(.*)', scn, re.S).group(1)
-        self.assertIn('<span class="mv-pl"><span>Joan Beringer</span>', folds)  # veteran draftee: slot, no purple
 
     def test_internal_notes_are_not_published(self):
         data = re.search(r'id="league-data">(.*?)</script>', self.static, re.S).group(1)
@@ -263,7 +280,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_public_ui_shows_the_verified_roster_snapshot(self):
         m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill cap-rule"', self.official)
-        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 14 · +1 TRADE")
+        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 14 · +3 TRADES")
         rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
         self.assertEqual(len(rules), 4)
         self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 $ COUNT · IL ✓" for r in rules), rules)

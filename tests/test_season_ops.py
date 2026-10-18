@@ -106,42 +106,33 @@ class TestLayers(unittest.TestCase):
         before = ss._load(ss.TXN_PATH)
         views = ss.enumerate_views(self.si)
         self.assertEqual(ss._load(ss.TXN_PATH), before)  # enumerating writes nothing
-        self.assertEqual(sorted(views), ["", "PROP-2026-001", "PROP-2026-001,PROP-2026-002", "PROP-2026-002"])
+        self.assertEqual(sorted(views), [""])  # both Bsy trades are completed: nothing is left to simulate
         cur = ss.season_state(self.si)
-        for k, f in ((CASTLE, BSY), (MITCHELL, BSY), (COWARD, SUP), (WEMBY, BSY), (JOKIC, THINH)):
-            self.assertEqual(cur["playerOwner"][k], f)                       # nothing proposed is applied by default
+        for k, f in ((WEMBY, THINH), (TYSON, THINH), (JOKIC, BSY), (OSO, BSY)):
+            self.assertEqual(cur["playerOwner"][k], f)                       # both completed trades are in the baseline
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
         self.assertEqual(data["official"]["teams"], views[""]["teams"])
-        self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001"])
-        with self.assertRaises(ls.StateError):
-            ss.season_state(self.si, ["TXN-2026-001"])                         # completed is not a scenario
+        self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
+        for done in ("TXN-2026-001", "PROP-2026-001", "PROP-2026-002"):
+            with self.assertRaises(ls.StateError):
+                ss.season_state(self.si, [done])                               # completed is not a scenario
 
-    def test_bsy_scenarios_individually_and_together(self):
-        caps = {}
-        for sel in ([], ["PROP-2026-001"], ["PROP-2026-002"], ["PROP-2026-001", "PROP-2026-002"]):
-            v = ss.season_view(self.si, sel)
-            caps[",".join(sel)] = {f: v["teams"][f]["cap"] for f in (BSY, THINH, SUP)}
-            self.assertTrue(all(r["applied"] and not r["errors"] for r in v["trades"].values()), sel)
-            self.assertEqual(sum(t["count"] for t in v["teams"].values()), 192)  # players move, none appear or vanish
-        self.assertEqual(caps[""], {BSY: 178, THINH: 177, SUP: 141})
-        self.assertEqual(caps["PROP-2026-001"], {BSY: 175, THINH: 177, SUP: 144})
-        self.assertEqual(caps["PROP-2026-002"], {BSY: 179, THINH: 176, SUP: 141})
-        self.assertEqual(caps["PROP-2026-001,PROP-2026-002"], {BSY: 176, THINH: 176, SUP: 144})
-        alone = ss.season_view(self.si, ["PROP-2026-002"])["trades"]["PROP-2026-002"]["warnings"]
-        self.assertEqual([(w["code"], w["detail"]["team"], w["detail"]["by"], w["detail"]["ladder"]) for w in alone],
-                         [("CAP_TRADE_LEAVES_BAND", "Bsy", 1.0, "UNDER_5")])  # 178 -> 179: out of band, away from it
-        both = ss.season_view(self.si, ["PROP-2026-001", "PROP-2026-002"])["trades"]
-        self.assertEqual(both["PROP-2026-002"]["warnings"], [])               # after the sup fam deal Bsy has room
-        st = ss.season_state(self.si, ["PROP-2026-001", "PROP-2026-002"])
-        self.assertEqual({k: st["playerOwner"][k] for k in (CASTLE, MITCHELL, COWARD, BERINGER, WEMBY, TYSON, JOKIC, OSO)},
-                         {CASTLE: SUP, MITCHELL: SUP, COWARD: BSY, BERINGER: BSY, WEMBY: THINH, TYSON: THINH, JOKIC: BSY, OSO: BSY})
+    def test_no_pending_proposals_remain_and_scenarios_start_from_the_updated_baseline(self):
+        self.assertEqual(ss.selectable(self.si), [])
+        base = ss.season_view(self.si, [])
+        self.assertEqual({f: base["teams"][f]["cap"] for f in (BSY, THINH, SUP)}, {BSY: 176, THINH: 176, SUP: 144})
+        self.assertEqual(sum(t["count"] for t in base["teams"].values()), 192)     # players move, none appear or vanish
+        self.assertEqual(set(base["trades"]), {"TXN-2026-001", "PROP-2026-001", "PROP-2026-002"})
 
-    def test_bsy_thinh_direction_discrepancy_is_flagged_not_invented(self):
+    def test_bsy_thinh_direction_is_the_ownership_consistent_one(self):
         t = self.si["tradeIndex"]["PROP-2026-002"]
-        self.assertEqual(t["status"], "PROPOSED")
-        self.assertEqual(t["directionCheck"]["status"], "DISCREPANCY_FLAGGED")
+        self.assertEqual(t["status"], "COMPLETED")
+        self.assertEqual(t["directionCheck"]["status"], "RESOLVED_ASSUMED_STAGED_DIRECTION")
+        for a in t["assets"]:   # every sender owned the player in the baseline BEFORE this trade
+            before = ss.season_state(ss.load_season(ls.load_inputs()))  # full state; check via history instead
+        hist = ls.resolve(self.i, (), "OFFICIAL")
         for a in t["assets"]:
-            self.assertEqual(self.cur["playerOwner"][a["playerKey"]], a["from"])  # every sender really owns the player
+            self.assertEqual(hist["playerOwner"][a["playerKey"]], a["from"])
 
     def test_in_season_rule_allows_moves_toward_the_band(self):
         self.assertEqual(ls.in_season_cap_checks(self.si, DT, 124, 128)[0]["code"], "CAP_STILL_OUTSIDE_BAND")
@@ -187,9 +178,110 @@ class TestTopNineCounting(unittest.TestCase):
         self.assertEqual(ls.draft_summary(self.i, hist)["completed"][-1]["capAfter"], 174)
 
     def test_trade_check_uses_counted_payroll(self):
-        st = ss.season_state(self.si, ["PROP-2026-002"])
-        r = [x for x in st["tradeResults"] if x["tradeId"] == "PROP-2026-002"][0]
-        self.assertEqual((r["teams"][BSY]["capBefore"], r["teams"][BSY]["capAfter"]), (178, 179))
+        r = [x for x in self.cur_state()["tradeResults"] if x["tradeId"] == "PROP-2026-002"][0]
+        self.assertEqual((r["teams"][BSY]["capBefore"], r["teams"][BSY]["capAfter"]), (175, 176))  # starts after the sup fam deal
+        self.assertEqual((r["teams"][THINH]["capBefore"], r["teams"][THINH]["capAfter"]), (177, 176))
+
+    def cur_state(self):
+        return ss.season_state(self.si)
+
+
+class TestBsyTradesCompleted(unittest.TestCase):
+    """PROP-2026-001 (Bsy <-> sup fam) and PROP-2026-002 (Bsy <-> Thinh) were promoted to COMPLETED in place."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.i = ls.load_inputs()
+        cls.si = ss.load_season(cls.i)
+        cls.hist = ls.resolve(cls.i, (), "OFFICIAL")
+        cls.cur = ss.season_state(cls.si)
+
+    def test_records_are_promoted_in_place_with_an_audit_trail(self):
+        ids = [t["txnId"] for t in self.si["seasonTxns"]]
+        self.assertEqual(ids, ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])      # no duplicate records
+        for tid in ("PROP-2026-001", "PROP-2026-002"):
+            t = self.si["tradeIndex"][tid]
+            self.assertEqual((t["status"], t["phase"]), ("COMPLETED", "IN_SEASON"))
+            self.assertEqual([h["status"] for h in t["statusHistory"]], ["PROPOSED", "COMPLETED"])
+            self.assertEqual(t["effectiveAt"], "2026-10-18T00:00:00Z")                  # dated to the report, as for TXN-2026-001
+            self.assertEqual((t["approvedOn"], t["approvedOnSource"]), ("2026-10-17", "owner-reported"))
+            self.assertIn("not supplied", t["source"])                                   # no invented Yahoo time or id
+            self.assertNotIn("yahooTransactionId", t)
+
+    def test_confirmed_directions_and_final_ownership(self):
+        sup = self.si["tradeIndex"]["PROP-2026-001"]
+        self.assertEqual({(a["name"], a["from"], a["to"]) for a in sup["assets"]},
+                         {("Stephon Castle", BSY, SUP), ("Ajay Mitchell", BSY, SUP), ("Cedric Coward", SUP, BSY), ("Joan Beringer", SUP, BSY)})
+        thinh = self.si["tradeIndex"]["PROP-2026-002"]
+        self.assertEqual({(a["name"], a["from"], a["to"]) for a in thinh["assets"]},
+                         {("Victor Wembanyama", BSY, THINH), ("Jaylon Tyson", BSY, THINH), ("Nikola Jokić", THINH, BSY), ("Oso Ighodaro", THINH, BSY)})
+        final = {CASTLE: SUP, MITCHELL: SUP, COWARD: BSY, BERINGER: BSY, WEMBY: THINH, TYSON: THINH, JOKIC: BSY, OSO: BSY}
+        start = {CASTLE: BSY, MITCHELL: BSY, COWARD: SUP, BERINGER: SUP, WEMBY: BSY, TYSON: BSY, JOKIC: THINH, OSO: THINH}
+        for k in final:
+            self.assertEqual(self.cur["playerOwner"][k], final[k])
+            self.assertEqual(self.hist["playerOwner"][k], start[k])                     # draft-night history untouched
+        for tid in ("PROP-2026-001", "PROP-2026-002"):
+            r = [x for x in self.cur["tradeResults"] if x["tradeId"] == tid][0]
+            self.assertTrue(r["applied"] and not r["errors"] and r["warnings"] == [])
+
+    def test_bsy_thinh_uses_the_only_ownership_consistent_direction(self):
+        t = self.si["tradeIndex"]["PROP-2026-002"]
+        self.assertEqual(t["directionCheck"]["status"], "RESOLVED_ASSUMED_STAGED_DIRECTION")
+        for a in t["assets"]:   # every sender really owned the asset in the baseline BEFORE this trade
+            self.assertEqual(self.hist["playerOwner"][a["playerKey"]], a["from"])
+        self.assertIn("NOT specified", t["source"])                                         # the assumption is recorded, not hidden
+
+    def test_payroll_uses_top_nine_and_frozen_salaries(self):
+        self.assertEqual({f: self.cur_cap(f) for f in (BSY, SUP, THINH, CC, HCMC)}, {BSY: 176, SUP: 144, THINH: 176, CC: 145, HCMC: 133})
+        for f in (BSY, SUP, THINH):
+            caps = sorted((ls.player_cap(self.si, k) for k in ls.team_players(self.si, self.cur, f)), reverse=True)
+            self.assertEqual(self.cur_cap(f), sum(caps[:9]))
+        self.assertEqual((ls.player_cap(self.si, CASTLE), ls.player_cap(self.si, WEMBY), ls.player_cap(self.si, JOKIC)), (13.0, 60.0, 61.0))
+        self.assertEqual({f: len(ls.team_players(self.si, self.cur, f)) for f in (BSY, SUP, THINH)}, {BSY: 12, SUP: 12, THINH: 12})
+        self.assertEqual([ls.cap_status(self.si, self.cur_cap(f)) for f in (BSY, SUP, THINH)], ["NEAR_CEILING", "IN_RANGE", "NEAR_CEILING"])
+
+    def cur_cap(self, f):
+        return ls.team_cap(self.si, self.cur, f)
+
+    def test_combined_final_state_and_no_double_processing(self):
+        owners = self.cur["playerOwner"]
+        self.assertEqual(len(owners), 192)                                                 # nobody appears or disappears
+        self.assertEqual(self.cur["activeTradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])  # each exactly once
+        again = ss.season_state(ss.load_season(ls.load_inputs()))                           # a rebuild gives the same state
+        self.assertEqual(again["playerOwner"], owners)
+        self.assertEqual((owners[MOREZ], owners[ZION]), (HCMC, CC))                         # the earlier completed trade still stands
+        self.assertEqual(ss.selectable(self.si), [])                                        # nothing pending
+        self.assertEqual(sorted(ss.enumerate_views(self.si)), [""])
+
+    def test_applying_the_same_trade_twice_fails_loudly(self):
+        si = copy.deepcopy(self.si)
+        dup = copy.deepcopy(si["tradeIndex"]["PROP-2026-001"])
+        dup.update({"txnId": "DUP", "tradeId": "DUP", "order": 2000})
+        si["tradeIndex"]["DUP"] = dup
+        si["seasonTxns"] = si["seasonTxns"] + [dup]
+        with self.assertRaises(ls.StateError):
+            ss.season_state(si)                                                             # senders no longer own the assets
+
+    def test_historical_layers_are_preserved(self):
+        snap = ss._load(ss.POST_DRAFT_PATH)
+        self.assertEqual(snap, ss.make_post_draft_snapshot(self.i, "2026-10-14"))
+        self.assertEqual((snap["draftSelections"], snap["rookies"]), (48, 19))
+        self.assertEqual(self.hist["activeTradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E", "TRADE-F", "TRADE-D-AMEND"])
+        self.assertEqual(self.hist["playerOwner"][MOREZ], CC)                               # draft-night owner of Morez
+        self.assertEqual(ls.team_cap(self.i, self.hist, DT), 124)
+        f = ss.checkpoint_findings(self.si)
+        self.assertEqual([(x["short"], x["shortfall"]) for x in f], [("DonTrick", 8)])      # DonTrick finding intact
+        snap0 = ss._load(os.path.join(ss.ROSTER_DIR, self.si["rosterIndex"]["current"]))
+        self.assertEqual(snap0["snapshotId"], "RS-2026-10-14-DRAFT-NIGHT")                  # no Yahoo refresh was applied
+
+    def test_public_page_shows_completed_history_not_pending_and_no_internal_notes(self):
+        data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
+        by = {t["id"]: t for t in data["trades"]}
+        self.assertEqual((by["PROP-2026-001"]["status"], by["PROP-2026-002"]["status"]), ("COMPLETED", "COMPLETED"))
+        self.assertEqual(sorted(data["scenarios"]), [""])
+        blob = json.dumps(data)
+        for internal in ("statusHistory", "directionCheck", "not supplied", "relayed", "DISCREPANCY", "NOT specified", "RESOLVED_ASSUMED"):
+            self.assertNotIn(internal, blob)
 
 
 class TestFrozenSalaries(unittest.TestCase):
@@ -261,7 +353,7 @@ class TestCheckpointRecording(unittest.TestCase):
             snap = ss.make_checkpoint_snapshot(si, "POST_TRADE_DEADLINE", "2027-02-20")
             self.assertEqual(snap["teamCaps"][DT], 123)
             self.assertEqual(snap["countingRule"], {"rule": "TOP_N_SALARIES", "n": 9})
-            self.assertEqual(snap["checkpoint"]["completedTransactions"], ["TXN-2026-001"])
+            self.assertEqual(snap["checkpoint"]["completedTransactions"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
             ss._write(os.path.join(td.dir, "snapshots", "POST_TRADE_DEADLINE.json"), snap)
             cp = ss._load(os.path.join(td.dir, "cap_checkpoints.json"))
             cp["checkpoints"][1].update({"date": "2027-02-20", "snapshot": "snapshots/POST_TRADE_DEADLINE.json", "status": "RECORDED"})
@@ -274,25 +366,26 @@ class TestRosterImport(unittest.TestCase):
     def test_round_trip_is_a_no_op_and_reflects_the_completed_trade(self):
         with TempData() as td:
             si = td.si()
-            snap, rep = ir.build_snapshot(si, ir.parse(td.csv(export_rows(si))), "2026-10-17T12:00:00Z", "test", td.dir)
+            snap, rep = ir.build_snapshot(si, ir.parse(td.csv(export_rows(si))), "2026-10-19T12:00:00Z", "test", td.dir)
             self.assertEqual(rep["blocking"], [])
             d = ir.diff(si, snap)
             self.assertEqual((d["added"], d["dropped"], d["changedTeam"], d["unchanged"]), ([], [], [], 192))
-            self.assertEqual(d["transactions"], [{"txnId": "TXN-2026-001", "label": "CRAZYCAT ↔ HCMC · MOREZ / ZION", "reflected": True}])
+            self.assertEqual([(t["txnId"], t["reflected"]) for t in d["transactions"]], [("TXN-2026-001", True), ("PROP-2026-001", True), ("PROP-2026-002", True)])
             ir.commit(si, snap, rep, d, td.dir, reviewed=True)
             si2 = td.si()
             self.assertEqual(ss.pending_completed(si2), [])           # now reflected in the snapshot: not re-applied
-            self.assertEqual([t["txnId"] for t in ss.reflected_completed(si2)], ["TXN-2026-001"])
+            self.assertEqual([t["txnId"] for t in ss.reflected_completed(si2)], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
             cur = ss.season_state(si2)
             self.assertEqual((cur["playerOwner"][MOREZ], cur["playerOwner"][ZION]), (HCMC, CC))
             self.assertEqual(ls.team_cap(si2, cur, CC), 145)            # exactly once, before and after the import
+            self.assertEqual((ls.team_cap(si2, cur, BSY), ls.team_cap(si2, cur, SUP), ls.team_cap(si2, cur, THINH)), (176, 144, 176))
 
     def test_diff_categories_and_commit_rollback(self):
         with TempData() as td:
             si = td.si()
             rows = export_rows(si)
             fa = next(k for k in si["registry"] if k not in ss.season_state(si)["playerOwner"])
-            rows = [r for r in rows if r[1] != "478.p.10313"]                               # Oso dropped by Thịnh
+            rows = [r for r in rows if r[1] != "478.p.5187"]                                # Dennis Schröder dropped by Bsy
             rows.append(["Thịnh", fa, "", si["registry"][fa]["name"], "BN"])                # FA added
             for r in rows:
                 if r[1] == WEMBY:
@@ -314,7 +407,7 @@ class TestRosterImport(unittest.TestCase):
             d = ir.diff(si, snap)
             self.assertEqual([x["player"] for x in d["lineupOnly"]], ["Stephon Castle"])
             self.assertEqual([(x["player"], x["from"], x["to"]) for x in d["ilMoves"]], [("Victor Wembanyama", "IL", "C")])
-            self.assertEqual([(x["player"], x["from"], x["to"]) for x in d["changedTeam"]], [("Jaylon Tyson", "Bsy", "sup fam")])
+            self.assertEqual([(x["player"], x["from"], x["to"]) for x in d["changedTeam"]], [("Jaylon Tyson", "Thịnh", "sup fam")])
             # first import's add/drop came through as ownership changes
             d0 = ir.diff(ss.load_season(ls.load_inputs(data_dir=td.dir), data_dir=td.dir), first)
             self.assertEqual(d0["added"] + d0["dropped"], [])                                # already current
@@ -323,7 +416,7 @@ class TestRosterImport(unittest.TestCase):
                 ir.commit(td.si(), snap, rep, d, td.dir, reviewed=True)
             back = ir.rollback(td.dir)
             self.assertIn(first["snapshotId"], back)
-            self.assertEqual(ss.season_state(td.si())["playerOwner"][TYSON], BSY)
+            self.assertEqual(ss.season_state(td.si())["playerOwner"][TYSON], THINH)
             self.assertTrue(os.path.exists(os.path.join(td.dir, "rosters", "snapshots", snap["snapshotId"] + ".json")))  # retained
 
     def test_first_import_reports_adds_and_drops(self):

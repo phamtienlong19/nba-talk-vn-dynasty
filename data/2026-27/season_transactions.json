@@ -42,7 +42,7 @@
     {
       "txnId": "PROP-2026-001",
       "type": "TRADE",
-      "status": "PROPOSED",
+      "status": "COMPLETED",
       "label": "BSY ↔ SUP FAM",
       "participants": [
         "franchise-01",
@@ -79,12 +79,28 @@
         }
       ],
       "recordedAt": "2026-10-16T00:00:00Z",
-      "note": "Castle + Ajay Mitchell for Coward + Beringer. Direction verified against the post-draft roster (Bsy owns Castle and Mitchell; sup fam owns Coward and Beringer)."
+      "note": "Castle + Ajay Mitchell for Coward + Beringer. Direction verified against the post-draft roster (Bsy owned Castle and Mitchell; sup fam owned Coward and Beringer).",
+      "effectiveAt": "2026-10-18T00:00:00Z",
+      "source": "League owner relayed on 2026-10-18 that the league confirmed this trade can be processed as completed; exact Yahoo processing time and transaction id not supplied (dated to the report, same convention as TXN-2026-001).",
+      "statusHistory": [
+        {
+          "status": "PROPOSED",
+          "at": "2026-10-16T00:00:00Z"
+        },
+        {
+          "status": "COMPLETED",
+          "at": "2026-10-18",
+          "by": "league owner instruction",
+          "note": "promoted in place; no duplicate record"
+        }
+      ],
+      "approvedOn": "2026-10-17",
+      "approvedOnSource": "owner-reported"
     },
     {
       "txnId": "PROP-2026-002",
       "type": "TRADE",
-      "status": "PROPOSED",
+      "status": "COMPLETED",
       "label": "BSY ↔ THỊNH",
       "participants": [
         "franchise-01",
@@ -122,11 +138,27 @@
       ],
       "recordedAt": "2026-10-16T00:00:00Z",
       "directionCheck": {
-        "status": "DISCREPANCY_FLAGGED",
+        "status": "RESOLVED_ASSUMED_STAGED_DIRECTION",
         "described": "Bsy receives Wembanyama + Tyson; Thịnh receives Jokić + Ighodaro",
         "verified": "Bsy owns Wembanyama and Tyson; Thịnh owns Jokić and Ighodaro, so the described direction cannot be executed. Staged in the only ownership-consistent direction (Bsy sends Wembanyama + Tyson, receives Jokić + Ighodaro). Confirm with the teams before it moves past PROPOSED."
       },
-      "note": "Same four players as described; direction corrected to match ownership and flagged for confirmation."
+      "note": "Wembanyama + Tyson to Thịnh for Jokić + Ighodaro. Staged and executed in the ownership-consistent direction.",
+      "effectiveAt": "2026-10-18T00:00:00Z",
+      "source": "League owner stated on 2026-10-18 that both Bsy trades were approved the day before (2026-10-17); exact Yahoo processing time and transaction id not supplied (dated to the report, same convention as TXN-2026-001). The direction was NOT specified in that message: it is recorded in the only ownership-consistent direction (Bsy sends Wembanyama + Tyson, receives Jokic + Ighodaro); the earlier description (Bsy receives Wembanyama + Tyson) cannot execute because Bsy already owns them.",
+      "approvedOn": "2026-10-17",
+      "approvedOnSource": "owner-reported",
+      "statusHistory": [
+        {
+          "status": "PROPOSED",
+          "at": "2026-10-16T00:00:00Z"
+        },
+        {
+          "status": "COMPLETED",
+          "at": "2026-10-18",
+          "by": "league owner instruction",
+          "note": "approved 2026-10-17 (owner-reported); promoted in place; staged ownership-consistent direction used"
+        }
+      ]
     }
   ]
 }

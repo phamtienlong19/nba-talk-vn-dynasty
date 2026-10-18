@@ -12,7 +12,7 @@
   "liveContentCheck": "PASS"
  },
  "working": {
-  "branch": "feat/season-ops",
+  "branch": "feat/bsy-sup-fam-trade",
   "commit": null,
   "issue": null,
   "prUrl": null,
@@ -187,7 +187,7 @@
    "checkpoint": "data/2026-27/snapshots/POST_DRAFT.json (2026-10-14)"
   },
   "rosterSnapshot": "data/2026-27/rosters/index.json -> RS-2026-10-14-DRAFT-NIGHT (derived draft-night rosters; no Yahoo import yet)",
-  "inSeasonLedger": "data/2026-27/season_transactions.json: TXN-2026-001 COMPLETED (Morez Johnson Jr. <-> Zion Williamson); PROP-2026-001 Bsy<->sup fam, PROP-2026-002 Bsy<->Thinh PROPOSED (direction flagged)",
+  "inSeasonLedger": "data/2026-27/season_transactions.json: TXN-2026-001 COMPLETED (Morez Johnson Jr. <-> Zion Williamson); PROP-2026-001 COMPLETED (Bsy <-> sup fam) and PROP-2026-002 COMPLETED (Bsy <-> Thinh), both approved 2026-10-17 (owner-reported), promoted in place, dated to the 2026-10-18 report. Bsy <-> Thinh recorded in the only ownership-consistent direction (Bsy sends Wembanyama + Tyson); the direction was not specified in the approval. No proposals pending.",
   "withdrawn": "TRADE-F-AMEND VOID/WITHDRAWN (trades.json), superseded by TXN-2026-001",
   "salaryFreeze": "data/2026-27/salary_freeze.json",
   "capCheckpoints": "data/2026-27/cap_checkpoints.json: POST_DRAFT recorded (DonTrick 123 counted vs floor 131, short 8, finding only); POST_TRADE_DEADLINE pending",
