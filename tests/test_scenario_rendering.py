@@ -162,12 +162,16 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("Stephon Castle", sup["names"])
         self.assertNotIn("Cedric Coward", sup["names"])
         bsy = _read(_card(self.official, "Bsy"))
-        self.assertEqual((bsy["cap"], bsy["rows"], bsy["gap"]), ("175", 12, "3 ROOM"))
+        self.assertEqual((bsy["cap"], bsy["rows"], bsy["gap"]), ("176", 12, "2 ROOM"))
         self.assertIn("Cedric Coward", bsy["names"])
         self.assertIn("Joan Beringer", bsy["names"])
         self.assertNotIn("Stephon Castle", bsy["names"])
+        for n in ("Nikola Jokić", "Oso Ighodaro", "Victor Wembanyama"):   # completed Bsy <-> Thịnh
+            self.assertIn(n, bsy["names"] if n != "Victor Wembanyama" else _read(_card(self.official, "Thịnh"))["names"])
         thinh = _read(_card(self.official, "Thịnh"))
-        self.assertIn("Nikola Jokić", thinh["names"])                 # Bsy <-> Thịnh is NOT finalized
+        self.assertEqual((thinh["cap"], thinh["rows"], thinh["gap"]), ("176", 12, "2 ROOM"))
+        self.assertIn("Jaylon Tyson", thinh["names"])
+        self.assertNotIn("Nikola Jokić", thinh["names"])
         bz = _read(_card(self.official, "Bz"))
         self.assertIn("Derrick White", bz["names"])
         self.assertNotIn("Franz Wagner", bz["names"])
@@ -179,7 +183,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_untraded_teams_keep_their_keepers_and_add_only_draftees(self):
         drafted = {c["name"] for c in ls.draft_summary(self.i, self.state)["completed"]}
-        for short in ("Quân", "DonTrick", "Thịnh", "TT"):
+        for short in ("Quân", "DonTrick", "TT"):
             now = _read(_card(self.official, short))["names"]
             before = _read(_card(self.static, short))["names"]
             self.assertEqual(sorted(n for n in now if n not in drafted), sorted(before), short)
@@ -217,21 +221,23 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_trade_lab_separates_proposals_from_completed_trades(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertEqual(lab.count('class="tcard prop'), 1)           # only Bsy <-> Thịnh is still pending
-        self.assertEqual(lab.count('<input type="checkbox">'), 1)     # selectable preview, not applied
+        self.assertEqual(lab.count('class="tcard prop'), 0)           # nothing is pending any more
+        self.assertEqual(lab.count('<input type="checkbox">'), 0)
         text = re.sub(r"<[^>]+>", " ", lab)
-        for name in ("Victor Wembanyama", "Nikola Jokić", "Jaylon Tyson", "Oso Ighodaro"):
-            self.assertIn(name, text)
-        self.assertNotIn("Stephon Castle", text)                       # completed trades are not proposals
-        self.assertRegex(text, r"175\s*→\s*176")                     # the proposal starts from the updated baseline
+        self.assertIn("No proposals", text)
+        for name in ("Stephon Castle", "Victor Wembanyama"):
+            self.assertNotIn(name, text)                               # completed trades are not proposals
         self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
         self.assertNotIn("AMENDMENT", lab)                             # withdrawn: not actionable
         done = re.search(r'id="lab-done">(.*?)</details>', self.official, re.S).group(1)
-        self.assertEqual(done.count('class="tcard done'), 2)
+        self.assertEqual(done.count('class="tcard done'), 3)
         self.assertIn("Morez Johnson Jr.", done)
         self.assertIn("Stephon Castle", done)
         self.assertIn("Cedric Coward", done)
-        self.assertRegex(re.sub(r"<[^>]+>", " ", done), r"178\s*→\s*175")
+        self.assertIn("Nikola Jokić", done)
+        done_text = re.sub(r"<[^>]+>", " ", done)
+        self.assertRegex(done_text, r"178\s*→\s*175")                # Bsy ↔ sup fam
+        self.assertRegex(done_text, r"175\s*→\s*176")                # Bsy ↔ Thịnh, applied after it
         self.assertIn("✓ DONE", done)
         self.assertNotIn("WITHDRAWN", done)                            # withdrawn entries are not shown
         hist = re.sub(r"<[^>]+>", " ", done.split("Pre-draft")[1])
@@ -274,7 +280,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_public_ui_shows_the_verified_roster_snapshot(self):
         m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill cap-rule"', self.official)
-        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 14 · +2 TRADES")
+        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 14 · +3 TRADES")
         rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
         self.assertEqual(len(rules), 4)
         self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 $ COUNT · IL ✓" for r in rules), rules)

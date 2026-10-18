@@ -25,9 +25,10 @@ importer refuses a snapshot that does not). A COMPLETED trade whose sender does
 not own the asset fails loudly.
 
 Current rows: `TXN-2026-001` CrazyCat ↔ HCMC, Morez Johnson Jr. ↔ Zion Williamson (COMPLETED);
-`PROP-2026-001` Bsy ↔ sup fam (COMPLETED 2026-10-18, promoted in place with a `statusHistory`; dated to the report, no
-Yahoo time or id supplied); `PROP-2026-002` Bsy ↔ Thịnh (still PROPOSED: the direction described to us conflicts with
-ownership, so it is not finalized and carries a direction-check flag). `TRADE-F-AMEND` in
+`PROP-2026-001` Bsy ↔ sup fam and `PROP-2026-002` Bsy ↔ Thịnh (both COMPLETED, approved 2026-10-17 per the league
+owner; promoted in place with a `statusHistory`, dated to the 2026-10-18 report; no Yahoo time or id supplied). Bsy ↔ Thịnh
+is recorded in the only ownership-consistent direction (Bsy sends Wembanyama + Tyson): the approval did not state the
+direction, and "Bsy receives Wembanyama + Tyson" cannot execute because Bsy already owns them. No proposals are pending. `TRADE-F-AMEND` in
 `trades.json` is VOID / WITHDRAWN, superseded by `TXN-2026-001`; `TRADE-F` and the
 2.07 selection are unchanged.
 
