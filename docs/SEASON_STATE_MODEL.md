@@ -24,9 +24,10 @@ snapshot's `verifiedAt`; a later verified snapshot already contains it (and the
 importer refuses a snapshot that does not). A COMPLETED trade whose sender does
 not own the asset fails loudly.
 
-Current rows: `TXN-2026-001` CrazyCat ↔ HCMC, Morez Johnson Jr. ↔ Zion Williamson
-(COMPLETED); `PROP-2026-001` Bsy ↔ sup fam and `PROP-2026-002` Bsy ↔ Thịnh
-(PROPOSED; the latter carries a direction-check flag). `TRADE-F-AMEND` in
+Current rows: `TXN-2026-001` CrazyCat ↔ HCMC, Morez Johnson Jr. ↔ Zion Williamson (COMPLETED);
+`PROP-2026-001` Bsy ↔ sup fam (COMPLETED 2026-10-18, promoted in place with a `statusHistory`; dated to the report, no
+Yahoo time or id supplied); `PROP-2026-002` Bsy ↔ Thịnh (still PROPOSED: the direction described to us conflicts with
+ownership, so it is not finalized and carries a direction-check flag). `TRADE-F-AMEND` in
 `trades.json` is VOID / WITHDRAWN, superseded by `TXN-2026-001`; `TRADE-F` and the
 2.07 selection are unchanged.
 

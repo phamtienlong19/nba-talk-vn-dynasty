@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-16T04:55:33Z
+Generated: 2026-10-18T10:31:09Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/season-ops
-Commit: 3d5d89a
+Branch: feat/bsy-sup-fam-trade
+Commit: 1c6bb4a
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/55 (OPEN)
-CI: Claude Code Review: completed/success
+PR: none
+CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,47 +27,50 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- README.md                                          |   23 +-
- ai_exchange/CURRENT_STATE.json                     |  369 +++---
- ai_exchange/REVIEW_NOTES.md                        |   22 +-
- ai_exchange/REVIEW_PACKET.md                       |   99 +-
- config/cap_policy.json                             |   10 +-
- data/2026-27/cap_checkpoints.json                  |   23 +
- data/2026-27/rosters/index.json                    |   14 +
- data/2026-27/rosters/player_aliases.json           |    4 +
- .../snapshots/RS-2026-10-14-DRAFT-NIGHT.json       | 1004 +++++++++++++++++
- data/2026-27/rosters/team_map.json                 |  145 +++
- data/2026-27/salary_freeze.json                    |  618 +++++++++++
- data/2026-27/season_transactions.json              |  132 +++
- data/2026-27/snapshots/POST_DRAFT.json             |  414 +++++++
- data/2026-27/trades.json                           |   10 +-
- docs/LEAGUE_STATE_MODEL.md                         |    6 +
- docs/OPEN_RULE_QUESTIONS.md                        |   16 +
- docs/ROSTER_REFRESH.md                             |   83 ++
- docs/SEASON_STATE_MODEL.md                         |   69 ++
- docs/YAHOO_API_FEASIBILITY.md                      |   99 ++
- docs/examples/roster_snapshot_example.csv          |  193 ++++
- index.html                                         | 1172 +++++++++++---------
- scripts/build_fa_draft_pool.py                     |    6 +-
- scripts/build_league_state.py                      |  110 +-
- scripts/import_rosters.py                          |  346 ++++++
- scripts/league_state.py                            |   47 +-
- scripts/season_state.py                            |  380 +++++++
- tasks/ACTIVE.md                                    |    8 +-
- tests/test_final_keeper_freeze.py                  |   11 +-
- tests/test_keeper_overrides.py                     |    5 +-
- tests/test_league_state_data.py                    |   54 +-
- tests/test_scenario_rendering.py                   |  111 +-
- tests/test_season_ops.py                           |  413 +++++++
- tests/test_seattle_keeper_ceiling.py               |    3 +-
- tests/test_what_if.py                              |    4 +-
- 34 files changed, 5216 insertions(+), 807 deletions(-)
+ data/what_if/snapshots/2026-10-16/players.json     | 4166 ++++++++++++++++++++
+ data/what_if/snapshots/2026-10-16/snapshot.json    |   16 +
+ docs/guides/BASKETBALL_DRAFT_FAST_START_VI.md      |  273 ++
+ docs/guides/BUILDING_WITH_AI.md                    |  505 +++
+ docs/guides/COPY_PASTE_PROMPTS.md                  |  234 ++
+ docs/guides/START_HERE.md                          |  468 +++
+ docs/guides/downloads/build_zip.py                 |   22 +
+ docs/guides/downloads/draft-board-example.zip      |  Bin 0 -> 26309 bytes
+ docs/guides/examples/club-directory/README.md      |   21 +
+ .../club-directory/v1-first-version/app.js         |   31 +
+ .../club-directory/v1-first-version/index.html     |   23 +
+ .../club-directory/v1-first-version/style.css      |   13 +
+ .../examples/club-directory/v2-role-filter/app.js  |   42 +
+ .../club-directory/v2-role-filter/index.html       |   25 +
+ .../club-directory/v2-role-filter/style.css        |   13 +
+ docs/guides/examples/draft-board/BAT_DAU_VI.md     |   42 +
+ docs/guides/examples/draft-board/README.md         |   71 +
+ .../draft-board/REQUIREMENTS_EXAMPLE_VI.md         |  108 +
+ docs/guides/examples/draft-board/app.js            |  236 ++
+ .../examples/draft-board/data-invalid/README.md    |   14 +
+ .../data-invalid/players_duplicate_id.csv          |    4 +
+ .../data-invalid/players_missing_column.csv        |    3 +
+ .../data-invalid/players_quoted_names.csv          |    5 +
+ .../data-invalid/results_duplicate_player.csv      |    3 +
+ .../data-invalid/results_out_of_order.csv          |    3 +
+ .../data-invalid/results_unknown_player.csv        |    3 +
+ .../examples/draft-board/data/draft_order.csv      |   13 +
+ .../examples/draft-board/data/draft_results.csv    |    9 +
+ docs/guides/examples/draft-board/data/players.csv  |   13 +
+ docs/guides/examples/draft-board/data/teams.csv    |    5 +
+ docs/guides/examples/draft-board/draft-core.js     |  205 +
+ docs/guides/examples/draft-board/index.html        |   75 +
+ docs/guides/examples/draft-board/style.css         |   44 +
+ .../examples/draft-board/test/draft-core.test.js   |  114 +
+ index.html                                         |    4 +-
+ scripts/what_if_app.js                             |    2 +-
+ tests/test_what_if.py                              |   12 +-
+ 37 files changed, 6831 insertions(+), 9 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
 - tests: PASS (keeper freeze is LOCKED -- baseline not regenerated (immutable).)
-- Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
+- Yahoo refresh: not run this session
 - live HTTP: OK
 
 ## Canonical State
@@ -76,53 +79,51 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
-- README.md
-- ai_exchange/CURRENT_STATE.json
-- ai_exchange/REVIEW_NOTES.md
-- ai_exchange/REVIEW_PACKET.md
-- config/cap_policy.json
-- data/2026-27/cap_checkpoints.json
-- data/2026-27/rosters/index.json
-- data/2026-27/rosters/player_aliases.json
-- data/2026-27/rosters/snapshots/RS-2026-10-14-DRAFT-NIGHT.json
-- data/2026-27/rosters/team_map.json
-- data/2026-27/salary_freeze.json
-- data/2026-27/season_transactions.json
-- data/2026-27/snapshots/POST_DRAFT.json
-- data/2026-27/trades.json
-- docs/LEAGUE_STATE_MODEL.md
-- docs/OPEN_RULE_QUESTIONS.md
-- docs/ROSTER_REFRESH.md
-- docs/SEASON_STATE_MODEL.md
-- docs/YAHOO_API_FEASIBILITY.md
-- docs/examples/roster_snapshot_example.csv
+- data/what_if/snapshots/2026-10-16/players.json
+- data/what_if/snapshots/2026-10-16/snapshot.json
+- docs/guides/BASKETBALL_DRAFT_FAST_START_VI.md
+- docs/guides/BUILDING_WITH_AI.md
+- docs/guides/COPY_PASTE_PROMPTS.md
+- docs/guides/START_HERE.md
+- docs/guides/downloads/build_zip.py
+- docs/guides/downloads/draft-board-example.zip
+- docs/guides/examples/club-directory/README.md
+- docs/guides/examples/club-directory/v1-first-version/app.js
+- docs/guides/examples/club-directory/v1-first-version/index.html
+- docs/guides/examples/club-directory/v1-first-version/style.css
+- docs/guides/examples/club-directory/v2-role-filter/app.js
+- docs/guides/examples/club-directory/v2-role-filter/index.html
+- docs/guides/examples/club-directory/v2-role-filter/style.css
+- docs/guides/examples/draft-board/BAT_DAU_VI.md
+- docs/guides/examples/draft-board/README.md
+- docs/guides/examples/draft-board/REQUIREMENTS_EXAMPLE_VI.md
+- docs/guides/examples/draft-board/app.js
+- docs/guides/examples/draft-board/data-invalid/README.md
+- docs/guides/examples/draft-board/data-invalid/players_duplicate_id.csv
+- docs/guides/examples/draft-board/data-invalid/players_missing_column.csv
+- docs/guides/examples/draft-board/data-invalid/players_quoted_names.csv
+- docs/guides/examples/draft-board/data-invalid/results_duplicate_player.csv
+- docs/guides/examples/draft-board/data-invalid/results_out_of_order.csv
+- docs/guides/examples/draft-board/data-invalid/results_unknown_player.csv
+- docs/guides/examples/draft-board/data/draft_order.csv
+- docs/guides/examples/draft-board/data/draft_results.csv
+- docs/guides/examples/draft-board/data/players.csv
+- docs/guides/examples/draft-board/data/teams.csv
+- docs/guides/examples/draft-board/draft-core.js
+- docs/guides/examples/draft-board/index.html
+- docs/guides/examples/draft-board/style.css
+- docs/guides/examples/draft-board/test/draft-core.test.js
 - index.html
-- scripts/build_fa_draft_pool.py
-- scripts/build_league_state.py
-- scripts/import_rosters.py
-- scripts/league_state.py
-- scripts/season_state.py
-- tasks/ACTIVE.md
-- tests/test_final_keeper_freeze.py
-- tests/test_keeper_overrides.py
-- tests/test_league_state_data.py
-- tests/test_scenario_rendering.py
-- tests/test_season_ops.py
-- tests/test_seattle_keeper_ceiling.py
+- scripts/what_if_app.js
 - tests/test_what_if.py
 
 ## Issues
-- Payroll now counts the top 9 salaries per roster, IL included (league owner, 2026-10-16). Current-season changes: CrazyCat 147→145, LC 162→161, DonTrick 124→123; DonTrick's post-draft shortfall is 8. Draft-night history keeps all-player totals.
-
-- PROP-2026-002 (Bsy ↔ Thịnh) was described with the direction reversed; it is staged in the only ownership-consistent direction (Bsy sends Wembanyama + Tyson). The flag lives only in `season_transactions.json` (`directionCheck`); internal notes are not published on the page.
-- PROP-2026-002 alone puts Bsy at 179 (> 178): `CAP_TRADE_LEAVES_BAND`, under-$5 ladder. Together with PROP-2026-001 Bsy ends at 176 (legal).
-- TXN-2026-001 effective date is the report date (2026-10-16); the exact Yahoo processing time was not supplied.
-- The 16 Yahoo team keys and the league key are unknown (no authenticated data in the repo); `rosters/team_map.json` has nulls.
+- PROP-2026-002 (Bsy ↔ Thịnh) NOT finalized. The direction described (Bsy receives Wembanyama + Tyson; Thịnh receives Jokić + Ighodaro) is impossible: Bsy owns Wembanyama and Tyson, Thịnh owns Jokić and Ighodaro. It stays PROPOSED in the only ownership-consistent direction (Bsy sends Wembanyama + Tyson). Nothing was reversed or reassigned.
+- PROP-2026-001 execution time/Yahoo transaction id were not supplied; effectiveAt is the report date (same convention as TXN-2026-001).
 
 ## Decisions Required
 
-- Confirm PROP-2026-002 direction before it moves past PROPOSED.
-- Commissioner: provide the league id; decide whether to apply for Yahoo Fantasy API access (docs/YAHOO_API_FEASIBILITY.md).
+- Bsy ↔ Thịnh: confirm which team actually sends Wembanyama + Tyson before it can be completed.
 
 ## Suggested Next Step
-Open/update the PR from `feat/season-ops` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/bsy-sup-fam-trade` if not already done, then request human/ChatGPT review of this packet.

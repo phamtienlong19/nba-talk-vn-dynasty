@@ -42,7 +42,7 @@
     {
       "txnId": "PROP-2026-001",
       "type": "TRADE",
-      "status": "PROPOSED",
+      "status": "COMPLETED",
       "label": "BSY ↔ SUP FAM",
       "participants": [
         "franchise-01",
@@ -79,7 +79,21 @@
         }
       ],
       "recordedAt": "2026-10-16T00:00:00Z",
-      "note": "Castle + Ajay Mitchell for Coward + Beringer. Direction verified against the post-draft roster (Bsy owns Castle and Mitchell; sup fam owns Coward and Beringer)."
+      "note": "Castle + Ajay Mitchell for Coward + Beringer. Direction verified against the post-draft roster (Bsy owned Castle and Mitchell; sup fam owned Coward and Beringer).",
+      "effectiveAt": "2026-10-18T00:00:00Z",
+      "source": "League owner relayed on 2026-10-18 that the league confirmed this trade can be processed as completed; exact Yahoo processing time and transaction id not supplied (dated to the report, same convention as TXN-2026-001).",
+      "statusHistory": [
+        {
+          "status": "PROPOSED",
+          "at": "2026-10-16T00:00:00Z"
+        },
+        {
+          "status": "COMPLETED",
+          "at": "2026-10-18",
+          "by": "league owner instruction",
+          "note": "promoted in place; no duplicate record"
+        }
+      ]
     },
     {
       "txnId": "PROP-2026-002",
