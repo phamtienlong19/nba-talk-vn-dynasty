@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import subprocess
+import json
 import sys
 import unittest
 
@@ -317,6 +318,51 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn('OFS:["OFS","Out for the season","ofs"]', css)
         self.assertIn('INJ:["INJ","Injured","inj"]', css)
         self.assertIn('D:["D","Doubtful","d"]', css)
+
+    def test_preseason_standings_pill_and_team_order(self):
+        a = self.official.split('id="rosters-a"')[1].split('id="rosters-b"')[0]
+        txt = lambda x: " ".join(re.sub(r"<[^>]+>", "", x).split())  # noqa: E731  (digits are wrapped in spans)
+        self.assertTrue(txt(a).startswith(">TEAMS 1–8"))
+        self.assertIn("meta-pill stand-pill off", a)
+        self.assertRegex(txt(a), r"STANDINGS\s*AFTER WEEK 1")
+        shorts = re.findall(r'<span class="identity-tag">([^<]*)</span>', a)
+        self.assertEqual(shorts[:3], ["Bsy", "CrazyCat", "Melo"])          # team # order until games are played
+        self.assertNotIn('<span class="stand-tag', self.official)          # no rank tags before games are played
+
+    def test_started_season_sorts_worst_record_first(self):
+        import tempfile, shutil
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        with open(INDEX, encoding="utf-8") as f:
+            html = f.read()
+        m = re.search(r'(id="league-data">)(.*?)(</script>)', html, re.S)
+        data = json.loads(m.group(2).replace("<\\/", "</"))
+        ids = [t["id"] for t in data["teams"]]
+        teams = {fid: {"rank": i + 1, "w": 160 - i * 6, "l": 40 + i * 6, "t": 3, "pct": None, "gb": str(i * 2), "division": "East",
+                       "divRecord": "0-0-0", "lastWeek": "5-4-0", "waiver": i + 1, "moves": 0, "place": i + 1} for i, fid in enumerate(ids)}
+        data["standings"] = {"capturedAt": "2026-11-02T12:00:00Z", "source": "test", "started": True, "teams": teams,
+                             "worstFirst": list(reversed(ids))}                 # made-up records: team 01 is best
+        d = tempfile.mkdtemp()
+        try:
+            path = os.path.join(d, "index.html")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(html[:m.start(2)] + json.dumps(data, ensure_ascii=False).replace("</", "<\\/") + html[m.end(2):])
+            dom = _dump("file://" + path)
+            a, b = dom.split('id="rosters-a"')[1].split('id="rosters-b"')
+            txt = lambda x: " ".join(re.sub(r"<[^>]+>", "", x).split())  # noqa: E731
+            self.assertTrue(txt(a).startswith(">STANDINGS 16–9"), txt(a)[:40])
+            self.assertTrue(txt(b).startswith(">STANDINGS 8–1"), txt(b)[:40])
+            self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', a)[0], "TT")      # 16th first
+            self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', b)[-1], "Bsy")    # 1st last
+            tag = re.search(r'<span class="stand-tag low"[^>]*>(.*?)</span></span>(?=<span class="chip)', _card(dom, "TT"), re.S)
+            self.assertEqual(txt(tag.group(1)), "16th70–130–3")
+            self.assertIn('class="so on">STANDINGS ↓', a)
+            dom2 = _dump("file://" + path + "?order=team")                    # toggle back to team number
+            a2 = dom2.split('id="rosters-a"')[1].split('id="rosters-b"')[0]
+            self.assertTrue(txt(a2).startswith(">TEAMS 1–8"))
+            self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', a2)[0], "Bsy")
+            self.assertIn('class="so on">TEAM #', a2)
+        finally:
+            shutil.rmtree(d)
 
     def test_full_team_names_and_no_health_badges(self):
         bsy = _card(self.official, "Bsy")

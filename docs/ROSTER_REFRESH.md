@@ -53,6 +53,16 @@ python3 scripts/import_rosters.py commit local_data/yahoo_observations/OBS-….j
   counted salaries like anyone else. A BN↔IL move changes neither ownership nor
   payroll.
 
+**Standings.** `python3 scripts/yahoo_rosters.py standings` reads the
+standings table on the league home page (read-only GET), validates it (all 16
+teams, no duplicate ranks) and saves it under `local_data/`; `--write` records it
+in `data/2026-27/standings.json` for the site (then `build_league_state.py embed`
+and a PR, as for rosters). Display only: once any game is played the team pages
+run worst record first ("Standings 16–9" / "8–1", Yahoo rank, else win %), each
+card shows place and W-L-T with GB / division / last week on hover, and an
+"Order" toggle (`?order=team`) returns to team number. Before that the page keeps
+team order and shows "Standings after week 1".
+
 **Manual capture (Chrome DevTools).** On any page of the league, logged in,
 paste into the console; it GETs the 16 team pages and downloads `capture.json`
 for `import-json`:

@@ -414,6 +414,30 @@ def public_pre_draft(trades: list) -> list:
 
 
 # ------------------------------------------------------------- embedding
+def standings_view(si: dict):
+    """Yahoo standings as recorded in data/2026-27/standings.json (yahoo_rosters.py standings --write), plus the card
+    order once games have been played: worst record first (best rank last). None when nothing is recorded."""
+    path = os.path.join(si.get("dataDir", DATA_DIR), "standings.json")
+    if not os.path.exists(path):
+        return None
+    doc = ls._load(path)
+    teams = {t["franchiseId"]: {k: t.get(k) for k in ("rank", "w", "l", "t", "pct", "gb", "division", "divRecord", "lastWeek", "waiver", "moves")}
+             for t in doc["teams"]}
+    order = None
+    if doc.get("started"):
+        def best_first(fid):
+            t = teams[fid]
+            games = (t["w"] or 0) + (t["l"] or 0) + (t["t"] or 0)
+            pct = t["pct"] if t["pct"] is not None else ((t["w"] + t["t"] / 2) / games if games else 0)
+            return (t["rank"] if t["rank"] is not None else 99, -pct, -(t["w"] or 0), fid)
+        best = sorted(teams, key=best_first)
+        for i, fid in enumerate(best, 1):
+            teams[fid]["place"] = i  # 1 = best record (Yahoo's rank when it gives one)
+        order = list(reversed(best))
+    return {"capturedAt": doc["capturedAt"], "source": doc["source"], "started": bool(doc.get("started")),
+            "teams": teams, "worstFirst": order}
+
+
 def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_YAHOO_PATH) -> dict:
     floor, ceiling = ls.cap_band(inputs)
     fr = inputs["franchises"]
@@ -502,6 +526,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
                      "windowWarnings": [], "tradeIds": current["activeTradeIds"]},
         "history": {"teams": history_teams, "tradeIds": official["activeTradeIds"],
                     "checkpoint": {k: ((si["postDraft"] or {}).get("checkpoint") or {}).get(k) for k in ("id", "date")}},
+        "standings": standings_view(si),
         "season": {"snapshot": {k: snap.get(k) for k in ("snapshotId", "verifiedAt", "source", "kind")},
                    "appliedAfterSnapshot": [t["txnId"] for t in ss.pending_completed(si)],
                    "checkpoints": [{k: c.get(k) for k in ("id", "label", "date", "status")} for c in si["checkpoints"]["checkpoints"]],

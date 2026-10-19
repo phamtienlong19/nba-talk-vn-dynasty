@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-19T15:25:03Z
+Generated: 2026-10-19T15:39:45Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/yahoo-roster-acquisition
-Commit: 0a76a17
+Commit: 837b320
 Base: main
 Working tree: dirty
 
@@ -18,7 +18,7 @@ Working tree: dirty
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
 PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/59 (OPEN)
-CI: Claude Code Review: completed/success
+CI: validate: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -29,9 +29,9 @@ Fingerprint: FRESH
 ```
  ai_exchange/CURRENT_STATE.json                     |    7 +-
  ai_exchange/REVIEW_NOTES.md                        |   15 +-
- ai_exchange/REVIEW_PACKET.md                       |  167 +-
+ ai_exchange/REVIEW_PACKET.md                       |  169 +-
  config/cap_policy.json                             |    6 +
- config/roster_rules.json                           |   65 +
+ config/roster_rules.json                           |   79 +
  config/yahoo_league.json                           |    8 +
  data/2026-27/rosters/index.json                    |   20 +-
  .../rosters/snapshots/RS-2026-10-19-83f0a0bb.json  | 1116 +++++++++++
@@ -39,13 +39,13 @@ Fingerprint: FRESH
  data/2026-27/rosters/team_map.json                 |  115 +-
  data/2026-27/unlisted_players.json                 |   14 +
  docs/ROSTER_REFRESH.md                             |   97 +-
- docs/SEASON_STATE_MODEL.md                         |   20 +
+ docs/SEASON_STATE_MODEL.md                         |   22 +
  docs/YAHOO_API_FEASIBILITY.md                      |    9 +
- index.html                                         |  196 +-
+ index.html                                         |  217 ++-
  scripts/build_league_state.py                      |   52 +-
  scripts/import_rosters.py                          |   59 +-
  scripts/league_state.py                            |   31 +-
- scripts/season_state.py                            |   96 +-
+ scripts/season_state.py                            |  104 +-
  scripts/what_if.py                                 |    6 +-
  scripts/yahoo_rosters.py                           |  631 ++++++
  tasks/ACTIVE.md                                    |    6 +-
@@ -57,10 +57,10 @@ Fingerprint: FRESH
  tests/test_final_keeper_freeze.py                  |    2 +-
  tests/test_league_state_builders.py                |    6 +-
  tests/test_league_state_data.py                    |   10 +-
- tests/test_scenario_rendering.py                   |   56 +-
+ tests/test_scenario_rendering.py                   |   72 +-
  tests/test_season_ops.py                           |   98 +-
- tests/test_yahoo_rosters.py                        |  712 +++++++
- 33 files changed, 7176 insertions(+), 266 deletions(-)
+ tests/test_yahoo_rosters.py                        |  727 +++++++
+ 33 files changed, 7253 insertions(+), 267 deletions(-)
 ```
 
 ## Validation
@@ -119,6 +119,8 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 - Roster checks (anti-tank limits, `config/roster_rules.json`) now show on every card as evidence: today DHA is short at PG (1 healthy, min 2); HCMC, TT, DonTrick and Thịnh have 6 healthy single-position players (inside the 7 combo exception -> review; injured players are not counted, owner 2026-10-19). Nothing is labelled tanking.
 - Second Yahoo import RS-2026-10-19-83f0a0bb (15:11Z): no roster change; adds Yahoo player status (O/Q/P) to the snapshot.
+
+- Standings: `yahoo_rosters.py standings --write` recorded the 2026-10-19 table (season not started, all 0-0-0). Cards sort worst record first automatically once games are played.
 
 ## Decisions Required
 
