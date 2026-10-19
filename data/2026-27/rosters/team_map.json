@@ -1,28 +1,30 @@
 {
   "season": "2026-27",
-  "leagueKey": null,
-  "note": "Maps Yahoo teams to stable franchise ids for scripts/import_rosters.py. leagueKey / yahooTeamKey are NOT known yet: no authenticated league data is in the repo (the public draft-analysis league 478.l.public / 478.l.101 is NOT this league). The commissioner fills them once from the league URL (basketball.fantasysports.yahoo.com/nba/<league_id>/<team_id>): leagueKey = 478.l.<league_id>, yahooTeamKey = 478.l.<league_id>.t.<team_id>. Until then imports match teams by alias.",
+  "leagueKey": "478.l.85092",
+  "note": "Maps Yahoo teams to stable franchise ids for scripts/import_rosters.py and scripts/yahoo_rosters.py. League 85092 (team id 10 does not exist). yahooTeamKey = 478.l.85092.t.<team id>; each was matched on 2026-10-19 by the team-name prefix AND by every listed player on that Yahoo team belonging to that one franchise in the current season state. Team names on Yahoo change; keys do not.",
   "teams": {
     "franchise-01": {
       "short": "Bsy",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.8",
       "aliases": [
         "Bsy",
         "GTA San Antonio",
+        "Hai | Bulls Dynasty",
         "Hai | GTA San Antonio"
       ]
     },
     "franchise-02": {
       "short": "CrazyCat",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.4",
       "aliases": [
         "CrazyCat",
-        "CrazyCat Damageee"
+        "CrazyCat Damageee",
+        "CrazyCat | Damageeeee"
       ]
     },
     "franchise-03": {
       "short": "Melo",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.13",
       "aliases": [
         "Melo",
         "MeloBB"
@@ -30,15 +32,16 @@
     },
     "franchise-04": {
       "short": "LC",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.1",
       "aliases": [
         "LC",
-        "Long con"
+        "Long con",
+        "Long con dynasty"
       ]
     },
     "franchise-05": {
       "short": "HCMC",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.9",
       "aliases": [
         "HCMC",
         "HCMC Kindergarten"
@@ -46,7 +49,7 @@
     },
     "franchise-06": {
       "short": "Dũng",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.7",
       "aliases": [
         "Dũng",
         "Dũng | Trader by Trade",
@@ -55,7 +58,7 @@
     },
     "franchise-07": {
       "short": "Maxfixe",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.12",
       "aliases": [
         "Maxfixe",
         "Poop for Coop"
@@ -63,7 +66,7 @@
     },
     "franchise-08": {
       "short": "DHA",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.5",
       "aliases": [
         "DHA",
         "DHA | Đì troi pít tông",
@@ -72,7 +75,7 @@
     },
     "franchise-09": {
       "short": "Đạt",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.11",
       "aliases": [
         "M. Jordat | The Silver Seekers",
         "The Silver Seekers",
@@ -81,7 +84,7 @@
     },
     "franchise-10": {
       "short": "DonTrick",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.6",
       "aliases": [
         "DonTrick",
         "DonTrick DevilTeam"
@@ -89,7 +92,7 @@
     },
     "franchise-11": {
       "short": "Thịnh",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.2",
       "aliases": [
         "Seattle SuperSonics",
         "Thịnh",
@@ -98,16 +101,17 @@
     },
     "franchise-12": {
       "short": "sup fam",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.16",
       "aliases": [
         "Bruised for Boozer",
         "sup fam",
-        "sup fam | Bruised for Boozer"
+        "sup fam | Bruised for Boozer",
+        "sup fam | Crashed for Caleb"
       ]
     },
     "franchise-13": {
       "short": "Quân",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.14",
       "aliases": [
         "Okay See Thunder",
         "Quan | Okay See Thunder",
@@ -116,7 +120,7 @@
     },
     "franchise-14": {
       "short": "TuLy",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.17",
       "aliases": [
         "No Country for Old Men",
         "TuLy",
@@ -125,7 +129,7 @@
     },
     "franchise-15": {
       "short": "Bz",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.3",
       "aliases": [
         "Bz",
         "Bz | Putin the tank driver",
@@ -134,9 +138,10 @@
     },
     "franchise-16": {
       "short": "TT",
-      "yahooTeamKey": null,
+      "yahooTeamKey": "478.l.85092.t.15",
       "aliases": [
         "Kratos Dynasty",
+        "T T| Kratos Dynasty",
         "TT",
         "TT | Kratos Dynasty"
       ]

@@ -1,5 +1,14 @@
 # Yahoo Fantasy API — roster integration feasibility (2026-10-16)
 
+> **Update 2026-10-19.** League id **85092** (team ids 1–9, 11–17) is now
+> known and `rosters/team_map.json` carries every `yahooTeamKey`. The league's
+> team pages are publicly viewable, so rosters are acquired read-only from those
+> pages by `scripts/yahoo_rosters.py` (plain GET, or an isolated Playwright
+> profile if the league becomes private) — see `docs/ROSTER_REFRESH.md`. The API
+> route below remains an option; the observation → reviewed import pipeline does
+> not change if it is adopted later. The two "not known" bullets and the closing
+> paragraph below describe the 2026-10-16 position.
+
 Short answer: **no authenticated access exists today, and Yahoo now gates the
 Fantasy API behind a manual application review.** The maintenance release
 therefore ships the manual importer (`docs/ROSTER_REFRESH.md`); an API adapter

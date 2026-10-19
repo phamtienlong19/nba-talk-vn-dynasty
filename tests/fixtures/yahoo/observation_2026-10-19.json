@@ -1,0 +1,2003 @@
+{
+  "kind": "YAHOO_ROSTER_OBSERVATION",
+  "schema": 1,
+  "leagueId": "85092",
+  "gameKey": "478",
+  "capturedAt": "2026-10-19T13:52:54Z",
+  "method": "http",
+  "scope": "FULL",
+  "requestedTeamIds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "teams": [
+    {
+      "teamId": 1,
+      "teamKey": "478.l.85092.t.1",
+      "teamName": "Long con dynasty",
+      "players": [
+        {
+          "playerId": "10599",
+          "playerKey": "478.p.10599",
+          "name": "AJ Dybantsa",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "WAS",
+          "positions": "SF"
+        },
+        {
+          "playerId": "10582",
+          "playerKey": "478.p.10582",
+          "name": "Darius Acuff Jr.",
+          "slot": "BN",
+          "nbaTeam": "SAC",
+          "positions": "PG"
+        },
+        {
+          "playerId": "10588",
+          "playerKey": "478.p.10588",
+          "name": "Mikel Brown Jr.",
+          "slot": "BN",
+          "nbaTeam": "BKN",
+          "positions": "PG"
+        },
+        {
+          "playerId": "5432",
+          "playerKey": "478.p.5432",
+          "name": "Karl-Anthony Towns",
+          "slot": "BN",
+          "nbaTeam": "NYK",
+          "positions": "PF,C",
+          "keeperSalary": 41.0
+        },
+        {
+          "playerId": "6550",
+          "playerKey": "478.p.6550",
+          "name": "Franz Wagner",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "ORL",
+          "positions": "SF,PF"
+        },
+        {
+          "playerId": "6692",
+          "playerKey": "478.p.6692",
+          "name": "Chet Holmgren",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "OKC",
+          "positions": "PF,C",
+          "keeperSalary": 30.0
+        },
+        {
+          "playerId": "10265",
+          "playerKey": "478.p.10265",
+          "name": "Matas Buzelis",
+          "slot": "BN",
+          "nbaTeam": "CHI",
+          "positions": "SF,PF"
+        },
+        {
+          "playerId": "10285",
+          "playerKey": "478.p.10285",
+          "name": "Donovan Clingan",
+          "slot": "BN",
+          "nbaTeam": "POR",
+          "positions": "C",
+          "keeperSalary": 25.0
+        },
+        {
+          "playerId": "6167",
+          "playerKey": "478.p.6167",
+          "name": "Darius Garland",
+          "slot": "BN",
+          "nbaTeam": "LAC",
+          "positions": "PG",
+          "keeperSalary": 18.0
+        },
+        {
+          "playerId": "6212",
+          "playerKey": "478.p.6212",
+          "name": "Ty Jerome",
+          "slot": "BN",
+          "nbaTeam": "MEM",
+          "positions": "PG,SG",
+          "keeperSalary": 2.0
+        },
+        {
+          "playerId": "5295",
+          "playerKey": "478.p.5295",
+          "name": "Aaron Gordon",
+          "slot": "BN",
+          "nbaTeam": "DEN",
+          "positions": "PF,C",
+          "keeperSalary": 1.0
+        },
+        {
+          "playerId": "10107",
+          "playerKey": "478.p.10107",
+          "name": "Cason Wallace",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "OKC",
+          "positions": "PG,SG,SF",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "10510",
+          "playerKey": "478.p.10510",
+          "name": "Dylan Cardwell",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "SAC",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "5009",
+          "playerKey": "478.p.5009",
+          "name": "Bradley Beal",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "LAC",
+          "positions": "SG,SF"
+        }
+      ]
+    },
+    {
+      "teamId": 2,
+      "teamKey": "478.l.85092.t.2",
+      "teamName": "Thịnh | Seattle SuperSonics",
+      "players": [
+        {
+          "playerId": "6404",
+          "playerKey": "478.p.6404",
+          "name": "Tyrese Haliburton",
+          "slot": "PG",
+          "nbaTeam": "IND",
+          "positions": "PG,SG",
+          "keeperSalary": 49.0
+        },
+        {
+          "playerId": "6606",
+          "playerKey": "478.p.6606",
+          "name": "Austin Reaves",
+          "slot": "SG",
+          "nbaTeam": "LAL",
+          "positions": "PG,SG,SF",
+          "keeperSalary": 33.0
+        },
+        {
+          "playerId": "10576",
+          "playerKey": "478.p.10576",
+          "name": "Brayden Burries",
+          "slot": "G",
+          "nbaTeam": "MIL",
+          "positions": "SG"
+        },
+        {
+          "playerId": "5836",
+          "playerKey": "478.p.5836",
+          "name": "OG Anunoby",
+          "slot": "SF",
+          "nbaTeam": "NYK",
+          "positions": "SF,PF",
+          "keeperSalary": 14.0
+        },
+        {
+          "playerId": "5482",
+          "playerKey": "478.p.5482",
+          "name": "Bobby Portis Jr.",
+          "slot": "PF",
+          "nbaTeam": "MIA",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "10279",
+          "playerKey": "478.p.10279",
+          "name": "Jaylon Tyson",
+          "slot": "F",
+          "nbaTeam": "CLE",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "10094",
+          "playerKey": "478.p.10094",
+          "name": "Victor Wembanyama",
+          "slot": "C",
+          "nbaTeam": "SAS",
+          "positions": "C",
+          "keeperSalary": 60.0
+        },
+        {
+          "playerId": "6564",
+          "playerKey": "478.p.6564",
+          "name": "Isaiah Jackson",
+          "slot": "FC",
+          "nbaTeam": "LAC",
+          "positions": "C",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "5835",
+          "playerKey": "478.p.5835",
+          "name": "Jarrett Allen",
+          "slot": "Util",
+          "nbaTeam": "CLE",
+          "positions": "C",
+          "keeperSalary": 16.0
+        },
+        {
+          "playerId": "10573",
+          "playerKey": "478.p.10573",
+          "name": "Bennett Stirtz",
+          "slot": "BN",
+          "nbaTeam": "OKC",
+          "positions": "PG"
+        },
+        {
+          "playerId": "10586",
+          "playerKey": "478.p.10586",
+          "name": "Sergio De Larrea",
+          "slot": "BN",
+          "nbaTeam": "DAL",
+          "positions": "PG"
+        },
+        {
+          "playerId": "5464",
+          "playerKey": "478.p.5464",
+          "name": "Kristaps Porziņģis",
+          "slot": "BN",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "GSW",
+          "positions": "C",
+          "keeperSalary": 4.0
+        },
+        {
+          "playerId": "4912",
+          "playerKey": "478.p.4912",
+          "name": "Jimmy Butler III",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "GSW",
+          "positions": "SF,PF",
+          "keeperSalary": 0.0
+        }
+      ]
+    },
+    {
+      "teamId": 3,
+      "teamKey": "478.l.85092.t.3",
+      "teamName": "Bz | Putin the tank driver",
+      "players": [
+        {
+          "playerId": "6047",
+          "playerKey": "478.p.6047",
+          "name": "Mitchell Robinson",
+          "slot": "BN",
+          "nbaTeam": "BOS",
+          "positions": "C"
+        },
+        {
+          "playerId": "10597",
+          "playerKey": "478.p.10597",
+          "name": "Cameron Carr",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "LAL",
+          "positions": "SG"
+        },
+        {
+          "playerId": "5197",
+          "playerKey": "478.p.5197",
+          "name": "Rudy Gobert",
+          "slot": "BN",
+          "nbaTeam": "MIN",
+          "positions": "C"
+        },
+        {
+          "playerId": "6702",
+          "playerKey": "478.p.6702",
+          "name": "Jalen Williams",
+          "slot": "BN",
+          "nbaTeam": "OKC",
+          "positions": "SF,PF"
+        },
+        {
+          "playerId": "5842",
+          "playerKey": "478.p.5842",
+          "name": "Derrick White",
+          "slot": "BN",
+          "nbaTeam": "BOS",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "6712",
+          "playerKey": "478.p.6712",
+          "name": "Walker Kessler",
+          "slot": "BN",
+          "nbaTeam": "LAL",
+          "positions": "C",
+          "keeperSalary": 24.0
+        },
+        {
+          "playerId": "6698",
+          "playerKey": "478.p.6698",
+          "name": "Dyson Daniels",
+          "slot": "BN",
+          "nbaTeam": "ATL",
+          "positions": "SG,SF",
+          "keeperSalary": 17.0
+        },
+        {
+          "playerId": "10288",
+          "playerKey": "478.p.10288",
+          "name": "Reed Sheppard",
+          "slot": "BN",
+          "nbaTeam": "HOU",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "10065",
+          "playerKey": "478.p.10065",
+          "name": "Toumani Camara",
+          "slot": "BN",
+          "nbaTeam": "POR",
+          "positions": "SF,PF",
+          "keeperSalary": 4.0
+        },
+        {
+          "playerId": "6711",
+          "playerKey": "478.p.6711",
+          "name": "Christian Braun",
+          "slot": "BN",
+          "nbaTeam": "DEN",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "6515",
+          "playerKey": "478.p.6515",
+          "name": "Scottie Barnes",
+          "slot": "BN",
+          "nbaTeam": "TOR",
+          "positions": "SF,PF,C",
+          "keeperSalary": 42.0
+        },
+        {
+          "playerId": "6433",
+          "playerKey": "478.p.6433",
+          "name": "Tre Jones",
+          "slot": "BN",
+          "nbaTeam": "CHI",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "6705",
+          "playerKey": "478.p.6705",
+          "name": "Mark Williams",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "PHX",
+          "positions": "C",
+          "keeperSalary": 5.0
+        }
+      ]
+    },
+    {
+      "teamId": 4,
+      "teamKey": "478.l.85092.t.4",
+      "teamName": "CrazyCat | Damageeeee",
+      "players": [
+        {
+          "playerId": "6016",
+          "playerKey": "478.p.6016",
+          "name": "Trae Young",
+          "slot": "BN",
+          "nbaTeam": "WAS",
+          "positions": "PG"
+        },
+        {
+          "playerId": "6422",
+          "playerKey": "478.p.6422",
+          "name": "Desmond Bane",
+          "slot": "BN",
+          "nbaTeam": "ORL",
+          "positions": "SG,SF",
+          "keeperSalary": 23.0
+        },
+        {
+          "playerId": "4840",
+          "playerKey": "478.p.4840",
+          "name": "Kyrie Irving",
+          "slot": "BN",
+          "nbaTeam": "DAL",
+          "positions": "PG",
+          "keeperSalary": 23.0
+        },
+        {
+          "playerId": "10115",
+          "playerKey": "478.p.10115",
+          "name": "Brandin Podziemski",
+          "slot": "BN",
+          "nbaTeam": "GSW",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "5012",
+          "playerKey": "478.p.5012",
+          "name": "Damian Lillard",
+          "slot": "BN",
+          "nbaTeam": "POR",
+          "positions": "PG",
+          "keeperSalary": 16.0
+        },
+        {
+          "playerId": "10100",
+          "playerKey": "478.p.10100",
+          "name": "Keyonte George",
+          "slot": "BN",
+          "nbaTeam": "UTA",
+          "positions": "PG,SG",
+          "keeperSalary": 24.0
+        },
+        {
+          "playerId": "5324",
+          "playerKey": "478.p.5324",
+          "name": "Zach LaVine",
+          "slot": "BN",
+          "nbaTeam": "SAC",
+          "positions": "PG,SG,SF",
+          "keeperSalary": 4.0
+        },
+        {
+          "playerId": "10092",
+          "playerKey": "478.p.10092",
+          "name": "Jaime Jaquez Jr.",
+          "slot": "BN",
+          "nbaTeam": "MIL",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 1.0
+        },
+        {
+          "playerId": "5727",
+          "playerKey": "478.p.5727",
+          "name": "Fred VanVleet",
+          "slot": "BN",
+          "nbaTeam": "HOU",
+          "positions": "PG",
+          "keeperSalary": 1.0
+        },
+        {
+          "playerId": "6403",
+          "playerKey": "478.p.6403",
+          "name": "Devin Vassell",
+          "slot": "BN",
+          "nbaTeam": "SAS",
+          "positions": "SG,SF",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "6163",
+          "playerKey": "478.p.6163",
+          "name": "Zion Williamson",
+          "slot": "BN",
+          "nbaTeam": "NOP",
+          "positions": "PF,C",
+          "keeperSalary": 12.0
+        },
+        {
+          "playerId": "6450",
+          "playerKey": "478.p.6450",
+          "name": "Paul Reed",
+          "slot": "BN",
+          "nbaTeam": "DET",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "5327",
+          "playerKey": "478.p.5327",
+          "name": "Jusuf Nurkić",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "UTA",
+          "positions": "C"
+        }
+      ]
+    },
+    {
+      "teamId": 5,
+      "teamKey": "478.l.85092.t.5",
+      "teamName": "DHA | Đì troi pít tông",
+      "players": [
+        {
+          "playerId": "6512",
+          "playerKey": "478.p.6512",
+          "name": "Cade Cunningham",
+          "slot": "PG",
+          "nbaTeam": "DET",
+          "positions": "PG,SG",
+          "keeperSalary": 57.0
+        },
+        {
+          "playerId": "6559",
+          "playerKey": "478.p.6559",
+          "name": "Trey Murphy III",
+          "slot": "SG",
+          "nbaTeam": "NOP",
+          "positions": "SG,SF",
+          "keeperSalary": 29.0
+        },
+        {
+          "playerId": "5506",
+          "playerKey": "478.p.5506",
+          "name": "Norman Powell",
+          "slot": "G",
+          "nbaTeam": "CHI",
+          "positions": "SG,SF",
+          "keeperSalary": 9.0
+        },
+        {
+          "playerId": "4896",
+          "playerKey": "478.p.4896",
+          "name": "Kawhi Leonard",
+          "slot": "SF",
+          "nbaTeam": "TOR",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 25.0
+        },
+        {
+          "playerId": "6514",
+          "playerKey": "478.p.6514",
+          "name": "Evan Mobley",
+          "slot": "PF",
+          "nbaTeam": "CLE",
+          "positions": "PF,C",
+          "keeperSalary": 30.0
+        },
+        {
+          "playerId": "10462",
+          "playerKey": "478.p.10462",
+          "name": "Ace Bailey",
+          "slot": "F",
+          "nbaTeam": "UTA",
+          "positions": "SF,PF",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "6693",
+          "playerKey": "478.p.6693",
+          "name": "Jabari Smith Jr.",
+          "slot": "C",
+          "nbaTeam": "HOU",
+          "positions": "PF,C",
+          "keeperSalary": 4.0
+        },
+        {
+          "playerId": "6173",
+          "playerKey": "478.p.6173",
+          "name": "Cameron Johnson",
+          "slot": "FC",
+          "nbaTeam": "DEN",
+          "positions": "SF,PF"
+        },
+        {
+          "playerId": "6745",
+          "playerKey": "478.p.6745",
+          "name": "Gui Santos",
+          "slot": "Util",
+          "nbaTeam": "GSW",
+          "positions": "SF,PF"
+        },
+        {
+          "playerId": "4897",
+          "playerKey": "478.p.4897",
+          "name": "Nikola Vučević",
+          "slot": "BN",
+          "nbaTeam": "ORL",
+          "positions": "C"
+        },
+        {
+          "playerId": "10099",
+          "playerKey": "478.p.10099",
+          "name": "Bilal Coulibaly",
+          "slot": "BN",
+          "nbaTeam": "WAS",
+          "positions": "SG,SF",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "6549",
+          "playerKey": "478.p.6549",
+          "name": "Jonathan Kuminga",
+          "slot": "BN",
+          "nbaTeam": "MIN",
+          "positions": "SF,PF",
+          "keeperSalary": 0.0
+        }
+      ]
+    },
+    {
+      "teamId": 6,
+      "teamKey": "478.l.85092.t.6",
+      "teamName": "DonTrick DevilTeam",
+      "players": [
+        {
+          "playerId": "6551",
+          "playerKey": "478.p.6551",
+          "name": "Davion Mitchell",
+          "slot": "BN",
+          "nbaTeam": "MIA",
+          "positions": "PG"
+        },
+        {
+          "playerId": "10580",
+          "playerKey": "478.p.10580",
+          "name": "Dailyn Swain",
+          "slot": "BN",
+          "nbaTeam": "CHI",
+          "positions": "SF"
+        },
+        {
+          "playerId": "6226",
+          "playerKey": "478.p.6226",
+          "name": "Daniel Gafford",
+          "slot": "BN",
+          "nbaTeam": "DAL",
+          "positions": "C"
+        },
+        {
+          "playerId": "5658",
+          "playerKey": "478.p.5658",
+          "name": "Pascal Siakam",
+          "slot": "BN",
+          "nbaTeam": "IND",
+          "positions": "PF,C",
+          "keeperSalary": 17.0
+        },
+        {
+          "playerId": "10450",
+          "playerKey": "478.p.10450",
+          "name": "Kon Knueppel",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "CHA",
+          "positions": "SG,SF",
+          "keeperSalary": 16.0
+        },
+        {
+          "playerId": "10287",
+          "playerKey": "478.p.10287",
+          "name": "Zach Edey",
+          "slot": "BN",
+          "nbaTeam": "MEM",
+          "positions": "C",
+          "keeperSalary": 15.0
+        },
+        {
+          "playerId": "4725",
+          "playerKey": "478.p.4725",
+          "name": "Paul George",
+          "slot": "BN",
+          "nbaTeam": "BOS",
+          "positions": "SF,PF",
+          "keeperSalary": 12.0
+        },
+        {
+          "playerId": "6219",
+          "playerKey": "478.p.6219",
+          "name": "Nic Claxton",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "CHI",
+          "positions": "C",
+          "keeperSalary": 7.0
+        },
+        {
+          "playerId": "6164",
+          "playerKey": "478.p.6164",
+          "name": "Ja Morant",
+          "slot": "BN",
+          "nbaTeam": "POR",
+          "positions": "PG",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "5473",
+          "playerKey": "478.p.5473",
+          "name": "Devin Booker",
+          "slot": "BN",
+          "nbaTeam": "PHX",
+          "positions": "PG,SG",
+          "keeperSalary": 32.0
+        },
+        {
+          "playerId": "6412",
+          "playerKey": "478.p.6412",
+          "name": "Precious Achiuwa",
+          "slot": "BN",
+          "nbaTeam": "SAC",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "6073",
+          "playerKey": "478.p.6073",
+          "name": "Duncan Robinson",
+          "slot": "BN",
+          "nbaTeam": "DET",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "6267",
+          "playerKey": "478.p.6267",
+          "name": "Max Strus",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "LAC",
+          "positions": "SF,PF"
+        },
+        {
+          "playerId": "5601",
+          "playerKey": "478.p.5601",
+          "name": "Brandon Ingram",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "LAC",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 16.0
+        },
+        {
+          "playerId": "10496",
+          "playerKey": "478.p.10496",
+          "name": "Maxime Raynaud",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "SAC",
+          "positions": "C",
+          "keeperSalary": 0.0
+        }
+      ]
+    },
+    {
+      "teamId": 7,
+      "teamKey": "478.l.85092.t.7",
+      "teamName": "Dũng | Trader By Trade",
+      "players": [
+        {
+          "playerId": "10571",
+          "playerKey": "478.p.10571",
+          "name": "Yaxel Lendeborg",
+          "slot": "BN",
+          "nbaTeam": "GSW",
+          "positions": "PF"
+        },
+        {
+          "playerId": "6707",
+          "playerKey": "478.p.6707",
+          "name": "Tari Eason",
+          "slot": "BN",
+          "nbaTeam": "HOU",
+          "positions": "SG,SF,PF"
+        },
+        {
+          "playerId": "10445",
+          "playerKey": "478.p.10445",
+          "name": "Egor Dëmin",
+          "slot": "BN",
+          "nbaTeam": "BKN",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "6703",
+          "playerKey": "478.p.6703",
+          "name": "Jalen Duren",
+          "slot": "BN",
+          "nbaTeam": "DET",
+          "positions": "C"
+        },
+        {
+          "playerId": "6044",
+          "playerKey": "478.p.6044",
+          "name": "Jalen Brunson",
+          "slot": "BN",
+          "nbaTeam": "NYK",
+          "positions": "PG",
+          "keeperSalary": 30.0
+        },
+        {
+          "playerId": "5769",
+          "playerKey": "478.p.5769",
+          "name": "Lauri Markkanen",
+          "slot": "BN",
+          "nbaTeam": "UTA",
+          "positions": "SF,PF",
+          "keeperSalary": 28.0
+        },
+        {
+          "playerId": "10095",
+          "playerKey": "478.p.10095",
+          "name": "Anthony Black",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "ORL",
+          "positions": "PG,SG,SF",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "6253",
+          "playerKey": "478.p.6253",
+          "name": "Naz Reid",
+          "slot": "BN",
+          "nbaTeam": "CHA",
+          "positions": "PF,C",
+          "keeperSalary": 17.0
+        },
+        {
+          "playerId": "6025",
+          "playerKey": "478.p.6025",
+          "name": "Michael Porter Jr.",
+          "slot": "BN",
+          "nbaTeam": "BKN",
+          "positions": "SF,PF",
+          "keeperSalary": 17.0
+        },
+        {
+          "playerId": "6516",
+          "playerKey": "478.p.6516",
+          "name": "Jalen Suggs",
+          "slot": "BN",
+          "nbaTeam": "ORL",
+          "positions": "PG,SG",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "5843",
+          "playerKey": "478.p.5843",
+          "name": "Josh Hart",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "NYK",
+          "positions": "SG,SF",
+          "keeperSalary": 4.0
+        },
+        {
+          "playerId": "6721",
+          "playerKey": "478.p.6721",
+          "name": "Andrew Nembhard",
+          "slot": "BN",
+          "nbaTeam": "IND",
+          "positions": "PG,SG",
+          "keeperSalary": 4.0
+        }
+      ]
+    },
+    {
+      "teamId": 8,
+      "teamKey": "478.l.85092.t.8",
+      "teamName": "Hai | Bulls Dynasty",
+      "players": [
+        {
+          "playerId": "5638",
+          "playerKey": "478.p.5638",
+          "name": "Jamal Murray",
+          "slot": "PG",
+          "nbaTeam": "DEN",
+          "positions": "PG"
+        },
+        {
+          "playerId": "10467",
+          "playerKey": "478.p.10467",
+          "name": "Dylan Harper",
+          "slot": "SG",
+          "nbaTeam": "SAS",
+          "positions": "PG,SG",
+          "keeperSalary": 11.0
+        },
+        {
+          "playerId": "5187",
+          "playerKey": "478.p.5187",
+          "name": "Dennis Schröder",
+          "slot": "G",
+          "nbaTeam": "CHA",
+          "positions": "PG,SG",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "5765",
+          "playerKey": "478.p.5765",
+          "name": "Jayson Tatum",
+          "slot": "PF",
+          "nbaTeam": "BOS",
+          "positions": "SF,PF",
+          "keeperSalary": 54.0
+        },
+        {
+          "playerId": "6406",
+          "playerKey": "478.p.6406",
+          "name": "Aaron Nesmith",
+          "slot": "F",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "IND",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "6733",
+          "playerKey": "478.p.6733",
+          "name": "Moussa Diabaté",
+          "slot": "FC",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "CHA",
+          "positions": "C"
+        },
+        {
+          "playerId": "6165",
+          "playerKey": "478.p.6165",
+          "name": "RJ Barrett",
+          "slot": "BN",
+          "nbaTeam": "TOR",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "10460",
+          "playerKey": "478.p.10460",
+          "name": "Joan Beringer",
+          "slot": "BN",
+          "nbaTeam": "MIN",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "10465",
+          "playerKey": "478.p.10465",
+          "name": "Cedric Coward",
+          "slot": "BN",
+          "nbaTeam": "MEM",
+          "positions": "SG,SF",
+          "keeperSalary": 10.0
+        },
+        {
+          "playerId": "10313",
+          "playerKey": "478.p.10313",
+          "name": "Oso Ighodaro",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "PHX",
+          "positions": "C",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "5352",
+          "playerKey": "478.p.5352",
+          "name": "Nikola Jokić",
+          "slot": "BN",
+          "nbaTeam": "DEN",
+          "positions": "C",
+          "keeperSalary": 61.0
+        },
+        {
+          "playerId": "6032",
+          "playerKey": "478.p.6032",
+          "name": "Grayson Allen",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "CHA",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "10084",
+          "playerKey": "478.p.10084",
+          "name": "Jordan Miller",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "LAC",
+          "positions": "SG,SF"
+        }
+      ]
+    },
+    {
+      "teamId": 9,
+      "teamKey": "478.l.85092.t.9",
+      "teamName": "HCMC Kindergarten",
+      "players": [
+        {
+          "playerId": "10590",
+          "playerKey": "478.p.10590",
+          "name": "Darryn Peterson",
+          "slot": "BN",
+          "nbaTeam": "UTA",
+          "positions": "SG"
+        },
+        {
+          "playerId": "6571",
+          "playerKey": "478.p.6571",
+          "name": "Day'Ron Sharpe",
+          "slot": "BN",
+          "nbaTeam": "BKN",
+          "positions": "C"
+        },
+        {
+          "playerId": "10585",
+          "playerKey": "478.p.10585",
+          "name": "Keaton Wagler",
+          "slot": "BN",
+          "nbaTeam": "LAC",
+          "positions": "SG"
+        },
+        {
+          "playerId": "10579",
+          "playerKey": "478.p.10579",
+          "name": "Aday Mara",
+          "slot": "BN",
+          "nbaTeam": "OKC",
+          "positions": "C"
+        },
+        {
+          "playerId": "6355",
+          "playerKey": "478.p.6355",
+          "name": "Anthony Edwards",
+          "slot": "BN",
+          "nbaTeam": "MIN",
+          "positions": "PG,SG",
+          "keeperSalary": 52.0
+        },
+        {
+          "playerId": "6562",
+          "playerKey": "478.p.6562",
+          "name": "Jalen Johnson",
+          "slot": "BN",
+          "nbaTeam": "ATL",
+          "positions": "SF,PF",
+          "keeperSalary": 47.0
+        },
+        {
+          "playerId": "6021",
+          "playerKey": "478.p.6021",
+          "name": "Mikal Bridges",
+          "slot": "BN",
+          "nbaTeam": "NYK",
+          "positions": "SF,PF",
+          "keeperSalary": 12.0
+        },
+        {
+          "playerId": "10444",
+          "playerKey": "478.p.10444",
+          "name": "Derik Queen",
+          "slot": "BN",
+          "nbaTeam": "NOP",
+          "positions": "PF,C",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "6417",
+          "playerKey": "478.p.6417",
+          "name": "Immanuel Quickley",
+          "slot": "BN",
+          "nbaTeam": "TOR",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "10440",
+          "playerKey": "478.p.10440",
+          "name": "Jeremiah Fears",
+          "slot": "BN",
+          "nbaTeam": "NOP",
+          "positions": "PG,SG",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "10048",
+          "playerKey": "478.p.10048",
+          "name": "Scoot Henderson",
+          "slot": "BN",
+          "nbaTeam": "POR",
+          "positions": "PG",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "10572",
+          "playerKey": "478.p.10572",
+          "name": "Morez Johnson Jr.",
+          "slot": "BN",
+          "nbaTeam": "DAL",
+          "positions": "PF"
+        }
+      ]
+    },
+    {
+      "teamId": 11,
+      "teamKey": "478.l.85092.t.11",
+      "teamName": "M. Jordat | The Silver Seekers",
+      "players": [
+        {
+          "playerId": "5069",
+          "playerKey": "478.p.5069",
+          "name": "Draymond Green",
+          "slot": "BN",
+          "nbaTeam": "GSW",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "4901",
+          "playerKey": "478.p.4901",
+          "name": "Tobias Harris",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "SAS",
+          "positions": "PF"
+        },
+        {
+          "playerId": "10289",
+          "playerKey": "478.p.10289",
+          "name": "Yves Missi",
+          "slot": "BN",
+          "nbaTeam": "NOP",
+          "positions": "C"
+        },
+        {
+          "playerId": "6014",
+          "playerKey": "478.p.6014",
+          "name": "Luka Dončić",
+          "slot": "BN",
+          "nbaTeam": "LAL",
+          "positions": "PG,SG",
+          "keeperSalary": 59.0
+        },
+        {
+          "playerId": "6548",
+          "playerKey": "478.p.6548",
+          "name": "Josh Giddey",
+          "slot": "BN",
+          "nbaTeam": "CHI",
+          "positions": "PG,SG",
+          "keeperSalary": 37.0
+        },
+        {
+          "playerId": "5827",
+          "playerKey": "478.p.5827",
+          "name": "Bam Adebayo",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "MIA",
+          "positions": "PF,C",
+          "keeperSalary": 31.0
+        },
+        {
+          "playerId": "5602",
+          "playerKey": "478.p.5602",
+          "name": "Jaylen Brown",
+          "slot": "BN",
+          "nbaTeam": "PHI",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 23.0
+        },
+        {
+          "playerId": "5767",
+          "playerKey": "478.p.5767",
+          "name": "De'Aaron Fox",
+          "slot": "BN",
+          "nbaTeam": "SAS",
+          "positions": "PG",
+          "keeperSalary": 13.0
+        },
+        {
+          "playerId": "4614",
+          "playerKey": "478.p.4614",
+          "name": "DeMar DeRozan",
+          "slot": "BN",
+          "nbaTeam": "DEN",
+          "positions": "SF,PF",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "5161",
+          "playerKey": "478.p.5161",
+          "name": "CJ McCollum",
+          "slot": "BN",
+          "nbaTeam": "ATL",
+          "positions": "PG,SG",
+          "keeperSalary": 3.0
+        },
+        {
+          "playerId": "5832",
+          "playerKey": "478.p.5832",
+          "name": "John Collins",
+          "slot": "BN",
+          "nbaTeam": "DET",
+          "positions": "PF,C",
+          "keeperSalary": 3.0
+        },
+        {
+          "playerId": "6751",
+          "playerKey": "478.p.6751",
+          "name": "Collin Gillespie",
+          "slot": "BN",
+          "nbaTeam": "PHX",
+          "positions": "PG,SG",
+          "keeperSalary": 0.0
+        }
+      ]
+    },
+    {
+      "teamId": 12,
+      "teamKey": "478.l.85092.t.12",
+      "teamName": "Maxfixe",
+      "players": [
+        {
+          "playerId": "10592",
+          "playerKey": "478.p.10592",
+          "name": "Cameron Boozer",
+          "slot": "BN",
+          "nbaTeam": "MEM",
+          "positions": "PF"
+        },
+        {
+          "playerId": "10312",
+          "playerKey": "478.p.10312",
+          "name": "Pelle Larsson",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "MIA",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "6171",
+          "playerKey": "478.p.6171",
+          "name": "Rui Hachimura",
+          "slot": "BN",
+          "nbaTeam": "LAC",
+          "positions": "SF,PF"
+        },
+        {
+          "playerId": "6395",
+          "playerKey": "478.p.6395",
+          "name": "LaMelo Ball",
+          "slot": "BN",
+          "nbaTeam": "MIN",
+          "positions": "PG",
+          "keeperSalary": 31.0
+        },
+        {
+          "playerId": "6401",
+          "playerKey": "478.p.6401",
+          "name": "Deni Avdija",
+          "slot": "BN",
+          "nbaTeam": "POR",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 22.0
+        },
+        {
+          "playerId": "5294",
+          "playerKey": "478.p.5294",
+          "name": "Joel Embiid",
+          "slot": "BN",
+          "nbaTeam": "PHI",
+          "positions": "C",
+          "keeperSalary": 19.0
+        },
+        {
+          "playerId": "5663",
+          "playerKey": "478.p.5663",
+          "name": "Ivica Zubac",
+          "slot": "BN",
+          "nbaTeam": "IND",
+          "positions": "C",
+          "keeperSalary": 18.0
+        },
+        {
+          "playerId": "6175",
+          "playerKey": "478.p.6175",
+          "name": "Tyler Herro",
+          "slot": "BN",
+          "nbaTeam": "MIL",
+          "positions": "PG,SG",
+          "keeperSalary": 16.0
+        },
+        {
+          "playerId": "10274",
+          "playerKey": "478.p.10274",
+          "name": "Kel'el Ware",
+          "slot": "BN",
+          "nbaTeam": "MIL",
+          "positions": "C",
+          "keeperSalary": 15.0
+        },
+        {
+          "playerId": "6580",
+          "playerKey": "478.p.6580",
+          "name": "Ayo Dosunmu",
+          "slot": "BN",
+          "nbaTeam": "MIN",
+          "positions": "PG,SG",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "6218",
+          "playerKey": "478.p.6218",
+          "name": "Kevin Porter Jr.",
+          "slot": "BN",
+          "nbaTeam": "MIL",
+          "positions": "PG,SG",
+          "keeperSalary": 3.0
+        },
+        {
+          "playerId": "6402",
+          "playerKey": "478.p.6402",
+          "name": "Jalen Smith",
+          "slot": "BN",
+          "nbaTeam": "CHI",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "6697",
+          "playerKey": "478.p.6697",
+          "name": "Shaedon Sharpe",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "POR",
+          "positions": "PG,SG",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "6556",
+          "playerKey": "478.p.6556",
+          "name": "Moses Moody",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "GSW",
+          "positions": "SG,SF,PF"
+        }
+      ]
+    },
+    {
+      "teamId": 13,
+      "teamKey": "478.l.85092.t.13",
+      "teamName": "MeloBB",
+      "players": [
+        {
+          "playerId": "4622",
+          "playerKey": "478.p.4622",
+          "name": "Jrue Holiday",
+          "slot": "PG",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "POR",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "6205",
+          "playerKey": "478.p.6205",
+          "name": "N. Alexander-Walker",
+          "slot": "SG",
+          "nbaTeam": "ATL",
+          "positions": "PG,SG",
+          "keeperSalary": 18.0
+        },
+        {
+          "playerId": "10096",
+          "playerKey": "478.p.10096",
+          "name": "Ausar Thompson",
+          "slot": "G",
+          "nbaTeam": "DET",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 12.0
+        },
+        {
+          "playerId": "6720",
+          "playerKey": "478.p.6720",
+          "name": "Peyton Watson",
+          "slot": "SF",
+          "nbaTeam": "CLE",
+          "positions": "SF,PF",
+          "keeperSalary": 4.0
+        },
+        {
+          "playerId": "5185",
+          "playerKey": "478.p.5185",
+          "name": "Giannis Antetokounmpo",
+          "slot": "PF",
+          "nbaTeam": "MIA",
+          "positions": "PF,C",
+          "keeperSalary": 55.0
+        },
+        {
+          "playerId": "6558",
+          "playerKey": "478.p.6558",
+          "name": "Alperen Şengün",
+          "slot": "F",
+          "nbaTeam": "HOU",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "6581",
+          "playerKey": "478.p.6581",
+          "name": "Neemias Queta",
+          "slot": "C",
+          "nbaTeam": "BOS",
+          "positions": "C"
+        },
+        {
+          "playerId": "5471",
+          "playerKey": "478.p.5471",
+          "name": "Myles Turner",
+          "slot": "FC",
+          "nbaTeam": "MIL",
+          "positions": "C",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "5642",
+          "playerKey": "478.p.5642",
+          "name": "Domantas Sabonis",
+          "slot": "Util",
+          "nbaTeam": "SAC",
+          "positions": "PF,C",
+          "keeperSalary": 26.0
+        },
+        {
+          "playerId": "5858",
+          "playerKey": "478.p.5858",
+          "name": "Dillon Brooks",
+          "slot": "BN",
+          "nbaTeam": "PHX",
+          "positions": "SF,PF"
+        },
+        {
+          "playerId": "6694",
+          "playerKey": "478.p.6694",
+          "name": "Keegan Murray",
+          "slot": "BN",
+          "nbaTeam": "SAC",
+          "positions": "SF,PF",
+          "keeperSalary": 2.0
+        },
+        {
+          "playerId": "6513",
+          "playerKey": "478.p.6513",
+          "name": "Jalen Green",
+          "slot": "BN",
+          "nbaTeam": "PHX",
+          "positions": "SG,SF",
+          "keeperSalary": 0.0
+        }
+      ]
+    },
+    {
+      "teamId": 14,
+      "teamKey": "478.l.85092.t.14",
+      "teamName": "Quan | Okay See Thunder",
+      "players": [
+        {
+          "playerId": "6596",
+          "playerKey": "478.p.6596",
+          "name": "Sandro Mamukelashvili",
+          "slot": "BN",
+          "nbaTeam": "LAL",
+          "positions": "PF,C"
+        },
+        {
+          "playerId": "6567",
+          "playerKey": "478.p.6567",
+          "name": "Quentin Grimes",
+          "slot": "BN",
+          "nbaTeam": "LAL",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "6022",
+          "playerKey": "478.p.6022",
+          "name": "Shai Gilgeous-Alexander",
+          "slot": "BN",
+          "nbaTeam": "OKC",
+          "positions": "PG",
+          "keeperSalary": 57.0
+        },
+        {
+          "playerId": "6413",
+          "playerKey": "478.p.6413",
+          "name": "Tyrese Maxey",
+          "slot": "BN",
+          "nbaTeam": "PHI",
+          "positions": "PG",
+          "keeperSalary": 50.0
+        },
+        {
+          "playerId": "10104",
+          "playerKey": "478.p.10104",
+          "name": "Brandon Miller",
+          "slot": "BN",
+          "nbaTeam": "CHA",
+          "positions": "SF,PF",
+          "keeperSalary": 25.0
+        },
+        {
+          "playerId": "6691",
+          "playerKey": "478.p.6691",
+          "name": "Paolo Banchero",
+          "slot": "BN",
+          "nbaTeam": "ORL",
+          "positions": "PF",
+          "keeperSalary": 19.0
+        },
+        {
+          "playerId": "6018",
+          "playerKey": "478.p.6018",
+          "name": "Wendell Carter Jr.",
+          "slot": "BN",
+          "nbaTeam": "ORL",
+          "positions": "C",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "6023",
+          "playerKey": "478.p.6023",
+          "name": "Miles Bridges",
+          "slot": "BN",
+          "nbaTeam": "PHX",
+          "positions": "PF",
+          "keeperSalary": 4.0
+        },
+        {
+          "playerId": "6411",
+          "playerKey": "478.p.6411",
+          "name": "Saddiq Bey",
+          "slot": "BN",
+          "nbaTeam": "NOP",
+          "positions": "SF,PF",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "6696",
+          "playerKey": "478.p.6696",
+          "name": "Bennedict Mathurin",
+          "slot": "BN",
+          "nbaTeam": "NOP",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "6597",
+          "playerKey": "478.p.6597",
+          "name": "Aaron Wiggins",
+          "slot": "BN",
+          "nbaTeam": "ATL",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "6578",
+          "playerKey": "478.p.6578",
+          "name": "Miles McBride",
+          "slot": "BN",
+          "nbaTeam": "NYK",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "6408",
+          "playerKey": "478.p.6408",
+          "name": "Isaiah Stewart",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "MEM",
+          "positions": "PF,C"
+        }
+      ]
+    },
+    {
+      "teamId": 15,
+      "teamKey": "478.l.85092.t.15",
+      "teamName": "T T| Kratos Dynasty",
+      "players": [
+        {
+          "playerId": "6577",
+          "playerKey": "478.p.6577",
+          "name": "Herbert Jones",
+          "slot": "BN",
+          "nbaTeam": "NOP",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "10577",
+          "playerKey": "478.p.10577",
+          "name": "Hannes Steinbach",
+          "slot": "BN",
+          "nbaTeam": "CHA",
+          "positions": "PF"
+        },
+        {
+          "playerId": "10581",
+          "playerKey": "478.p.10581",
+          "name": "Nate Ament",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "MIL",
+          "positions": "SF"
+        },
+        {
+          "playerId": "5826",
+          "playerKey": "478.p.5826",
+          "name": "Donovan Mitchell",
+          "slot": "BN",
+          "nbaTeam": "CLE",
+          "positions": "PG,SG",
+          "keeperSalary": 46.0
+        },
+        {
+          "playerId": "4563",
+          "playerKey": "478.p.4563",
+          "name": "James Harden",
+          "slot": "BN",
+          "nbaTeam": "CLE",
+          "positions": "PG,SG",
+          "keeperSalary": 29.0
+        },
+        {
+          "playerId": "6015",
+          "playerKey": "478.p.6015",
+          "name": "Jaren Jackson Jr.",
+          "slot": "BN",
+          "nbaTeam": "UTA",
+          "positions": "PF,C",
+          "keeperSalary": 24.0
+        },
+        {
+          "playerId": "6398",
+          "playerKey": "478.p.6398",
+          "name": "Onyeka Okongwu",
+          "slot": "BN",
+          "nbaTeam": "ATL",
+          "positions": "C",
+          "keeperSalary": 22.0
+        },
+        {
+          "playerId": "5660",
+          "playerKey": "478.p.5660",
+          "name": "Dejounte Murray",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "NOP",
+          "positions": "PG",
+          "keeperSalary": 18.0
+        },
+        {
+          "playerId": "10294",
+          "playerKey": "478.p.10294",
+          "name": "Alex Sarr",
+          "slot": "BN",
+          "nbaTeam": "WAS",
+          "positions": "C",
+          "keeperSalary": 17.0
+        },
+        {
+          "playerId": "10454",
+          "playerKey": "478.p.10454",
+          "name": "VJ Edgecombe",
+          "slot": "BN",
+          "nbaTeam": "PHI",
+          "positions": "PG,SG",
+          "keeperSalary": 8.0
+        },
+        {
+          "playerId": "5292",
+          "playerKey": "478.p.5292",
+          "name": "Andrew Wiggins",
+          "slot": "BN",
+          "nbaTeam": "MIA",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 5.0
+        },
+        {
+          "playerId": "5856",
+          "playerKey": "478.p.5856",
+          "name": "Isaiah Hartenstein",
+          "slot": "BN",
+          "nbaTeam": "OKC",
+          "positions": "C",
+          "keeperSalary": 5.0
+        }
+      ]
+    },
+    {
+      "teamId": 16,
+      "teamKey": "478.l.85092.t.16",
+      "teamName": "sup fam | Crashed for Caleb",
+      "players": [
+        {
+          "playerId": "10108",
+          "playerKey": "478.p.10108",
+          "name": "Amen Thompson",
+          "slot": "PG",
+          "nbaTeam": "HOU",
+          "positions": "PG,SG",
+          "keeperSalary": 35.0
+        },
+        {
+          "playerId": "10595",
+          "playerKey": "478.p.10595",
+          "name": "Caleb Wilson",
+          "slot": "PF",
+          "nbaTeam": "CHI",
+          "positions": "PF"
+        },
+        {
+          "playerId": "10574",
+          "playerKey": "478.p.10574",
+          "name": "Kingston Flemings",
+          "slot": "BN",
+          "nbaTeam": "ATL",
+          "positions": "PG"
+        },
+        {
+          "playerId": "10570",
+          "playerKey": "478.p.10570",
+          "name": "Allen Graves",
+          "slot": "BN",
+          "nbaTeam": "TOR",
+          "positions": "PF"
+        },
+        {
+          "playerId": "10468",
+          "playerKey": "478.p.10468",
+          "name": "Cooper Flagg",
+          "slot": "BN",
+          "nbaTeam": "DAL",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 44.0
+        },
+        {
+          "playerId": "5318",
+          "playerKey": "478.p.5318",
+          "name": "Julius Randle",
+          "slot": "BN",
+          "nbaTeam": "BKN",
+          "positions": "PF"
+        },
+        {
+          "playerId": "5007",
+          "playerKey": "478.p.5007",
+          "name": "Anthony Davis",
+          "slot": "BN",
+          "nbaTeam": "WAS",
+          "positions": "PF,C",
+          "keeperSalary": 23.0
+        },
+        {
+          "playerId": "10443",
+          "playerKey": "478.p.10443",
+          "name": "Collin Murray-Boyles",
+          "slot": "BN",
+          "nbaTeam": "TOR",
+          "positions": "PF,C",
+          "keeperSalary": 3.0
+        },
+        {
+          "playerId": "10447",
+          "playerKey": "478.p.10447",
+          "name": "Khaman Maluach",
+          "slot": "BN",
+          "nbaTeam": "PHX",
+          "positions": "C",
+          "keeperSalary": 1.0
+        },
+        {
+          "playerId": "10272",
+          "playerKey": "478.p.10272",
+          "name": "Kyshawn George",
+          "slot": "BN",
+          "nbaTeam": "WAS",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 1.0
+        },
+        {
+          "playerId": "10290",
+          "playerKey": "478.p.10290",
+          "name": "Stephon Castle",
+          "slot": "BN",
+          "nbaTeam": "SAS",
+          "positions": "PG,SG",
+          "keeperSalary": 13.0
+        },
+        {
+          "playerId": "10304",
+          "playerKey": "478.p.10304",
+          "name": "Ajay Mitchell",
+          "slot": "BN",
+          "nbaTeam": "OKC",
+          "positions": "PG,SG",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "10441",
+          "playerKey": "478.p.10441",
+          "name": "Y. Konan Niederhäuser",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "LAC",
+          "positions": "C"
+        },
+        {
+          "playerId": "6028",
+          "playerKey": "478.p.6028",
+          "name": "Donte DiVincenzo",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "MIN",
+          "positions": "SG,SF"
+        },
+        {
+          "playerId": "10594",
+          "playerKey": "478.p.10594",
+          "name": "Jayden Quaintance",
+          "slot": "IL",
+          "injury": "O",
+          "injuryTitle": "Out",
+          "nbaTeam": "SAS",
+          "positions": "PF"
+        }
+      ]
+    },
+    {
+      "teamId": 17,
+      "teamKey": "478.l.85092.t.17",
+      "teamName": "TuLy | No country for Old Men",
+      "players": [
+        {
+          "playerId": "5640",
+          "playerKey": "478.p.5640",
+          "name": "Jakob Poeltl",
+          "slot": "BN",
+          "nbaTeam": "TOR",
+          "positions": "C"
+        },
+        {
+          "playerId": "6757",
+          "playerKey": "478.p.6757",
+          "name": "Scotty Pippen Jr.",
+          "slot": "BN",
+          "nbaTeam": "MEM",
+          "positions": "PG"
+        },
+        {
+          "playerId": "10282",
+          "playerKey": "478.p.10282",
+          "name": "Isaiah Collier",
+          "slot": "BN",
+          "nbaTeam": "UTA",
+          "positions": "PG,SG"
+        },
+        {
+          "playerId": "4244",
+          "playerKey": "478.p.4244",
+          "name": "Kevin Durant",
+          "slot": "BN",
+          "nbaTeam": "HOU",
+          "positions": "SG,SF,PF",
+          "keeperSalary": 42.0
+        },
+        {
+          "playerId": "4612",
+          "playerKey": "478.p.4612",
+          "name": "Stephen Curry",
+          "slot": "BN",
+          "injury": "P",
+          "injuryTitle": "Probable",
+          "nbaTeam": "GSW",
+          "positions": "PG",
+          "keeperSalary": 31.0
+        },
+        {
+          "playerId": "3704",
+          "playerKey": "478.p.3704",
+          "name": "LeBron James",
+          "slot": "BN",
+          "nbaTeam": "PHI",
+          "positions": "SF,PF",
+          "keeperSalary": 25.0
+        },
+        {
+          "playerId": "6734",
+          "playerKey": "478.p.6734",
+          "name": "Ryan Rollins",
+          "slot": "BN",
+          "nbaTeam": "MIL",
+          "positions": "PG,SG",
+          "keeperSalary": 17.0
+        },
+        {
+          "playerId": "6418",
+          "playerKey": "478.p.6418",
+          "name": "Payton Pritchard",
+          "slot": "BN",
+          "nbaTeam": "BOS",
+          "positions": "PG",
+          "keeperSalary": 13.0
+        },
+        {
+          "playerId": "6169",
+          "playerKey": "478.p.6169",
+          "name": "Coby White",
+          "slot": "BN",
+          "injury": "Q",
+          "injuryTitle": "Questionable",
+          "nbaTeam": "CHA",
+          "positions": "PG,SG",
+          "keeperSalary": 12.0
+        },
+        {
+          "playerId": "6420",
+          "playerKey": "478.p.6420",
+          "name": "Jaden McDaniels",
+          "slot": "BN",
+          "nbaTeam": "MIN",
+          "positions": "SF",
+          "keeperSalary": 6.0
+        },
+        {
+          "playerId": "6174",
+          "playerKey": "478.p.6174",
+          "name": "P.J. Washington",
+          "slot": "BN",
+          "nbaTeam": "DAL",
+          "positions": "PF,C",
+          "keeperSalary": 0.0
+        },
+        {
+          "playerId": "5475",
+          "playerKey": "478.p.5475",
+          "name": "Kelly Oubre Jr.",
+          "slot": "BN",
+          "nbaTeam": "IND",
+          "positions": "SF,PF",
+          "keeperSalary": 0.0
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "source": "Yahoo Fantasy league 85092 team pages, read-only http capture at 2026-10-19T13:52:54Z",
+  "digest": "6944931a3aa597ea81847762568ea71025651aa6677ca9cec7b661366f9e3435"
+}

@@ -12,7 +12,7 @@
   "liveContentCheck": "PASS"
  },
  "working": {
-  "branch": "feat/bsy-sup-fam-trade",
+  "branch": "feat/yahoo-roster-acquisition",
   "commit": null,
   "issue": null,
   "prUrl": null,
@@ -194,6 +194,7 @@
   "provisionalPlayers": 6,
   "yahooApi": "docs/YAHOO_API_FEASIBILITY.md: no authenticated access; league key + team keys unknown (team_map.json nulls)",
   "openQuestions": "docs/OPEN_RULE_QUESTIONS.md#in-season-cap-questions-added-2026-10-16 (IL/salary counting resolved: top 9)",
-  "payrollCounting": "top 9 salaries per roster, IL included (config/cap_policy.json; league owner 2026-10-16)"
+  "payrollCounting": "top 9 salaries per roster, IL included (config/cap_policy.json; league owner 2026-10-16)",
+  "yahooRosterAcquisition": "scripts/yahoo_rosters.py: read-only GET of league 85092 team pages (ids 1-9, 11-17) -> staged observation in local_data/yahoo_observations (gitignored) -> validation + report vs current season state and previous observation. Official rosters change only via import_rosters.py commit --reviewed. 2026-10-19 capture: 207 players; blocked on Jayden Quaintance (478.p.10594, not in the frozen salary table) and 6 provisional link candidates; not imported."
  }
 }
