@@ -117,13 +117,30 @@ def reflected_completed(si: dict) -> list:
     return [t for t in si["seasonTxns"] if t["status"] == "COMPLETED" and ts(t["effectiveAt"]) <= since]
 
 
+def _replay_reflected(si: dict, official: dict) -> dict:
+    """Completed trades a verified snapshot already contains, replayed from the post-draft rosters in ledger order --
+    for their history only (who moved, payroll before/after at the time). Ownership still comes from the snapshot."""
+    replay = {"playerOwner": dict(official["playerOwner"]), "pickOwner": dict(official["pickOwner"]), "history": {},
+              "completedPicks": official["completedPicks"], "draftedPlayers": official["draftedPlayers"],
+              "tradeResults": [], "activeTradeIds": [], "applied": set()}
+    done = reflected_completed(si)
+    ids = {t["tradeId"] for t in done}
+    for t in done:
+        res = ls._apply_trade(si, replay, t, ids)
+        res["reflected"] = True
+    replay["activeTradeIds"] = [t["tradeId"] for t in done]
+    return replay
+
+
 def season_state(si: dict, selected=()) -> dict:
     """Layer B (no selection) or C (selected proposals). Reads, never writes."""
     official = ls.resolve(si, (), "OFFICIAL")  # layer A: draft archive, pick ledger, draft tags
     snap = si["rosterSnapshot"]
-    state = {"playerOwner": snapshot_owner(snap), "pickOwner": dict(official["pickOwner"]), "history": {},
+    past = _replay_reflected(si, official)  # completed trades already inside the snapshot: history, never re-applied
+    state = {"playerOwner": snapshot_owner(snap), "pickOwner": dict(official["pickOwner"]), "history": past["history"],
              "completedPicks": official["completedPicks"], "draftedPlayers": official["draftedPlayers"],
-             "tradeResults": [], "activeTradeIds": [], "applied": set(), "slots": snapshot_slots(snap)}
+             "tradeResults": past["tradeResults"], "activeTradeIds": [], "applied": set(past["applied"]),
+             "slots": snapshot_slots(snap)}
     chosen = []
     for tid in selected:
         t = si["tradeIndex"].get(tid)
@@ -135,7 +152,7 @@ def season_state(si: dict, selected=()) -> dict:
     done = pending_completed(si)
     active = done + sorted(chosen, key=lambda t: t["order"])
     active_ids = {t["tradeId"] for t in active}
-    state["activeTradeIds"] = [t["tradeId"] for t in active]
+    state["activeTradeIds"] = past["activeTradeIds"] + [t["tradeId"] for t in active]
     for t in active:
         res = ls._apply_trade(si, state, t, active_ids)
         if t["status"] == "COMPLETED" and not res["applied"]:
@@ -161,6 +178,13 @@ def team_view(si, state, fid, base) -> dict:
         r["pos"], r["nba"] = (meta.get("displayPosition") or "").replace(",", "/"), meta.get("nbaTeam") or ""
     rep["il"] = sum(1 for r in rep["roster"] if r["s"] in SLOTS_IL)
     rep["outKeys"] = sorted(set(ls.team_players(si, base, fid)) - {r["k"] for r in rep["roster"]})
+    # a trade acquisition (⇄) is not a free-agent add: only players received in a trade count as traded in
+    traded_in = {a["k"] for a in rep["fold"]["in"] if a["t"] == "p"}
+    traded_out = {a["k"] for a in rep["fold"]["out"] if a["t"] == "p"}
+    added = [k for k in rep["inKeys"] if k not in traded_in]
+    rep["inKeys"] = [k for k in rep["inKeys"] if k in traded_in]
+    rep["added"] = [ls.describe_asset(si, {"type": "player", "playerKey": k}) for k in added]
+    rep["dropped"] = [ls.describe_asset(si, {"type": "player", "playerKey": k}) for k in rep["outKeys"] if k not in traded_out]
     return rep
 
 

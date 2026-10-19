@@ -21,7 +21,7 @@ import import_rosters as ir  # noqa: E402
 import league_state as ls  # noqa: E402
 import season_state as ss  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
-from test_season_ops import TempData, export_rows  # noqa: E402
+from test_season_ops import TempData, draft_night, export_rows  # noqa: E402
 
 FIX = os.path.join(os.path.dirname(__file__), "fixtures", "yahoo")
 REFERENCE = os.path.join(FIX, "observation_2026-10-19.json")
@@ -171,7 +171,7 @@ class TestNormalization(unittest.TestCase):
             yr.normalize_manual(dict(list_shape, leagueId="12345"), self.cfg)
 
     def test_identity_resolution_keeps_provisional_records(self):
-        si = ss.load_season(ls.load_inputs())
+        si = draft_night(ss.load_season(ls.load_inputs()))
         rec = yr.reconcile(si, reference())
         snap = rec["snapshot"]
         owners = ss.snapshot_owner(snap)
@@ -184,7 +184,7 @@ class TestNormalization(unittest.TestCase):
         self.assertFalse(any(p.get("yahooPlayerKey") for p in prov["players"]))  # linking stays a reviewed command
 
     def test_bn_and_il_are_lineup_slots_not_ownership_classes(self):
-        si = ss.load_season(ls.load_inputs())
+        si = draft_night(ss.load_season(ls.load_inputs()))
         snap = yr.reconcile(si, reference())["snapshot"]
         slots = ss.snapshot_slots(snap)
         self.assertEqual(slots[MILLER], "IL")
@@ -285,7 +285,7 @@ class TestValidation(unittest.TestCase):
 class TestReconciliation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.si = ss.load_season(ls.load_inputs())
+        cls.si = draft_night(ss.load_season(ls.load_inputs()))   # the state the 2026-10-19 capture was compared with
         cls.rec = yr.reconcile(cls.si, reference())
 
     def test_recorded_trades_are_reflected_and_not_reported_as_differences(self):
@@ -376,7 +376,7 @@ class TestUnlistedPlayers(unittest.TestCase):
             self.assertIsNone(ir.resolve_player(si, {}, {"playerKey": self.QUAINTANCE, "name": "Jayden Quaintance"})[0])
 
     def test_preview_prices_the_unlisted_player_at_zero(self):
-        si = ss.load_season(ls.load_inputs())
+        si = draft_night(ss.load_season(ls.load_inputs()))
         rec = yr.reconcile(si, reference())
         u = rec["report"]["unlisted"]
         self.assertEqual(u, [{"playerKey": self.QUAINTANCE, "name": "Jayden Quaintance", "nbaTeam": "SAS",
@@ -386,6 +386,13 @@ class TestUnlistedPlayers(unittest.TestCase):
         sup = next(p for p in rec["payroll"] if p["team"] == "sup fam")
         self.assertEqual((sup["count"], sup["capIfImported"]), (15, sup["capNow"]))
         self.assertNotIn(self.QUAINTANCE, si.get("unlistedPlayers", {}))      # nothing recorded by a preview
+
+    def test_live_state_carries_the_recorded_unlisted_player(self):
+        si = ss.load_season(ls.load_inputs())
+        self.assertEqual(si["unlistedPlayers"][self.QUAINTANCE]["cap"], 0)
+        self.assertEqual(ir.resolve_player(si, {}, {"playerId": "10594", "name": "Jayden Quaintance"})[:2], (self.QUAINTANCE, "KEY"))
+        rec = yr.reconcile(si, reference())                                 # the same capture again: nothing new
+        self.assertEqual((rec["report"]["unlisted"], rec["diff"]["added"], rec["diff"]["dropped"]), ([], [], []))
 
     def test_commit_records_identity_once_and_never_touches_the_salary_freeze(self):
         with TempData() as td:
@@ -543,7 +550,8 @@ class TestInjuredList(unittest.TestCase):
             self.assertIn(("Nikola Jokić", "IL", "BN"), {(x["player"], x["from"], x["to"]) for x in rec["diff"]["ilMoves"]})
         with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
             html = f.read()
-        self.assertIn('if(r.s==="IL"||r.s==="IL+")row.querySelector(".pname").appendChild(h("span",{class:"il-tag",text:r.s}));', html)
+        self.assertIn('if(r.s==="IL"||r.s==="IL+"){row.classList.add("has-il");row.querySelector(".pname").appendChild(h("span",{class:"il-tag",text:r.s}));}', html)
+        self.assertIn(".player-row.has-il .pname{white-space:normal;overflow:visible", html.replace(",.player-row.has-il", "\n.player-row.has-il"))  # long names wrap, the tag is never cut off
 
     def test_removing_an_il_player_by_verified_transaction_recomputes_the_nine(self):
         with TempData() as td:

@@ -6,8 +6,8 @@ Generated: 2026-10-19T00:00:00Z
 
 ## Task
 
-Automated read-only Yahoo roster acquisition feeding the existing reviewed import (`scripts/yahoo_rosters.py`; see `docs/ROSTER_REFRESH.md`). IL kept as a lineup slot; payroll stays top-9 frozen salaries, IL included.
+Read-only Yahoo roster acquisition (`scripts/yahoo_rosters.py`, `docs/ROSTER_REFRESH.md`), the $0 rule for players not in the frozen salary table, and the first reviewed Yahoo import (2026-10-19).
 
 ## Status
 
-Implementation complete; tests + `./validate.sh` pass. No roster import committed. PR pending review — do not merge without approval.
+Implementation complete; tests + `./validate.sh` pass. PR pending review — do not merge without approval.

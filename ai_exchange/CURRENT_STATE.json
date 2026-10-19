@@ -195,6 +195,8 @@
   "yahooApi": "docs/YAHOO_API_FEASIBILITY.md: no authenticated access; league key + team keys unknown (team_map.json nulls)",
   "openQuestions": "docs/OPEN_RULE_QUESTIONS.md#in-season-cap-questions-added-2026-10-16 (IL/salary counting resolved: top 9)",
   "payrollCounting": "top 9 salaries per roster, IL included (config/cap_policy.json; league owner 2026-10-16)",
-  "yahooRosterAcquisition": "scripts/yahoo_rosters.py: read-only GET of league 85092 team pages (ids 1-9, 11-17) -> staged observation in local_data/yahoo_observations (gitignored) -> validation + report vs current season state and previous observation. Official rosters change only via import_rosters.py commit --reviewed. 2026-10-19 capture: 207 players; blocked on Jayden Quaintance (478.p.10594, not in the frozen salary table) and 6 provisional link candidates; not imported."
+  "yahooRosterAcquisition": "scripts/yahoo_rosters.py: read-only GET of league 85092 team pages (ids 1-9, 11-17) -> staged observation in local_data/yahoo_observations (gitignored) -> validation + report vs current season state and previous observation. Official rosters change only via import_rosters.py commit --reviewed.",
+  "currentRosterSnapshot": "RS-2026-10-19-878cd6e3: reviewed import of the 2026-10-19T14:26:21Z Yahoo capture (207 players). The three completed in-season trades are inside it (replayed for history, never re-applied). 18 pickups / 3 drops vs draft night; payroll unchanged for every team.",
+  "unlistedPlayerRule": "League owner 2026-10-19: a rostered player not in salary_freeze.json is $0 (config/cap_policy.json unlistedPlayerSalary); recorded in data/2026-27/unlisted_players.json (Jayden Quaintance)."
  }
 }

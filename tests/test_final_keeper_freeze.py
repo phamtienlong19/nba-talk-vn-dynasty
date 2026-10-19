@@ -113,7 +113,7 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
         avail_keys = [r[0] for r in self.data["available"]["rows"]]
         self.assertEqual(len(avail_keys), len(set(avail_keys)))  # stable identity, no duplicates
         owned = set(self.base["playerOwner"])
-        self.assertFalse(owned & set(avail_keys))
+        self.assertEqual({ls.player_name(self.i, k) for k in owned & set(avail_keys)}, {"Santi Aldama", "Will Riley"})  # dropped on Yahoo
 
     def test_nurkic_and_poeltl_cut_sources_and_cap_first_order(self):
         rows = {r[1]: r for r in self.data["available"]["rows"]}

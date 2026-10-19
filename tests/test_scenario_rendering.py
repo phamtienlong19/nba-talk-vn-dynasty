@@ -158,18 +158,18 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn("Jalen Williams", sup["names"])
         self.assertIn("Julius Randle", sup["names"])
         # completed Bsy <-> sup fam trade: sup fam 141 -> 144 (Castle $13 + Mitchell $0 in; Coward $10 + Beringer $0 out)
-        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("144", 12, "34 ROOM"))
+        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("144", 15, "34 ROOM"))   # + 3 IL pickups at $0 (Yahoo 2026-10-19)
         self.assertIn("Stephon Castle", sup["names"])
         self.assertNotIn("Cedric Coward", sup["names"])
         bsy = _read(_card(self.official, "Bsy"))
-        self.assertEqual((bsy["cap"], bsy["rows"], bsy["gap"]), ("176", 12, "2 ROOM"))
+        self.assertEqual((bsy["cap"], bsy["rows"], bsy["gap"]), ("176", 13, "2 ROOM"))
         self.assertIn("Cedric Coward", bsy["names"])
         self.assertIn("Joan Beringer", bsy["names"])
         self.assertNotIn("Stephon Castle", bsy["names"])
         for n in ("Nikola Jokić", "Oso Ighodaro", "Victor Wembanyama"):   # completed Bsy <-> Thịnh
             self.assertIn(n, bsy["names"] if n != "Victor Wembanyama" else _read(_card(self.official, "Thịnh"))["names"])
         thinh = _read(_card(self.official, "Thịnh"))
-        self.assertEqual((thinh["cap"], thinh["rows"], thinh["gap"]), ("176", 12, "2 ROOM"))
+        self.assertEqual((thinh["cap"], thinh["rows"], thinh["gap"]), ("176", 13, "2 ROOM"))
         self.assertIn("Jaylon Tyson", thinh["names"])
         self.assertNotIn("Nikola Jokić", thinh["names"])
         bz = _read(_card(self.official, "Bz"))
@@ -183,7 +183,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_untraded_teams_keep_their_keepers_and_add_only_draftees(self):
         drafted = {c["name"] for c in ls.draft_summary(self.i, self.state)["completed"]}
-        for short in ("Quân", "DonTrick", "TT"):
+        for short in ("DHA", "Đạt", "TuLy", "TT"):   # no pre-draft trade, no in-season trade, no Yahoo add/drop
             now = _read(_card(self.official, short))["names"]
             before = _read(_card(self.static, short))["names"]
             self.assertEqual(sorted(n for n in now if n not in drafted), sorted(before), short)
@@ -266,6 +266,23 @@ class TestRenderedCards(unittest.TestCase):
         cc = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "CrazyCat"), re.S).group(1)
         self.assertRegex(cc, r'<span class="mv-l">OUT</span><span class="mv-items"><span class="mv-pl rk"><span>Morez Johnson Jr\.</span>')
 
+    def test_pickups_are_not_shown_as_trades_and_il_is_tagged(self):
+        def row(short, name):
+            return next(r for r in re.findall(r'<div class="player-row[^"]*".*?<div class="cap">.*?</div>', _card(self.official, short), re.S)
+                        if f">{name}<" in r)
+        miller = row("Bsy", "Jordan Miller")
+        self.assertNotIn("tr-tag", miller)                                   # free-agent pickup: no ⇄
+        self.assertNotIn("row-trade", miller)
+        self.assertIn('class="il-tag">IL<', miller)
+        self.assertIn("tr-tag", row("Bsy", "Nikola Jokić"))                  # trade acquisition keeps ⇄
+        mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "Bsy"), re.S).group(1))
+        self.assertRegex(mv, r"ADDED\s.*Jordan Miller")
+        self.assertRegex(mv, r"DROPPED\s.*Zaccharie Risacher")
+        q = row("sup fam", "Jayden Quaintance")                              # unlisted salary: $0 by league rule
+        self.assertIn('<div class="pos">PF</div>', q)
+        self.assertIn('<div class="nba">SAS</div>', q)
+        self.assertIn('class="il-tag">IL<', q)
+
     def test_internal_notes_are_not_published(self):
         data = re.search(r'id="league-data">(.*?)</script>', self.static, re.S).group(1)
         for internal in ("directionCheck", "DISCREPANCY", "ownership-consistent", "Direction verified",
@@ -280,7 +297,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_public_ui_shows_the_verified_roster_snapshot(self):
         m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill cap-rule"', self.official)
-        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 14 · +3 TRADES")
+        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 19")
         rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
         self.assertEqual(len(rules), 4)
         self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 $ COUNT · IL ✓" for r in rules), rules)

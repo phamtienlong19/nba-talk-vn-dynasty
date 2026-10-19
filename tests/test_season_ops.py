@@ -26,13 +26,40 @@ def _read_html():
         return f.read()
 
 
+DRAFT_NIGHT = "RS-2026-10-14-DRAFT-NIGHT"
+
+
+def draft_night(si):
+    """The season layer as it stood before the first Yahoo import: the draft-night snapshot + completed trades. Trade and
+    import mechanics are tested from this fixed baseline so later verified imports do not change the expectations."""
+    si = dict(si)
+    si["rosterSnapshot"] = ss._load(os.path.join(ss.ROSTER_DIR, "snapshots", DRAFT_NIGHT + ".json"))
+    si["unlistedPlayers"] = {}
+    return si
+
+
 class TempData:
-    """A private copy of data/2026-27 so commits, rollbacks and links never touch the repo."""
+    """A private copy of data/2026-27 so commits, rollbacks and links never touch the repo. By default the copy is
+    reset to the draft-night roster snapshot (no later imports, no unlisted players) -- a fixed baseline for tests."""
+
+    def __init__(self, pin=True):
+        self.pin = pin
 
     def __enter__(self):
         self.root = tempfile.mkdtemp()
         self.dir = os.path.join(self.root, "2026-27")
         shutil.copytree(ls.DATA_DIR, self.dir)
+        if self.pin:
+            idx_path = os.path.join(self.dir, "rosters", "index.json")
+            idx = ss._load(idx_path)
+            idx["current"] = f"snapshots/{DRAFT_NIGHT}.json"
+            idx["history"] = [h for h in idx["history"] if h.get("snapshotId") == DRAFT_NIGHT]
+            ss._write(idx_path, idx)
+            for f in os.listdir(os.path.join(self.dir, "rosters", "snapshots")):
+                if f != DRAFT_NIGHT + ".json":
+                    os.remove(os.path.join(self.dir, "rosters", "snapshots", f))
+            if os.path.exists(os.path.join(self.dir, "unlisted_players.json")):
+                os.remove(os.path.join(self.dir, "unlisted_players.json"))
         return self
 
     def __exit__(self, *a):
@@ -59,7 +86,7 @@ class TestLayers(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.i = ls.load_inputs()
-        cls.si = ss.load_season(cls.i)
+        cls.si = draft_night(ss.load_season(cls.i))
         cls.hist = ls.resolve(cls.i, (), "OFFICIAL")
         cls.cur = ss.season_state(cls.si)
 
@@ -111,7 +138,8 @@ class TestLayers(unittest.TestCase):
         for k, f in ((WEMBY, THINH), (TYSON, THINH), (JOKIC, BSY), (OSO, BSY)):
             self.assertEqual(cur["playerOwner"][k], f)                       # both completed trades are in the baseline
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
-        self.assertEqual(data["official"]["teams"], views[""]["teams"])
+        live = ss.enumerate_views(ss.load_season(ls.load_inputs()))          # the page renders the live state
+        self.assertEqual(data["official"]["teams"], live[""]["teams"])
         self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
         for done in ("TXN-2026-001", "PROP-2026-001", "PROP-2026-002"):
             with self.assertRaises(ls.StateError):
@@ -128,8 +156,6 @@ class TestLayers(unittest.TestCase):
         t = self.si["tradeIndex"]["PROP-2026-002"]
         self.assertEqual(t["status"], "COMPLETED")
         self.assertEqual(t["directionCheck"]["status"], "RESOLVED_ASSUMED_STAGED_DIRECTION")
-        for a in t["assets"]:   # every sender owned the player in the baseline BEFORE this trade
-            before = ss.season_state(ss.load_season(ls.load_inputs()))  # full state; check via history instead
         hist = ls.resolve(self.i, (), "OFFICIAL")
         for a in t["assets"]:
             self.assertEqual(hist["playerOwner"][a["playerKey"]], a["from"])
@@ -149,7 +175,7 @@ class TestTopNineCounting(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.i = ls.load_inputs()
-        cls.si = ss.load_season(cls.i)
+        cls.si = draft_night(ss.load_season(cls.i))
         cls.cur = ss.season_state(cls.si)
 
     def test_policy_and_counted_payroll(self):
@@ -192,7 +218,7 @@ class TestBsyTradesCompleted(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.i = ls.load_inputs()
-        cls.si = ss.load_season(cls.i)
+        cls.si = draft_night(ss.load_season(cls.i))
         cls.hist = ls.resolve(cls.i, (), "OFFICIAL")
         cls.cur = ss.season_state(cls.si)
 
@@ -247,7 +273,7 @@ class TestBsyTradesCompleted(unittest.TestCase):
         owners = self.cur["playerOwner"]
         self.assertEqual(len(owners), 192)                                                 # nobody appears or disappears
         self.assertEqual(self.cur["activeTradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])  # each exactly once
-        again = ss.season_state(ss.load_season(ls.load_inputs()))                           # a rebuild gives the same state
+        again = ss.season_state(draft_night(ss.load_season(ls.load_inputs())))              # a rebuild gives the same state
         self.assertEqual(again["playerOwner"], owners)
         self.assertEqual((owners[MOREZ], owners[ZION]), (HCMC, CC))                         # the earlier completed trade still stands
         self.assertEqual(ss.selectable(self.si), [])                                        # nothing pending
@@ -271,8 +297,10 @@ class TestBsyTradesCompleted(unittest.TestCase):
         self.assertEqual(ls.team_cap(self.i, self.hist, DT), 124)
         f = ss.checkpoint_findings(self.si)
         self.assertEqual([(x["short"], x["shortfall"]) for x in f], [("DonTrick", 8)])      # DonTrick finding intact
-        snap0 = ss._load(os.path.join(ss.ROSTER_DIR, self.si["rosterIndex"]["current"]))
-        self.assertEqual(snap0["snapshotId"], "RS-2026-10-14-DRAFT-NIGHT")                  # no Yahoo refresh was applied
+        idx = ss._load(ss.ROSTER_INDEX)
+        self.assertEqual((idx["history"][0]["snapshotId"], idx["history"][0]["action"]), (DRAFT_NIGHT, "INIT"))
+        dn = ss._load(os.path.join(ss.ROSTER_DIR, "snapshots", DRAFT_NIGHT + ".json"))
+        self.assertEqual(dn["digest"], idx["history"][0]["digest"])                         # never rewritten by later imports
 
     def test_public_page_shows_completed_history_not_pending_and_no_internal_notes(self):
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
@@ -282,6 +310,42 @@ class TestBsyTradesCompleted(unittest.TestCase):
         blob = json.dumps(data)
         for internal in ("statusHistory", "directionCheck", "not supplied", "relayed", "DISCREPANCY", "NOT specified", "RESOLVED_ASSUMED"):
             self.assertNotIn(internal, blob)
+
+
+class TestVerifiedYahooImport(unittest.TestCase):
+    """The live state after the 2026-10-19 Yahoo import: the snapshot already contains the three completed trades."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.si = ss.load_season(ls.load_inputs())
+        cls.cur = ss.season_state(cls.si)
+
+    def test_snapshot_is_the_reviewed_yahoo_import(self):
+        snap = self.si["rosterSnapshot"]
+        self.assertEqual(snap["kind"], "VERIFIED_IMPORT")
+        self.assertIn("Yahoo Fantasy league 85092", snap["source"])
+        self.assertEqual(ss.pending_completed(self.si), [])
+        self.assertEqual([t["txnId"] for t in ss.reflected_completed(self.si)], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
+
+    def test_reflected_trades_are_history_not_reapplied(self):
+        self.assertEqual(self.cur["playerOwner"], ss.snapshot_owner(self.si["rosterSnapshot"]))   # ownership = the snapshot
+        self.assertEqual(self.cur["activeTradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])  # each once
+        res = {r["tradeId"]: r for r in self.cur["tradeResults"]}
+        self.assertTrue(all(r["reflected"] and r["applied"] for r in res.values()))
+        self.assertEqual((res["PROP-2026-001"]["teams"][BSY]["capBefore"], res["PROP-2026-001"]["teams"][BSY]["capAfter"]), (178, 175))
+        self.assertEqual((res["PROP-2026-002"]["teams"][BSY]["capBefore"], res["PROP-2026-002"]["teams"][BSY]["capAfter"]), (175, 176))
+        self.assertEqual(self.cur["history"]["player:" + JOKIC], [{"tradeId": "PROP-2026-002", "from": THINH, "to": BSY}])
+
+    def test_counts_payroll_and_moves(self):
+        self.assertEqual(len(self.cur["playerOwner"]), 207)
+        caps = {f: ls.team_cap(self.si, self.cur, f) for f in (BSY, SUP, THINH, CC, HCMC, DT)}
+        self.assertEqual(caps, {BSY: 176, SUP: 144, THINH: 176, CC: 145, HCMC: 133, DT: 123})  # adds were all $0
+        bsy = ss.season_view(self.si)["teams"][BSY]
+        self.assertEqual({a["n"] for a in bsy["added"]}, {"Jordan Miller", "Grayson Allen"})
+        self.assertEqual({a["n"] for a in bsy["dropped"]}, {"Zaccharie Risacher"})
+        self.assertNotIn("478.p.10084", bsy["inKeys"])                      # a pickup is not a trade acquisition
+        self.assertIn(JOKIC, bsy["inKeys"])
+        self.assertEqual(bsy["il"], 1)
 
 
 class TestFrozenSalaries(unittest.TestCase):
@@ -299,7 +363,10 @@ class TestFrozenSalaries(unittest.TestCase):
         self.assertEqual(doc["digest"], ls._digest(doc["salaries"]))
         i = ls.load_inputs()
         cur = ss.season_state(ss.load_season(i))
-        self.assertFalse([k for k in cur["playerOwner"] if k not in doc["salaries"]])
+        # every owned player has a frozen salary, or is an unlisted player at the league-rule 0 (owner, 2026-10-19)
+        self.assertFalse([k for k in cur["playerOwner"] if k not in doc["salaries"] and k not in i["unlistedPlayers"]])
+        self.assertFalse(set(i["unlistedPlayers"]) & set(doc["salaries"]))
+        self.assertTrue(all(p["cap"] == 0 for p in i["unlistedPlayers"].values()))
         for k in i["extraPlayers"]:
             self.assertEqual(doc["salaries"][k], 0.0)
 
