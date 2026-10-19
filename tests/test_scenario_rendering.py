@@ -119,7 +119,8 @@ def _card(dom, short):
 
 
 def _read(card):
-    names = [html_lib.unescape(n.split("<span")[0]).strip() for n in re.findall(r'<div class="pname">(.*?)</div>', card, re.S)]
+    names = [html_lib.unescape(re.sub(r'<span class="st-chip[^"]*"[^>]*>[^<]*</span>', "", n).split("<span")[0]).strip()
+             for n in re.findall(r'<div class="pname">(.*?)</div>', card, re.S)]  # the left status chip is not part of the name
     cap = re.search(r'<div class="cap-total">(.*?)<span>/(\d+)</span>', card, re.S)
     return {"names": names, "cap": cap.group(1), "ceiling": cap.group(2),
             "gap": re.search(r'<div class="gap-big">(.*?)</div>', card).group(1),
@@ -273,7 +274,7 @@ class TestRenderedCards(unittest.TestCase):
         miller = row("Bsy", "Jordan Miller")
         self.assertNotIn("tr-tag", miller)                                   # free-agent pickup: no ⇄
         self.assertNotIn("row-trade", miller)
-        self.assertIn('class="il-tag">IL<', miller)
+        self.assertIn('<div class="pname"><span class="st-chip il" title="Injured list">IL</span>Jordan Miller', miller)  # chip on the left
         self.assertIn("tr-tag", row("Bsy", "Nikola Jokić"))                  # trade acquisition keeps ⇄
         mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "Bsy"), re.S).group(1))
         self.assertRegex(mv, r"ADDED\s.*Jordan Miller")
@@ -281,7 +282,33 @@ class TestRenderedCards(unittest.TestCase):
         q = row("sup fam", "Jayden Quaintance")                              # unlisted salary: $0 by league rule
         self.assertIn('<div class="pos">PF</div>', q)
         self.assertIn('<div class="nba">SAS</div>', q)
-        self.assertIn('class="il-tag">IL<', q)
+        self.assertIn('class="st-chip il"', q)
+
+    def test_injured_list_is_its_own_group_at_the_foot_of_the_roster(self):
+        for short in ("Bsy", "sup fam", "CrazyCat", "LC", "Maxfixe", "DonTrick"):
+            card = _card(self.official, short)
+            players = re.search(r'<div class="players">(.*)', card, re.S).group(1)
+            head = players.find('class="il-head"')
+            self.assertGreater(head, 0, short)
+            before, after = players[:head], players[head:]
+            self.assertNotIn("il-row", before, short)                        # healthy players first
+            self.assertEqual(after.count('class="player-row'), after.count("il-row"), short)  # only IL rows below
+        cc = _card(self.official, "CrazyCat")                                # Nurkić ($4) is on IL and inside the nine
+        self.assertRegex(cc, r'class="il-head">.*?Injured list.*?class="il-c"[^>]*>4 counted<')
+        self.assertIn('<div class="nc-div">not counted</div>', cc)           # no "top 9" divider when IL counts
+        self.assertRegex(re.sub(r"<[^>]+>", " ", cc), r"healthy\s+141")     # 145 counted, 4 of it on IL
+        bsy = _card(self.official, "Bsy")                                    # Miller ($0) is outside the nine
+        self.assertIn("beyond top 9 · not counted", re.sub(r"<[^>]+>", "", bsy))
+        self.assertNotIn("healthy", re.sub(r"<[^>]+>", " ", bsy.split('class="players"')[0]))
+        self.assertNotIn('class="il-c"', bsy)
+
+    def test_full_team_names_and_no_health_badges(self):
+        bsy = _card(self.official, "Bsy")
+        self.assertIn('<div class="team-name">Hai | Bulls Dynasty</div>', bsy)    # one style, no lighter manager part
+        self.assertNotIn("tn-m", self.official)
+        self.assertIn('Long con dynasty</div>', _card(self.official, "LC"))
+        for badge in ("health-badge", ">REC<", ">INJ<", "health-rec", "health-inj"):
+            self.assertNotIn(badge, self.official.split("<body", 1)[1].split("<script", 1)[0], badge)
 
     def test_internal_notes_are_not_published(self):
         data = re.search(r'id="league-data">(.*?)</script>', self.static, re.S).group(1)

@@ -430,8 +430,9 @@ class TestTeamNames(unittest.TestCase):
         i = ls.load_inputs()
         tm = ss._load(os.path.join(ss.ROSTER_DIR, "team_map.json"))
         self.assertEqual(tm["teams"]["franchise-01"]["yahooTeamName"], "Hai | Bulls Dynasty")
-        self.assertEqual(ls.team_name(i, "franchise-01"), "Bulls Dynasty")       # "Manager | " prefix dropped
-        self.assertEqual(ls.team_name(i, "franchise-12"), "Crashed for Caleb")
+        self.assertEqual(ls.team_name(i, "franchise-01"), "Hai | Bulls Dynasty")  # the full Yahoo name
+        self.assertEqual(ls.team_name(i, "franchise-12"), "sup fam | Crashed for Caleb")
+        self.assertEqual(ls.team_name(i, "franchise-16"), "T T | Kratos Dynasty")  # spacing around "|" normalised
         self.assertEqual(ls.team_name(i, "franchise-07"), "Maxfixe")
         freeze = {t["franchiseId"]: t["teamName"] for t in i["freeze"]["teams"]}
         self.assertEqual(freeze["franchise-01"], "GTA San Antonio")              # the locked freeze is not rewritten
@@ -443,20 +444,21 @@ class TestTeamNames(unittest.TestCase):
             html = f.read()
         i = ls.load_inputs()
         self.assertEqual(bls.sync_team_names(html, i), html)                     # already in sync (idempotent)
-        names = re.findall(r'<div class="team-name">([^<]*)</div>', html)
-        self.assertIn("Bulls Dynasty", names)
-        self.assertIn("Damageeeee", names)
-        self.assertIn("<b>sup fam</b><small>Crashed for Caleb</small>", html)
-        self.assertIn(">CrazyCat | Damageeeee</span>", html)                     # bare chip gains its short name
-        self.assertIn(">Bsy | Bulls Dynasty</span>", html)
+        names = [re.sub(r"<[^>]+>", "", n) for n in re.findall(r'<div class="team-name">(.*?)</div>', html)]
+        self.assertIn("Hai | Bulls Dynasty", names)
+        self.assertIn("CrazyCat | Damageeeee", names)
+        self.assertIn("Long con dynasty", names)
+        self.assertIn("<b>sup fam</b><small>sup fam | Crashed for Caleb</small>", html)
+        self.assertIn(">CrazyCat | Damageeeee</span>", html)
+        self.assertIn(">Hai | Bulls Dynasty</span>", html)                       # chips show the full name
         for old in ("GTA San Antonio", "Bruised for Boozer", "Poop for Coop", "CrazyCat Damageee<"):
             self.assertNotIn(old, html)
         data = json.loads(re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1).replace("<\\/", "</"))
-        self.assertEqual({t["short"]: t["name"] for t in data["teams"]}["Bsy"], "Bulls Dynasty")
+        self.assertEqual({t["short"]: t["name"] for t in data["teams"]}["Bsy"], "Hai | Bulls Dynasty")
         # renaming back restores the old labels: the rewrite is driven by the map, not hard-coded
         i2 = dict(i, teamNames=dict(i["teamNames"], **{"franchise-01": "GTA San Antonio"}))
         back = bls.sync_team_names(html, i2)
-        self.assertIn(">Bsy | GTA San Antonio</span>", back)
+        self.assertIn(">GTA San Antonio</span>", back)
         self.assertIn("<b>Bsy</b><small>GTA San Antonio</small>", back)
 
 
@@ -588,8 +590,9 @@ class TestInjuredList(unittest.TestCase):
             self.assertIn(("Nikola Jokić", "IL", "BN"), {(x["player"], x["from"], x["to"]) for x in rec["diff"]["ilMoves"]})
         with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
             html = f.read()
-        self.assertIn('if(r.s==="IL"||r.s==="IL+"){row.classList.add("has-il");row.querySelector(".pname").appendChild(h("span",{class:"il-tag",text:r.s}));}', html)
-        self.assertIn(".player-row.has-il .pname{white-space:normal;overflow:visible", html.replace(",.player-row.has-il", "\n.player-row.has-il"))  # long names wrap, the tag is never cut off
+        self.assertIn('pn0.insertBefore(h("span",{class:"st-chip il"', html)   # IL chip left of the name, in an IL group
+        self.assertIn('h("div",{class:"il-head"}', html)
+        self.assertIn(".player-row.il-row .pname{white-space:normal;overflow:visible", html.replace(",.player-row.il-row", "\n.player-row.il-row"))  # long names wrap
 
     def test_removing_an_il_player_by_verified_transaction_recomputes_the_nine(self):
         with TempData() as td:

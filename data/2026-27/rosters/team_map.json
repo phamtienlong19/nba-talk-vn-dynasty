@@ -13,7 +13,7 @@
         "Hai | GTA San Antonio"
       ],
       "yahooTeamName": "Hai | Bulls Dynasty",
-      "name": "Bulls Dynasty"
+      "name": "Hai | Bulls Dynasty"
     },
     "franchise-02": {
       "short": "CrazyCat",
@@ -24,7 +24,7 @@
         "CrazyCat | Damageeeee"
       ],
       "yahooTeamName": "CrazyCat | Damageeeee",
-      "name": "Damageeeee"
+      "name": "CrazyCat | Damageeeee"
     },
     "franchise-03": {
       "short": "Melo",
@@ -66,7 +66,7 @@
         "Trader by Trade"
       ],
       "yahooTeamName": "Dũng | Trader By Trade",
-      "name": "Trader By Trade"
+      "name": "Dũng | Trader By Trade"
     },
     "franchise-07": {
       "short": "Maxfixe",
@@ -87,7 +87,7 @@
         "Đì troi pít tông"
       ],
       "yahooTeamName": "DHA | Đì troi pít tông",
-      "name": "Đì troi pít tông"
+      "name": "DHA | Đì troi pít tông"
     },
     "franchise-09": {
       "short": "Đạt",
@@ -98,7 +98,7 @@
         "Đạt"
       ],
       "yahooTeamName": "M. Jordat | The Silver Seekers",
-      "name": "The Silver Seekers"
+      "name": "M. Jordat | The Silver Seekers"
     },
     "franchise-10": {
       "short": "DonTrick",
@@ -119,7 +119,7 @@
         "Thịnh | Seattle SuperSonics"
       ],
       "yahooTeamName": "Thịnh | Seattle SuperSonics",
-      "name": "Seattle SuperSonics"
+      "name": "Thịnh | Seattle SuperSonics"
     },
     "franchise-12": {
       "short": "sup fam",
@@ -131,7 +131,7 @@
         "sup fam | Crashed for Caleb"
       ],
       "yahooTeamName": "sup fam | Crashed for Caleb",
-      "name": "Crashed for Caleb"
+      "name": "sup fam | Crashed for Caleb"
     },
     "franchise-13": {
       "short": "Quân",
@@ -142,7 +142,7 @@
         "Quân"
       ],
       "yahooTeamName": "Quan | Okay See Thunder",
-      "name": "Okay See Thunder"
+      "name": "Quan | Okay See Thunder"
     },
     "franchise-14": {
       "short": "TuLy",
@@ -153,7 +153,7 @@
         "TuLy | No Country for Old Men"
       ],
       "yahooTeamName": "TuLy | No country for Old Men",
-      "name": "No country for Old Men"
+      "name": "TuLy | No country for Old Men"
     },
     "franchise-15": {
       "short": "Bz",
@@ -164,7 +164,7 @@
         "Putin the Tank Driver"
       ],
       "yahooTeamName": "Bz | Putin the tank driver",
-      "name": "Putin the tank driver"
+      "name": "Bz | Putin the tank driver"
     },
     "franchise-16": {
       "short": "TT",
@@ -176,9 +176,9 @@
         "TT | Kratos Dynasty"
       ],
       "yahooTeamName": "T T| Kratos Dynasty",
-      "name": "Kratos Dynasty"
+      "name": "T T | Kratos Dynasty"
     }
   },
   "namesAsOf": "2026-10-19",
-  "namesNote": "name = the Yahoo team name without its 'Manager | ' prefix (yahooTeamName as listed on Yahoo on namesAsOf). It is what the site shows. The locked keeper freeze and franchises.json keep the names as they were at the time."
+  "namesNote": "name = the Yahoo team name as listed on namesAsOf (yahooTeamName), spacing around '|' normalised. It is what the site shows. The locked keeper freeze and franchises.json keep the names as they were at the time."
 }

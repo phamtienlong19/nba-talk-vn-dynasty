@@ -58,7 +58,7 @@ def parse_board(index_html: str):
     for attrs, body in TEAM_CARD_RE.findall(index_html):
         color = re.search(r"--team-color:(#[0-9a-fA-F]+)", attrs)
         text = re.search(r"--team-text:(#[0-9a-fA-F]+)", attrs)
-        name = html_lib.unescape(re.search(r'<div class="team-name">(.*?)</div>', body, re.S).group(1)).replace(pool.CROWN.strip(), "").strip()
+        name = html_lib.unescape(re.sub(r"<[^>]+>", "", re.search(r'<div class="team-name">(.*?)</div>', body, re.S).group(1))).replace(pool.CROWN.strip(), "").strip()
         short = html_lib.unescape(re.search(r'<span class="identity-tag">([^<]*)</span>', body).group(1))
         rows = re.findall(r'<div class="pname">(.*?)</div><div class="nba">[^<]*</div><div class="cap">([\d.]+)</div>', body, re.S)
         kept = [(html_lib.unescape(re.sub(r"<span.*?</span>", "", n)).strip(), float(c)) for n, c in rows]
@@ -282,17 +282,22 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
     return panel.replace(anchor, anchor + "\n" + block, 1)
 
 
+def team_name_html(name: str) -> str:
+    """The full team name, one style throughout (a "Manager | Team" name is shown exactly as written)."""
+    return html_lib.escape(name, quote=False)
+
+
 def sync_team_names(index_html: str, inputs: dict) -> str:
     """Rewrite the static team labels (card title, cap-page label, draft-order chips) to the current names in
-    rosters/team_map.json. Idempotent. A chip keeps its format ("Short | Name" or a bare name); a bare chip whose name
-    contained the short name gets the "Short | " prefix so the team stays recognisable."""
+    rosters/team_map.json. Idempotent. A full "Manager | Team" name is shown as is; otherwise a chip keeps its format
+    ("Short | Name" or a bare name), and a bare chip whose name contained the short name gets the "Short | " prefix."""
     teams, _ = parse_board(index_html)
     old_by_short = {t["short"]: t["name"] for t in teams}
     out = index_html
     for ft in inputs["freeze"]["teams"]:
         short, new = ft["short"], ls.team_name(inputs, ft["franchiseId"])
         old = old_by_short.get(short)
-        if not old or old == new:
+        if not old:
             continue
         e_old, e_new, e_short = (html_lib.escape(x, quote=False) for x in (old, new, short))
 
@@ -300,8 +305,8 @@ def sync_team_names(index_html: str, inputs: dict) -> str:
             body = m.group(0)
             if f'<span class="identity-tag">{e_short}</span>' not in body:
                 return body
-            return re.sub(r'(<div class="team-name">(?:' + re.escape(pool.CROWN) + r')?)' + re.escape(e_old) + r'</div>',
-                          lambda x: x.group(1) + e_new + "</div>", body)
+            return re.sub(r'(<div class="team-name">(?:' + re.escape(pool.CROWN) + r')?).*?</div>',
+                          lambda x: x.group(1) + team_name_html(new) + "</div>", body, count=1, flags=re.S)
         out = re.sub(r'<section class="team-card[^"]*"[^>]*>.*?</section>', card, out, flags=re.S)
         out = out.replace(f"<b>{e_short}</b><small>{e_old}</small>", f"<b>{e_short}</b><small>{e_new}</small>")
 
@@ -309,12 +314,14 @@ def sync_team_names(index_html: str, inputs: dict) -> str:
             text = m.group(2)
             crown = pool.CROWN if text.startswith(pool.CROWN) else ""
             bare = text[len(crown):]
-            if bare == e_old:
-                label = e_new if short.lower() not in old.lower() or short.lower() in new.lower() else f"{e_short} | {e_new}"
-            elif bare == f"{e_short} | {e_old}":
-                label = f"{e_short} | {e_new}"
-            else:
+            if bare not in (e_old, f"{e_short} | {e_old}"):
                 return m.group(0)
+            if "|" in new:
+                label = e_new
+            elif bare == e_old:
+                label = e_new if short.lower() not in old.lower() or short.lower() in new.lower() else f"{e_short} | {e_new}"
+            else:
+                label = f"{e_short} | {e_new}"
             return m.group(1) + crown + label + "</span>"
         out = re.sub(r'(<span class="pick-chip"[^>]*>)([^<]*)</span>', chip, out)
     return out

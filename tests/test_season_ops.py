@@ -346,6 +346,9 @@ class TestVerifiedYahooImport(unittest.TestCase):
         self.assertNotIn("478.p.10084", bsy["inKeys"])                      # a pickup is not a trade acquisition
         self.assertIn(JOKIC, bsy["inKeys"])
         self.assertEqual(bsy["il"], 1)
+        cc = ss.season_view(self.si)["teams"][CC]                            # Nurkić ($4) on IL, inside the counted nine
+        self.assertEqual((cc["cap"], cc["ilCap"], cc["healthyCap"]), (145, 4, 141))
+        self.assertEqual((bsy["ilCap"], bsy["healthyCap"]), (0, 176))       # Miller ($0) is outside the nine
 
 
 class TestFrozenSalaries(unittest.TestCase):

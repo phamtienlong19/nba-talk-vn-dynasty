@@ -177,6 +177,9 @@ def team_view(si, state, fid, base) -> dict:
         meta = ls.player_meta(si, r["k"])  # display data for players the original board does not list (in-season adds)
         r["pos"], r["nba"] = (meta.get("displayPosition") or "").replace(",", "/"), meta.get("nbaTeam") or ""
     rep["il"] = sum(1 for r in rep["roster"] if r["s"] in SLOTS_IL)
+    # IL players compete for the counted nine like anyone else; "healthy" is the counted payroll without them (display)
+    rep["ilCap"] = sum(r["c"] for r in rep["roster"] if r["s"] in SLOTS_IL and not r["x"])
+    rep["healthyCap"] = rep["cap"] - rep["ilCap"]
     rep["outKeys"] = sorted(set(ls.team_players(si, base, fid)) - {r["k"] for r in rep["roster"]})
     # a trade acquisition (⇄) is not a free-agent add: only players received in a trade count as traded in
     traded_in = {a["k"] for a in rep["fold"]["in"] if a["t"] == "p"}
