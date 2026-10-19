@@ -43,8 +43,7 @@ python3 scripts/import_rosters.py commit local_data/yahoo_observations/OBS-….j
   and each recorded in-season trade as reflected or not; versus the previous full
   observation: added / removed / changed team / slot changes. These are observed
   differences — nothing is classified as a trade and no transaction is created.
-  A payroll preview applies the existing top-9 frozen-salary rule (IL included);
-  players missing from the frozen salary table are listed and block the import.
+  A payroll preview applies the existing top-9 frozen-salary rule (IL included).
   Yahoo's "Keeper Salary" label is shown only as evidence when it differs from
   the frozen salary; `salary_freeze.json` is never changed.
 - **IL.** IL / IL+ is a lineup slot. IL players are owned roster members, stay
@@ -160,6 +159,12 @@ draft event, the rookie flag and the frozen $0 draft salary do not change, so no
 second player appears and the 19-rookie count holds. Linking refuses a Yahoo key
 that already has its own frozen identity or is linked elsewhere.
 
-A free agent added in-season who is not in the frozen 2026-27 player table (the
-600-player registry + provisional) blocks the import until the commissioner adds
-an explicit entry with a salary; nothing is guessed.
+## Players not in the frozen salary table
+
+League rule (owner, 2026-10-19; `config/cap_policy.json` `unlistedPlayerSalary`):
+**a rostered player whose salary is not in the table is a 0.** An import row with a
+Yahoo id that is not in `salary_freeze.json` is reported as
+`UNLISTED_PLAYER_ZERO_SALARY` and, on a reviewed commit, recorded once in
+`data/2026-27/unlisted_players.json` (name, NBA team, position, salary 0, first
+snapshot). `salary_freeze.json` is never changed. A row with neither a known
+identity nor a Yahoo id still blocks.

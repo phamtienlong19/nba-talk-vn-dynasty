@@ -157,6 +157,8 @@ def team_view(si, state, fid, base) -> dict:
     slots = state.get("slots", {})
     for r in rep["roster"]:
         r["s"] = slots.get(r["k"])
+        meta = ls.player_meta(si, r["k"])  # display data for players the original board does not list (in-season adds)
+        r["pos"], r["nba"] = (meta.get("displayPosition") or "").replace(",", "/"), meta.get("nbaTeam") or ""
     rep["il"] = sum(1 for r in rep["roster"] if r["s"] in SLOTS_IL)
     rep["outKeys"] = sorted(set(ls.team_players(si, base, fid)) - {r["k"] for r in rep["roster"]})
     return rep

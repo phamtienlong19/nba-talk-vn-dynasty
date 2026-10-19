@@ -9,11 +9,14 @@
     python3 scripts/import_rosters.py link-provisional provisional:dailyn-swain 478.p.12345
 
 FILE is CSV (header: team,player_key,player_id,player_name,slot -- player_key/player_id may be blank) or JSON
-({"teams":[{"team":..., "players":[{"playerKey"|"playerId", "name", "slot"}]}]}). See docs/ROSTER_REFRESH.md.
+({"teams":[{"team"|"teamKey":..., "players":[{"playerKey"|"playerId", "name", "slot"}]}]}, e.g. a Yahoo observation from
+scripts/yahoo_rosters.py). See docs/ROSTER_REFRESH.md.
 
 Rules: teams map through data/2026-27/rosters/team_map.json (Yahoo team key, else an alias); players resolve by Yahoo player
-key, then Yahoo player id, then an explicit alias, then a unique exact name (flagged). Anything unmatched BLOCKS the
-commit -- a player is never silently dropped or invented. A team missing from the file blocks too. The diff separates
+key, then Yahoo player id, then an explicit alias, then a unique exact name (flagged). A Yahoo id that is not in the
+frozen salary table is an UNLISTED player: salary 0 by league rule (config/cap_policy.json unlistedPlayerSalary), reported,
+and recorded in data/2026-27/unlisted_players.json when the import is committed. A row with neither a known identity nor a
+Yahoo id BLOCKS the commit -- a player is never silently dropped or invented. A team missing from the file blocks too. The diff separates
 ownership changes (added / dropped / changed team) from IL moves and lineup-only slot changes. The same content, an
 older timestamp, or a player on two teams cannot be committed. Every prior snapshot is kept; `rollback` only moves the
 pointer. COMPLETED in-season transactions dated before the new snapshot must be reflected in it, or the commit blocks.
@@ -55,7 +58,8 @@ def parse(path: str) -> list:
             team = t.get("teamKey") or t.get("team")
             for p in t["players"]:
                 rows.append({"team": team, "playerKey": p.get("playerKey"), "playerId": p.get("playerId"),
-                             "name": p.get("name"), "slot": p.get("slot")})
+                             "name": p.get("name"), "slot": p.get("slot"),
+                             "nbaTeam": p.get("nbaTeam"), "positions": p.get("positions")})
         return rows
     with open(path, encoding="utf-8-sig", newline="") as f:
         return [{"team": (r.get("team") or "").strip(), "playerKey": (r.get("player_key") or "").strip() or None,
@@ -86,10 +90,16 @@ def resolve_team(team_map: dict, value: str):
 
 
 def known_players(si) -> dict:
-    """Every identity the league can roster with a frozen salary: registry + provisional."""
+    """Every identity already on record: registry + provisional + unlisted (recorded by an earlier import)."""
     out = {k: p["name"] for k, p in si["registry"].items()}
     out.update({k: p["name"] for k, p in si["extraPlayers"].items()})
+    out.update({k: p["name"] for k, p in si.get("unlistedPlayers", {}).items()})
     return out
+
+
+def unlisted_salary(si):
+    rule = si["policy"].get("unlistedPlayerSalary")
+    return None if rule is None else float(rule["value"])
 
 
 def resolve_player(si, aliases: dict, row: dict):
@@ -116,6 +126,8 @@ def resolve_player(si, aliases: dict, row: dict):
                     if key else f"provisional {k} matched by name")
             return k, "PROVISIONAL_NAME", note
         return k, "NAME", (f"Yahoo key {key} not in the frozen player table; matched '{name}' by name" if key else f"matched '{name}' by name")
+    if key and not hits and name and unlisted_salary(si) is not None:
+        return key, "UNLISTED", f"'{name}' ({key}) is not in the frozen salary table: salary {unlisted_salary(si):g} by league rule"
     return None, None, (f"{len(hits)} players named '{name}'" if hits else f"unknown player '{name}' ({key or 'no Yahoo id'})")
 
 
@@ -124,7 +136,7 @@ def build_snapshot(si, rows, verified_at: str, source: str, data_dir: str) -> tu
     team_map, aliases = load_maps(data_dir)
     blocking, warnings = [], []
     teams = {fid: [] for fid in si["franchises"]}
-    seen = {}
+    seen, unlisted = {}, {}
     for i, r in enumerate(rows, 2):
         fid = resolve_team(team_map, r["team"])
         if fid is None:
@@ -134,9 +146,13 @@ def build_snapshot(si, rows, verified_at: str, source: str, data_dir: str) -> tu
         if key is None:
             blocking.append({"code": "UNMATCHED_PLAYER", "line": i, "team": si["shorts"][fid], "detail": note})
             continue
-        if how in ("NAME", "PROVISIONAL_NAME"):
-            warnings.append({"code": "MATCHED_BY_NAME" if how == "NAME" else "PROVISIONAL_LINK_CANDIDATE",
+        if how in ("NAME", "PROVISIONAL_NAME", "UNLISTED"):
+            warnings.append({"code": {"NAME": "MATCHED_BY_NAME", "PROVISIONAL_NAME": "PROVISIONAL_LINK_CANDIDATE",
+                                      "UNLISTED": "UNLISTED_PLAYER_ZERO_SALARY"}[how],
                              "line": i, "team": si["shorts"][fid], "detail": note})
+        if how == "UNLISTED":
+            unlisted[key] = {"playerKey": key, "name": " ".join(r["name"].split()), "nbaTeam": r.get("nbaTeam") or "",
+                             "displayPosition": r.get("positions") or "", "cap": unlisted_salary(si)}
         if key in seen:
             blocking.append({"code": "DUPLICATE_OWNERSHIP", "line": i, "detail": f"{ls.player_name(si, key)} on "
                              f"{si['shorts'][seen[key]]} and {si['shorts'][fid]}"})
@@ -146,7 +162,7 @@ def build_snapshot(si, rows, verified_at: str, source: str, data_dir: str) -> tu
             blocking.append({"code": "UNKNOWN_SLOT", "line": i, "detail": slot[1:]})
             continue
         seen[key] = fid
-        teams[fid].append({"playerKey": key, "name": ls.player_name(si, key), "slot": slot})
+        teams[fid].append({"playerKey": key, "name": unlisted[key]["name"] if key in unlisted else ls.player_name(si, key), "slot": slot})
     for fid, ps in teams.items():
         if not ps:
             blocking.append({"code": "TEAM_MISSING", "detail": f"{si['shorts'][fid]} has no rows: a whole roster is never removed silently"})
@@ -160,18 +176,26 @@ def build_snapshot(si, rows, verified_at: str, source: str, data_dir: str) -> tu
             "teams": teams,
             "ownershipDigest": ls._digest({f: sorted(r["playerKey"] for r in rs) for f, rs in teams.items()}),
             "digest": digest}
-    return snap, {"blocking": blocking, "warnings": warnings}
+    return snap, {"blocking": blocking, "warnings": warnings, "unlisted": [unlisted[k] for k in sorted(unlisted)]}
+
+
+def with_unlisted(si, report) -> dict:
+    """`si` plus the unlisted players this import would record (so names and the $0 salary resolve before commit)."""
+    out = dict(si)
+    out["unlistedPlayers"] = {**si.get("unlistedPlayers", {}), **{p["playerKey"]: p for p in report.get("unlisted", [])}}
+    return out
 
 
 def diff(si, snap) -> dict:
     """New snapshot vs the CURRENT-SEASON state (current snapshot + COMPLETED transactions not yet reflected)."""
     cur = ss.season_state(si)
+    names = {r["playerKey"]: r["name"] for rows in snap["teams"].values() for r in rows}
     old_owner, old_slot = cur["playerOwner"], cur["slots"]
     new_owner = ss.snapshot_owner(snap)
     new_slot = ss.snapshot_slots(snap)
     out = {"added": [], "dropped": [], "changedTeam": [], "ilMoves": [], "lineupOnly": [], "unchanged": 0,
            "transactions": []}
-    nm = lambda k: ls.player_name(si, k)  # noqa: E731
+    nm = lambda k: ls.player_name(si, k) if ls.player_meta(si, k) else names.get(k, k)  # noqa: E731
     sh = si["shorts"]
     for k, f in sorted(new_owner.items()):
         if k not in old_owner:
@@ -218,6 +242,16 @@ def commit(si, snap, report, d, data_dir, reviewed: bool) -> str:
     path = os.path.join(data_dir, "rosters", rel)
     if os.path.exists(path):
         raise ImportBlocked(f"DUPLICATE_IMPORT: {snap['snapshotId']} already exists")
+    if report.get("unlisted"):  # league rule: salary 0; identity recorded once, salary_freeze.json untouched
+        upath = os.path.join(data_dir, "unlisted_players.json")
+        doc = ss._load(upath) if os.path.exists(upath) else {
+            "season": "2026-27", "players": [],
+            "note": "Players rostered in-season who are not in salary_freeze.json. Salary 0 by league rule "
+                    "(config/cap_policy.json unlistedPlayerSalary). Added only by a reviewed roster import."}
+        have = {p["playerKey"] for p in doc["players"]}
+        doc["players"] += [{**p, "firstSeen": snap["snapshotId"]} for p in report["unlisted"] if p["playerKey"] not in have]
+        doc["players"].sort(key=lambda p: p["playerKey"])
+        ss._write(upath, doc)
     ss._write(path, snap)
     idx["history"].append({"snapshotId": snap["snapshotId"], "file": rel, "verifiedAt": snap["verifiedAt"],
                            "source": snap["source"], "digest": snap["digest"], "action": "COMMIT",

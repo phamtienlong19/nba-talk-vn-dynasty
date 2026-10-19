@@ -281,8 +281,8 @@ class TestReconciliation(unittest.TestCase):
         self.assertIn(("Jordan Miller", "Bsy"), {(x["player"], x["team"]) for x in d["added"]})
         self.assertTrue(all(x["note"] == "on Yahoo, not on our roster" for x in d["added"]))
         self.assertTrue(all("not on Yahoo" in x["note"] or "provisional" in x["note"] for x in d["dropped"]))
-        unknown = [b for b in self.rec["report"]["blocking"] if b["code"] == "UNMATCHED_PLAYER"]
-        self.assertEqual([b["detail"] for b in unknown], ["unknown player 'Jayden Quaintance' (478.p.10594)"])
+        self.assertEqual(self.rec["report"]["blocking"], [])                 # importable under the 2026-10-19 rule
+        self.assertEqual([p["name"] for p in self.rec["report"]["unlisted"]], ["Jayden Quaintance"])
 
     def test_team_change_matching_an_open_proposal_is_labelled_not_applied(self):
         with TempData() as td:
@@ -341,6 +341,59 @@ class TestReconciliation(unittest.TestCase):
         self.assertEqual([x["player"] for x in self.rec["salaryEvidence"]], ["RJ Barrett"])  # reported, frozen salary kept
 
 
+class TestUnlistedPlayers(unittest.TestCase):
+    """League rule (owner, 2026-10-19): a rostered player whose salary is not in the frozen table is a 0."""
+    QUAINTANCE = "478.p.10594"
+
+    def test_rule_is_recorded_in_policy_not_hidden_in_code(self):
+        rule = ss._load(os.path.join(os.path.dirname(ss.DATA_DIR), "..", "config", "cap_policy.json"))["unlistedPlayerSalary"]
+        self.assertEqual(rule["value"], 0)
+        self.assertIn("2026-10-19", rule["source"])
+        with TempData() as td:
+            si = td.si()
+            si["policy"] = {k: v for k, v in si["policy"].items() if k != "unlistedPlayerSalary"}
+            self.assertIsNone(ir.resolve_player(si, {}, {"playerKey": self.QUAINTANCE, "name": "Jayden Quaintance"})[0])
+
+    def test_preview_prices_the_unlisted_player_at_zero(self):
+        si = ss.load_season(ls.load_inputs())
+        rec = yr.reconcile(si, reference())
+        u = rec["report"]["unlisted"]
+        self.assertEqual(u, [{"playerKey": self.QUAINTANCE, "name": "Jayden Quaintance", "nbaTeam": "SAS",
+                              "displayPosition": "PF", "cap": 0.0}])
+        self.assertIn("UNLISTED_PLAYER_ZERO_SALARY", [w["code"] for w in rec["report"]["warnings"]])
+        self.assertIn(("Jayden Quaintance", "sup fam"), {(x["player"], x["team"]) for x in rec["diff"]["added"]})
+        sup = next(p for p in rec["payroll"] if p["team"] == "sup fam")
+        self.assertEqual((sup["count"], sup["capIfImported"]), (15, sup["capNow"]))
+        self.assertNotIn(self.QUAINTANCE, si.get("unlistedPlayers", {}))      # nothing recorded by a preview
+
+    def test_commit_records_identity_once_and_never_touches_the_salary_freeze(self):
+        with TempData() as td:
+            salaries = ss._load(os.path.join(td.dir, "salary_freeze.json"))
+            obs = reference()
+            path = os.path.join(td.root, "obs.json")
+            ss._write(path, obs)
+            si = td.si()
+            snap, rep = ir.build_snapshot(si, ir.parse(path), obs["capturedAt"], obs["source"], td.dir)
+            ir.commit(si, snap, rep, ir.diff(si, snap), td.dir, reviewed=True)
+            si2 = td.si()
+            cur = ss.season_state(si2)
+            self.assertEqual((cur["playerOwner"][self.QUAINTANCE], cur["slots"][self.QUAINTANCE]), (SUP, "IL"))
+            self.assertEqual((ls.player_cap(si2, self.QUAINTANCE), ls.player_name(si2, self.QUAINTANCE)), (0.0, "Jayden Quaintance"))
+            row = next(r for r in ss.season_view(si2)["teams"][SUP]["roster"] if r["k"] == self.QUAINTANCE)
+            self.assertEqual((row["pos"], row["nba"], row["s"], row["c"]), ("PF", "SAS", "IL", 0.0))
+            self.assertEqual(ss._load(os.path.join(td.dir, "salary_freeze.json")), salaries)
+            # a later import that still lists him does not add a second record
+            obs2 = dict(obs, capturedAt="2026-10-20T00:00:00Z")
+            obs2["teams"][0]["players"][0] = dict(obs2["teams"][0]["players"][0], slot="IL")
+            ss._write(path, obs2)
+            snap2, rep2 = ir.build_snapshot(si2, ir.parse(path), obs2["capturedAt"], "t", td.dir)
+            self.assertEqual(rep2["unlisted"], [])
+            ir.commit(si2, snap2, rep2, ir.diff(si2, snap2), td.dir, reviewed=True)
+            recs = ss._load(os.path.join(td.dir, "unlisted_players.json"))["players"]
+            self.assertEqual([p["playerKey"] for p in recs], [self.QUAINTANCE])
+            self.assertEqual(recs[0]["firstSeen"], snap["snapshotId"])
+
+
 class TestGovernance(unittest.TestCase):
     """A fetch, a manual import, a validate or a diff never changes official data."""
 
@@ -366,8 +419,6 @@ class TestGovernance(unittest.TestCase):
         with TempData() as td:
             si = td.si()
             obs = reference()
-            for t in obs["teams"]:                                          # test data: drop the one unpriced player
-                t["players"] = [p for p in t["players"] if p["playerId"] != "10594"]
             path = os.path.join(td.root, "obs.json")
             ss._write(path, obs)
             rows = ir.parse(path)                                           # the importer reads an observation as-is

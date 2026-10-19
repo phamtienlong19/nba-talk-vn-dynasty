@@ -462,7 +462,7 @@ def build_now(si: dict, current: dict, snapshot: dict, band1: dict, near: int) -
         keys = ls.team_players(si, current, fid)
         rows = []
         for k in keys:
-            meta = si["registry"].get(k) or si["extraPlayers"].get(k) or {}
+            meta = ls.player_meta(si, k)
             sp = snap_by_key.get(k)
             c0, c1 = ls.player_cap(si, k), float(sp["capDollars"]) if sp else 0.0
             rows.append({"k": k, "n": ls.player_name(si, k), "pos": (meta.get("displayPosition") or "").replace(",", "/"),

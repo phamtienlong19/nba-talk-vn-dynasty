@@ -353,7 +353,8 @@ def reconcile(si, obs, data_dir=ss.DATA_DIR) -> dict:
             unmapped.append(t["teamId"])
         for p in t["players"]:
             rows.append({"team": fid or t.get("teamName") or str(t["teamId"]), "playerKey": p.get("playerKey"),
-                         "playerId": p.get("playerId"), "name": p.get("name"), "slot": p.get("slot")})
+                         "playerId": p.get("playerId"), "name": p.get("name"), "slot": p.get("slot"),
+                         "nbaTeam": p.get("nbaTeam"), "positions": p.get("positions")})
     snap, report = ir.build_snapshot(si, rows, obs["capturedAt"], obs["source"], data_dir)
     hard = {"UNMATCHED_TEAM", "DUPLICATE_OWNERSHIP"}
     d = ir.diff(si, snap) if not any(b["code"] in hard for b in report["blocking"]) else None
@@ -379,18 +380,18 @@ def reconcile(si, obs, data_dir=ss.DATA_DIR) -> dict:
     for x in d["dropped"]:
         x["note"] = ("provisional identity: Yahoo may list this player under its own id (see PROVISIONAL_LINK_CANDIDATE)"
                      if x["key"] in si["extraPlayers"] else "on our roster, not on Yahoo")
-    # payroll preview: the existing top-9 rule over frozen salaries, IL included; unknown players are reported, not priced
+    # payroll preview: the existing top-9 rule over frozen salaries, IL included; unlisted players at the league-rule 0
     new_owner = ss.snapshot_owner(snap)
+    si_new = ir.with_unlisted(si, report)
     for fid in si["franchises"]:
         before = ls.team_cap(si, cur, fid)
         keys = [k for k, f in new_owner.items() if f == fid]
         out["payroll"].append({"team": si["shorts"][fid], "count": len(keys), "capNow": before,
-                               "capIfImported": ls.counted_cap(si, keys),
+                               "capIfImported": ls.counted_cap(si_new, keys),
                                "il": sum(1 for r in snap["teams"][fid] if r.get("slot") in ss.SLOTS_IL)})
-    unknown = [b for b in report["blocking"] if b["code"] == "UNMATCHED_PLAYER"]
-    if unknown:
-        out["notes"].append(f"{len(unknown)} player(s) are not in the frozen 2026-27 salary table; the commissioner must add a "
-                            "reviewed entry before this observation can be imported (salaries are never guessed)")
+    if report.get("unlisted"):
+        out["notes"].append(f"{len(report['unlisted'])} player(s) are not in the frozen 2026-27 salary table: salary 0 by league "
+                            "rule, recorded in unlisted_players.json only when the import is committed")
     for t in obs["teams"]:
         for p in t["players"]:
             k = p.get("playerKey")
@@ -429,7 +430,7 @@ def render_report(obs, check, rec, prev_diff=None, prev_path=None) -> str:
                 L.append(f"  RECORDED     {t['txnId']} {t.get('label') or ''}: {'reflected on Yahoo' if t['reflected'] else 'NOT reflected on Yahoo'}")
             L.append(f"  unchanged: {d['unchanged']}")
         if rec["payroll"]:
-            L.append("payroll preview (top 9 frozen salaries, IL included; unknown players not priced):")
+            L.append("payroll preview (top 9 frozen salaries, IL included; unlisted players at 0 by league rule):")
             for p in rec["payroll"]:
                 delta = p["capIfImported"] - p["capNow"]
                 L.append(f"  {p['team']:9} {p['count']:2} players ({p['il']} IL)  {p['capNow']:g} → {p['capIfImported']:g}"

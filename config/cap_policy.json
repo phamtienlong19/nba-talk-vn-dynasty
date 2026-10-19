@@ -13,5 +13,11 @@
     "appliesTo": "2026-27 regular season: current-season payroll, Trade Lab scenarios, in-season trade-time cap check, cap-checkpoint findings",
     "source": "League owner, 2026-10-16: only the top 9 salaries on a roster count toward the cap, IL or not.",
     "note": "Draft-night history (keeper freeze, pre-draft trades, draft running totals) keeps the totals as recorded at the time."
+  },
+  "unlistedPlayerSalary": {
+    "value": 0,
+    "appliesTo": "a player rostered in-season (identified by Yahoo player id) who is not in data/2026-27/salary_freeze.json",
+    "source": "League owner, 2026-10-19: everyone whose salary is not found in the table is automatically a 0.",
+    "record": "data/2026-27/unlisted_players.json, written by a reviewed roster import; salary_freeze.json is never changed"
   }
 }

@@ -435,7 +435,7 @@ class TestRosterImport(unittest.TestCase):
             si = td.si()
             base = export_rows(si)
             cases = {
-                "UNMATCHED_PLAYER": base + [["Bsy", "478.p.999999", "", "Nobody Real", "BN"]],
+                "UNMATCHED_PLAYER": base + [["Bsy", "", "", "Nobody Real", "BN"]],   # no Yahoo id, unknown name
                 "UNMATCHED_TEAM": base + [["Not A Team", WEMBY, "", "Victor Wembanyama", ""]],
                 "DUPLICATE_OWNERSHIP": base + [["TT", WEMBY, "", "Victor Wembanyama", ""]],
                 "TEAM_MISSING": [r for r in base if r[0] != "TT"],
@@ -468,7 +468,9 @@ class TestRosterImport(unittest.TestCase):
             self.assertEqual(ir.resolve_player(si, al, {"playerId": "10094", "name": "x"})[:2], (WEMBY, "KEY"))
             self.assertEqual(ir.resolve_player(si, {"Wemby": WEMBY}, {"name": "Wemby"})[:2], (WEMBY, "ALIAS"))
             self.assertEqual(ir.resolve_player(si, al, {"name": "Victor Wembanyama"})[:2], (WEMBY, "NAME"))
-            self.assertIsNone(ir.resolve_player(si, al, {"playerKey": "478.p.999999", "name": "Nobody"})[0])
+            # a Yahoo id outside the frozen table is an unlisted player at the league-rule salary 0 (2026-10-19)
+            self.assertEqual(ir.resolve_player(si, al, {"playerKey": "478.p.999999", "name": "Nobody"})[:2], ("478.p.999999", "UNLISTED"))
+            self.assertIsNone(ir.resolve_player(si, al, {"name": "Nobody"})[0])     # no id, unknown name: still blocks
 
 
 class TestProvisionalPlayers(unittest.TestCase):

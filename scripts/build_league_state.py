@@ -401,7 +401,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
     def card_asset(a):  # what a trade card shows: name, salary, position, NBA team, 2026 rookie
         d = ls.describe_asset(si, a)
         if a["type"] == "player":
-            p = si["registry"].get(a["playerKey"]) or si["extraPlayers"].get(a["playerKey"]) or {}
+            p = ls.player_meta(si, a["playerKey"])
             d.update({"pos": (p.get("displayPosition") or "").replace(",", "/"), "nba": p.get("nbaTeam") or "",
                       "rk": a["playerKey"] in rookies, "dr": drafted_at.get(a["playerKey"])})
         return d
