@@ -353,7 +353,7 @@ def reconcile(si, obs, data_dir=ss.DATA_DIR) -> dict:
             unmapped.append(t["teamId"])
         for p in t["players"]:
             rows.append({"team": fid or t.get("teamName") or str(t["teamId"]), "playerKey": p.get("playerKey"),
-                         "playerId": p.get("playerId"), "name": p.get("name"), "slot": p.get("slot"),
+                         "playerId": p.get("playerId"), "name": p.get("name"), "slot": p.get("slot"), "status": p.get("injury"),
                          "nbaTeam": p.get("nbaTeam"), "positions": p.get("positions")})
     snap, report = ir.build_snapshot(si, rows, obs["capturedAt"], obs["source"], data_dir)
     hard = {"UNMATCHED_TEAM", "DUPLICATE_OWNERSHIP"}

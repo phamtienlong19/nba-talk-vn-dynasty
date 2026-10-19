@@ -58,7 +58,7 @@ def parse(path: str) -> list:
             team = t.get("teamKey") or t.get("team")
             for p in t["players"]:
                 rows.append({"team": team, "playerKey": p.get("playerKey"), "playerId": p.get("playerId"),
-                             "name": p.get("name"), "slot": p.get("slot"),
+                             "name": p.get("name"), "slot": p.get("slot"), "status": p.get("status") or p.get("injury"),
                              "nbaTeam": p.get("nbaTeam"), "positions": p.get("positions")})
         return rows
     with open(path, encoding="utf-8-sig", newline="") as f:
@@ -162,7 +162,10 @@ def build_snapshot(si, rows, verified_at: str, source: str, data_dir: str) -> tu
             blocking.append({"code": "UNKNOWN_SLOT", "line": i, "detail": slot[1:]})
             continue
         seen[key] = fid
-        teams[fid].append({"playerKey": key, "name": unlisted[key]["name"] if key in unlisted else ls.player_name(si, key), "slot": slot})
+        row = {"playerKey": key, "name": unlisted[key]["name"] if key in unlisted else ls.player_name(si, key), "slot": slot}
+        if r.get("status"):  # Yahoo's injury status as observed (O, Q, D, INJ, ...): evidence only, never ownership
+            row["status"] = str(r["status"]).strip().upper()
+        teams[fid].append(row)
     for fid, ps in teams.items():
         if not ps:
             blocking.append({"code": "TEAM_MISSING", "detail": f"{si['shorts'][fid]} has no rows: a whole roster is never removed silently"})

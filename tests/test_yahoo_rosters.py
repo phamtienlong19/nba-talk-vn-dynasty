@@ -462,6 +462,93 @@ class TestTeamNames(unittest.TestCase):
         self.assertIn("<b>Bsy</b><small>GTA San Antonio</small>", back)
 
 
+class TestRosterChecks(unittest.TestCase):
+    """Anti-tank roster limits (docs/LEAGUE_RULES_MODEL.md) reported as evidence: injured stacking, single-position
+    hoarding, position coverage and whether a full lineup can be fielded. Levels only -- never a tanking verdict."""
+
+    def setUp(self):
+        self.si = ss.load_season(ls.load_inputs())
+        self.cur = ss.season_state(self.si)
+        self.rules = ss._load(ss.RULES_PATH)
+
+    def state_with(self, fid, slots=None, status=None, add=()):
+        st = dict(self.cur, slots=dict(self.cur["slots"]), status=dict(self.cur.get("status", {})),
+                  playerOwner=dict(self.cur["playerOwner"]))
+        st["slots"].update(slots or {})
+        st["status"].update(status or {})
+        for k in add:
+            st["playerOwner"][k] = fid
+        return st
+
+    def test_rules_are_recorded_with_their_source(self):
+        self.assertEqual((self.rules["longTermInjured"]["max"], self.rules["minPerPosition"]), (5, 2))
+        self.assertEqual((self.rules["singlePosition"]["max"], self.rules["singlePosition"]["maxWithComboTags"]), (5, 7))
+        self.assertEqual(list(self.rules["lineupSlots"]), ["PG", "SG", "G", "SF", "PF", "F", "C", "FC", "Util"])
+        self.assertIn("never decides tanking intent", self.rules["note"])
+
+    def test_injured_stacking_counts_il_and_out_players(self):
+        f = BSY
+        keys = sorted(ls.team_players(self.si, self.cur, f), key=lambda k: -ls.player_cap(self.si, k))
+        c = ss.roster_checks(self.si, self.cur, f)["injured"]
+        self.assertEqual((c["count"], c["level"]), (1, "ok"))                     # Jordan Miller on IL
+        four_il = {k: "IL" for k in keys[1:4]}
+        out = {keys[0]: "O", keys[4]: "INJ"}                                         # Out but kept off IL still counts
+        c = ss.roster_checks(self.si, self.state_with(f, four_il, out), f)["injured"]
+        self.assertEqual((c["count"], c["il"], c["out"], c["level"]), (6, 4, 2, "over"))
+        self.assertEqual(c["countedCap"], sum(ls.player_cap(self.si, k) for k in keys[:5]) + 0)  # their salaries still count
+        q = ss.roster_checks(self.si, self.state_with(f, status={keys[0]: "Q"}), f)["injured"]
+        self.assertEqual(q["count"], 1)                                              # questionable is not injured-list stacking
+
+    def test_single_position_hoarding_levels(self):
+        levels = {self.si["shorts"][f]: ss.roster_checks(self.si, self.cur, f)["singlePosition"]["level"] for f in self.si["franchises"]}
+        self.assertEqual(levels["Bsy"], "ok")
+        self.assertEqual(levels["HCMC"], "watch")                                   # 6: inside the combo exception -> review
+        c = ss.roster_checks(self.si, self.cur, BSY, dict(self.rules, singlePosition={"max": 2, "maxWithComboTags": 3}))
+        self.assertEqual(c["singlePosition"]["level"], "over")
+
+    def test_coverage_and_full_lineup(self):
+        dha = ss.roster_checks(self.si, self.cur, "franchise-08")
+        self.assertEqual((dha["coverage"]["short"], dha["coverage"]["byPosition"]["PG"], dha["coverage"]["level"]), (["PG"], 1, "over"))
+        self.assertEqual((dha["lineup"]["filled"], dha["lineup"]["empty"]), (9, []))
+        # put every healthy center on IL: the lineup can no longer be filled
+        keys = ls.team_players(self.si, self.cur, BSY)
+        centers = [k for k in keys if "C" in ss._positions(self.si, k, self.rules["positions"])]
+        c = ss.roster_checks(self.si, self.state_with(BSY, {k: "IL" for k in centers}), BSY)
+        self.assertIn("C", c["coverage"]["short"])
+        self.assertIn("C", c["lineup"]["empty"])
+        self.assertEqual(c["lineup"]["level"], "over")
+
+    def test_status_is_observed_evidence_not_ownership(self):
+        with TempData() as td:
+            obs = reference()
+            path = os.path.join(td.root, "obs.json")
+            ss._write(path, obs)
+            si = td.si()
+            snap, rep = ir.build_snapshot(si, ir.parse(path), obs["capturedAt"], obs["source"], td.dir)
+            rows = {r["playerKey"]: r for rows in snap["teams"].values() for r in rows}
+            self.assertEqual((rows[MILLER]["slot"], rows[MILLER]["status"]), ("IL", "O"))
+            self.assertEqual(rows["478.p.5464"]["status"], "O")                    # Porziņģis: Out, kept on the bench
+            self.assertNotIn("status", rows[JOKIC])
+            ir.commit(si, snap, rep, ir.diff(si, snap), td.dir, reviewed=True)
+            si2 = td.si()
+            cur = ss.season_state(si2)
+            self.assertEqual(cur["status"]["478.p.5464"], "O")
+            thinh = ss.roster_checks(si2, cur, THINH)["injured"]
+            self.assertEqual((thinh["il"], thinh["out"]), (1, 1))                  # Butler on IL + Porziņģis out
+            self.assertEqual(ss.snapshot_owner(snap)["478.p.5464"], THINH)          # status never moves ownership
+
+    def test_cards_show_the_checks_quietly(self):
+        with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
+            html = f.read()
+        self.assertIn("function rosterChecks(c)", html)
+        self.assertIn('if(tm.checks)strip.appendChild(rosterChecks(tm.checks));', html)
+        data = json.loads(re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1).replace("<\\/", "</"))
+        dha = data["official"]["teams"]["franchise-08"]["checks"]
+        self.assertEqual(dha["coverage"]["short"], ["PG"])
+        for word in ("tank", "Tank", "violator"):                                   # evidence, not a label on a team
+            self.assertNotIn(word, json.dumps(data["official"]["teams"]))
+
+
 class TestGovernance(unittest.TestCase):
     """A fetch, a manual import, a validate or a diff never changes official data."""
 

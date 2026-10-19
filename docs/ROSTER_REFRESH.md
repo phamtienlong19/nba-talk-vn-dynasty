@@ -46,6 +46,8 @@ python3 scripts/import_rosters.py commit local_data/yahoo_observations/OBS-….j
   A payroll preview applies the existing top-9 frozen-salary rule (IL included).
   Yahoo's "Keeper Salary" label is shown only as evidence when it differs from
   the frozen salary; `salary_freeze.json` is never changed.
+- **Status.** Yahoo's player status (`O`, `Q`, `D`, `INJ`, …) is kept on the
+  snapshot row as observed evidence; it feeds the roster checks and never ownership or payroll.
 - **IL.** IL / IL+ is a lineup slot. IL players are owned roster members, stay
   in observations, snapshots and team cards (IL tag), and compete for the nine
   counted salaries like anyone else. A BN↔IL move changes neither ownership nor
