@@ -11,7 +11,9 @@
         "GTA San Antonio",
         "Hai | Bulls Dynasty",
         "Hai | GTA San Antonio"
-      ]
+      ],
+      "yahooTeamName": "Hai | Bulls Dynasty",
+      "name": "Bulls Dynasty"
     },
     "franchise-02": {
       "short": "CrazyCat",
@@ -20,7 +22,9 @@
         "CrazyCat",
         "CrazyCat Damageee",
         "CrazyCat | Damageeeee"
-      ]
+      ],
+      "yahooTeamName": "CrazyCat | Damageeeee",
+      "name": "Damageeeee"
     },
     "franchise-03": {
       "short": "Melo",
@@ -28,7 +32,9 @@
       "aliases": [
         "Melo",
         "MeloBB"
-      ]
+      ],
+      "yahooTeamName": "MeloBB",
+      "name": "MeloBB"
     },
     "franchise-04": {
       "short": "LC",
@@ -37,7 +43,9 @@
         "LC",
         "Long con",
         "Long con dynasty"
-      ]
+      ],
+      "yahooTeamName": "Long con dynasty",
+      "name": "Long con dynasty"
     },
     "franchise-05": {
       "short": "HCMC",
@@ -45,7 +53,9 @@
       "aliases": [
         "HCMC",
         "HCMC Kindergarten"
-      ]
+      ],
+      "yahooTeamName": "HCMC Kindergarten",
+      "name": "HCMC Kindergarten"
     },
     "franchise-06": {
       "short": "Dũng",
@@ -54,7 +64,9 @@
         "Dũng",
         "Dũng | Trader by Trade",
         "Trader by Trade"
-      ]
+      ],
+      "yahooTeamName": "Dũng | Trader By Trade",
+      "name": "Trader By Trade"
     },
     "franchise-07": {
       "short": "Maxfixe",
@@ -62,7 +74,9 @@
       "aliases": [
         "Maxfixe",
         "Poop for Coop"
-      ]
+      ],
+      "yahooTeamName": "Maxfixe",
+      "name": "Maxfixe"
     },
     "franchise-08": {
       "short": "DHA",
@@ -71,7 +85,9 @@
         "DHA",
         "DHA | Đì troi pít tông",
         "Đì troi pít tông"
-      ]
+      ],
+      "yahooTeamName": "DHA | Đì troi pít tông",
+      "name": "Đì troi pít tông"
     },
     "franchise-09": {
       "short": "Đạt",
@@ -80,7 +96,9 @@
         "M. Jordat | The Silver Seekers",
         "The Silver Seekers",
         "Đạt"
-      ]
+      ],
+      "yahooTeamName": "M. Jordat | The Silver Seekers",
+      "name": "The Silver Seekers"
     },
     "franchise-10": {
       "short": "DonTrick",
@@ -88,7 +106,9 @@
       "aliases": [
         "DonTrick",
         "DonTrick DevilTeam"
-      ]
+      ],
+      "yahooTeamName": "DonTrick DevilTeam",
+      "name": "DonTrick DevilTeam"
     },
     "franchise-11": {
       "short": "Thịnh",
@@ -97,7 +117,9 @@
         "Seattle SuperSonics",
         "Thịnh",
         "Thịnh | Seattle SuperSonics"
-      ]
+      ],
+      "yahooTeamName": "Thịnh | Seattle SuperSonics",
+      "name": "Seattle SuperSonics"
     },
     "franchise-12": {
       "short": "sup fam",
@@ -107,7 +129,9 @@
         "sup fam",
         "sup fam | Bruised for Boozer",
         "sup fam | Crashed for Caleb"
-      ]
+      ],
+      "yahooTeamName": "sup fam | Crashed for Caleb",
+      "name": "Crashed for Caleb"
     },
     "franchise-13": {
       "short": "Quân",
@@ -116,7 +140,9 @@
         "Okay See Thunder",
         "Quan | Okay See Thunder",
         "Quân"
-      ]
+      ],
+      "yahooTeamName": "Quan | Okay See Thunder",
+      "name": "Okay See Thunder"
     },
     "franchise-14": {
       "short": "TuLy",
@@ -125,7 +151,9 @@
         "No Country for Old Men",
         "TuLy",
         "TuLy | No Country for Old Men"
-      ]
+      ],
+      "yahooTeamName": "TuLy | No country for Old Men",
+      "name": "No country for Old Men"
     },
     "franchise-15": {
       "short": "Bz",
@@ -134,7 +162,9 @@
         "Bz",
         "Bz | Putin the tank driver",
         "Putin the Tank Driver"
-      ]
+      ],
+      "yahooTeamName": "Bz | Putin the tank driver",
+      "name": "Putin the tank driver"
     },
     "franchise-16": {
       "short": "TT",
@@ -144,7 +174,11 @@
         "T T| Kratos Dynasty",
         "TT",
         "TT | Kratos Dynasty"
-      ]
+      ],
+      "yahooTeamName": "T T| Kratos Dynasty",
+      "name": "Kratos Dynasty"
     }
-  }
+  },
+  "namesAsOf": "2026-10-19",
+  "namesNote": "name = the Yahoo team name without its 'Manager | ' prefix (yahooTeamName as listed on Yahoo on namesAsOf). It is what the site shows. The locked keeper freeze and franchises.json keep the names as they were at the time."
 }

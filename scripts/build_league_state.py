@@ -282,6 +282,44 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
     return panel.replace(anchor, anchor + "\n" + block, 1)
 
 
+def sync_team_names(index_html: str, inputs: dict) -> str:
+    """Rewrite the static team labels (card title, cap-page label, draft-order chips) to the current names in
+    rosters/team_map.json. Idempotent. A chip keeps its format ("Short | Name" or a bare name); a bare chip whose name
+    contained the short name gets the "Short | " prefix so the team stays recognisable."""
+    teams, _ = parse_board(index_html)
+    old_by_short = {t["short"]: t["name"] for t in teams}
+    out = index_html
+    for ft in inputs["freeze"]["teams"]:
+        short, new = ft["short"], ls.team_name(inputs, ft["franchiseId"])
+        old = old_by_short.get(short)
+        if not old or old == new:
+            continue
+        e_old, e_new, e_short = (html_lib.escape(x, quote=False) for x in (old, new, short))
+
+        def card(m):
+            body = m.group(0)
+            if f'<span class="identity-tag">{e_short}</span>' not in body:
+                return body
+            return re.sub(r'(<div class="team-name">(?:' + re.escape(pool.CROWN) + r')?)' + re.escape(e_old) + r'</div>',
+                          lambda x: x.group(1) + e_new + "</div>", body)
+        out = re.sub(r'<section class="team-card[^"]*"[^>]*>.*?</section>', card, out, flags=re.S)
+        out = out.replace(f"<b>{e_short}</b><small>{e_old}</small>", f"<b>{e_short}</b><small>{e_new}</small>")
+
+        def chip(m):
+            text = m.group(2)
+            crown = pool.CROWN if text.startswith(pool.CROWN) else ""
+            bare = text[len(crown):]
+            if bare == e_old:
+                label = e_new if short.lower() not in old.lower() or short.lower() in new.lower() else f"{e_short} | {e_new}"
+            elif bare == f"{e_short} | {e_old}":
+                label = f"{e_short} | {e_new}"
+            else:
+                return m.group(0)
+            return m.group(1) + crown + label + "</span>"
+        out = re.sub(r'(<span class="pick-chip"[^>]*>)([^<]*)</span>', chip, out)
+    return out
+
+
 def cmd_sync_ledger(args):
     with open(INDEX_HTML, encoding="utf-8") as f:
         html = f.read()
@@ -372,7 +410,7 @@ def public_pre_draft(trades: list) -> list:
 def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_YAHOO_PATH) -> dict:
     floor, ceiling = ls.cap_band(inputs)
     fr = inputs["franchises"]
-    teams = [{"id": t["franchiseId"], "short": t["short"], "name": t.get("teamName") or fr[t["franchiseId"]]["displayName"],
+    teams = [{"id": t["franchiseId"], "short": t["short"], "name": ls.team_name(inputs, t["franchiseId"]),
               "color": t["color"], "text": t["text"],
               "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME} for t in inputs["freeze"]["teams"]]
     base = ls.initial_state(inputs)
@@ -487,6 +525,7 @@ def cmd_embed(args):
     with open(INDEX_HTML, encoding="utf-8") as f:
         html = f.read()
     inputs = ls.load_inputs()
+    html = sync_team_names(html, inputs)  # static labels follow the current team names
     data = build_page_data(inputs, html)
     with open(INDEX_HTML, "w", encoding="utf-8") as f:
         f.write(embed(html, data))

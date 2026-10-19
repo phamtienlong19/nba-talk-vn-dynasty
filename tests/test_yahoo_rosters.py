@@ -9,6 +9,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -420,6 +421,43 @@ class TestUnlistedPlayers(unittest.TestCase):
             recs = ss._load(os.path.join(td.dir, "unlisted_players.json"))["players"]
             self.assertEqual([p["playerKey"] for p in recs], [self.QUAINTANCE])
             self.assertEqual(recs[0]["firstSeen"], snap["snapshotId"])
+
+
+class TestTeamNames(unittest.TestCase):
+    """The site shows each team's current Yahoo name (rosters/team_map.json); locked history keeps the old names."""
+
+    def test_current_names_come_from_the_team_map(self):
+        i = ls.load_inputs()
+        tm = ss._load(os.path.join(ss.ROSTER_DIR, "team_map.json"))
+        self.assertEqual(tm["teams"]["franchise-01"]["yahooTeamName"], "Hai | Bulls Dynasty")
+        self.assertEqual(ls.team_name(i, "franchise-01"), "Bulls Dynasty")       # "Manager | " prefix dropped
+        self.assertEqual(ls.team_name(i, "franchise-12"), "Crashed for Caleb")
+        self.assertEqual(ls.team_name(i, "franchise-07"), "Maxfixe")
+        freeze = {t["franchiseId"]: t["teamName"] for t in i["freeze"]["teams"]}
+        self.assertEqual(freeze["franchise-01"], "GTA San Antonio")              # the locked freeze is not rewritten
+        self.assertEqual(i["franchises"]["franchise-01"]["displayName"], "Hai | GTA San Antonio")
+
+    def test_page_labels_follow_the_current_names(self):
+        import build_league_state as bls
+        with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
+            html = f.read()
+        i = ls.load_inputs()
+        self.assertEqual(bls.sync_team_names(html, i), html)                     # already in sync (idempotent)
+        names = re.findall(r'<div class="team-name">([^<]*)</div>', html)
+        self.assertIn("Bulls Dynasty", names)
+        self.assertIn("Damageeeee", names)
+        self.assertIn("<b>sup fam</b><small>Crashed for Caleb</small>", html)
+        self.assertIn(">CrazyCat | Damageeeee</span>", html)                     # bare chip gains its short name
+        self.assertIn(">Bsy | Bulls Dynasty</span>", html)
+        for old in ("GTA San Antonio", "Bruised for Boozer", "Poop for Coop", "CrazyCat Damageee<"):
+            self.assertNotIn(old, html)
+        data = json.loads(re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1).replace("<\\/", "</"))
+        self.assertEqual({t["short"]: t["name"] for t in data["teams"]}["Bsy"], "Bulls Dynasty")
+        # renaming back restores the old labels: the rewrite is driven by the map, not hard-coded
+        i2 = dict(i, teamNames=dict(i["teamNames"], **{"franchise-01": "GTA San Antonio"}))
+        back = bls.sync_team_names(html, i2)
+        self.assertIn(">Bsy | GTA San Antonio</span>", back)
+        self.assertIn("<b>Bsy</b><small>GTA San Antonio</small>", back)
 
 
 class TestGovernance(unittest.TestCase):

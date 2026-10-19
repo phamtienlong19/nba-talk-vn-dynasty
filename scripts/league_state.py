@@ -71,6 +71,9 @@ def load_inputs(data_dir: str = DATA_DIR, registry_path: str = REGISTRY_PATH, po
     # table (league rule: their salary is 0; config/cap_policy.json unlistedPlayerSalary). Written by a reviewed import.
     unl = os.path.join(data_dir, "unlisted_players.json")
     inputs["unlistedPlayers"] = {p["playerKey"]: p for p in _load(unl)["players"]} if os.path.exists(unl) else {}
+    # current team names (Yahoo, rosters/team_map.json); the locked keeper freeze keeps the names it was frozen with
+    tm = os.path.join(data_dir, "rosters", "team_map.json")
+    inputs["teamNames"] = {f: t["name"] for f, t in _load(tm)["teams"].items() if t.get("name")} if os.path.exists(tm) else {}
     # 2026-27 salaries frozen at the end of the draft: payroll never moves when the Yahoo registry is refreshed
     sal = os.path.join(data_dir, "salary_freeze.json")
     inputs["salaries"] = _load(sal)["salaries"] if os.path.exists(sal) else {}
@@ -127,6 +130,14 @@ def player_cap(inputs: dict, player_key: str) -> float:
     if extra is not None:
         return float(extra.get("cap", 0))
     raise StateError(f"unknown player {player_key}")
+
+
+def team_name(inputs: dict, fid: str) -> str:
+    """The team's current name (team_map.json), else the name recorded at the keeper freeze, else the forensic one."""
+    if inputs.get("teamNames", {}).get(fid):
+        return inputs["teamNames"][fid]
+    t = next((t for t in inputs["freeze"]["teams"] if t["franchiseId"] == fid), {})
+    return t.get("teamName") or inputs["franchises"][fid]["displayName"]
 
 
 def player_meta(inputs: dict, player_key: str) -> dict:

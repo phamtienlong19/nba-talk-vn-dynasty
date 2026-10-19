@@ -384,7 +384,7 @@ def build_what_if(inputs: dict, snapshot: dict, assumptions: dict | None = None,
                             "or0": or0[k], "or1": or1[k], "k0": k in k0, "k1": k in keep,
                             "lock": p1[k] >= A["neverDropAtOrAbove"], "rev": A["reviewDropFrom"] <= p1[k] < A["neverDropAtOrAbove"]})
         team = {
-            "id": fid, "short": t["short"], "name": t.get("teamName") or inputs["franchises"][fid]["displayName"],
+            "id": fid, "short": t["short"], "name": ls.team_name(inputs, fid),
             "color": t["color"], "text": t["text"], "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME,
             "players": players,
             "a": {"official": _num(cap0), "whatIf": _num(cap1), "delta": _num(cap1 - cap0),
@@ -472,7 +472,7 @@ def build_now(si: dict, current: dict, snapshot: dict, band1: dict, near: int) -
         for i, r in enumerate(rows):
             r["x"] = bool(n) and i >= n  # beyond the top N at snapshot prices: not counted
         cap0, cap1 = counted([r["c0"] for r in rows]), counted([r["c1"] for r in rows])
-        out.append({"id": fid, "short": t["short"], "name": t.get("teamName") or si["franchises"][fid]["displayName"],
+        out.append({"id": fid, "short": t["short"], "name": ls.team_name(si, fid),
                     "color": t["color"], "text": t["text"], "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME,
                     "players": rows,
                     "a": {"official": _num(cap0), "whatIf": _num(cap1), "delta": _num(cap1 - cap0),

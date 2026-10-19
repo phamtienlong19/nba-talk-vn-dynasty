@@ -5,6 +5,8 @@
 - The 6 provisional rookies are still provisional (Yahoo ids appear as link candidates); not linked.
 - Yahoo's keeper-salary label for RJ Barrett is 5; the frozen salary is 0. Not changed.
 
+- Team names now follow Yahoo (2026-10-19, `rosters/team_map.json` `name`): e.g. Bsy → Bulls Dynasty, sup fam → Crashed for Caleb, CrazyCat → Damageeeee, Maxfixe → Maxfixe, LC → Long con dynasty. The locked keeper freeze and franchises.json keep the old names as history.
+
 ## Decisions Required
 
 - Whether to link the 6 provisional rookies to their Yahoo ids (`import_rosters.py link-provisional`).
