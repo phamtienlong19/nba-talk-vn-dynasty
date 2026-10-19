@@ -238,7 +238,8 @@ class TestValidation(unittest.TestCase):
                 rc = yr.main(["fetch"], fetcher=fake, out_dir=out_dir)
             text = out.getvalue()
             self.assertEqual(rc, 1)
-            self.assertEqual(len(fake.urls), 16)                            # every team is still attempted
+            self.assertEqual(len({u for u in fake.urls}), 16)               # every team is still attempted
+            self.assertEqual(sum(1 for u in fake.urls if u.endswith("/9")), 2)  # the 503 was retried once
             self.assertIn("FETCH_AUTH_REQUIRED", text)
             self.assertIn("FETCH_HTTP_503", text)
             self.assertIn("INCOMPLETE_CAPTURE", text)
@@ -246,6 +247,26 @@ class TestValidation(unittest.TestCase):
             self.assertTrue(all(u.startswith("https://basketball.fantasysports.yahoo.com/nba/85092/") for u in fake.urls))
         finally:
             shutil.rmtree(out_dir)
+
+    def test_transient_errors_are_retried_once_auth_errors_never(self):
+        class Flaky(FakeFetcher):
+            def __init__(self):
+                super().__init__(pages={5: LOGIN_PAGE})
+                self.failed = set()
+
+            def get(self, url):
+                tid = int(url.rstrip("/").split("/")[-1])
+                if tid in (4, 9) and (tid not in self.failed or tid == 9):
+                    self.failed.add(tid)
+                    self.urls.append(url)
+                    raise yr.FetchError("NETWORK", "The read operation timed out")
+                return super().get(url)
+        f = Flaky()
+        teams, errors = yr.fetch_teams(yr.load_config(), yr.load_config()["teamIds"], f, delay=0, sleep=lambda s: None)
+        self.assertIn(4, [t["teamId"] for t in teams])                      # one timeout, then success
+        self.assertEqual({(e["teamId"], e["code"], e["attempts"]) for e in errors},
+                         {(9, "NETWORK", 2), (5, "AUTH_REQUIRED", 1)})        # sign-in page: no retry
+        self.assertEqual(sum(1 for u in f.urls if u.endswith("/5")), 1)
 
     def test_single_team_fetch_is_partial(self):
         out_dir = tempfile.mkdtemp()

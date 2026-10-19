@@ -503,21 +503,31 @@ class BrowserFetcher:
         self._pw.stop()
 
 
-def fetch_teams(cfg, team_ids, fetcher, delay=None, sleep=time.sleep):
-    """-> (teams, errors). Every requested team is attempted; one failure never hides the others."""
+RETRYABLE = ("NETWORK", "HTTP_429", "HTTP_500", "HTTP_502", "HTTP_503", "HTTP_504")
+
+
+def fetch_teams(cfg, team_ids, fetcher, delay=None, sleep=time.sleep, attempts=2):
+    """-> (teams, errors). Every requested team is attempted; one failure never hides the others. A timeout or a
+    server error is retried once after a pause; a sign-in page, consent wall or wrong team is not retried."""
     teams, errors = [], []
     delay = cfg.get("requestDelaySeconds", 1.5) if delay is None else delay
     for i, tid in enumerate(team_ids):
         if i:
             sleep(delay)
         url = page_url(cfg, tid)
-        try:
-            status, final_url, body = fetcher.get(url)
-            if status != 200:
-                raise FetchError(f"HTTP_{status}", url)
-            teams.append(parse_team_page(body, tid, cfg["leagueId"], final_url))
-        except FetchError as e:
-            errors.append({"teamId": tid, "code": e.code, "detail": e.detail})
+        for attempt in range(1, attempts + 1):
+            try:
+                status, final_url, body = fetcher.get(url)
+                if status != 200:
+                    raise FetchError(f"HTTP_{status}", url)
+                teams.append(parse_team_page(body, tid, cfg["leagueId"], final_url))
+                break
+            except FetchError as e:
+                if e.code in RETRYABLE and attempt < attempts:
+                    sleep(delay * 3)
+                    continue
+                errors.append({"teamId": tid, "code": e.code, "detail": e.detail, "attempts": attempt})
+                break
     return teams, errors
 
 
