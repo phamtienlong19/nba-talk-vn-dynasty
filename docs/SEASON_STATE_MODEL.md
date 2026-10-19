@@ -55,11 +55,13 @@ as evidence for the commissioner; it never labels a team as tanking. Injured pla
 | injured | IL / IL+ slots + players Yahoo lists Out (`O`, `INJ`) off IL; max 5 | at 5 = watch, over 5 = over |
 | single-pos | healthy players who can play only one position; max 5 (7 with combo tags) | 6–7 = watch (combo exception is a judgment), > 7 = over |
 | positions ✓ / short PG … | healthy players who can play each of PG, SG, SF, PF, C; min 2 | below = over |
+| short G / short F | healthy players who can play either position of a two-position combo (G = PG/SG, F = SF/PF); min 3 | below = over |
 | lineup | whether the healthy roster fills every Yahoo lineup slot on a full game day | any empty slot = over |
 
-Player status comes from the verified roster snapshot (Yahoo's `O`/`Q`/… as
-observed; it never affects ownership or payroll). Not automated: the "3 for a
-two-position combo" coverage nuance, the "max 4 single-position in the active
+Player status comes from the verified roster snapshot (Yahoo's codes as observed;
+it never affects ownership or payroll). Cards show it as a chip left of the name:
+P green, Q / GTD / DTD blue, D orange, INJ red, OUT solid red, OFS / SUSP ink; an IL
+player without a status shows IL. Not automated: when combo tags lift the single-position cap to 7, the "max 4 single-position in the active
 roster" lineup rule, injury duration, IL-return timing, and trades that would
 worsen a concentration.
 

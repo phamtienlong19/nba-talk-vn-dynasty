@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-19T15:17:10Z
+Generated: 2026-10-19T15:25:03Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/yahoo-roster-acquisition
-Commit: cd72bf1
+Commit: 0a76a17
 Base: main
 Working tree: dirty
 
@@ -29,9 +29,9 @@ Fingerprint: FRESH
 ```
  ai_exchange/CURRENT_STATE.json                     |    7 +-
  ai_exchange/REVIEW_NOTES.md                        |   15 +-
- ai_exchange/REVIEW_PACKET.md                       |  165 +-
+ ai_exchange/REVIEW_PACKET.md                       |  167 +-
  config/cap_policy.json                             |    6 +
- config/roster_rules.json                           |   21 +
+ config/roster_rules.json                           |   65 +
  config/yahoo_league.json                           |    8 +
  data/2026-27/rosters/index.json                    |   20 +-
  .../rosters/snapshots/RS-2026-10-19-83f0a0bb.json  | 1116 +++++++++++
@@ -39,7 +39,7 @@ Fingerprint: FRESH
  data/2026-27/rosters/team_map.json                 |  115 +-
  data/2026-27/unlisted_players.json                 |   14 +
  docs/ROSTER_REFRESH.md                             |   97 +-
- docs/SEASON_STATE_MODEL.md                         |   19 +
+ docs/SEASON_STATE_MODEL.md                         |   20 +
  docs/YAHOO_API_FEASIBILITY.md                      |    9 +
  index.html                                         |  196 +-
  scripts/build_league_state.py                      |   52 +-
@@ -59,8 +59,8 @@ Fingerprint: FRESH
  tests/test_league_state_data.py                    |   10 +-
  tests/test_scenario_rendering.py                   |   56 +-
  tests/test_season_ops.py                           |   98 +-
- tests/test_yahoo_rosters.py                        |  703 +++++++
- 33 files changed, 7118 insertions(+), 268 deletions(-)
+ tests/test_yahoo_rosters.py                        |  712 +++++++
+ 33 files changed, 7176 insertions(+), 266 deletions(-)
 ```
 
 ## Validation

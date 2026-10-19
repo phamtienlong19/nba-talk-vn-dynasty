@@ -26,7 +26,7 @@ from test_season_ops import TempData, draft_night, export_rows  # noqa: E402
 
 FIX = os.path.join(os.path.dirname(__file__), "fixtures", "yahoo")
 REFERENCE = os.path.join(FIX, "observation_2026-10-19.json")
-BSY, THINH, SUP, QUAN = "franchise-01", "franchise-11", "franchise-12", "franchise-13"
+BSY, THINH, SUP, QUAN, TT_ = "franchise-01", "franchise-11", "franchise-12", "franchise-13", "franchise-16"
 JOKIC, MILLER = "478.p.5352", "478.p.10084"
 
 
@@ -515,6 +515,21 @@ class TestRosterChecks(unittest.TestCase):
         after = ss.roster_checks(self.si, self.state_with(BSY, {single[0]: "IL"}), BSY)["singlePosition"]["count"]
         self.assertEqual(after, before - (0 if self.cur["slots"].get(single[0]) in ("IL", "IL+") else 1))
 
+    def test_two_position_combos_need_three_healthy_players(self):
+        self.assertEqual((self.rules["combos"], self.rules["minPerCombo"]), ({"G": ["PG", "SG"], "F": ["SF", "PF"]}, 3))
+        c = ss.roster_checks(self.si, self.cur, BSY)["coverage"]
+        self.assertEqual(c["shortCombo"], [])
+        guards = [k for k in ls.team_players(self.si, self.cur, BSY) if ss._positions(self.si, k, self.rules["positions"]) & {"PG", "SG"}
+                  and self.cur["slots"].get(k) not in ("IL", "IL+") and self.cur["status"].get(k) not in ("O", "INJ", "OFS")]
+        keep = guards[:2]                                                          # leave only two healthy guards
+        c = ss.roster_checks(self.si, self.state_with(BSY, {k: "IL" for k in guards if k not in keep}), BSY)["coverage"]
+        self.assertEqual((c["byCombo"]["G"], c["shortCombo"], c["level"]), (2, ["G"], "over"))
+
+    def test_ofs_and_inj_count_as_long_term_injured(self):
+        keys = ls.team_players(self.si, self.cur, TT_)
+        c = ss.roster_checks(self.si, self.state_with(TT_, status={keys[0]: "OFS", keys[1]: "INJ", keys[2]: "D"}), TT_)["injured"]
+        self.assertEqual((c["out"], c["count"]), (2, 2))                          # doubtful is not
+
     def test_coverage_and_full_lineup(self):
         dha = ss.roster_checks(self.si, self.cur, "franchise-08")
         self.assertEqual((dha["coverage"]["short"], dha["coverage"]["byPosition"]["PG"], dha["coverage"]["level"]), (["PG"], 1, "over"))
@@ -686,7 +701,7 @@ class TestInjuredList(unittest.TestCase):
             self.assertIn(("Nikola Jokić", "IL", "BN"), {(x["player"], x["from"], x["to"]) for x in rec["diff"]["ilMoves"]})
         with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
             html = f.read()
-        self.assertIn('pn0.insertBefore(h("span",{class:"st-chip il"', html)   # IL chip left of the name, in an IL group
+        self.assertIn('sc=statusChip(r.st)||(il?h("span",{class:"st-chip il"', html)   # status (or IL) chip left of the name
         self.assertIn('h("div",{class:"il-head"}', html)
         self.assertIn(".player-row.il-row .pname{white-space:normal;overflow:visible", html.replace(",.player-row.il-row", "\n.player-row.il-row"))  # long names wrap
 

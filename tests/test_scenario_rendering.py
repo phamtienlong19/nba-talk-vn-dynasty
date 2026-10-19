@@ -274,7 +274,7 @@ class TestRenderedCards(unittest.TestCase):
         miller = row("Bsy", "Jordan Miller")
         self.assertNotIn("tr-tag", miller)                                   # free-agent pickup: no ⇄
         self.assertNotIn("row-trade", miller)
-        self.assertIn('<div class="pname"><span class="st-chip il" title="Injured list">IL</span>Jordan Miller', miller)  # chip on the left
+        self.assertIn('<div class="pname"><span class="st-chip st-out" title="Out (Yahoo)" aria-label="Out">OUT</span>Jordan Miller', miller)  # status chip on the left
         self.assertIn("tr-tag", row("Bsy", "Nikola Jokić"))                  # trade acquisition keeps ⇄
         mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "Bsy"), re.S).group(1))
         self.assertRegex(mv, r"ADDED\s.*Jordan Miller")
@@ -282,12 +282,12 @@ class TestRenderedCards(unittest.TestCase):
         q = row("sup fam", "Jayden Quaintance")                              # unlisted salary: $0 by league rule
         self.assertIn('<div class="pos">PF</div>', q)
         self.assertIn('<div class="nba">SAS</div>', q)
-        self.assertIn('class="st-chip il"', q)
+        self.assertIn('class="st-chip st-out"', q)                           # on IL and Out on Yahoo
 
     def test_injured_list_is_its_own_group_at_the_foot_of_the_roster(self):
         for short in ("Bsy", "sup fam", "CrazyCat", "LC", "Maxfixe", "DonTrick"):
             card = _card(self.official, short)
-            players = re.search(r'<div class="players">(.*)', card, re.S).group(1)
+            players = re.search(r'<div class="players[^"]*">(.*)', card, re.S).group(1)
             head = players.find('class="il-head"')
             self.assertGreater(head, 0, short)
             before, after = players[:head], players[head:]
@@ -301,6 +301,22 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("beyond top 9 · not counted", re.sub(r"<[^>]+>", "", bsy))
         self.assertNotIn("healthy", re.sub(r"<[^>]+>", " ", bsy.split('class="players"')[0]))
         self.assertNotIn('class="il-c"', bsy)
+
+    def test_yahoo_status_chips_are_distinct(self):
+        lc = _card(self.official, "LC")
+        self.assertIn('class="players has-st"', lc)                         # names aligned past the status gutter
+        self.assertRegex(lc, r'<span class="st-chip st-q" title="Questionable \(Yahoo\)"[^>]*>Q</span>Chet Holmgren')
+        self.assertRegex(lc, r'<span class="st-chip st-out"[^>]*>OUT</span>Bradley Beal')
+        tuly = _card(self.official, "TuLy")
+        self.assertRegex(tuly, r'<span class="st-chip st-p" title="Probable \(Yahoo\)"[^>]*>P</span>Stephen Curry')
+        css = self.static
+        for cls, color in (("st-p", "#17734c"), ("st-q", "#1f5fbf"), ("st-d", "#b45a09"), ("st-inj", "#b3261e")):
+            self.assertIn(f".st-chip.{cls}{{color:{color}", css)
+        self.assertIn(".st-chip.st-out{color:#fff;background:#c9362d}", css)   # out: solid red
+        self.assertIn(".st-chip.st-ofs{color:#fff;background:#1d2330}", css)   # out for the season: ink
+        self.assertIn('OFS:["OFS","Out for the season","ofs"]', css)
+        self.assertIn('INJ:["INJ","Injured","inj"]', css)
+        self.assertIn('D:["D","Doubtful","d"]', css)
 
     def test_full_team_names_and_no_health_badges(self):
         bsy = _card(self.official, "Bsy")

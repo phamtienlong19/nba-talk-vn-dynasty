@@ -150,6 +150,9 @@ def roster_checks(si, state, fid, rules=None) -> dict:
     sp = rules["singlePosition"]
     cover = {p: sum(1 for v in healthy.values() if p in v) for p in base}
     short = [p for p in base if cover[p] < rules["minPerPosition"]]
+    combos = rules.get("combos", {})
+    combo_cover = {c: sum(1 for v in healthy.values() if v & set(ps)) for c, ps in combos.items()}
+    short_combo = [c for c in combos if combo_cover[c] < rules.get("minPerCombo", 0)]
     empty = _fillable(healthy, rules["lineupSlots"])
     cap_il = sum(r["c"] for r in ls.team_roster(si, state, fid) if r["k"] in injured and not r["x"])
     return {
@@ -159,7 +162,9 @@ def roster_checks(si, state, fid, rules=None) -> dict:
         "singlePosition": {"count": len(single), "max": sp["max"], "maxWithCombo": sp["maxWithComboTags"],
                            "level": "over" if len(single) > sp["maxWithComboTags"] else "watch" if len(single) > sp["max"] else "ok",
                            "players": [nm(k) for k in single]},
-        "coverage": {"byPosition": cover, "min": rules["minPerPosition"], "short": short, "level": "over" if short else "ok"},
+        "coverage": {"byPosition": cover, "min": rules["minPerPosition"], "short": short,
+                     "byCombo": combo_cover, "comboMin": rules.get("minPerCombo"), "comboOf": combos, "shortCombo": short_combo,
+                     "level": "over" if short or short_combo else "ok"},
         "lineup": {"slots": len(rules["lineupSlots"]), "filled": len(rules["lineupSlots"]) - len(empty), "empty": empty,
                    "level": "over" if empty else "ok"},
     }
@@ -232,8 +237,11 @@ def team_view(si, state, fid, base) -> dict:
     rep = ls.team_report(si, state, fid, base)
     rep["fold"] = ls.fold_team(si, state, fid)
     slots = state.get("slots", {})
+    status = state.get("status", {})
     for r in rep["roster"]:
         r["s"] = slots.get(r["k"])
+        if status.get(r["k"]):
+            r["st"] = status[r["k"]]  # Yahoo player status as observed (P, Q, D, O, INJ, OFS, ...)
         meta = ls.player_meta(si, r["k"])  # display data for players the original board does not list (in-season adds)
         r["pos"], r["nba"] = (meta.get("displayPosition") or "").replace(",", "/"), meta.get("nbaTeam") or ""
     rep["il"] = sum(1 for r in rep["roster"] if r["s"] in SLOTS_IL)
