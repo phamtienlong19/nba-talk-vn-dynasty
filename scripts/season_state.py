@@ -146,7 +146,7 @@ def roster_checks(si, state, fid, rules=None) -> dict:
     injured = on_il + out
     lim = rules["longTermInjured"]["max"]
     healthy = {k: _positions(si, k, base) for k in keys if k not in injured}
-    single = [k for k in keys if len(_positions(si, k, base)) == 1]
+    single = [k for k, v in healthy.items() if len(v) == 1]  # injured players cannot contribute: not counted (owner, 2026-10-19)
     sp = rules["singlePosition"]
     cover = {p: sum(1 for v in healthy.values() if p in v) for p in base}
     short = [p for p in base if cover[p] < rules["minPerPosition"]]

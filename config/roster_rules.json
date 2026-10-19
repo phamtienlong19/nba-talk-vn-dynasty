@@ -2,20 +2,64 @@
   "note": "Countable anti-tank roster limits from the dynasty rules (docs/LEAGUE_RULES_MODEL.md, 'Roster / anti-tank governance'). scripts/season_state.py roster_checks() reports them per team as evidence for commissioner review; it never decides tanking intent (CLAUDE.md human-decision boundary).",
   "longTermInjured": {
     "max": 5,
-    "outStatuses": ["O", "INJ"],
+    "outStatuses": [
+      "O",
+      "INJ"
+    ],
     "note": "Rule: max 5 long-term-injured players (IL, or GTD with a >2-week-out signal). Counted here: players in an IL / IL+ slot plus players Yahoo lists as Out (O) or INJ while not on IL. Yahoo gives no injury duration, so a short absence can be counted; the commissioner judges."
   },
   "minPerPosition": 2,
   "minPerPositionNote": "Rule: minimum 2 tagged players per position (3 for some two-position combos -- not automated). Counted over healthy players (not injured as above), from Yahoo position eligibility.",
-  "positions": ["PG", "SG", "SF", "PF", "C"],
+  "positions": [
+    "PG",
+    "SG",
+    "SF",
+    "PF",
+    "C"
+  ],
   "singlePosition": {
     "max": 5,
     "maxWithComboTags": 7,
     "note": "Rule: max 5 single-position-only players roster-wide (max 4 in the active roster); combo-position tags raise the cap to 7. 6-7 is shown for review because whether the combo exception applies is a judgment."
   },
   "lineupSlots": {
-    "PG": ["PG"], "SG": ["SG"], "G": ["PG", "SG"], "SF": ["SF"], "PF": ["PF"], "F": ["SF", "PF"],
-    "C": ["C"], "FC": ["SF", "PF", "C"], "Util": ["PG", "SG", "SF", "PF", "C"]
+    "PG": [
+      "PG"
+    ],
+    "SG": [
+      "SG"
+    ],
+    "G": [
+      "PG",
+      "SG"
+    ],
+    "SF": [
+      "SF"
+    ],
+    "PF": [
+      "PF"
+    ],
+    "F": [
+      "SF",
+      "PF"
+    ],
+    "C": [
+      "C"
+    ],
+    "FC": [
+      "SF",
+      "PF",
+      "C"
+    ],
+    "Util": [
+      "PG",
+      "SG",
+      "SF",
+      "PF",
+      "C"
+    ]
   },
-  "lineupSlotsNote": "Active lineup slots as observed on the league's Yahoo team pages (2026-10-19). 'lineup' checks that the healthy roster can fill every slot on a full game day."
+  "lineupSlotsNote": "Active lineup slots as observed on the league's Yahoo team pages (2026-10-19). 'lineup' checks that the healthy roster can fill every slot on a full game day.",
+  "positionalLimitsCountHealthyOnly": true,
+  "positionalLimitsNote": "League owner, 2026-10-19: in most cases IL players do not count toward the positional limits because they cannot contribute. Single-position, coverage and lineup checks count healthy players only (not injured as defined above); the commissioner judges exceptions."
 }

@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-19T15:15:02Z
+Generated: 2026-10-19T15:17:10Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/yahoo-roster-acquisition
-Commit: 60eef8c
+Commit: cd72bf1
 Base: main
 Working tree: dirty
 
@@ -28,21 +28,24 @@ Fingerprint: FRESH
 ## Changes
 ```
  ai_exchange/CURRENT_STATE.json                     |    7 +-
- ai_exchange/REVIEW_NOTES.md                        |   10 +-
- ai_exchange/REVIEW_PACKET.md                       |  156 +-
+ ai_exchange/REVIEW_NOTES.md                        |   15 +-
+ ai_exchange/REVIEW_PACKET.md                       |  165 +-
  config/cap_policy.json                             |    6 +
+ config/roster_rules.json                           |   21 +
  config/yahoo_league.json                           |    8 +
- data/2026-27/rosters/index.json                    |   11 +-
+ data/2026-27/rosters/index.json                    |   20 +-
+ .../rosters/snapshots/RS-2026-10-19-83f0a0bb.json  | 1116 +++++++++++
  .../rosters/snapshots/RS-2026-10-19-878cd6e3.json  | 1079 +++++++++++
  data/2026-27/rosters/team_map.json                 |  115 +-
  data/2026-27/unlisted_players.json                 |   14 +
- docs/ROSTER_REFRESH.md                             |   95 +-
+ docs/ROSTER_REFRESH.md                             |   97 +-
+ docs/SEASON_STATE_MODEL.md                         |   19 +
  docs/YAHOO_API_FEASIBILITY.md                      |    9 +
- index.html                                         |  176 +-
+ index.html                                         |  196 +-
  scripts/build_league_state.py                      |   52 +-
- scripts/import_rosters.py                          |   56 +-
+ scripts/import_rosters.py                          |   59 +-
  scripts/league_state.py                            |   31 +-
- scripts/season_state.py                            |   35 +-
+ scripts/season_state.py                            |   96 +-
  scripts/what_if.py                                 |    6 +-
  scripts/yahoo_rosters.py                           |  631 ++++++
  tasks/ACTIVE.md                                    |    6 +-
@@ -56,8 +59,8 @@ Fingerprint: FRESH
  tests/test_league_state_data.py                    |   10 +-
  tests/test_scenario_rendering.py                   |   56 +-
  tests/test_season_ops.py                           |   98 +-
- tests/test_yahoo_rosters.py                        |  616 ++++++
- 30 files changed, 5766 insertions(+), 268 deletions(-)
+ tests/test_yahoo_rosters.py                        |  703 +++++++
+ 33 files changed, 7118 insertions(+), 268 deletions(-)
 ```
 
 ## Validation
@@ -76,12 +79,15 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - ai_exchange/REVIEW_NOTES.md
 - ai_exchange/REVIEW_PACKET.md
 - config/cap_policy.json
+- config/roster_rules.json
 - config/yahoo_league.json
 - data/2026-27/rosters/index.json
+- data/2026-27/rosters/snapshots/RS-2026-10-19-83f0a0bb.json
 - data/2026-27/rosters/snapshots/RS-2026-10-19-878cd6e3.json
 - data/2026-27/rosters/team_map.json
 - data/2026-27/unlisted_players.json
 - docs/ROSTER_REFRESH.md
+- docs/SEASON_STATE_MODEL.md
 - docs/YAHOO_API_FEASIBILITY.md
 - index.html
 - scripts/build_league_state.py
@@ -111,12 +117,12 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 - Team names now follow Yahoo (2026-10-19, `rosters/team_map.json` `name`): e.g. Bsy → Bulls Dynasty, sup fam → Crashed for Caleb, CrazyCat → Damageeeee, Maxfixe → Maxfixe, LC → Long con dynasty. The locked keeper freeze and franchises.json keep the old names as history.
 
-- Roster checks (anti-tank limits, `config/roster_rules.json`) now show on every card as evidence: today DHA is short at PG (1 healthy, min 2); HCMC and TT have 6 and DonTrick, Thịnh and sup fam 7 single-position players (inside the 7 combo exception -> review). Nothing is labelled tanking.
+- Roster checks (anti-tank limits, `config/roster_rules.json`) now show on every card as evidence: today DHA is short at PG (1 healthy, min 2); HCMC, TT, DonTrick and Thịnh have 6 healthy single-position players (inside the 7 combo exception -> review; injured players are not counted, owner 2026-10-19). Nothing is labelled tanking.
 - Second Yahoo import RS-2026-10-19-83f0a0bb (15:11Z): no roster change; adds Yahoo player status (O/Q/P) to the snapshot.
 
 ## Decisions Required
 
-- Whether the single-position combo exception applies to HCMC, TT, DonTrick, Thịnh, sup fam.
+- Whether the single-position combo exception applies to HCMC, TT, DonTrick, Thịnh.
 
 - Whether to link the 6 provisional rookies to their Yahoo ids (`import_rosters.py link-provisional`).
 

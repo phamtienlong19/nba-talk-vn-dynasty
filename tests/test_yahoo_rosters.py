@@ -506,6 +506,15 @@ class TestRosterChecks(unittest.TestCase):
         c = ss.roster_checks(self.si, self.cur, BSY, dict(self.rules, singlePosition={"max": 2, "maxWithComboTags": 3}))
         self.assertEqual(c["singlePosition"]["level"], "over")
 
+    def test_injured_players_do_not_count_toward_positional_limits(self):
+        self.assertTrue(self.rules["positionalLimitsCountHealthyOnly"])
+        sup = ss.roster_checks(self.si, self.cur, SUP)                           # 7 single-position players, 2 of them on IL
+        self.assertEqual((sup["singlePosition"]["count"], sup["singlePosition"]["level"]), (5, "ok"))
+        single = [k for k in ls.team_players(self.si, self.cur, BSY) if len(ss._positions(self.si, k, self.rules["positions"])) == 1]
+        before = ss.roster_checks(self.si, self.cur, BSY)["singlePosition"]["count"]
+        after = ss.roster_checks(self.si, self.state_with(BSY, {single[0]: "IL"}), BSY)["singlePosition"]["count"]
+        self.assertEqual(after, before - (0 if self.cur["slots"].get(single[0]) in ("IL", "IL+") else 1))
+
     def test_coverage_and_full_lineup(self):
         dha = ss.roster_checks(self.si, self.cur, "franchise-08")
         self.assertEqual((dha["coverage"]["short"], dha["coverage"]["byPosition"]["PG"], dha["coverage"]["level"]), (["PG"], 1, "over"))
