@@ -9,3 +9,6 @@ __pycache__/
 
 # GitHub Issue/PR materialized attachment context (temporary)
 /.issue-context/
+
+# workflow run output (reports, observations): uploaded as artifacts, never committed
+/artifacts/

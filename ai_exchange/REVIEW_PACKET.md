@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-20T10:38:32Z
+Generated: 2026-10-20T13:35:28Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/lottery-eligibility-rule
-Commit: 39ea740
+Branch: feat/update-yahoo-rosters-workflow
+Commit: 76ab603
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/62 (OPEN)
-CI: validate: completed/success
+PR: none
+CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,13 +27,7 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md      | 27 +++++++++----
- config/draft_lottery_rules.json   | 47 +++++++++++++++++++++++
- docs/GOVERNANCE_ROADMAP.md        | 33 +++++++++++++++-
- docs/LEAGUE_RULES_MODEL.md        | 13 +++++++
- scripts/lottery_eligibility.py    | 80 +++++++++++++++++++++++++++++++++++++++
- tests/test_lottery_eligibility.py | 63 ++++++++++++++++++++++++++++++
- 6 files changed, 254 insertions(+), 9 deletions(-)
+
 ```
 
 ## Validation
@@ -48,22 +42,17 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
-- ai_exchange/REVIEW_PACKET.md
-- config/draft_lottery_rules.json
-- docs/GOVERNANCE_ROADMAP.md
-- docs/LEAGUE_RULES_MODEL.md
-- scripts/lottery_eligibility.py
-- tests/test_lottery_eligibility.py
+(none)
 
 ## Issues
-- Player metadata refreshed 2026-10-20 (registry display fields + status table). 4 real NBA team moves (Tony Bradley NYK→UTA, Tyler Burton MEM→GSW, Caleb Houstan NOP→POR, Drew Timme MIN→PHX) and 16 eligibility changes (IL-slot eligibility). O-Rank, cap dollars and salary_freeze.json untouched.
-- Roster import RS-2026-10-20-2d3a229c: no ownership change; DonTrick moved Claxton BN→IL and Strus IL→BN; statuses refreshed. Team and positions agree with Yahoo's team pages for all 207 rostered players.
-- Not in the registry but on Yahoo: Jaylen Martin (478.p.10134), Kylor Kelley (478.p.10404). Not in the live response: Trentyn Flowers, Buddy Boeheim. Registry membership unchanged (reported only).
-- Standings re-read: still not started.
+- New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
+- It has NOT been run on GitHub yet (it needs the `YAHOO_STORAGE_STATE` secret and two repo settings). Logic is tested locally; see the PR for exactly what was and was not exercised.
+- Lineup-slot moves (bench <-> active) are treated as "no material change": 102 players moved on 2026-10-20 alone, they affect nothing, and a PR per lineup change would be noise. IL moves and status changes are material.
+- Live cross-check on 2026-10-20: no metadata drift, no ineligible slots, IL labels intact, payroll matches. Flags for the commissioner: Porziņģis (BN), Strus (Util) and Harris (PF) are listed Out but not on IL; DHA is short at PG; HCMC, TT and Thịnh have 6 single-position players.
 
 ## Decisions Required
 
-- None.
+- Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/lottery-eligibility-rule` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/update-yahoo-rosters-workflow` if not already done, then request human/ChatGPT review of this packet.

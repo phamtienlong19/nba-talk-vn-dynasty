@@ -1,0 +1,135 @@
+name: Update Yahoo Rosters
+
+# Manual only. Reads league 85092's 16 Yahoo team pages (GET only), validates them, reconciles them with the official
+# rosters through the existing reviewed-import code, and either opens a DRAFT pull request or publishes a review report.
+# It never pushes to main and never merges. Setup and usage: docs/YAHOO_ROSTER_WORKFLOW.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      engine:
+        description: "browser = signed-in session from the YAHOO_STORAGE_STATE secret; http = no sign-in (public team pages)"
+        type: choice
+        options:
+          - browser
+          - http
+        default: browser
+      open_pr:
+        description: "Open a draft PR when the update is unambiguous (only when run from main)"
+        type: boolean
+        default: true
+
+# Least privilege: push a branch and open a PR. Nothing else.
+permissions:
+  contents: write
+  pull-requests: write
+
+# One roster update at a time; a second run waits instead of racing the first.
+concurrency:
+  group: update-yahoo-rosters
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ENGINE: ${{ inputs.engine }}
+      # The importer only commits (and a PR is only opened) from main; from any other ref this is a dry run.
+      APPLY: ${{ inputs.open_pr && github.ref == 'refs/heads/main' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Playwright (browser engine only)
+        if: env.ENGINE == 'browser'
+        run: |
+          python3 -m pip install -r requirements-yahoo-rosters.txt
+          python3 -m playwright install --with-deps chromium
+
+      - name: Prepare the Yahoo session (browser engine only)
+        if: env.ENGINE == 'browser'
+        env:
+          YAHOO_STORAGE_STATE: ${{ secrets.YAHOO_STORAGE_STATE }}
+        run: |
+          if [ -z "$YAHOO_STORAGE_STATE" ]; then
+            echo "::error title=Yahoo session missing::The YAHOO_STORAGE_STATE repository secret is not set. One-time setup: docs/YAHOO_ROSTER_WORKFLOW.md (or re-run with engine=http)."
+            exit 1
+          fi
+          umask 077
+          printf '%s' "$YAHOO_STORAGE_STATE" > "$RUNNER_TEMP/yahoo-state.json"
+          echo "YAHOO_STORAGE_STATE_FILE=$RUNNER_TEMP/yahoo-state.json" >> "$GITHUB_ENV"
+
+      - name: Fetch, validate and reconcile
+        id: update
+        run: |
+          args="--engine $ENGINE --out artifacts/yahoo-roster-update"
+          if [ "$APPLY" = "true" ]; then args="$args --apply"; fi
+          python3 scripts/update_yahoo_rosters.py $args
+
+      - name: Publish the report
+        if: always()
+        run: |
+          if [ -f artifacts/yahoo-roster-update/report.md ]; then
+            cat artifacts/yahoo-roster-update/report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No report was produced: the run stopped before it could write one. See the log above." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Remove the Yahoo session from the runner
+        if: always()
+        run: rm -f "$RUNNER_TEMP/yahoo-state.json"
+
+      - name: Upload report and observation (no credentials)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yahoo-roster-update
+          path: |
+            artifacts/yahoo-roster-update/report.md
+            artifacts/yahoo-roster-update/observation.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Validate the regenerated site and run the tests
+        if: steps.update.outputs.outcome == 'READY' && env.APPLY == 'true'
+        run: |
+          python3 -m pip install -r requirements.txt
+          ./validate.sh
+          python3 -m unittest discover -s tests
+
+      - name: Only roster data and the generated site may have changed
+        if: steps.update.outputs.outcome == 'READY' && env.APPLY == 'true'
+        run: |
+          bad=$(git status --porcelain | awk '{print $2}' | grep -vE '^(data/2026-27/rosters/|data/2026-27/unlisted_players\.json$|index\.html$)' || true)
+          if [ -n "$bad" ]; then
+            echo "::error title=Unexpected changes::These paths changed but a roster update may not touch them: $bad"
+            exit 1
+          fi
+
+      - name: Open a draft pull request
+        if: steps.update.outputs.outcome == 'READY' && env.APPLY == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SNAPSHOT: ${{ steps.update.outputs.snapshot }}
+        run: |
+          branch="automation/yahoo-rosters-$(date -u +%Y%m%d-%H%M%S)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add data/2026-27/rosters data/2026-27/unlisted_players.json index.html
+          git commit -m "data: Yahoo roster update $SNAPSHOT (automated)" \
+                     -m "Generated by the Update Yahoo Rosters workflow ($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID). Review before merging."
+          git push origin "$branch"
+          {
+            echo "> Draft PR from the **Update Yahoo Rosters** workflow: [run $GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)."
+            echo "> It was not merged automatically. Review the report, then merge or close. Tests and validation passed in the run."
+            echo
+            head -c 60000 artifacts/yahoo-roster-update/report.md
+          } > artifacts/pr-body.md
+          gh pr create --draft --base main --head "$branch" --title "Yahoo roster update: $SNAPSHOT" --body-file artifacts/pr-body.md
