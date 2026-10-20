@@ -51,7 +51,12 @@ class TestLotteryEligibility(unittest.TestCase):
         r = self.cfg["rules"]
         self.assertEqual((r["noTop2TwiceInARow"]["slots"], r["oneNumberOnePerWindow"]["windowDrafts"]), ([1, 2], 3))
         self.assertIn("Commissioner", r["source"])
-        self.assertEqual(len(self.cfg["openQuestions"]), 2)                                  # undecided points are listed, not guessed
+        self.assertEqual(self.cfg["openQuestions"], [])
+        ids = {x["id"] for x in self.cfg["decisions"]}
+        self.assertEqual(ids, {"ELIGIBILITY_FOLLOWS_LOTTERY_HOLDER", "INELIGIBLE_RESULT_IS_REDRAWN"})
+        self.assertEqual(self.cfg["rules"]["ineligibleResult"], "REDRAW")
+        # a later trade of a top-2 pick cannot change eligibility: the derivation only reads who held the slot at the lottery
+        self.assertEqual(le.eligibility(self.cfg, 2027)[MAX]["canPickTop2"], False)
 
 
 if __name__ == "__main__":

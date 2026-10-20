@@ -1,9 +1,12 @@
 {
-  "note": "Draft-order eligibility rules confirmed by the commissioner on 2026-10-20, plus the top-of-draft history they are computed from. Eligibility is derived by scripts/lottery_eligibility.py. This file does NOT define the lottery odds or how an ineligible team's lottery result is redrawn: the league has not yet decided how it implements the NBA's 2027 lottery reform (see docs/GOVERNANCE_ROADMAP.md).",
+  "note": "Draft-order eligibility rules confirmed by the commissioner on 2026-10-20, plus the top-of-draft history they are computed from. Eligibility is derived by scripts/lottery_eligibility.py. This file does NOT define the lottery odds: the league has not yet decided how it implements the NBA's 2027 lottery reform (see docs/GOVERNANCE_ROADMAP.md).",
   "rules": {
     "noTop2TwiceInARow": {
       "text": "A team that picked 1st or 2nd in a draft cannot pick 1st or 2nd in the next draft.",
-      "slots": [1, 2],
+      "slots": [
+        1,
+        2
+      ],
       "consecutiveDrafts": 2
     },
     "oneNumberOnePerWindow": {
@@ -11,16 +14,34 @@
       "slot": 1,
       "windowDrafts": 3
     },
-    "source": "Commissioner confirmation relayed by the league owner, 2026-10-20."
+    "source": "Commissioner confirmation relayed by the league owner, 2026-10-20.",
+    "ineligibleResult": "REDRAW"
   },
-  "openQuestions": [
-    "Whether eligibility follows the team that holds and uses the pick or the team whose record earned it, if a top-2 pick is traded. Both are the same team in every draft recorded so far.",
-    "How an ineligible team's lottery result is handled (redraw, next slot, ...): not decided."
-  ],
+  "openQuestions": [],
   "history": [
-    {"draft": 2025, "slot1": "franchise-12", "slot2": null,
-     "source": "League owner, 2026-10-20: 'I picked 1st last year'; owner's team is Yahoo team 16 = sup fam. The 2025 second pick is not recorded here (not needed for any current eligibility)."},
-    {"draft": 2026, "slot1": "franchise-07", "slot2": "franchise-04",
-     "source": "data/2026-27/draft_state.json: 1.01 Cameron Boozer (Maxfixe), 1.02 AJ Dybantsa (Long con)."}
+    {
+      "draft": 2025,
+      "slot1": "franchise-12",
+      "slot2": null,
+      "source": "League owner, 2026-10-20: 'I picked 1st last year'; owner's team is Yahoo team 16 = sup fam. The 2025 second pick is not recorded here (not needed for any current eligibility)."
+    },
+    {
+      "draft": 2026,
+      "slot1": "franchise-07",
+      "slot2": "franchise-04",
+      "source": "data/2026-27/draft_state.json: 1.01 Cameron Boozer (Maxfixe), 1.02 AJ Dybantsa (Long con)."
+    }
+  ],
+  "decisions": [
+    {
+      "id": "ELIGIBILITY_FOLLOWS_LOTTERY_HOLDER",
+      "text": "Eligibility belongs to the team that holds the slot when the lottery is drawn. First-round picks are only traded after keepers, which come after the lottery, so draft order is already final by then: a later trade of a top-2 pick does not move the restriction. History entries therefore name the team that held 1.01 / 1.02 at the lottery.",
+      "source": "League owner, 2026-10-20"
+    },
+    {
+      "id": "INELIGIBLE_RESULT_IS_REDRAWN",
+      "text": "If the lottery draw lands a slot on an ineligible team, that slot is redrawn (for maximum suspense).",
+      "source": "League owner, 2026-10-20"
+    }
   ]
 }

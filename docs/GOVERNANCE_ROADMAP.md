@@ -21,7 +21,8 @@ for rule checks. Fairness, tank intent and penalties stay commissioner judgment 
 3. **Lottery / standings display built as configuration.** Top-of-draft eligibility is now recorded
    (`config/draft_lottery_rules.json`, `scripts/lottery_eligibility.py`; commissioner rules of 2026-10-20: no top 2 twice in
    a row, one No. 1 per 3-year span). The display should flag, per team, "cannot pick 1st / 1st or 2nd in <year>" with the
-   reason, and recompute after each draft. Remaining: The NBA changes its lottery in 2027; how this league adopts it
+   reason, and recompute after each draft. Decided: eligibility follows the lottery-time holder; an ineligible draw result is
+   redrawn. Remaining: The NBA changes its lottery in 2027; how this league adopts it
    is undecided (expected: relegation-style zone, limits on top-3 picks for the worst teams, no consecutive No.1s). Model
    odds table, zone, exclusions and no-consecutive rule as config; show the current model as "2026–27 model". Do NOT guess
    the 2027 rules.

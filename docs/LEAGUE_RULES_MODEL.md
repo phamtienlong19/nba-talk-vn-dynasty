@@ -181,9 +181,10 @@ older/evolving numbers — see `docs/OPEN_RULE_QUESTIONS.md`):
 Recorded in `config/draft_lottery_rules.json` with the history it is computed from, derived by
 `scripts/lottery_eligibility.py`. Today: **2027** — Maxfixe and Long con cannot pick 1st or 2nd; sup fam cannot pick 1st
 (No. 1 in 2025) but can pick 2nd. **2028** — Maxfixe cannot pick 1st (No. 1 in 2026) but can pick 2nd; sup fam and Long con
-are eligible for 1st. Answers for later drafts change after each draft. Not decided: whether eligibility follows the pick
-holder or the team whose record earned it after a trade, and how an ineligible team's lottery result is handled. The NBA's
-2027 lottery reform is not modelled; the league has not yet chosen how to adopt it.
+are eligible for 1st. Answers for later drafts change after each draft. Eligibility belongs to the team that holds the slot
+when the lottery is drawn (first-round picks are only traded after keepers, i.e. after the lottery, so a later trade does not
+move it). If the draw lands a slot on an ineligible team, that slot is **redrawn**. The NBA's 2027 lottery reform / odds are
+not modelled; the league has not yet chosen how to adopt them.
 
 The DOCX describes an earlier/transitional model (a 2024-25-era 8-ball
 combination scheme, `21-21-19-19-16-12-8-3`, and various proposed
