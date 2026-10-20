@@ -91,7 +91,39 @@ for `import-json`:
 `import-json` also accepts `{"<teamId>": [players]}` and a flat list of players
 carrying `teamId`.
 
-**Scheduling (not set up).** The fetch is safe to run unattended because it
+**Scheduling.** `Update Yahoo Rosters` (docs/YAHOO_ROSTER_WORKFLOW.md) is the manual, GitHub-hosted way to run the fetch,
+report and open a draft PR. For a local scheduled job (not set up), the fetch is safe to run unattended because it never
+changes official data: a LaunchAgent running `python3 scripts/yahoo_rosters.py fetch` from the repo directory.
+
+**Manual capture (Chrome DevTools).** On any page of the league, logged in,
+paste into the console; it GETs the 16 team pages and downloads `capture.json`
+for `import-json`:
+
+```js
+(async () => {
+  const ids = [1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17], teams = [];
+  for (const id of ids) {
+    const doc = new DOMParser().parseFromString(await (await fetch(`/nba/85092/${id}`)).text(), "text/html");
+    const t = doc.querySelector("table#statTable0");
+    if (!t) throw new Error(`team ${id}: no roster table (signed out?)`);
+    teams.push({teamId: id, teamName: doc.title.replace(/^.* - Dynasty - /, "").replace(/ \| Fantasy Basketball.*$/, ""),
+      players: [...t.querySelectorAll("tbody tr")].map(tr => {
+        const a = tr.querySelector('a.name[href*="/nba/players/"]'); if (!a) return null;
+        const pl = tr.querySelector(".pos-label"), inj = tr.querySelector(".F-injury");
+        return {playerId: a.href.match(/players\/(\d+)/)[1], name: a.textContent.trim(),
+                slot: pl && (pl.dataset.pos || pl.textContent.trim()), injury: inj ? inj.textContent.trim() : null};
+      }).filter(Boolean)});
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  const blob = new Blob([JSON.stringify({capturedAt: new Date().toISOString(), leagueId: "85092", teams})], {type: "application/json"});
+  Object.assign(document.createElement("a"), {href: URL.createObjectURL(blob), download: "capture.json"}).click();
+})();
+```
+
+`import-json` also accepts `{"<teamId>": [players]}` and a flat list of players
+carrying `teamId`.
+
+**Scheduling (not set up locally).** The `Update Yahoo Rosters` workflow (docs/YAHOO_ROSTER_WORKFLOW.md) is the manual, GitHub-hosted way to run this. For a local job: The fetch is safe to run unattended because it
 never changes official data. A future local macOS job would be a LaunchAgent
 running `python3 scripts/yahoo_rosters.py fetch` from the repo directory. Do not
 run it from GitHub Actions and never put Yahoo credentials in a workflow.

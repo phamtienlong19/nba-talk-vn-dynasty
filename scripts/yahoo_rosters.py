@@ -5,6 +5,7 @@
     python3 scripts/yahoo_rosters.py fetch --team 8           # one team (a partial observation; never importable)
     python3 scripts/yahoo_rosters.py fetch --engine browser   # through the logged-in Playwright profile
     python3 scripts/yahoo_rosters.py login                    # one-time interactive Yahoo login (browser profile)
+    python3 scripts/yahoo_rosters.py export-state             # export that login as a browser-state file (for the GitHub secret)
     python3 scripts/yahoo_rosters.py import-json FILE         # JSON captured by the Chrome DevTools script
     python3 scripts/yahoo_rosters.py validate OBS.json
     python3 scripts/yahoo_rosters.py diff OBS.json            # vs the current season state and the previous observation
@@ -546,20 +547,55 @@ class HttpFetcher:
         pass
 
 
+STATE_ENV = "YAHOO_STORAGE_STATE_FILE"  # path to a Playwright browser-state file (never its contents)
+DEFAULT_STATE = os.path.join(os.path.expanduser("~"), ".config", "nba-talk-vn-dynasty", "yahoo-storage-state.json")
+
+
+def storage_state_problems(path, now=None) -> list:
+    """Why a browser-state file cannot authenticate (empty list = usable). Looks only at structure and cookie expiry;
+    it never returns, logs or prints a cookie name's value."""
+    now = time.time() if now is None else now
+    if not path or not os.path.isfile(path):
+        return [f"no browser-state file at {path or '(none given)'}"]
+    try:
+        with open(path, encoding="utf-8") as f:
+            state = json.load(f)
+        cookies = state["cookies"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return ["the browser-state file is not a valid Playwright storage state (expected JSON with a 'cookies' list)"]
+    yahoo = [c for c in cookies if isinstance(c, dict) and "yahoo.com" in str(c.get("domain", ""))]
+    if not yahoo:
+        return ["the browser-state file has no yahoo.com cookies (was the export taken before signing in?)"]
+    live = [c for c in yahoo if not c.get("expires") or c["expires"] < 0 or c["expires"] > now]  # session cookies have no expiry
+    if not live:
+        return ["every Yahoo cookie in the browser-state file has expired"]
+    return []
+
+
 class BrowserFetcher:
-    """GET through a persistent Playwright profile (cookies from `login`). Uses the context's request API: no page
-    scripts run and nothing is clicked or submitted."""
+    """GET through a Playwright browser context that carries the signed-in Yahoo session: either the persistent profile
+    created by `login`, or a saved browser-state file (`storage_state`, e.g. the GitHub secret written to a temp file).
+    Uses the context's request API: no page scripts run and nothing is clicked or submitted."""
     method = "browser"
 
-    def __init__(self, profile=PROFILE_DIR, headless=True):
+    def __init__(self, profile=PROFILE_DIR, headless=True, storage_state=None):
         try:
             from playwright.sync_api import sync_playwright
         except ImportError:
             raise FetchError("NO_PLAYWRIGHT", "pip install playwright && python3 -m playwright install chromium")
-        if not os.path.isdir(profile):
+        self._browser = None
+        if storage_state:
+            problems = storage_state_problems(storage_state)
+            if problems:
+                raise FetchError("AUTH_REQUIRED", problems[0] + "; re-run `yahoo_rosters.py login`, then `export-state`, and update the secret")
+        elif not os.path.isdir(profile):
             raise FetchError("AUTH_REQUIRED", f"no browser profile at {profile}; run `yahoo_rosters.py login` first")
         self._pw = sync_playwright().start()
-        self.ctx = self._pw.chromium.launch_persistent_context(profile, headless=headless, user_agent=USER_AGENT)
+        if storage_state:
+            self._browser = self._pw.chromium.launch(headless=headless)
+            self.ctx = self._browser.new_context(storage_state=storage_state, user_agent=USER_AGENT)
+        else:
+            self.ctx = self._pw.chromium.launch_persistent_context(profile, headless=headless, user_agent=USER_AGENT)
 
     def get(self, url):
         r = self.ctx.request.get(url, timeout=30000)
@@ -567,6 +603,8 @@ class BrowserFetcher:
 
     def close(self):
         self.ctx.close()
+        if self._browser:
+            self._browser.close()
         self._pw.stop()
 
 
@@ -611,6 +649,23 @@ def login(cfg, profile=PROFILE_DIR):
         ctx.close()
 
 
+def export_state(profile=PROFILE_DIR, out=DEFAULT_STATE) -> list:
+    """Write the signed-in session of the `login` profile as a Playwright browser-state file (mode 600). Returns its
+    problems (empty = usable). Prints nothing from inside the file."""
+    from playwright.sync_api import sync_playwright
+    if not os.path.isdir(profile):
+        raise FetchError("AUTH_REQUIRED", f"no browser profile at {profile}; run `yahoo_rosters.py login` first")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with sync_playwright() as pw:
+        ctx = pw.chromium.launch_persistent_context(profile, headless=True, user_agent=USER_AGENT)
+        try:
+            ctx.storage_state(path=out)
+        finally:
+            ctx.close()
+    os.chmod(out, 0o600)
+    return storage_state_problems(out)
+
+
 # ----------------------------------------------------------------------- cli
 def _analyse(obs, cfg, require_full, out_dir=None):
     si = ss.load_season(ls.load_inputs())
@@ -642,7 +697,10 @@ def main(argv=None, fetcher=None, out_dir=None):
     p.add_argument("--engine", choices=("http", "browser"), default="http")
     p.add_argument("--no-save", action="store_true")
     p.add_argument("--headed", action="store_true")
+    p.add_argument("--storage-state", default=os.environ.get(STATE_ENV), help="browser-state file (default: $" + STATE_ENV + ")")
     sub.add_parser("login")
+    p = sub.add_parser("export-state")
+    p.add_argument("--out", default=DEFAULT_STATE)
     p = sub.add_parser("standings")
     p.add_argument("--write", action="store_true", help="record them in data/2026-27/standings.json for the site")
     p = sub.add_parser("import-json")
@@ -657,6 +715,19 @@ def main(argv=None, fetcher=None, out_dir=None):
     if args.cmd == "login":
         login(cfg)
         return 0
+    if args.cmd == "export-state":
+        try:
+            problems = export_state(out=args.out)
+        except FetchError as e:
+            print("BLOCKED:", e)
+            return 2
+        if problems:
+            print(f"BLOCKED: exported {args.out} but it cannot authenticate: {problems[0]}")
+            return 2
+        print(f"wrote {args.out} (mode 600). Keep it OUTSIDE the repository; its contents are never printed.\n"
+              f"Store it as the repository secret:  gh secret set YAHOO_STORAGE_STATE < {args.out}\n"
+              "See docs/YAHOO_ROSTER_WORKFLOW.md.")
+        return 0
     if args.cmd == "fetch":
         ids = args.team or cfg["teamIds"]
         bad = [t for t in ids if t not in cfg["teamIds"]]
@@ -665,7 +736,8 @@ def main(argv=None, fetcher=None, out_dir=None):
             return 2
         injected = fetcher is not None  # tests pass a fake fetcher: no network, no politeness delay
         try:
-            fetcher = fetcher or (HttpFetcher() if args.engine == "http" else BrowserFetcher(headless=not args.headed))
+            fetcher = fetcher or (HttpFetcher() if args.engine == "http"
+                                else BrowserFetcher(headless=not args.headed, storage_state=args.storage_state))
         except FetchError as e:
             print("BLOCKED:", e)
             return 2
