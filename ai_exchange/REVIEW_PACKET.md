@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-20T03:25:34Z
+Generated: 2026-10-20T10:18:42Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/player-metadata-refresh
-Commit: 86c2b7c
+Branch: feat/lottery-eligibility-rule
+Commit: 3a02c51
 Base: main
 Working tree: dirty
 
@@ -55,4 +55,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - None.
 
 ## Suggested Next Step
-Open/update the PR from `feat/player-metadata-refresh` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/lottery-eligibility-rule` if not already done, then request human/ChatGPT review of this packet.

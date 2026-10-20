@@ -1,0 +1,26 @@
+{
+  "note": "Draft-order eligibility rules confirmed by the commissioner on 2026-10-20, plus the top-of-draft history they are computed from. Eligibility is derived by scripts/lottery_eligibility.py. This file does NOT define the lottery odds or how an ineligible team's lottery result is redrawn: the league has not yet decided how it implements the NBA's 2027 lottery reform (see docs/GOVERNANCE_ROADMAP.md).",
+  "rules": {
+    "noTop2TwiceInARow": {
+      "text": "A team that picked 1st or 2nd in a draft cannot pick 1st or 2nd in the next draft.",
+      "slots": [1, 2],
+      "consecutiveDrafts": 2
+    },
+    "oneNumberOnePerWindow": {
+      "text": "A team may make only one number-one pick in any 3-year span of drafts.",
+      "slot": 1,
+      "windowDrafts": 3
+    },
+    "source": "Commissioner confirmation relayed by the league owner, 2026-10-20."
+  },
+  "openQuestions": [
+    "Whether eligibility follows the team that holds and uses the pick or the team whose record earned it, if a top-2 pick is traded. Both are the same team in every draft recorded so far.",
+    "How an ineligible team's lottery result is handled (redraw, next slot, ...): not decided."
+  ],
+  "history": [
+    {"draft": 2025, "slot1": "franchise-12", "slot2": null,
+     "source": "League owner, 2026-10-20: 'I picked 1st last year'; owner's team is Yahoo team 16 = sup fam. The 2025 second pick is not recorded here (not needed for any current eligibility)."},
+    {"draft": 2026, "slot1": "franchise-07", "slot2": "franchise-04",
+     "source": "data/2026-27/draft_state.json: 1.01 Cameron Boozer (Maxfixe), 1.02 AJ Dybantsa (Long con)."}
+  ]
+}
