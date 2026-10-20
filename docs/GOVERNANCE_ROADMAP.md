@@ -30,6 +30,33 @@ for rule checks. Fairness, tank intent and penalties stay commissioner judgment 
    ranking, payroll / band room / legality update live. Client-side only, saved in the browser, never written to official
    data. Needs the exact rank→keeper-salary function confirmed against `docs/CAP_MODEL.md` and how the league actually sets it.
 
+## Backlog (filed 2026-10-20; not scheduled)
+
+**Lottery simulator on live standings** (inspired by Tankathon's draft-lottery simulator that tanking-franchise fans use).
+- **What:** a page that takes the live Yahoo standings, orders teams worst to best (`standings_view` already provides this once
+  games are played) into the projected pre-lottery order, shows each team's odds for each slot, and lets a manager press "Sim
+  lottery" to draw one outcome, or run many sims for a probability table. Reset returns to the live order.
+- **Rules it must apply:** the league's lottery parameters, once decided (the league has not chosen how to adopt the NBA's
+  2027 reform); the top-of-draft eligibility from `config/draft_lottery_rules.json` / `scripts/lottery_eligibility.py` (no
+  top 2 twice in a row, one No. 1 per 3 years; ineligible teams show as such); and the owner's rule that a draw landing on
+  an ineligible team is **redrawn**.
+- **Open before building:** the odds table / zone / exclusions for 2027 (config-driven, never hard-coded); whether Round 2/3
+  stay plain inverse standings (true in 2026-27); how ties in the standings are broken (H2H, per the league rules).
+- **Governance, not advice:** it shows odds and eligibility; it never says who should tank or trade.
+- **Reuse:** `standings_view` (live order), `lottery_eligibility.eligibility`, the card/chip styling. Client-side simulation;
+  nothing is written to official data. The actual official lottery stays in the separate `nba-talk-vn-lottery` repo.
+
+**Other planned or possible work, in rough priority:**
+- Ranking board with live keeper-salary math (offseason; per-manager, browser-only) and, later, a keeper planner.
+- Statuses for free agents in the available-players list (the 600-player status table `data/yahoo/player_status.json` exists;
+  only rostered players show a status today).
+- Local scheduled refresh on the owner's Mac (a LaunchAgent running `yahoo_rosters.py fetch`, `standings` and
+  `refresh_player_metadata.py`); never GitHub Actions with Yahoo credentials.
+- Link the six provisional rookies to their Yahoo ids (`import_rosters.py link-provisional`) once the commissioner agrees.
+- Decide whether Jaylen Martin and Kylor Kelley (on Yahoo, not in the registry) should join the player registry.
+- Roster-check refinements not yet automated: the "max 4 single-position in the active lineup" rule, injury duration,
+  IL-return timing, and "trades may not worsen a concentration" (part of the trade checker).
+
 ## Trade checker rules (source: `docs/LEAGUE_RULES_MODEL.md`)
 | Rule | Check | Level |
 |---|---|---|
