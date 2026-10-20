@@ -151,6 +151,40 @@ def double_checks(si_new, aliases, obs, snap, baseline_checks, new_state) -> dic
 
 
 # ------------------------------------------------------------------ report
+FLAG_KEYS = ("metadataDrift", "slotIneligible", "healthyOnIL", "injuredOffIL")
+
+
+def flag_count(dc) -> int:
+    """Compliance findings worth a human look: anti-tank limits not ok + roster/IL/metadata cross-check hits."""
+    return len(dc["antiTank"]) + sum(len(dc[k]) for k in FLAG_KEYS)
+
+
+def checks_section(dc) -> list:
+    """The anti-tank limits and the roster / IL cross-checks, as report lines (identical for every outcome)."""
+    L = ["", "## Anti-tank roster checks (evidence only)", ""]
+    if dc["antiTank"]:
+        L += [f"- {x['team']} — {x['check']}: **{x['level']}** {x['detail']}" + (" (new)" if x["isNew"] else "") for x in dc["antiTank"]]
+    else:
+        L.append("- every team is within every limit")
+    L += ["", "## Double checks", ""]
+    for key, title in (("metadataDrift", "Team / position eligibility differs from our data (run `refresh_player_metadata.py`)"),
+                       ("slotIneligible", "Player in a lineup slot he is not eligible for"),
+                       ("healthyOnIL", "Parked on IL but not IL-eligible"), ("injuredOffIL", "Injured (IL-eligible or Out) but not on IL"),
+                       ("ilLabelsLost", "IL labels lost in the snapshot"), ("payrollMismatch", "Payroll mismatch")):
+        items = dc[key]
+        L.append(f"- {title}: " + ("none" if not items else f"**{len(items)}**"))
+        L += [f"  - {x}" for x in items[:25]]
+    return L
+
+
+def no_change_report(obs, si, dc, why, run_info="") -> str:
+    """NO_CHANGE is still a compliance check: the rosters are re-examined against the rules on every run."""
+    L = ["# Update Yahoo Rosters — NO_CHANGE", "", f"Captured {obs['capturedAt']} · {obs['method']} · {len(obs['teams'])} teams · "
+         f"{sum(len(t['players']) for t in obs['teams'])} players" + (f" · {run_info}" if run_info else ""), "", why,
+         "", f"**Compliance flags on the current rosters: {flag_count(dc)}**" + (" — see below; they are for the commissioner, nothing was changed." if flag_count(dc) else " — none.")]
+    return "\n".join(L + checks_section(dc)) + "\n"
+
+
 def build_report(outcome, obs, check, rec, dc, si, baseline, new_state, conflicts, run_info="") -> str:
     L = [f"# Update Yahoo Rosters — {outcome}", ""]
     L.append(f"Captured {obs['capturedAt']} · {obs['method']} · league {obs['leagueId']} · {len(obs['teams'])} teams · "
@@ -208,19 +242,7 @@ def build_report(outcome, obs, check, rec, dc, si, baseline, new_state, conflict
         L.append(f"| {p['team']} | {p['count']} | {p['il']} | {move} | {_fmt_cap(p['capIfImported'] - il_cap)} | {ls.cap_status(si, p['capIfImported'])} |")
     if rec["salaryEvidence"]:
         L += [""] + [f"- Yahoo keeper-salary label for {x['player']} is {x['yahooKeeperSalary']:g}; frozen salary {x['frozen']:g} (frozen wins)" for x in rec["salaryEvidence"]]
-    L += ["", "## Anti-tank roster checks on the proposed rosters (evidence only)", ""]
-    if dc["antiTank"]:
-        L += [f"- {x['team']} — {x['check']}: **{x['level']}** {x['detail']}" + (" (new)" if x["isNew"] else "") for x in dc["antiTank"]]
-    else:
-        L.append("- every team is within every limit")
-    L += ["", "## Double checks", ""]
-    for key, title in (("metadataDrift", "Team / position eligibility differs from our data (run `refresh_player_metadata.py`)"),
-                       ("slotIneligible", "Player in a lineup slot he is not eligible for"),
-                       ("healthyOnIL", "Parked on IL but not IL-eligible"), ("injuredOffIL", "Injured (IL-eligible or Out) but not on IL"),
-                       ("ilLabelsLost", "IL labels lost in the snapshot"), ("payrollMismatch", "Payroll mismatch")):
-        items = dc[key]
-        L.append(f"- {title}: " + ("none" if not items else f"**{len(items)}**"))
-        L += [f"  - {x}" for x in items[:25]]
+    L += checks_section(dc)
     if rec["report"]["warnings"]:
         prov = [w for w in rec["report"]["warnings"] if w["code"] == "PROVISIONAL_LINK_CANDIDATE"]
         unl = [w for w in rec["report"]["warnings"] if w["code"] == "UNLISTED_PLAYER_ZERO_SALARY"]
@@ -261,9 +283,20 @@ def run(cfg, fetcher, out_dir, data_dir=ss.DATA_DIR, apply=False, regenerate=Fal
                             if rec["unmappedTeams"] else {"code": "DUPLICATE_OR_UNMATCHED", "detail": str(rec["report"]["blocking"][:3])}]}
         return finish("FAILED", build_report("FAILED", obs, bad, None, None, None, None, None, [], run_info), 1)
     snap, d = rec["snapshot"], rec["diff"]
+    si_new = ir.with_unlisted(si, rec["report"])
+    si2 = dict(si_new, rosterSnapshot=snap)
+    new_state = ss.season_state(si2)
+    base_state = ss.season_state(si)
+    baseline = {"status": base_state.get("status", {}), "checks": {f: ss.roster_checks(si, base_state, f) for f in si["franchises"]}}
+    _, aliases = ir.load_maps(data_dir)
+    dc = double_checks(si2, aliases, obs, snap, baseline["checks"], new_state)
+    result["flags"] = flag_count(dc)
+    if dc["payrollMismatch"] or dc["ilLabelsLost"]:
+        check = {"blocking": [{"code": "INTERNAL_CHECK", "detail": "; ".join(dc["payrollMismatch"] + [f"IL label lost: {k}" for k in dc["ilLabelsLost"]])}]}
+        return finish("FAILED", build_report("FAILED", obs, check, None, None, None, None, None, [], run_info), 1)
     if snap["digest"] == si["rosterSnapshot"]["digest"]:
-        return finish("NO_CHANGE", f"# Update Yahoo Rosters — NO_CHANGE\n\nYahoo matches the current verified snapshot "
-                                   f"`{si['rosterSnapshot']['snapshotId']}` ({obs['capturedAt']}). Nothing to do.\n", 0)
+        return finish("NO_CHANGE", no_change_report(obs, si2, dc, f"Yahoo matches the current verified snapshot "
+                                                    f"`{si['rosterSnapshot']['snapshotId']}`. Nothing to do.", run_info), 0)
     conflicts = []
     for b in rec["report"]["blocking"]:
         conflicts.append(f"import-blocking {b['code']}: {b.get('team', '')} {b.get('detail')}".replace("  ", " "))
@@ -273,23 +306,14 @@ def run(cfg, fetcher, out_dir, data_dir=ss.DATA_DIR, apply=False, regenerate=Fal
         conflicts.append(f"the capture ({snap['verifiedAt']}) is not newer than the current verified snapshot ({si['rosterSnapshot']['verifiedAt']})")
     if any(h.get("digest") == snap["digest"] for h in si["rosterIndex"]["history"]):
         conflicts.append("Yahoo matches an OLDER verified snapshot exactly (a reverted state): needs a human look")
-    si_new = ir.with_unlisted(si, rec["report"])
-    si2 = dict(si_new, rosterSnapshot=snap)
-    new_state = ss.season_state(si2)
-    base_state = ss.season_state(si)
-    baseline = {"status": base_state.get("status", {}), "checks": {f: ss.roster_checks(si, base_state, f) for f in si["franchises"]}}
-    _, aliases = ir.load_maps(data_dir)
-    dc = double_checks(si2, aliases, obs, snap, baseline["checks"], new_state)
-    if dc["payrollMismatch"] or dc["ilLabelsLost"]:
-        check = {"blocking": [{"code": "INTERNAL_CHECK", "detail": "; ".join(dc["payrollMismatch"] + [f"IL label lost: {k}" for k in dc["ilLabelsLost"]])}]}
-        return finish("FAILED", build_report("FAILED", obs, check, None, None, None, None, None, [], run_info), 1)
     new_status = {r["playerKey"]: r["status"] for rows in snap["teams"].values() for r in rows if r.get("status")}
     status_changed = new_status != {k: v for k, v in baseline["status"].items() if k in new_state["playerOwner"]}
     material = bool(d["added"] or d["dropped"] or d["changedTeam"] or d["ilMoves"] or status_changed or rec["report"].get("unlisted"))
     if not conflicts and not material:  # lineup-slot churn only: not worth a snapshot or a PR
-        return finish("NO_CHANGE", f"# Update Yahoo Rosters — NO_CHANGE\n\nCaptured {obs['capturedAt']}. Ownership, IL labels and statuses "
-                                   f"match the current verified snapshot `{si['rosterSnapshot']['snapshotId']}`; {len(d['lineupOnly'])} players only moved "
-                                   "between bench and lineup slots, which does not affect ownership, payroll or the checks. Nothing to do.\n", 0)
+        return finish("NO_CHANGE", no_change_report(
+            obs, si2, dc, f"Ownership, IL labels and statuses match the current verified snapshot `{si['rosterSnapshot']['snapshotId']}`; "
+                          f"{len(d['lineupOnly'])} players only moved between bench and lineup slots, which does not affect ownership, "
+                          "payroll or the checks. Nothing to do.", run_info), 0)
     outcome = "CONFLICT" if conflicts else "READY"
     report = build_report(outcome, obs, check, rec, dc, si2, baseline, new_state, conflicts, run_info)
     if outcome == "READY" and apply:
@@ -333,8 +357,10 @@ def main(argv=None, fetcher=None) -> int:
     finally:
         fetcher.close()
     write_outputs(os.environ.get("GITHUB_OUTPUT"), {"outcome": res["outcome"], "report": os.path.join(args.out, "report.md"),
-                                                    "snapshot": res.get("snapshot", "")})
+                                                    "snapshot": res.get("snapshot", ""), "flags": res.get("flags", 0)})
     print(f"{res['outcome']}: report at {os.path.relpath(os.path.join(args.out, 'report.md'), ROOT)}")
+    if res.get("flags"):
+        print(f"::notice title=Compliance flags::{res['flags']} roster / IL / anti-tank finding(s) for the commissioner. See the report (job summary); nothing was changed.")
     if res["outcome"] == "CONFLICT":
         print("::warning::Yahoo differs from the official rosters in a way that needs a human decision. See the report; nothing was changed.")
     return res["exit"]

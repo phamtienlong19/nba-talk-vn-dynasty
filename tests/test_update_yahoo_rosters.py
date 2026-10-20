@@ -138,6 +138,27 @@ class TestOutcomes(RunCase):
             self.assertIn("only moved between bench and lineup slots", res["report"])
             self.assertEqual(len(self.snapshot_files(td)), 2)
 
+    def test_no_change_still_reports_compliance_flags(self):
+        with TempData() as td:
+            self.run_update(td, reference(), apply=True)
+            o = reference()
+            next(p for p in team(o, 8)["players"] if p["name"] == "Aaron Nesmith")["injury"] = "O"      # Out, in a lineup slot
+            self.run_update(td, o, apply=True)                                                           # status change: applied
+            res, _ = self.run_update(td, o, apply=True)                                                  # nothing changed since
+            self.assertEqual(res["outcome"], "NO_CHANGE")
+            rep = res["report"]
+            self.assertRegex(rep, r"\*\*Compliance flags on the current rosters: [1-9]\d*\*\*")
+            self.assertIn("Aaron Nesmith (team 8) is injured (status O)", rep)                           # injured but not on IL
+            self.assertRegex(rep, r"DHA — position coverage: \*\*over\*\* short PG")
+            self.assertGreater(res["flags"], 0)
+            self.assertNotRegex(rep.lower(), r"tanking|violator")
+            self.assertEqual(len(self.snapshot_files(td)), 3)                                            # still no extra snapshot
+
+    def test_flag_count_adds_antitank_and_cross_checks(self):
+        dc = {"antiTank": [1, 2], "metadataDrift": [1], "slotIneligible": [], "healthyOnIL": [1], "injuredOffIL": [1, 2, 3],
+              "ilLabelsLost": [9], "payrollMismatch": [9]}
+        self.assertEqual(up.flag_count(dc), 7)                          # integrity failures are not flags: they fail the run
+
     def test_il_move_and_status_change_are_material(self):
         with TempData() as td:
             self.run_update(td, reference(), apply=True)
@@ -254,7 +275,7 @@ class TestDoubleChecks(RunCase):
 
     def test_anti_tank_checks_are_reported_without_a_verdict(self):
         report = self.report(lambda o: None)
-        self.assertIn("## Anti-tank roster checks on the proposed rosters (evidence only)", report)
+        self.assertIn("## Anti-tank roster checks (evidence only)", report)
         self.assertRegex(report, r"DHA — position coverage: \*\*over\*\* short PG")
         self.assertNotRegex(report.lower(), r"tanking|violator")
 
