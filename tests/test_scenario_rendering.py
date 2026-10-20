@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import subprocess
+import datetime
 import json
 import sys
 import unittest
@@ -10,6 +11,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 import league_state as ls  # noqa: E402
+import season_state as ss  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _proposed import proposed_inputs  # noqa: E402
 import refresh_team_cap_summary as cap_summary  # noqa: E402
@@ -110,6 +112,12 @@ def _dump(url):
     out = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--dump-dom", url],
                          capture_output=True, text=True, timeout=90)
     return out.stdout
+
+
+def _snapshot_label():
+    snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
+    d = datetime.date.fromisoformat(snap["verifiedAt"][:10])
+    return f"✓ ROSTERS {d.strftime('%b').upper()} {d.day}"
 
 
 def _card(dom, short):
@@ -304,12 +312,19 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn('class="il-c"', bsy)
 
     def test_yahoo_status_chips_are_distinct(self):
-        lc = _card(self.official, "LC")
-        self.assertIn('class="players has-st"', lc)                         # names aligned past the status gutter
-        self.assertRegex(lc, r'<span class="st-chip st-q" title="Questionable \(Yahoo\)"[^>]*>Q</span>Chet Holmgren')
-        self.assertRegex(lc, r'<span class="st-chip st-out"[^>]*>OUT</span>Bradley Beal')
-        tuly = _card(self.official, "TuLy")
-        self.assertRegex(tuly, r'<span class="st-chip st-p" title="Probable \(Yahoo\)"[^>]*>P</span>Stephen Curry')
+        snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
+        want = {"O": "OUT", "Q": "Q", "P": "P"}
+        seen = set()
+        for fid, rows in snap["teams"].items():                              # whatever the current snapshot says, card by card
+            card = _card(self.official, self.si["shorts"][fid])
+            chips = {html_lib.unescape(n).strip(): c for c, n in
+                     re.findall(r'<span class="st-chip st-[a-z]+"[^>]*>([^<]*)</span>([^<]*)', card)}
+            for r in rows:
+                if r.get("status") in want:
+                    self.assertEqual(chips.get(r["name"]), want[r["status"]], (r["name"], r["status"]))
+                    seen.add(r["status"])
+        self.assertTrue(seen, "the snapshot carries no statuses to check")
+        self.assertIn('class="players has-st"', _card(self.official, "LC"))   # names aligned past the status gutter
         css = self.static
         for cls, color in (("st-p", "#17734c"), ("st-q", "#1f5fbf"), ("st-d", "#b45a09"), ("st-inj", "#b3261e")):
             self.assertIn(f".st-chip.{cls}{{color:{color}", css)
@@ -386,7 +401,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_public_ui_shows_the_verified_roster_snapshot(self):
         m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill cap-rule"', self.official)
-        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 19")
+        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), _snapshot_label())
         rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
         self.assertEqual(len(rules), 4)
         self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 $ COUNT · IL ✓" for r in rules), rules)

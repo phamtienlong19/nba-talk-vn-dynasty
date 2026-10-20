@@ -1401,7 +1401,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 7.0,
    "oRank": 89,
@@ -1650,7 +1651,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 4.0,
    "oRank": 105,
@@ -2383,7 +2385,8 @@
    "eligiblePositions": [
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 151,
@@ -2397,7 +2400,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 4.0,
    "oRank": 152,
@@ -2554,7 +2558,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 162,
@@ -2744,7 +2749,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 174,
@@ -3107,7 +3113,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 197,
@@ -3344,7 +3351,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 212,
@@ -3671,7 +3679,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 232,
@@ -4368,7 +4377,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 275,
@@ -4617,7 +4627,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 291,
@@ -5313,7 +5324,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 334,
@@ -6212,7 +6224,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 390,
@@ -6476,7 +6489,8 @@
     "PG",
     "SG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 407,
@@ -7152,7 +7166,7 @@
    "playerId": "5841",
    "playerKey": "478.p.5841",
    "name": "Tony Bradley",
-   "nbaTeam": "NYK",
+   "nbaTeam": "UTA",
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
@@ -7268,8 +7282,7 @@
     "SF",
     "PF",
     "F",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 457,
@@ -7568,7 +7581,7 @@
    "playerId": "10529",
    "playerKey": "478.p.10529",
    "name": "Tyler Burton",
-   "nbaTeam": "MEM",
+   "nbaTeam": "GSW",
    "displayPosition": "PF",
    "eligiblePositions": [
     "PF",
@@ -7583,7 +7596,7 @@
    "playerId": "6722",
    "playerKey": "478.p.6722",
    "name": "Caleb Houstan",
-   "nbaTeam": "NOP",
+   "nbaTeam": "POR",
    "displayPosition": "SF",
    "eligiblePositions": [
     "SF",
@@ -7849,7 +7862,7 @@
    "playerId": "10141",
    "playerKey": "478.p.10141",
    "name": "Drew Timme",
-   "nbaTeam": "MIN",
+   "nbaTeam": "PHX",
    "displayPosition": "PF,C",
    "eligiblePositions": [
     "PF",
@@ -8948,7 +8961,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 565,
@@ -9481,5 +9495,6 @@
    "oRank": 600,
    "headshotUrl": "https://s.yimg.com/iu/api/res/1.2/6E3CiTDckykS8Ar3_Zph3A--~C/YXBwaWQ9eXNwb3J0cztjaD0yMzM2O2NyPTE7Y3c9MTc5MDtkeD04NTc7ZHk9MDtmaT11bGNyb3A7aD02MDtxPTEwMDt3PTQ2/https://s.yimg.com/xe/i/us/sp/v/nba_cutout/players_l/10172023/6752.png"
   }
- ]
+ ],
+ "metadataRefreshedAt": "2026-10-20T03:19:46Z"
 }
