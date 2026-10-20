@@ -317,6 +317,26 @@ class TestStorageState(unittest.TestCase):
             self.assertNotIn("SECRET-VALUE-NEVER-PRINT", text)
         self.assertEqual(up.protected_files(ls.DATA_DIR), before)
 
+    def test_session_problem_is_reported_even_when_playwright_is_not_installed(self):
+        """CI installs no Playwright: the missing/expired session must still be the reported reason."""
+        saved = {k: sys.modules.get(k) for k in ("playwright", "playwright.sync_api")}
+        sys.modules["playwright"] = sys.modules["playwright.sync_api"] = None        # makes `import playwright` raise ImportError
+        try:
+            with self.assertRaises(yr.FetchError) as e:
+                yr.BrowserFetcher(storage_state="/nonexistent")
+            self.assertEqual(e.exception.code, "AUTH_REQUIRED")
+            self.assertIn("no browser-state file", e.exception.detail)
+            valid = self.write({"cookies": [self.cookie()]})
+            with self.assertRaises(yr.FetchError) as e:                              # a usable session but no Playwright
+                yr.BrowserFetcher(storage_state=valid)
+            self.assertEqual(e.exception.code, "NO_PLAYWRIGHT")
+        finally:
+            for k, v in saved.items():
+                if v is None:
+                    sys.modules.pop(k, None)
+                else:
+                    sys.modules[k] = v
+
     def test_missing_state_fails_before_any_request(self):
         out = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, out)

@@ -579,17 +579,19 @@ class BrowserFetcher:
     method = "browser"
 
     def __init__(self, profile=PROFILE_DIR, headless=True, storage_state=None):
-        try:
-            from playwright.sync_api import sync_playwright
-        except ImportError:
-            raise FetchError("NO_PLAYWRIGHT", "pip install playwright && python3 -m playwright install chromium")
-        self._browser = None
+        # Check the session first: it needs no browser, and "your session is missing/expired" is the more useful message
+        # than "Playwright is not installed" when both are wrong.
         if storage_state:
             problems = storage_state_problems(storage_state)
             if problems:
                 raise FetchError("AUTH_REQUIRED", problems[0] + "; re-run `yahoo_rosters.py login`, then `export-state`, and update the secret")
         elif not os.path.isdir(profile):
             raise FetchError("AUTH_REQUIRED", f"no browser profile at {profile}; run `yahoo_rosters.py login` first")
+        try:
+            from playwright.sync_api import sync_playwright
+        except ImportError:
+            raise FetchError("NO_PLAYWRIGHT", "pip install -r requirements-yahoo-rosters.txt && python3 -m playwright install chromium")
+        self._browser = None
         self._pw = sync_playwright().start()
         if storage_state:
             self._browser = self._pw.chromium.launch(headless=headless)
