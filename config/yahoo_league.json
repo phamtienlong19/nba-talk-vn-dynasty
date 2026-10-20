@@ -1,0 +1,26 @@
+{
+  "note": "NBA Talk VN Dynasty on Yahoo Fantasy, used by scripts/yahoo_rosters.py (read-only GETs). Team id 10 does not exist in this league. No credentials belong in this file or anywhere in the repository.",
+  "leagueId": "85092",
+  "gameKey": "478",
+  "teamIds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "pageUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/{teamId}",
+  "requestDelaySeconds": 1.5,
+  "leagueUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/"
+}

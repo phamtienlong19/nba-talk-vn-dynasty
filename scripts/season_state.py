@@ -105,6 +105,71 @@ def snapshot_slots(snapshot: dict) -> dict:
     return {r["playerKey"]: r.get("slot") for rows in snapshot["teams"].values() for r in rows}
 
 
+def snapshot_status(snapshot: dict) -> dict:
+    return {r["playerKey"]: r["status"] for rows in snapshot["teams"].values() for r in rows if r.get("status")}
+
+
+RULES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "roster_rules.json")
+
+
+def _positions(si, key, base):
+    raw = (ls.player_meta(si, key).get("displayPosition") or "").replace("/", ",")
+    return {p.strip() for p in raw.split(",")} & set(base)
+
+
+def _fillable(players: dict, slots: dict) -> list:
+    """Maximum assignment of players to lineup slots (augmenting paths); -> the slots that stay empty."""
+    match = {}
+
+    def place(slot, seen):
+        for p, pos in players.items():
+            if p in seen or not (pos & set(slots[slot])):
+                continue
+            seen.add(p)
+            if p not in match or place(match[p], seen):
+                match[p] = slot
+                return True
+        return False
+    return [s for s in slots if not place(s, set())]
+
+
+def roster_checks(si, state, fid, rules=None) -> dict:
+    """The countable anti-tank roster limits (docs/LEAGUE_RULES_MODEL.md, roster / anti-tank governance), as evidence
+    for review. Levels: ok / watch (at a limit, or inside a commissioner exception) / over. Never a tanking verdict."""
+    rules = rules or _load(RULES_PATH)
+    base = rules["positions"]
+    keys = ls.team_players(si, state, fid)
+    slots, status = state.get("slots", {}), state.get("status", {})
+    nm = lambda k: ls.player_name(si, k)  # noqa: E731
+    on_il = [k for k in keys if slots.get(k) in SLOTS_IL]
+    out = [k for k in keys if k not in on_il and status.get(k) in rules["longTermInjured"]["outStatuses"]]
+    injured = on_il + out
+    lim = rules["longTermInjured"]["max"]
+    healthy = {k: _positions(si, k, base) for k in keys if k not in injured}
+    single = [k for k, v in healthy.items() if len(v) == 1]  # injured players cannot contribute: not counted (owner, 2026-10-19)
+    sp = rules["singlePosition"]
+    cover = {p: sum(1 for v in healthy.values() if p in v) for p in base}
+    short = [p for p in base if cover[p] < rules["minPerPosition"]]
+    combos = rules.get("combos", {})
+    combo_cover = {c: sum(1 for v in healthy.values() if v & set(ps)) for c, ps in combos.items()}
+    short_combo = [c for c in combos if combo_cover[c] < rules.get("minPerCombo", 0)]
+    empty = _fillable(healthy, rules["lineupSlots"])
+    cap_il = sum(r["c"] for r in ls.team_roster(si, state, fid) if r["k"] in injured and not r["x"])
+    return {
+        "injured": {"count": len(injured), "il": len(on_il), "out": len(out), "max": lim,
+                    "level": "over" if len(injured) > lim else "watch" if len(injured) == lim else "ok",
+                    "players": [nm(k) for k in injured], "countedCap": cap_il},
+        "singlePosition": {"count": len(single), "max": sp["max"], "maxWithCombo": sp["maxWithComboTags"],
+                           "level": "over" if len(single) > sp["maxWithComboTags"] else "watch" if len(single) > sp["max"] else "ok",
+                           "players": [nm(k) for k in single]},
+        "coverage": {"byPosition": cover, "min": rules["minPerPosition"], "short": short,
+                     "byCombo": combo_cover, "comboMin": rules.get("minPerCombo"), "comboOf": combos, "shortCombo": short_combo,
+                     "level": "over" if short or short_combo else "ok"},
+        "lineup": {"slots": len(rules["lineupSlots"]), "filled": len(rules["lineupSlots"]) - len(empty), "empty": empty,
+                   "level": "over" if empty else "ok"},
+    }
+
+
 # ------------------------------------------------------------------- state
 def pending_completed(si: dict) -> list:
     """COMPLETED transactions not yet reflected in the current verified snapshot (applied on top of it)."""
@@ -117,13 +182,30 @@ def reflected_completed(si: dict) -> list:
     return [t for t in si["seasonTxns"] if t["status"] == "COMPLETED" and ts(t["effectiveAt"]) <= since]
 
 
+def _replay_reflected(si: dict, official: dict) -> dict:
+    """Completed trades a verified snapshot already contains, replayed from the post-draft rosters in ledger order --
+    for their history only (who moved, payroll before/after at the time). Ownership still comes from the snapshot."""
+    replay = {"playerOwner": dict(official["playerOwner"]), "pickOwner": dict(official["pickOwner"]), "history": {},
+              "completedPicks": official["completedPicks"], "draftedPlayers": official["draftedPlayers"],
+              "tradeResults": [], "activeTradeIds": [], "applied": set()}
+    done = reflected_completed(si)
+    ids = {t["tradeId"] for t in done}
+    for t in done:
+        res = ls._apply_trade(si, replay, t, ids)
+        res["reflected"] = True
+    replay["activeTradeIds"] = [t["tradeId"] for t in done]
+    return replay
+
+
 def season_state(si: dict, selected=()) -> dict:
     """Layer B (no selection) or C (selected proposals). Reads, never writes."""
     official = ls.resolve(si, (), "OFFICIAL")  # layer A: draft archive, pick ledger, draft tags
     snap = si["rosterSnapshot"]
-    state = {"playerOwner": snapshot_owner(snap), "pickOwner": dict(official["pickOwner"]), "history": {},
+    past = _replay_reflected(si, official)  # completed trades already inside the snapshot: history, never re-applied
+    state = {"playerOwner": snapshot_owner(snap), "pickOwner": dict(official["pickOwner"]), "history": past["history"],
              "completedPicks": official["completedPicks"], "draftedPlayers": official["draftedPlayers"],
-             "tradeResults": [], "activeTradeIds": [], "applied": set(), "slots": snapshot_slots(snap)}
+             "tradeResults": past["tradeResults"], "activeTradeIds": [], "applied": set(past["applied"]),
+             "slots": snapshot_slots(snap), "status": snapshot_status(snap)}
     chosen = []
     for tid in selected:
         t = si["tradeIndex"].get(tid)
@@ -135,7 +217,7 @@ def season_state(si: dict, selected=()) -> dict:
     done = pending_completed(si)
     active = done + sorted(chosen, key=lambda t: t["order"])
     active_ids = {t["tradeId"] for t in active}
-    state["activeTradeIds"] = [t["tradeId"] for t in active]
+    state["activeTradeIds"] = past["activeTradeIds"] + [t["tradeId"] for t in active]
     for t in active:
         res = ls._apply_trade(si, state, t, active_ids)
         if t["status"] == "COMPLETED" and not res["applied"]:
@@ -155,10 +237,26 @@ def team_view(si, state, fid, base) -> dict:
     rep = ls.team_report(si, state, fid, base)
     rep["fold"] = ls.fold_team(si, state, fid)
     slots = state.get("slots", {})
+    status = state.get("status", {})
     for r in rep["roster"]:
         r["s"] = slots.get(r["k"])
+        if status.get(r["k"]):
+            r["st"] = status[r["k"]]  # Yahoo player status as observed (P, Q, D, O, INJ, OFS, ...)
+        meta = ls.player_meta(si, r["k"])  # display data for players the original board does not list (in-season adds)
+        r["pos"], r["nba"] = (meta.get("displayPosition") or "").replace(",", "/"), meta.get("nbaTeam") or ""
     rep["il"] = sum(1 for r in rep["roster"] if r["s"] in SLOTS_IL)
+    # IL players compete for the counted nine like anyone else; "healthy" is the counted payroll without them (display)
+    rep["ilCap"] = sum(r["c"] for r in rep["roster"] if r["s"] in SLOTS_IL and not r["x"])
+    rep["healthyCap"] = rep["cap"] - rep["ilCap"]
+    rep["checks"] = roster_checks(si, state, fid)
     rep["outKeys"] = sorted(set(ls.team_players(si, base, fid)) - {r["k"] for r in rep["roster"]})
+    # a trade acquisition (⇄) is not a free-agent add: only players received in a trade count as traded in
+    traded_in = {a["k"] for a in rep["fold"]["in"] if a["t"] == "p"}
+    traded_out = {a["k"] for a in rep["fold"]["out"] if a["t"] == "p"}
+    added = [k for k in rep["inKeys"] if k not in traded_in]
+    rep["inKeys"] = [k for k in rep["inKeys"] if k in traded_in]
+    rep["added"] = [ls.describe_asset(si, {"type": "player", "playerKey": k}) for k in added]
+    rep["dropped"] = [ls.describe_asset(si, {"type": "player", "playerKey": k}) for k in rep["outKeys"] if k not in traded_out]
     return rep
 
 

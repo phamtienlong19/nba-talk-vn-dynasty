@@ -67,6 +67,13 @@ def load_inputs(data_dir: str = DATA_DIR, registry_path: str = REGISTRY_PATH, po
     # playerKey -> {name, nbaTeam, displayPosition, cap} for drafted players Yahoo does not list yet (provisional, cap 0)
     prov = os.path.join(data_dir, "provisional_players.json")
     inputs["extraPlayers"] = {p["playerKey"]: p for p in _load(prov)["players"]} if os.path.exists(prov) else {}
+    # playerKey -> {name, nbaTeam, displayPosition, cap 0} for players rostered in-season who are not in the frozen salary
+    # table (league rule: their salary is 0; config/cap_policy.json unlistedPlayerSalary). Written by a reviewed import.
+    unl = os.path.join(data_dir, "unlisted_players.json")
+    inputs["unlistedPlayers"] = {p["playerKey"]: p for p in _load(unl)["players"]} if os.path.exists(unl) else {}
+    # current team names (Yahoo, rosters/team_map.json); the locked keeper freeze keeps the names it was frozen with
+    tm = os.path.join(data_dir, "rosters", "team_map.json")
+    inputs["teamNames"] = {f: t["name"] for f, t in _load(tm)["teams"].items() if t.get("name")} if os.path.exists(tm) else {}
     # 2026-27 salaries frozen at the end of the draft: payroll never moves when the Yahoo registry is refreshed
     sal = os.path.join(data_dir, "salary_freeze.json")
     inputs["salaries"] = _load(sal)["salaries"] if os.path.exists(sal) else {}
@@ -119,14 +126,28 @@ def player_cap(inputs: dict, player_key: str) -> float:
     p = inputs["registry"].get(player_key)
     if p is not None:
         return float(p["projectedAuctionValue"])
-    extra = inputs["extraPlayers"].get(player_key)
+    extra = inputs["extraPlayers"].get(player_key) or inputs.get("unlistedPlayers", {}).get(player_key)
     if extra is not None:
         return float(extra.get("cap", 0))
     raise StateError(f"unknown player {player_key}")
 
 
+def team_name(inputs: dict, fid: str) -> str:
+    """The team's current name (team_map.json), else the name recorded at the keeper freeze, else the forensic one."""
+    if inputs.get("teamNames", {}).get(fid):
+        return inputs["teamNames"][fid]
+    t = next((t for t in inputs["freeze"]["teams"] if t["franchiseId"] == fid), {})
+    return t.get("teamName") or inputs["franchises"][fid]["displayName"]
+
+
+def player_meta(inputs: dict, player_key: str) -> dict:
+    """Identity/display record: Yahoo registry, else provisional draftee, else unlisted in-season player."""
+    return (inputs["registry"].get(player_key) or inputs["extraPlayers"].get(player_key)
+            or inputs.get("unlistedPlayers", {}).get(player_key) or {})
+
+
 def player_name(inputs: dict, player_key: str) -> str:
-    p = inputs["registry"].get(player_key) or inputs["extraPlayers"].get(player_key)
+    p = player_meta(inputs, player_key)
     return p["name"] if p else player_key
 
 
@@ -275,7 +296,7 @@ def validate_trade(inputs, state, trade, active_ids):
             if a["pickId"] in state["completedPicks"]:
                 errors.append({"code": "PICK_ALREADY_USED", "detail": a["pickId"]})
                 continue
-        elif a["playerKey"] not in inputs["registry"] and a["playerKey"] not in inputs["extraPlayers"]:
+        elif not player_meta(inputs, a["playerKey"]):
             errors.append({"code": "UNKNOWN_PLAYER", "detail": a["playerKey"]})
             continue
         owner = _owner(state, a)
@@ -413,8 +434,8 @@ def draft_summary(inputs: dict, state: dict) -> dict:
                          "name": player_name(inputs, c["playerKey"]), "cap": cap, "capBefore": before, "capAfter": running[f],
                          "room": ceiling - running[f], "status": cap_status(inputs, running[f]),
                          "rookie": bool(ev.get("rookie")),
-                         "pos": ((inputs["registry"].get(c["playerKey"]) or inputs["extraPlayers"].get(c["playerKey"]) or {}).get("displayPosition") or "").replace(",", "/"),
-                         "nba": (inputs["registry"].get(c["playerKey"]) or inputs["extraPlayers"].get(c["playerKey"]) or {}).get("nbaTeam", "")})
+                         "pos": (player_meta(inputs, c["playerKey"]).get("displayPosition") or "").replace(",", "/"),
+                         "nba": player_meta(inputs, c["playerKey"]).get("nbaTeam", "")})
     holds_raw = active_holds(inputs)
     held_ids = {h["pickId"] for h in holds_raw}
     holds = [{"pickId": h["pickId"], "label": pick_label(inputs["pickIndex"][h["pickId"]]), "reason": h["reason"],

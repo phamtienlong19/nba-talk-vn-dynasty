@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 import build_fa_draft_pool as pool  # noqa: E402
 import build_league_state as bls  # noqa: E402
 import league_state as ls  # noqa: E402
+import season_state as ss  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -373,8 +374,9 @@ class TestDraftRoom(unittest.TestCase):
     def test_drafted_players_leave_the_pool_and_join_rosters(self):
         avail = {r[1] for r in self.data["available"]["rows"]}
         board = set(re.findall(r'<div class="pool-player">(.*?)</div>', self.html))
+        dropped = {"Zaccharie Risacher"}  # drafted at 3.01, dropped on Yahoo by 2026-10-19: a free agent again
         for c in self.d["completed"]:
-            self.assertNotIn(c["name"], avail)
+            self.assertEqual(c["name"] in avail, c["name"] in dropped, c["name"])
             self.assertNotIn(c["name"], board)
             self.assertIn(c["playerKey"], ls.team_players(self.i, self.o, c["franchiseId"]))
         self.assertEqual(len(board), 60)  # the 60 is refilled from the next-best remaining players
@@ -560,14 +562,16 @@ class TestEmbeddedPageData(unittest.TestCase):
         rows = self.data["available"]["rows"]
         self.assertGreater(len(rows), 60)
         on_board = [r for r in rows if r[6] is not None]
-        self.assertEqual(len(on_board), 60)
+        self.assertEqual(len(on_board), 50)  # the 60-player board minus 10 later picked up on Yahoo
         outside = [r for r in rows if r[6] is None and r[5] and r[5] > 300]
         self.assertTrue(outside, "a Yahoo-ranked player outside the recommendation board must be selectable")
 
     def test_kept_players_are_not_available(self):
         keys = {r[0] for r in self.data["available"]["rows"]}
         kept = {k["playerKey"] for t in self.i["freeze"]["teams"] for k in t["keepers"]}
-        self.assertFalse(keys & kept)
+        owned = set(ss.season_state(ss.load_season(self.i))["playerOwner"])
+        self.assertFalse(keys & owned)                                       # nobody rostered today is available
+        self.assertEqual({ls.player_name(self.i, k) for k in keys & kept}, {"Santi Aldama", "Will Riley"})  # dropped on Yahoo
 
     def test_dynasty_rank_is_not_exposed_in_the_operational_data(self):
         self.assertEqual(self.data["available"]["cols"], ["key", "name", "nba", "pos", "cap", "yahooOr", "board", "src"])

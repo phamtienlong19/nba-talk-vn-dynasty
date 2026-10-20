@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import subprocess
+import json
 import sys
 import unittest
 
@@ -119,7 +120,8 @@ def _card(dom, short):
 
 
 def _read(card):
-    names = [html_lib.unescape(n.split("<span")[0]).strip() for n in re.findall(r'<div class="pname">(.*?)</div>', card, re.S)]
+    names = [html_lib.unescape(re.sub(r'<span class="st-chip[^"]*"[^>]*>[^<]*</span>', "", n).split("<span")[0]).strip()
+             for n in re.findall(r'<div class="pname">(.*?)</div>', card, re.S)]  # the left status chip is not part of the name
     cap = re.search(r'<div class="cap-total">(.*?)<span>/(\d+)</span>', card, re.S)
     return {"names": names, "cap": cap.group(1), "ceiling": cap.group(2),
             "gap": re.search(r'<div class="gap-big">(.*?)</div>', card).group(1),
@@ -158,18 +160,18 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn("Jalen Williams", sup["names"])
         self.assertIn("Julius Randle", sup["names"])
         # completed Bsy <-> sup fam trade: sup fam 141 -> 144 (Castle $13 + Mitchell $0 in; Coward $10 + Beringer $0 out)
-        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("144", 12, "34 ROOM"))
+        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("144", 15, "34 ROOM"))   # + 3 IL pickups at $0 (Yahoo 2026-10-19)
         self.assertIn("Stephon Castle", sup["names"])
         self.assertNotIn("Cedric Coward", sup["names"])
         bsy = _read(_card(self.official, "Bsy"))
-        self.assertEqual((bsy["cap"], bsy["rows"], bsy["gap"]), ("176", 12, "2 ROOM"))
+        self.assertEqual((bsy["cap"], bsy["rows"], bsy["gap"]), ("176", 13, "2 ROOM"))
         self.assertIn("Cedric Coward", bsy["names"])
         self.assertIn("Joan Beringer", bsy["names"])
         self.assertNotIn("Stephon Castle", bsy["names"])
         for n in ("Nikola Jokić", "Oso Ighodaro", "Victor Wembanyama"):   # completed Bsy <-> Thịnh
             self.assertIn(n, bsy["names"] if n != "Victor Wembanyama" else _read(_card(self.official, "Thịnh"))["names"])
         thinh = _read(_card(self.official, "Thịnh"))
-        self.assertEqual((thinh["cap"], thinh["rows"], thinh["gap"]), ("176", 12, "2 ROOM"))
+        self.assertEqual((thinh["cap"], thinh["rows"], thinh["gap"]), ("176", 13, "2 ROOM"))
         self.assertIn("Jaylon Tyson", thinh["names"])
         self.assertNotIn("Nikola Jokić", thinh["names"])
         bz = _read(_card(self.official, "Bz"))
@@ -183,7 +185,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_untraded_teams_keep_their_keepers_and_add_only_draftees(self):
         drafted = {c["name"] for c in ls.draft_summary(self.i, self.state)["completed"]}
-        for short in ("Quân", "DonTrick", "TT"):
+        for short in ("DHA", "Đạt", "TuLy", "TT"):   # no pre-draft trade, no in-season trade, no Yahoo add/drop
             now = _read(_card(self.official, short))["names"]
             before = _read(_card(self.static, short))["names"]
             self.assertEqual(sorted(n for n in now if n not in drafted), sorted(before), short)
@@ -266,6 +268,110 @@ class TestRenderedCards(unittest.TestCase):
         cc = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "CrazyCat"), re.S).group(1)
         self.assertRegex(cc, r'<span class="mv-l">OUT</span><span class="mv-items"><span class="mv-pl rk"><span>Morez Johnson Jr\.</span>')
 
+    def test_pickups_are_not_shown_as_trades_and_il_is_tagged(self):
+        def row(short, name):
+            return next(r for r in re.findall(r'<div class="player-row[^"]*".*?<div class="cap">.*?</div>', _card(self.official, short), re.S)
+                        if f">{name}<" in r)
+        miller = row("Bsy", "Jordan Miller")
+        self.assertNotIn("tr-tag", miller)                                   # free-agent pickup: no ⇄
+        self.assertNotIn("row-trade", miller)
+        self.assertIn('<div class="pname"><span class="st-chip st-out" title="Out (Yahoo)" aria-label="Out">OUT</span>Jordan Miller', miller)  # status chip on the left
+        self.assertIn("tr-tag", row("Bsy", "Nikola Jokić"))                  # trade acquisition keeps ⇄
+        mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "Bsy"), re.S).group(1))
+        self.assertRegex(mv, r"ADDED\s.*Jordan Miller")
+        self.assertRegex(mv, r"DROPPED\s.*Zaccharie Risacher")
+        q = row("sup fam", "Jayden Quaintance")                              # unlisted salary: $0 by league rule
+        self.assertIn('<div class="pos">PF</div>', q)
+        self.assertIn('<div class="nba">SAS</div>', q)
+        self.assertIn('class="st-chip st-out"', q)                           # on IL and Out on Yahoo
+
+    def test_injured_list_is_its_own_group_at_the_foot_of_the_roster(self):
+        for short in ("Bsy", "sup fam", "CrazyCat", "LC", "Maxfixe", "DonTrick"):
+            card = _card(self.official, short)
+            players = re.search(r'<div class="players[^"]*">(.*)', card, re.S).group(1)
+            head = players.find('class="il-head"')
+            self.assertGreater(head, 0, short)
+            before, after = players[:head], players[head:]
+            self.assertNotIn("il-row", before, short)                        # healthy players first
+            self.assertEqual(after.count('class="player-row'), after.count("il-row"), short)  # only IL rows below
+        cc = _card(self.official, "CrazyCat")                                # Nurkić ($4) is on IL and inside the nine
+        self.assertRegex(cc, r'class="il-head">.*?Injured list.*?class="il-c"[^>]*>4 counted<')
+        self.assertIn('<div class="nc-div">not counted</div>', cc)           # no "top 9" divider when IL counts
+        self.assertRegex(re.sub(r"<[^>]+>", " ", cc), r"healthy\s+141")     # 145 counted, 4 of it on IL
+        bsy = _card(self.official, "Bsy")                                    # Miller ($0) is outside the nine
+        self.assertIn("beyond top 9 · not counted", re.sub(r"<[^>]+>", "", bsy))
+        self.assertNotIn("healthy", re.sub(r"<[^>]+>", " ", bsy.split('class="players"')[0]))
+        self.assertNotIn('class="il-c"', bsy)
+
+    def test_yahoo_status_chips_are_distinct(self):
+        lc = _card(self.official, "LC")
+        self.assertIn('class="players has-st"', lc)                         # names aligned past the status gutter
+        self.assertRegex(lc, r'<span class="st-chip st-q" title="Questionable \(Yahoo\)"[^>]*>Q</span>Chet Holmgren')
+        self.assertRegex(lc, r'<span class="st-chip st-out"[^>]*>OUT</span>Bradley Beal')
+        tuly = _card(self.official, "TuLy")
+        self.assertRegex(tuly, r'<span class="st-chip st-p" title="Probable \(Yahoo\)"[^>]*>P</span>Stephen Curry')
+        css = self.static
+        for cls, color in (("st-p", "#17734c"), ("st-q", "#1f5fbf"), ("st-d", "#b45a09"), ("st-inj", "#b3261e")):
+            self.assertIn(f".st-chip.{cls}{{color:{color}", css)
+        self.assertIn(".st-chip.st-out{color:#fff;background:#c9362d}", css)   # out: solid red
+        self.assertIn(".st-chip.st-ofs{color:#fff;background:#1d2330}", css)   # out for the season: ink
+        self.assertIn('OFS:["OFS","Out for the season","ofs"]', css)
+        self.assertIn('INJ:["INJ","Injured","inj"]', css)
+        self.assertIn('D:["D","Doubtful","d"]', css)
+
+    def test_preseason_standings_pill_and_team_order(self):
+        a = self.official.split('id="rosters-a"')[1].split('id="rosters-b"')[0]
+        txt = lambda x: " ".join(re.sub(r"<[^>]+>", "", x).split())  # noqa: E731  (digits are wrapped in spans)
+        self.assertTrue(txt(a).startswith(">TEAMS 1–8"))
+        self.assertIn("meta-pill stand-pill off", a)
+        self.assertRegex(txt(a), r"STANDINGS\s*AFTER WEEK 1")
+        shorts = re.findall(r'<span class="identity-tag">([^<]*)</span>', a)
+        self.assertEqual(shorts[:3], ["Bsy", "CrazyCat", "Melo"])          # team # order until games are played
+        self.assertNotIn('<span class="stand-tag', self.official)          # no rank tags before games are played
+
+    def test_started_season_sorts_worst_record_first(self):
+        import tempfile, shutil
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+        with open(INDEX, encoding="utf-8") as f:
+            html = f.read()
+        m = re.search(r'(id="league-data">)(.*?)(</script>)', html, re.S)
+        data = json.loads(m.group(2).replace("<\\/", "</"))
+        ids = [t["id"] for t in data["teams"]]
+        teams = {fid: {"rank": i + 1, "w": 160 - i * 6, "l": 40 + i * 6, "t": 3, "pct": None, "gb": str(i * 2), "division": "East",
+                       "divRecord": "0-0-0", "lastWeek": "5-4-0", "waiver": i + 1, "moves": 0, "place": i + 1} for i, fid in enumerate(ids)}
+        data["standings"] = {"capturedAt": "2026-11-02T12:00:00Z", "source": "test", "started": True, "teams": teams,
+                             "worstFirst": list(reversed(ids))}                 # made-up records: team 01 is best
+        d = tempfile.mkdtemp()
+        try:
+            path = os.path.join(d, "index.html")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(html[:m.start(2)] + json.dumps(data, ensure_ascii=False).replace("</", "<\\/") + html[m.end(2):])
+            dom = _dump("file://" + path)
+            a, b = dom.split('id="rosters-a"')[1].split('id="rosters-b"')
+            txt = lambda x: " ".join(re.sub(r"<[^>]+>", "", x).split())  # noqa: E731
+            self.assertTrue(txt(a).startswith(">STANDINGS 16–9"), txt(a)[:40])
+            self.assertTrue(txt(b).startswith(">STANDINGS 8–1"), txt(b)[:40])
+            self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', a)[0], "TT")      # 16th first
+            self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', b)[-1], "Bsy")    # 1st last
+            tag = re.search(r'<span class="stand-tag low"[^>]*>(.*?)</span></span>(?=<span class="chip)', _card(dom, "TT"), re.S)
+            self.assertEqual(txt(tag.group(1)), "16th70–130–3")
+            self.assertIn('class="so on">STANDINGS ↓', a)
+            dom2 = _dump("file://" + path + "?order=team")                    # toggle back to team number
+            a2 = dom2.split('id="rosters-a"')[1].split('id="rosters-b"')[0]
+            self.assertTrue(txt(a2).startswith(">TEAMS 1–8"))
+            self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', a2)[0], "Bsy")
+            self.assertIn('class="so on">TEAM #', a2)
+        finally:
+            shutil.rmtree(d)
+
+    def test_full_team_names_and_no_health_badges(self):
+        bsy = _card(self.official, "Bsy")
+        self.assertIn('<div class="team-name">Hai | Bulls Dynasty</div>', bsy)    # one style, no lighter manager part
+        self.assertNotIn("tn-m", self.official)
+        self.assertIn('Long con dynasty</div>', _card(self.official, "LC"))
+        for badge in ("health-badge", ">REC<", ">INJ<", "health-rec", "health-inj"):
+            self.assertNotIn(badge, self.official.split("<body", 1)[1].split("<script", 1)[0], badge)
+
     def test_internal_notes_are_not_published(self):
         data = re.search(r'id="league-data">(.*?)</script>', self.static, re.S).group(1)
         for internal in ("directionCheck", "DISCREPANCY", "ownership-consistent", "Direction verified",
@@ -280,7 +386,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_public_ui_shows_the_verified_roster_snapshot(self):
         m = re.search(r'id="lab-keeper-status"[^>]*>(.*?)</span><span class="meta-pill cap-rule"', self.official)
-        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 14 · +3 TRADES")
+        self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), "✓ ROSTERS OCT 19")
         rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
         self.assertEqual(len(rules), 4)
         self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 $ COUNT · IL ✓" for r in rules), rules)

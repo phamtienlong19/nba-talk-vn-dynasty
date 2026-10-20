@@ -146,7 +146,7 @@ class TestCrownMarker(unittest.TestCase):
             self.assertTrue(chip.startswith(pool.CROWN), f"missing crown on draft order chip: {chip!r}")
 
     def test_crown_on_keeper_board_team_card(self):
-        self.assertIn(f'<div class="team-name">{pool.CROWN}The Silver Seekers</div>', self.html)
+        self.assertIn(f'<div class="team-name">{pool.CROWN}M. Jordat | The Silver Seekers</div>', self.html)
 
     def test_crown_on_cap_page_team_row(self):
         self.assertIn(f'<b>{pool.CROWN}{pool.DEFENDING_CHAMPION_SHORT_NAME}</b>', self.html)

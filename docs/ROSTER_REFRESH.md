@@ -3,7 +3,100 @@
 Keeps the current-season rosters (layer B, `docs/SEASON_STATE_MODEL.md`) in step
 with Yahoo. Local, standard library, Git/PR based — no backend.
 
-## Steps
+## Yahoo acquisition (read-only, recommended)
+
+`scripts/yahoo_rosters.py` fetches the 16 Yahoo team pages of league 85092
+(team ids 1–9, 11–17; there is no team 10), validates them and reports the
+differences. It writes **only** a staged observation under `local_data/yahoo_observations/`
+(gitignored); official rosters change only through the reviewed import below.
+
+```bash
+python3 scripts/yahoo_rosters.py fetch                  # all teams → validate → save observation → report
+python3 scripts/yahoo_rosters.py fetch --team 8         # one team (PARTIAL: diagnostic only, never importable)
+python3 scripts/yahoo_rosters.py import-json capture.json   # a capture made with the DevTools script below
+python3 scripts/yahoo_rosters.py validate local_data/yahoo_observations/OBS-….json
+python3 scripts/yahoo_rosters.py diff     local_data/yahoo_observations/OBS-….json
+# official change = the existing reviewed import, fed the observation file unchanged:
+python3 scripts/import_rosters.py diff   local_data/yahoo_observations/OBS-….json --verified-at <capturedAt> --source "<source>"
+python3 scripts/import_rosters.py commit local_data/yahoo_observations/OBS-….json --verified-at … --source … --reviewed
+```
+
+- **Engines.** `--engine http` (default) is a plain GET with no cookies: the
+  league's team pages are publicly viewable (checked 2026-10-19). If Yahoo makes
+  them private, use `--engine browser`: run `yahoo_rosters.py login` once (a
+  visible Chromium on an isolated profile at
+  `~/.config/nba-talk-vn-dynasty/yahoo-browser-profile`, override with
+  `NBA_TALK_YAHOO_PROFILE`; needs `pip install playwright && python3 -m playwright install chromium`).
+  Either way only GET requests are sent; nothing is clicked or submitted. A
+  sign-in page, consent wall, HTTP error or a page for the wrong team fails that
+  team clearly; login is never worked around.
+- **Validation.** A full observation needs all 16 teams, a non-empty roster per
+  team, numeric Yahoo ids, known slots and each player on one team. Roster size
+  is **not** checked (in-season counts vary). A failed or partial capture is not
+  saved as a baseline.
+- **Identity.** Yahoo id → `478.p.<id>` (the game key is checked against the
+  frozen salary table) → registry / provisional identity, via the importer.
+  Teams resolve by `yahooTeamKey` (`478.l.85092.t.<id>`) in
+  `rosters/team_map.json`; Yahoo team names change and are kept only as aliases.
+- **Report.** Versus the current season state: ON YAHOO ONLY, OURS ONLY, OTHER
+  TEAM (labelled when it matches a not-completed proposal), IL MOVE, LINEUP ONLY,
+  and each recorded in-season trade as reflected or not; versus the previous full
+  observation: added / removed / changed team / slot changes. These are observed
+  differences — nothing is classified as a trade and no transaction is created.
+  A payroll preview applies the existing top-9 frozen-salary rule (IL included).
+  Yahoo's "Keeper Salary" label is shown only as evidence when it differs from
+  the frozen salary; `salary_freeze.json` is never changed.
+- **Status.** Yahoo's player status (`O`, `Q`, `D`, `INJ`, …) is kept on the
+  snapshot row as observed evidence; it feeds the roster checks and never ownership or payroll.
+- **IL.** IL / IL+ is a lineup slot. IL players are owned roster members, stay
+  in observations, snapshots and team cards (IL tag), and compete for the nine
+  counted salaries like anyone else. A BN↔IL move changes neither ownership nor
+  payroll.
+
+**Standings.** `python3 scripts/yahoo_rosters.py standings` reads the
+standings table on the league home page (read-only GET), validates it (all 16
+teams, no duplicate ranks) and saves it under `local_data/`; `--write` records it
+in `data/2026-27/standings.json` for the site (then `build_league_state.py embed`
+and a PR, as for rosters). Display only: once any game is played the team pages
+run worst record first ("Standings 16–9" / "8–1", Yahoo rank, else win %), each
+card shows place and W-L-T with GB / division / last week on hover, and an
+"Order" toggle (`?order=team`) returns to team number. Before that the page keeps
+team order and shows "Standings after week 1".
+
+**Manual capture (Chrome DevTools).** On any page of the league, logged in,
+paste into the console; it GETs the 16 team pages and downloads `capture.json`
+for `import-json`:
+
+```js
+(async () => {
+  const ids = [1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17], teams = [];
+  for (const id of ids) {
+    const doc = new DOMParser().parseFromString(await (await fetch(`/nba/85092/${id}`)).text(), "text/html");
+    const t = doc.querySelector("table#statTable0");
+    if (!t) throw new Error(`team ${id}: no roster table (signed out?)`);
+    teams.push({teamId: id, teamName: doc.title.replace(/^.* - Dynasty - /, "").replace(/ \| Fantasy Basketball.*$/, ""),
+      players: [...t.querySelectorAll("tbody tr")].map(tr => {
+        const a = tr.querySelector('a.name[href*="/nba/players/"]'); if (!a) return null;
+        const pl = tr.querySelector(".pos-label"), inj = tr.querySelector(".F-injury");
+        return {playerId: a.href.match(/players\/(\d+)/)[1], name: a.textContent.trim(),
+                slot: pl && (pl.dataset.pos || pl.textContent.trim()), injury: inj ? inj.textContent.trim() : null};
+      }).filter(Boolean)});
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  const blob = new Blob([JSON.stringify({capturedAt: new Date().toISOString(), leagueId: "85092", teams})], {type: "application/json"});
+  Object.assign(document.createElement("a"), {href: URL.createObjectURL(blob), download: "capture.json"}).click();
+})();
+```
+
+`import-json` also accepts `{"<teamId>": [players]}` and a flat list of players
+carrying `teamId`.
+
+**Scheduling (not set up).** The fetch is safe to run unattended because it
+never changes official data. A future local macOS job would be a LaunchAgent
+running `python3 scripts/yahoo_rosters.py fetch` from the repo directory. Do not
+run it from GitHub Actions and never put Yahoo credentials in a workflow.
+
+## Manual steps (spreadsheet / CSV)
 
 ```bash
 # 1. start from the current rosters (or paste Yahoo's rosters into the same columns)
@@ -78,6 +171,12 @@ draft event, the rookie flag and the frozen $0 draft salary do not change, so no
 second player appears and the 19-rookie count holds. Linking refuses a Yahoo key
 that already has its own frozen identity or is linked elsewhere.
 
-A free agent added in-season who is not in the frozen 2026-27 player table (the
-600-player registry + provisional) blocks the import until the commissioner adds
-an explicit entry with a salary; nothing is guessed.
+## Players not in the frozen salary table
+
+League rule (owner, 2026-10-19; `config/cap_policy.json` `unlistedPlayerSalary`):
+**a rostered player whose salary is not in the table is a 0.** An import row with a
+Yahoo id that is not in `salary_freeze.json` is reported as
+`UNLISTED_PLAYER_ZERO_SALARY` and, on a reviewed commit, recorded once in
+`data/2026-27/unlisted_players.json` (name, NBA team, position, salary 0, first
+snapshot). `salary_freeze.json` is never changed. A row with neither a known
+identity nor a Yahoo id still blocks.

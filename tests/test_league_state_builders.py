@@ -80,7 +80,11 @@ class TestKeeperLockWorkflow(unittest.TestCase):
         fr = ls._load(os.path.join(ls.DATA_DIR, "franchises.json"))["franchises"]
         a = bls.build_baseline(html, r, fr)
         self.assertEqual(a, bls.build_baseline(html, r, fr))
-        self.assertEqual(a[0]["teams"], ls._load(os.path.join(ls.DATA_DIR, "keeper_freeze.json"))["teams"])
+        frozen = ls._load(os.path.join(ls.DATA_DIR, "keeper_freeze.json"))["teams"]
+        strip = lambda ts: [{k: v for k, v in t.items() if k != "teamName"} for t in ts]  # noqa: E731
+        self.assertEqual(strip(a[0]["teams"]), strip(frozen))  # identities, colors, keepers: exactly the locked freeze
+        current = ls.load_inputs()["teamNames"]                # the page shows the current names (team_map.json)
+        self.assertEqual({t["franchiseId"]: t["teamName"] for t in a[0]["teams"]}, current)
         stored = ls._load(os.path.join(ls.DATA_DIR, "picks.json"))
         self.assertEqual(a[1]["picks"], stored["picks"])  # historicalTransfers are recorded history, not board-derived
 

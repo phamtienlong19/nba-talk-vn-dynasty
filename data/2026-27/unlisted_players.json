@@ -1,0 +1,14 @@
+{
+  "season": "2026-27",
+  "players": [
+    {
+      "playerKey": "478.p.10594",
+      "name": "Jayden Quaintance",
+      "nbaTeam": "SAS",
+      "displayPosition": "PF",
+      "cap": 0.0,
+      "firstSeen": "RS-2026-10-19-878cd6e3"
+    }
+  ],
+  "note": "Players rostered in-season who are not in salary_freeze.json. Salary 0 by league rule (config/cap_policy.json unlistedPlayerSalary). Added only by a reviewed roster import."
+}

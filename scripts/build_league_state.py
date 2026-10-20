@@ -58,7 +58,7 @@ def parse_board(index_html: str):
     for attrs, body in TEAM_CARD_RE.findall(index_html):
         color = re.search(r"--team-color:(#[0-9a-fA-F]+)", attrs)
         text = re.search(r"--team-text:(#[0-9a-fA-F]+)", attrs)
-        name = html_lib.unescape(re.search(r'<div class="team-name">(.*?)</div>', body, re.S).group(1)).replace(pool.CROWN.strip(), "").strip()
+        name = html_lib.unescape(re.sub(r"<[^>]+>", "", re.search(r'<div class="team-name">(.*?)</div>', body, re.S).group(1))).replace(pool.CROWN.strip(), "").strip()
         short = html_lib.unescape(re.search(r'<span class="identity-tag">([^<]*)</span>', body).group(1))
         rows = re.findall(r'<div class="pname">(.*?)</div><div class="nba">[^<]*</div><div class="cap">([\d.]+)</div>', body, re.S)
         kept = [(html_lib.unescape(re.sub(r"<span.*?</span>", "", n)).strip(), float(c)) for n, c in rows]
@@ -282,6 +282,51 @@ def _draft_room_block(panel: str, summary: dict, chip_of: dict, order: list, inp
     return panel.replace(anchor, anchor + "\n" + block, 1)
 
 
+def team_name_html(name: str) -> str:
+    """The full team name, one style throughout (a "Manager | Team" name is shown exactly as written)."""
+    return html_lib.escape(name, quote=False)
+
+
+def sync_team_names(index_html: str, inputs: dict) -> str:
+    """Rewrite the static team labels (card title, cap-page label, draft-order chips) to the current names in
+    rosters/team_map.json. Idempotent. A full "Manager | Team" name is shown as is; otherwise a chip keeps its format
+    ("Short | Name" or a bare name), and a bare chip whose name contained the short name gets the "Short | " prefix."""
+    teams, _ = parse_board(index_html)
+    old_by_short = {t["short"]: t["name"] for t in teams}
+    out = index_html
+    for ft in inputs["freeze"]["teams"]:
+        short, new = ft["short"], ls.team_name(inputs, ft["franchiseId"])
+        old = old_by_short.get(short)
+        if not old:
+            continue
+        e_old, e_new, e_short = (html_lib.escape(x, quote=False) for x in (old, new, short))
+
+        def card(m):
+            body = m.group(0)
+            if f'<span class="identity-tag">{e_short}</span>' not in body:
+                return body
+            return re.sub(r'(<div class="team-name">(?:' + re.escape(pool.CROWN) + r')?).*?</div>',
+                          lambda x: x.group(1) + team_name_html(new) + "</div>", body, count=1, flags=re.S)
+        out = re.sub(r'<section class="team-card[^"]*"[^>]*>.*?</section>', card, out, flags=re.S)
+        out = out.replace(f"<b>{e_short}</b><small>{e_old}</small>", f"<b>{e_short}</b><small>{e_new}</small>")
+
+        def chip(m):
+            text = m.group(2)
+            crown = pool.CROWN if text.startswith(pool.CROWN) else ""
+            bare = text[len(crown):]
+            if bare not in (e_old, f"{e_short} | {e_old}"):
+                return m.group(0)
+            if "|" in new:
+                label = e_new
+            elif bare == e_old:
+                label = e_new if short.lower() not in old.lower() or short.lower() in new.lower() else f"{e_short} | {e_new}"
+            else:
+                label = f"{e_short} | {e_new}"
+            return m.group(1) + crown + label + "</span>"
+        out = re.sub(r'(<span class="pick-chip"[^>]*>)([^<]*)</span>', chip, out)
+    return out
+
+
 def cmd_sync_ledger(args):
     with open(INDEX_HTML, encoding="utf-8") as f:
         html = f.read()
@@ -369,10 +414,34 @@ def public_pre_draft(trades: list) -> list:
 
 
 # ------------------------------------------------------------- embedding
+def standings_view(si: dict):
+    """Yahoo standings as recorded in data/2026-27/standings.json (yahoo_rosters.py standings --write), plus the card
+    order once games have been played: worst record first (best rank last). None when nothing is recorded."""
+    path = os.path.join(si.get("dataDir", DATA_DIR), "standings.json")
+    if not os.path.exists(path):
+        return None
+    doc = ls._load(path)
+    teams = {t["franchiseId"]: {k: t.get(k) for k in ("rank", "w", "l", "t", "pct", "gb", "division", "divRecord", "lastWeek", "waiver", "moves")}
+             for t in doc["teams"]}
+    order = None
+    if doc.get("started"):
+        def best_first(fid):
+            t = teams[fid]
+            games = (t["w"] or 0) + (t["l"] or 0) + (t["t"] or 0)
+            pct = t["pct"] if t["pct"] is not None else ((t["w"] + t["t"] / 2) / games if games else 0)
+            return (t["rank"] if t["rank"] is not None else 99, -pct, -(t["w"] or 0), fid)
+        best = sorted(teams, key=best_first)
+        for i, fid in enumerate(best, 1):
+            teams[fid]["place"] = i  # 1 = best record (Yahoo's rank when it gives one)
+        order = list(reversed(best))
+    return {"capturedAt": doc["capturedAt"], "source": doc["source"], "started": bool(doc.get("started")),
+            "teams": teams, "worstFirst": order}
+
+
 def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_YAHOO_PATH) -> dict:
     floor, ceiling = ls.cap_band(inputs)
     fr = inputs["franchises"]
-    teams = [{"id": t["franchiseId"], "short": t["short"], "name": t.get("teamName") or fr[t["franchiseId"]]["displayName"],
+    teams = [{"id": t["franchiseId"], "short": t["short"], "name": ls.team_name(inputs, t["franchiseId"]),
               "color": t["color"], "text": t["text"],
               "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME} for t in inputs["freeze"]["teams"]]
     base = ls.initial_state(inputs)
@@ -401,7 +470,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
     def card_asset(a):  # what a trade card shows: name, salary, position, NBA team, 2026 rookie
         d = ls.describe_asset(si, a)
         if a["type"] == "player":
-            p = si["registry"].get(a["playerKey"]) or si["extraPlayers"].get(a["playerKey"]) or {}
+            p = ls.player_meta(si, a["playerKey"])
             d.update({"pos": (p.get("displayPosition") or "").replace(",", "/"), "nba": p.get("nbaTeam") or "",
                       "rk": a["playerKey"] in rookies, "dr": drafted_at.get(a["playerKey"])})
         return d
@@ -457,6 +526,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
                      "windowWarnings": [], "tradeIds": current["activeTradeIds"]},
         "history": {"teams": history_teams, "tradeIds": official["activeTradeIds"],
                     "checkpoint": {k: ((si["postDraft"] or {}).get("checkpoint") or {}).get(k) for k in ("id", "date")}},
+        "standings": standings_view(si),
         "season": {"snapshot": {k: snap.get(k) for k in ("snapshotId", "verifiedAt", "source", "kind")},
                    "appliedAfterSnapshot": [t["txnId"] for t in ss.pending_completed(si)],
                    "checkpoints": [{k: c.get(k) for k in ("id", "label", "date", "status")} for c in si["checkpoints"]["checkpoints"]],
@@ -487,6 +557,7 @@ def cmd_embed(args):
     with open(INDEX_HTML, encoding="utf-8") as f:
         html = f.read()
     inputs = ls.load_inputs()
+    html = sync_team_names(html, inputs)  # static labels follow the current team names
     data = build_page_data(inputs, html)
     with open(INDEX_HTML, "w", encoding="utf-8") as f:
         f.write(embed(html, data))

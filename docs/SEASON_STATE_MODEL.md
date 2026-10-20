@@ -43,6 +43,28 @@ B and C and to checkpoint findings (re-derived from each checkpoint's frozen
 ownership); layer A keeps the all-player totals recorded at the time. The draft-night 12-player count is not enforced; the
 importer only warns above the 15 roster spots.
 
+## Roster checks (anti-tank limits)
+
+`season_state.roster_checks` reports the countable limits from the dynasty rules
+(`config/roster_rules.json`, citing `LEAGUE_RULES_MODEL.md`) on every team card,
+as evidence for the commissioner; it never labels a team as tanking. Injured players
+(below) do not count toward the positional checks: they cannot contribute (owner, 2026-10-19).
+
+| Chip | Counts | Levels |
+|---|---|---|
+| injured | IL / IL+ slots + players Yahoo lists Out (`O`, `INJ`) off IL; max 5 | at 5 = watch, over 5 = over |
+| single-pos | healthy players who can play only one position; max 5 (7 with combo tags) | 6–7 = watch (combo exception is a judgment), > 7 = over |
+| positions ✓ / short PG … | healthy players who can play each of PG, SG, SF, PF, C; min 2 | below = over |
+| short G / short F | healthy players who can play either position of a two-position combo (G = PG/SG, F = SF/PF); min 3 | below = over |
+| lineup | whether the healthy roster fills every Yahoo lineup slot on a full game day | any empty slot = over |
+
+Player status comes from the verified roster snapshot (Yahoo's codes as observed;
+it never affects ownership or payroll). Cards show it as a chip left of the name:
+P green, Q / GTD / DTD blue, D orange, INJ red, OUT solid red, OFS / SUSP ink; an IL
+player without a status shows IL. Not automated: when combo tags lift the single-position cap to 7, the "max 4 single-position in the active
+roster" lineup rule, injury duration, IL-return timing, and trades that would
+worsen a concentration.
+
 ## Trade-time cap rule (in-season)
 
 Dynasty-Rule-Oct-2025 "Trade trong mùa": adds/drops may leave the band, trades
