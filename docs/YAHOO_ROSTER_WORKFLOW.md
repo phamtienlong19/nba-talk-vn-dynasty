@@ -16,7 +16,7 @@ importer (`scripts/import_rosters.py`). It adds no scraper and no ownership mode
 |---|---|---|
 | `READY` | only adds, drops, IL moves and status changes | a **draft PR** with the snapshot and regenerated site, and the report as its description |
 | `CONFLICT` | needs a human: a player on a different team than ours (not a recorded completed trade), a completed trade Yahoo does not show, any import-blocking problem | the report only; **canonical data is not modified**; the run shows a warning |
-| `NO_CHANGE` | Yahoo matches the verified snapshot, or only lineup slots moved (bench ↔ active) | a short note; no PR |
+| `NO_CHANGE` | Yahoo matches the verified snapshot, or only lineup slots moved (bench ↔ active) | no PR, but the **compliance checks still run**: the report lists any anti-tank, IL and roster findings (a count, plus a run annotation), so a no-change run doubles as a weekly check |
 | `FAILED` | see step 2 | the report says why and how to fix it |
 
 An unexplained ownership change is always a `CONFLICT`: record the trade in `data/2026-27/season_transactions.json`
