@@ -18,13 +18,46 @@ for rule checks. Fairness, tank intent and penalties stay commissioner judgment 
    `?mode=scenario&trades=`; extend it to ad-hoc proposals). No storage.
 2. **"My team" landing view**, phone-first: counted + healthy payroll, room to the band, what the manager cannot drop,
    cooldowns, restrictions, checkpoint status, pick ownership.
-3. **Lottery / standings display built as configuration.** The NBA changes its lottery in 2027; how this league adopts it
+3. **Lottery / standings display built as configuration.** Top-of-draft eligibility is now recorded
+   (`config/draft_lottery_rules.json`, `scripts/lottery_eligibility.py`; commissioner rules of 2026-10-20: no top 2 twice in
+   a row, one No. 1 per 3-year span). The display should flag, per team, "cannot pick 1st / 1st or 2nd in <year>" with the
+   reason, and recompute after each draft. Decided: eligibility follows the lottery-time holder; an ineligible draw result is
+   redrawn; the 2027 ball allocation is unchanged. Remaining: The NBA changes its lottery in 2027; how this league adopts it
    is undecided (expected: relegation-style zone, limits on top-3 picks for the worst teams, no consecutive No.1s). Model
-   odds table, zone, exclusions and no-consecutive rule as config; show the current model as "2026–27 model". Do NOT guess
-   the 2027 rules.
+   odds table, zone, exclusions and no-consecutive rule as config; show the current model as "2026–27 model". The ball allocation is unchanged
+   for 2027 (see Backlog).
 4. **Ranking board with live keeper-salary math** (offseason): a manager re-ranks players, keeper salaries move with the
    ranking, payroll / band room / legality update live. Client-side only, saved in the browser, never written to official
    data. Needs the exact rank→keeper-salary function confirmed against `docs/CAP_MODEL.md` and how the league actually sets it.
+
+## Backlog (filed 2026-10-20; not scheduled)
+
+**Lottery simulator on live standings** (inspired by Tankathon's draft-lottery simulator that tanking-franchise fans use).
+- **What:** a page that takes the live Yahoo standings, orders teams worst to best (`standings_view` already provides this once
+  games are played) into the projected pre-lottery order, shows each team's odds for each slot, and lets a manager press "Sim
+  lottery" to draw one outcome, or run many sims for a probability table. Reset returns to the live order.
+- **Rules it must apply:** the league's lottery parameters (above); the top-of-draft eligibility from `config/draft_lottery_rules.json` / `scripts/lottery_eligibility.py` (no
+  top 2 twice in a row, one No. 1 per 3 years; ineligible teams show as such); and the owner's rule that a draw landing on
+  an ineligible team is **redrawn**.
+- **Settled:** the ball allocation is the same for 2027 as for 2026-27 (owner, 2026-10-20) and is recorded as data
+  (`lottery` in `config/draft_lottery_rules.json`: 12 teams, tickets 16,16,15,15,14,13,12,11,2,2,2,2 = 120, draw 1.02 then
+  1.01, rank 3/4 bonus, rounds 2-3 plain inverse standings). Read it from config; never hard-code it.
+- **Open before building:** how ties in the standings are broken (H2H, per the league rules); how the "same team wins both
+  picks" clause interacts with the redraw rule.
+- **Governance, not advice:** it shows odds and eligibility; it never says who should tank or trade.
+- **Reuse:** `standings_view` (live order), `lottery_eligibility.eligibility`, the card/chip styling. Client-side simulation;
+  nothing is written to official data. The actual official lottery stays in the separate `nba-talk-vn-lottery` repo.
+
+**Other planned or possible work, in rough priority:**
+- Ranking board with live keeper-salary math (offseason; per-manager, browser-only) and, later, a keeper planner.
+- Statuses for free agents in the available-players list (the 600-player status table `data/yahoo/player_status.json` exists;
+  only rostered players show a status today).
+- Local scheduled refresh on the owner's Mac (a LaunchAgent running `yahoo_rosters.py fetch`, `standings` and
+  `refresh_player_metadata.py`); never GitHub Actions with Yahoo credentials.
+- Link the six provisional rookies to their Yahoo ids (`import_rosters.py link-provisional`) once the commissioner agrees.
+- Decide whether Jaylen Martin and Kylor Kelley (on Yahoo, not in the registry) should join the player registry.
+- Roster-check refinements not yet automated: the "max 4 single-position in the active lineup" rule, injury duration,
+  IL-return timing, and "trades may not worsen a concentration" (part of the trade checker).
 
 ## Trade checker rules (source: `docs/LEAGUE_RULES_MODEL.md`)
 | Rule | Check | Level |
