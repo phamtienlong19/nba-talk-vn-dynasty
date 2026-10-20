@@ -132,3 +132,14 @@ policy and is never changed by a refresh. Status is also `CHANGED` when the
 live market snapshot differs from the tracked `data/yahoo/` snapshot or the
 committed Top-300 export is stale. It never modifies `index.html`
 automatically.
+
+## Metadata refresh (2026-10-20)
+
+`python3 scripts/refresh_player_metadata.py [--write]` re-reads the 600-player registry endpoint and updates only the
+**display** fields of players already in `data/yahoo/player_registry.json` -- `nbaTeam`, `displayPosition`,
+`eligiblePositions` (Yahoo also lists `IL` there when a player may use an IL slot) -- and writes the league-wide status
+table `data/yahoo/player_status.json` (O, Q, P, NA, ...; healthy players have no entry). It never adds or removes a player
+and never changes `oRank` or `projectedAuctionValue`: the registry's O-Rank is the **preseason reference** (top-32
+cooldown rule) and payroll uses `salary_freeze.json`. Players on Yahoo but not in the registry, or missing from a
+response, are reported only. For the 207 rostered players, `yahoo_rosters.py` then cross-checks team and positions
+against the league's own team pages and carries each player's status into the reviewed roster snapshot.

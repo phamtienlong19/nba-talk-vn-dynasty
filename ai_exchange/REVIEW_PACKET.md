@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-19T15:39:45Z
+Generated: 2026-10-20T03:25:34Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/yahoo-roster-acquisition
-Commit: 837b320
+Branch: feat/player-metadata-refresh
+Commit: 86c2b7c
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/59 (OPEN)
-CI: validate: completed/success
+PR: none
+CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,40 +27,7 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/CURRENT_STATE.json                     |    7 +-
- ai_exchange/REVIEW_NOTES.md                        |   15 +-
- ai_exchange/REVIEW_PACKET.md                       |  169 +-
- config/cap_policy.json                             |    6 +
- config/roster_rules.json                           |   79 +
- config/yahoo_league.json                           |    8 +
- data/2026-27/rosters/index.json                    |   20 +-
- .../rosters/snapshots/RS-2026-10-19-83f0a0bb.json  | 1116 +++++++++++
- .../rosters/snapshots/RS-2026-10-19-878cd6e3.json  | 1079 +++++++++++
- data/2026-27/rosters/team_map.json                 |  115 +-
- data/2026-27/unlisted_players.json                 |   14 +
- docs/ROSTER_REFRESH.md                             |   97 +-
- docs/SEASON_STATE_MODEL.md                         |   22 +
- docs/YAHOO_API_FEASIBILITY.md                      |    9 +
- index.html                                         |  217 ++-
- scripts/build_league_state.py                      |   52 +-
- scripts/import_rosters.py                          |   59 +-
- scripts/league_state.py                            |   31 +-
- scripts/season_state.py                            |  104 +-
- scripts/what_if.py                                 |    6 +-
- scripts/yahoo_rosters.py                           |  631 ++++++
- tasks/ACTIVE.md                                    |    6 +-
- tests/fixtures/yahoo/observation_2026-10-19.json   | 2003 ++++++++++++++++++++
- tests/fixtures/yahoo/team16_2026-10-19.html        |  316 +++
- tests/fixtures/yahoo/team2_2026-10-19.html         |  190 ++
- tests/fixtures/yahoo/team8_2026-10-19.html         |  232 +++
- tests/test_fa_draft_pool.py                        |    2 +-
- tests/test_final_keeper_freeze.py                  |    2 +-
- tests/test_league_state_builders.py                |    6 +-
- tests/test_league_state_data.py                    |   10 +-
- tests/test_scenario_rendering.py                   |   72 +-
- tests/test_season_ops.py                           |   98 +-
- tests/test_yahoo_rosters.py                        |  727 +++++++
- 33 files changed, 7253 insertions(+), 267 deletions(-)
+
 ```
 
 ## Validation
@@ -75,58 +42,17 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
-- ai_exchange/CURRENT_STATE.json
-- ai_exchange/REVIEW_NOTES.md
-- ai_exchange/REVIEW_PACKET.md
-- config/cap_policy.json
-- config/roster_rules.json
-- config/yahoo_league.json
-- data/2026-27/rosters/index.json
-- data/2026-27/rosters/snapshots/RS-2026-10-19-83f0a0bb.json
-- data/2026-27/rosters/snapshots/RS-2026-10-19-878cd6e3.json
-- data/2026-27/rosters/team_map.json
-- data/2026-27/unlisted_players.json
-- docs/ROSTER_REFRESH.md
-- docs/SEASON_STATE_MODEL.md
-- docs/YAHOO_API_FEASIBILITY.md
-- index.html
-- scripts/build_league_state.py
-- scripts/import_rosters.py
-- scripts/league_state.py
-- scripts/season_state.py
-- scripts/what_if.py
-- scripts/yahoo_rosters.py
-- tasks/ACTIVE.md
-- tests/fixtures/yahoo/observation_2026-10-19.json
-- tests/fixtures/yahoo/team16_2026-10-19.html
-- tests/fixtures/yahoo/team2_2026-10-19.html
-- tests/fixtures/yahoo/team8_2026-10-19.html
-- tests/test_fa_draft_pool.py
-- tests/test_final_keeper_freeze.py
-- tests/test_league_state_builders.py
-- tests/test_league_state_data.py
-- tests/test_scenario_rendering.py
-- tests/test_season_ops.py
-- tests/test_yahoo_rosters.py
+(none)
 
 ## Issues
-- `rosters/team_map.json` maps all 16 Yahoo team ids to franchises (name prefix + every Yahoo-listed player on that team belongs to that franchise). Please confirm.
-- First Yahoo import committed (RS-2026-10-19-878cd6e3): 18 players added, 3 dropped (Risacher, Will Riley, Santi Aldama); payroll unchanged everywhere. Jayden Quaintance recorded at $0 under the owner's 2026-10-19 rule.
-- The 6 provisional rookies are still provisional (Yahoo ids appear as link candidates); not linked.
-- Yahoo's keeper-salary label for RJ Barrett is 5; the frozen salary is 0. Not changed.
-
-- Team names now follow Yahoo (2026-10-19, `rosters/team_map.json` `name`): e.g. Bsy → Bulls Dynasty, sup fam → Crashed for Caleb, CrazyCat → Damageeeee, Maxfixe → Maxfixe, LC → Long con dynasty. The locked keeper freeze and franchises.json keep the old names as history.
-
-- Roster checks (anti-tank limits, `config/roster_rules.json`) now show on every card as evidence: today DHA is short at PG (1 healthy, min 2); HCMC, TT, DonTrick and Thịnh have 6 healthy single-position players (inside the 7 combo exception -> review; injured players are not counted, owner 2026-10-19). Nothing is labelled tanking.
-- Second Yahoo import RS-2026-10-19-83f0a0bb (15:11Z): no roster change; adds Yahoo player status (O/Q/P) to the snapshot.
-
-- Standings: `yahoo_rosters.py standings --write` recorded the 2026-10-19 table (season not started, all 0-0-0). Cards sort worst record first automatically once games are played.
+- Player metadata refreshed 2026-10-20 (registry display fields + status table). 4 real NBA team moves (Tony Bradley NYK→UTA, Tyler Burton MEM→GSW, Caleb Houstan NOP→POR, Drew Timme MIN→PHX) and 16 eligibility changes (IL-slot eligibility). O-Rank, cap dollars and salary_freeze.json untouched.
+- Roster import RS-2026-10-20-2d3a229c: no ownership change; DonTrick moved Claxton BN→IL and Strus IL→BN; statuses refreshed. Team and positions agree with Yahoo's team pages for all 207 rostered players.
+- Not in the registry but on Yahoo: Jaylen Martin (478.p.10134), Kylor Kelley (478.p.10404). Not in the live response: Trentyn Flowers, Buddy Boeheim. Registry membership unchanged (reported only).
+- Standings re-read: still not started.
 
 ## Decisions Required
 
-- Whether the single-position combo exception applies to HCMC, TT, DonTrick, Thịnh.
-
-- Whether to link the 6 provisional rookies to their Yahoo ids (`import_rosters.py link-provisional`).
+- None.
 
 ## Suggested Next Step
-Open/update the PR from `feat/yahoo-roster-acquisition` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/player-metadata-refresh` if not already done, then request human/ChatGPT review of this packet.
