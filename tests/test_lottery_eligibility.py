@@ -47,6 +47,20 @@ class TestLotteryEligibility(unittest.TestCase):
         self.assertEqual(le.eligibility(cfg, 2029)[HCMC]["canPick1"], False)                 # No.1 in 2027: blocked through 2029
         self.assertNotIn(MAX, le.eligibility(cfg, 2029))                                     # 2026 No.1 has aged out
 
+    def test_ball_allocation_is_recorded_and_matches_the_rule_document(self):
+        lot = self.cfg["lottery"]
+        t = lot["ticketsByRank"]
+        self.assertEqual(lot["appliesTo"], [2026, 2027])                       # unchanged for the 2027 draft (owner, 2026-10-20)
+        self.assertEqual([t[str(r)] for r in range(16, 4, -1)], [16, 16, 15, 15, 14, 13, 12, 11, 2, 2, 2, 2])
+        self.assertEqual((len(t), lot["participants"], sum(t.values()), lot["totalCombinations"]), (12, 12, 120, 120))
+        self.assertEqual(lot["drawOrder"], ["1.02", "1.01"])
+        self.assertTrue(all(t[str(r)] == 2 for r in (5, 6, 7, 8)))             # a few playoff teams get balls
+        self.assertNotIn("3", t)                                                # ranks 3 and 4 get the bonus, not balls
+        self.assertNotIn("4", t)
+        self.assertIn("rank 3", lot["rank3And4Bonus"])
+        with open(os.path.join(os.path.dirname(__file__), "..", "docs", "LEAGUE_RULES_MODEL.md"), encoding="utf-8") as f:
+            self.assertIn("`16,16,15,15,14,13,12,11,2,2,2,2`", f.read())      # same numbers as the rule document
+
     def test_the_rule_is_recorded_not_hidden_in_code(self):
         r = self.cfg["rules"]
         self.assertEqual((r["noTop2TwiceInARow"]["slots"], r["oneNumberOnePerWindow"]["windowDrafts"]), ([1, 2], 3))

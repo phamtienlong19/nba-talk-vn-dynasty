@@ -183,8 +183,10 @@ Recorded in `config/draft_lottery_rules.json` with the history it is computed fr
 (No. 1 in 2025) but can pick 2nd. **2028** — Maxfixe cannot pick 1st (No. 1 in 2026) but can pick 2nd; sup fam and Long con
 are eligible for 1st. Answers for later drafts change after each draft. Eligibility belongs to the team that holds the slot
 when the lottery is drawn (first-round picks are only traded after keepers, i.e. after the lottery, so a later trade does not
-move it). If the draw lands a slot on an ineligible team, that slot is **redrawn**. The NBA's 2027 lottery reform / odds are
-not modelled; the league has not yet chosen how to adopt them.
+move it). If the draw lands a slot on an ineligible team, that slot is **redrawn**. The ball allocation above (12 teams,
+`16,16,15,15,14,13,12,11,2,2,2,2`, 120 combinations, rank 3/4 bonus) is **unchanged for the 2027 draft** (owner, 2026-10-20: a
+few playoff teams get balls and 3rd/4th place get a bonus, as in the rule document); it is recorded as data under `lottery` in
+`config/draft_lottery_rules.json`. The NBA's own 2027 reform is not adopted for the ball allocation.
 
 The DOCX describes an earlier/transitional model (a 2024-25-era 8-ball
 combination scheme, `21-21-19-19-16-12-8-3`, and various proposed

@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-20T10:34:49Z
+Generated: 2026-10-20T10:38:32Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/lottery-eligibility-rule
-Commit: 1cc6c00
+Commit: 39ea740
 Base: main
 Working tree: dirty
 
@@ -18,7 +18,7 @@ Working tree: dirty
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
 PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/62 (OPEN)
-CI: Claude Code Review: completed/success
+CI: validate: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -29,11 +29,11 @@ Fingerprint: FRESH
 ```
  ai_exchange/REVIEW_PACKET.md      | 27 +++++++++----
  config/draft_lottery_rules.json   | 47 +++++++++++++++++++++++
- docs/GOVERNANCE_ROADMAP.md        |  6 ++-
+ docs/GOVERNANCE_ROADMAP.md        | 33 +++++++++++++++-
  docs/LEAGUE_RULES_MODEL.md        | 13 +++++++
  scripts/lottery_eligibility.py    | 80 +++++++++++++++++++++++++++++++++++++++
  tests/test_lottery_eligibility.py | 63 ++++++++++++++++++++++++++++++
- 6 files changed, 227 insertions(+), 9 deletions(-)
+ 6 files changed, 254 insertions(+), 9 deletions(-)
 ```
 
 ## Validation
