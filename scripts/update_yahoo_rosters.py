@@ -106,12 +106,17 @@ def double_checks(si_new, aliases, obs, snap, baseline_checks, new_state) -> dic
             key = _canonical_key(si_new, aliases, row)
             slot = ir.norm_slot(p.get("slot"))
             status = (p.get("injury") or "").upper() or None
+            elig = (ls.player_meta(si_new, key).get("eligiblePositions") if key else None) or []
+            il_ok = "IL" in elig if elig else None  # Yahoo's own IL eligibility; None = unknown (provisional / unlisted player)
             if slot in ss.SLOTS_IL:
                 il_in_obs.add(key)
-                if status in (None, "P"):
+                if il_ok is False:
+                    out["healthyOnIL"].append(f"{p['name']} (team {t['teamId']}) is on IL but Yahoo does not list him as IL-eligible")
+                elif il_ok is None and status in (None, "P"):
                     out["healthyOnIL"].append(f"{p['name']} (team {t['teamId']}) is on IL but Yahoo shows no injury status")
-            elif status in LONG_TERM:
-                out["injuredOffIL"].append(f"{p['name']} (team {t['teamId']}) is {status} but sits in {slot or 'no slot'}, not IL")
+            elif il_ok or status in LONG_TERM:
+                why = ("IL-eligible per Yahoo" + (f", status {status}" if status else "")) if il_ok else f"status {status}"
+                out["injuredOffIL"].append(f"{p['name']} (team {t['teamId']}) is injured ({why}) but sits in {slot or 'no slot'}, not IL")
             meta = ls.player_meta(si_new, key) if key else {}
             if meta and (p.get("nbaTeam") or p.get("positions")):  # compare what the team page actually showed
                 have = ((meta.get("nbaTeam") or ""), (meta.get("displayPosition") or "").replace(" ", ""))
@@ -211,7 +216,7 @@ def build_report(outcome, obs, check, rec, dc, si, baseline, new_state, conflict
     L += ["", "## Double checks", ""]
     for key, title in (("metadataDrift", "Team / position eligibility differs from our data (run `refresh_player_metadata.py`)"),
                        ("slotIneligible", "Player in a lineup slot he is not eligible for"),
-                       ("healthyOnIL", "On IL with no injury status"), ("injuredOffIL", "Out / injured but not on IL"),
+                       ("healthyOnIL", "Parked on IL but not IL-eligible"), ("injuredOffIL", "Injured (IL-eligible or Out) but not on IL"),
                        ("ilLabelsLost", "IL labels lost in the snapshot"), ("payrollMismatch", "Payroll mismatch")):
         items = dc[key]
         L.append(f"- {title}: " + ("none" if not items else f"**{len(items)}**"))

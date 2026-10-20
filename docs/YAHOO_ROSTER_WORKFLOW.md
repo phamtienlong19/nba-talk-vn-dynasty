@@ -29,7 +29,7 @@ status changes, **salary-cap effects** per team (counted payroll before → afte
 roster checks on the proposed rosters, the recorded transactions, and unresolved discrepancies. Payroll is the existing rule:
 the top nine frozen salaries over **all** owned players, IL included; frozen salaries are never written (checked by file hash
 before and after). Cross-checks: team and position eligibility vs our data, players in a lineup slot they are not eligible
-for, players on IL with no injury status, Out/injured players not on IL, IL labels preserved, and an independent top-9 payroll
+for, players parked on IL that Yahoo does not list as IL-eligible, injured players (IL-eligible per Yahoo, or Out) not on IL, IL labels preserved, and an independent top-9 payroll
 recomputation.
 
 ## One-time setup

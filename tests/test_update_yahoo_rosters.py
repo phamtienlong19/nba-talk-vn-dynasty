@@ -236,13 +236,21 @@ class TestDoubleChecks(RunCase):
             p["slot"] = "PG"                                           # slot ineligible for the page's own positions (C)
         self.assertIn("Nikola Jokić (C) is in the PG slot", self.report(mutate2))
 
-    def test_il_consistency_flags(self):
+    def test_il_consistency_flags_use_yahoos_il_eligibility(self):
         def mutate(o):
-            next(p for p in team(o, 8)["players"] if p["name"] == "Jordan Miller")["injury"] = None      # on IL, no status
+            next(p for p in team(o, 8)["players"] if p["name"] == "Nikola Jokić")["slot"] = "IL"          # healthy star parked on IL
+            next(p for p in team(o, 8)["players"] if p["name"] == "Jordan Miller")["injury"] = None      # IL-eligible, no status: still fine
             next(p for p in team(o, 8)["players"] if p["name"] == "Grayson Allen")["injury"] = "OFS"     # out for the season, on the bench
+            next(p for p in team(o, 2)["players"] if p["name"] == "Kristaps Porziņģis")["injury"] = None  # IL-eligible, benched, no status
         report = self.report(mutate)
-        self.assertIn("Jordan Miller (team 8) is on IL but Yahoo shows no injury status", report)
-        self.assertIn("Grayson Allen (team 8) is OFS but sits in BN, not IL", report)
+        self.assertIn("Nikola Jokić (team 8) is on IL but Yahoo does not list him as IL-eligible", report)
+        self.assertNotIn("Jordan Miller (team 8) is on IL", report)
+        self.assertIn("Grayson Allen (team 8) is injured (", report)
+        self.assertIn("Kristaps Porziņģis (team 2) is injured (IL-eligible per Yahoo) but sits in BN, not IL", report)
+
+    def test_il_eligible_players_in_il_slots_are_not_flagged(self):
+        report = self.report(lambda o: None)
+        self.assertIn("- Parked on IL but not IL-eligible: none", report)
 
     def test_anti_tank_checks_are_reported_without_a_verdict(self):
         report = self.report(lambda o: None)
