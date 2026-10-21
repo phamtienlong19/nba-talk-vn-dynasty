@@ -547,7 +547,9 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         # trade checker inputs: rule numbers, roster limits, the preseason top-N and who acquired whom (cooldowns). The page's
         # checker is a port of scripts/trade_checker.py and is tested against it.
         "trade": {"rules": _public(tc.load_rules()), "roster": _public(ss._load(ss.RULES_PATH)), "top": sorted(tc.top_ranked(si)),
-                  "acq": {f"{k}|{f}": at for (k, f), at in sorted(tc.acquisitions(si).items())}},
+                  "acq": {f"{k}|{f}": at for (k, f), at in sorted(tc.acquisitions(si).items())},
+                  "rank": {k: r for k, r in tc.preseason_ranks(si, tc.load_rules()["drops"]["neverTopRanked"]).items()},
+                  "picks": {k: {"y": v["year"], "r": v["round"], "f": v["original"], "o": v["owner"]} for k, v in tc.future_picks(si).items()}},
         "available": {"cols": ["key", "name", "nba", "pos", "cap", "yahooOr", "board", "src"], "rows": rows,
                       "curatedYahooMissing": extras},
     }

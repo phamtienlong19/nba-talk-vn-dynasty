@@ -634,9 +634,38 @@ class TestRenderedCards(unittest.TestCase):
             cases.append({"moves": mv, "drops": [{"key": r["k"], "team": f} for r in mine]})
             big = rows[f][1]                                                 # dropping a protected / review-tier player
             cases.append({"moves": mv, "drops": [{"key": big["k"], "team": f}]})
-        nows = ["2026-10-21T12:00:00Z", "2030-01-01T00:00:00Z"]
-        expect = [[tc.signature(tc.check_proposal(si, state, c["moves"], n, drops=c["drops"])) for c in cases] for n in nows]
-        r = self._drive("var C=%s,N=%s,E=[];N.forEach(function(n){E.push(C.map(function(m){var x=NBA_NAV.check(m.moves,n,m.drops);"
+        for f in fids[:4]:                                                   # a team that only drops (not in any move) still takes part
+            g, h2 = [x for x in fids if x != f][:2]
+            mv = [{"key": rows[g][-1]["k"], "from": g, "to": h2}, {"key": rows[h2][-1]["k"], "from": h2, "to": g}]
+            cases.append({"moves": mv, "drops": [{"key": rows[f][-1]["k"], "team": f}]})
+            cases.append({"moves": mv, "drops": [{"key": rows[f][0]["k"], "team": f}, {"key": rows[g][-2]["k"], "team": g}]})
+        elig = set(tc.load_rules()["yahoo"]["ilEligibleStatuses"])
+        for i, f in enumerate(fids[:8]):                                       # draft picks (1st locked, 2nd / 3rd to review), alone and with players
+            g = fids[(i + 1) % len(fids)]
+            for rnd in (1, 2, 3):
+                cases.append({"moves": [{"key": "2027-R%d-%s" % (rnd, f), "type": "pick", "from": f, "to": g}], "drops": [], "ils": []})
+            cases.append({"moves": [{"key": "2027-R2-%s" % f, "type": "pick", "from": f, "to": g}, {"key": rows[g][-1]["k"], "from": g, "to": f}], "drops": [], "ils": []})
+            cases.append({"moves": [{"key": "2027-R2-%s" % g, "type": "pick", "from": f, "to": g}], "drops": [], "ils": []})   # not f's pick
+        for f in fids:                                                         # IL moves: eligible and ineligible players, plus slot overflow
+            g = next(x for x in fids if x != f)
+            mv = [{"key": rows[g][-1]["k"], "from": g, "to": f}]
+            own = [r for r in rows[f] if state["slots"].get(r["k"]) not in ("IL", "IL+")]
+            inj = next((r for r in own if state["status"].get(r["k"]) in elig), None)
+            cases.append({"moves": mv, "drops": [], "ils": []})
+            cases.append({"moves": mv, "drops": [], "ils": [{"key": own[0]["k"], "team": f}]})
+            if inj:
+                cases.append({"moves": mv, "drops": [], "ils": [{"key": inj["k"], "team": f}]})
+            cases.append({"moves": mv, "drops": [], "ils": [{"key": r["k"], "team": f} for r in own[:5]]})
+        pre50 = tc.preseason_ranks(si, 50)
+        for f in fids:                                                         # dropping a top-50 / 20+ player, a 10-19 player and a plain one, each with a roster-balancing move
+            g = next(x for x in fids if x != f)
+            mv = [{"key": rows[g][-1]["k"], "from": g, "to": f}, {"key": rows[f][-1]["k"], "from": f, "to": g}]
+            for pick in (next((r for r in rows[f][:-1] if r["k"] in pre50), None), next((r for r in rows[f][:-1] if 10 <= r["c"] < 20 and r["k"] not in pre50), None), rows[f][-2]):
+                if pick:
+                    cases.append({"moves": mv, "drops": [{"key": pick["k"], "team": f}], "ils": []})
+        nows = ["2026-10-21T12:00:00Z", "2026-12-31T00:00:00Z", "2027-02-10T00:00:00Z", "2027-03-01T00:00:00Z"]
+        expect = [[tc.signature(tc.check_proposal(si, state, c["moves"], n, drops=c["drops"], ils=c.get("ils", []))) for c in cases] for n in nows]
+        r = self._drive("var C=%s,N=%s,E=[];N.forEach(function(n){E.push(C.map(function(m){var x=NBA_NAV.check(m.moves,n,m.drops,m.ils||[]);"
                         "return {status:x.status,rules:x.rules.map(function(q){return [q.rule,q.team,q.level];}).sort(function(a,b){return a.join('|')<b.join('|')?-1:1;})};}));});R.out=E;"
                         % (json.dumps(cases), json.dumps(nows)), wait=100)
         for n in range(len(nows)):
@@ -670,6 +699,11 @@ class TestRenderedCards(unittest.TestCase):
           R.verdict=!!document.getElementById('chk-verdict');R.status=(document.querySelector('#chk .chk-st')||{}).textContent;R.rows=q('#chk .chk-r').length;
           R.meters=q('#chk .meter').length;R.payShown=q('#chk .chk-col .chk-pay b').length;                 // live payroll: only teams that move
           R.text=document.getElementById('chk').textContent;
+          R.dropBtns=q('#chk .tm-more').length;
+          var dcol=document.querySelector('#chk .chk-col[data-team="'+R.c+'"]');dcol.querySelector('.tm-more').click();document.querySelector('#chk .chk-col[data-team="'+R.c+'"] .chk-tray .tr-btn.drop').click();   // the idle third team drops a player
+          R.dropRows=q('#chk .player-row.tm-drop').length;R.dropInYahoo=!!document.querySelector('#chk-yahoo')&&document.querySelector('#chk-yahoo').textContent.indexOf('DROPS')>=0;
+          R.yahooTrades=q('#chk-yahoo .yh-t').length-1;
+          var cap=null;Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:function(t){cap=t;return {then:function(f){f();}};}}});document.getElementById('chk-text').click();R.summary=cap||'';
           R.url=location.search;
           document.getElementById('chk-reset').click();R.cleared=!document.getElementById('chk-verdict');R.urlAfterReset=location.search;""")
         self.assertTrue(r["hasPanel"] and r["empty"])
@@ -680,7 +714,7 @@ class TestRenderedCards(unittest.TestCase):
         self.assertGreaterEqual(r["cols"], 3)
         self.assertGreaterEqual(r["sumCards"], 3)                                  # a summary card per team: who gets and sends what
         self.assertEqual((r["sends"], r["gets"]), (2, 2))
-        self.assertEqual(r["checks"], r["sumCards"] * 4)                           # CAP / ROSTER / LIMITS / HELD per team
+        self.assertEqual(r["checks"], r["sumCards"] * 5)                           # CAP / ROSTER / SLOTS / LIMITS / HELD per team
         self.assertEqual((r["outRows"], r["inRows"]), (2, 2))                      # the editor shows the post-trade roster: who leaves, who arrives
         self.assertTrue(r["bar"])
         self.assertGreaterEqual(r["cyc"], 2)                                       # with 3+ teams the destination is changeable
@@ -690,6 +724,11 @@ class TestRenderedCards(unittest.TestCase):
         self.assertTrue(r["verdict"])
         self.assertIn(r["status"], ("LEGAL", "BLOCKED", "COMMISSIONER REVIEW"))
         self.assertGreaterEqual(r["rows"], 4)
+        self.assertGreater(r["dropBtns"], 10)                                      # drop / IL actions are one tap away on every player, not only when a team is over 15
+        self.assertEqual(r["dropRows"], 1)                                         # and a dropped player moves to the "dropping" group
+        self.assertTrue(r["dropInYahoo"])                                          # the Yahoo steps list the drop
+        self.assertGreaterEqual(r["yahooTrades"], 1)
+        self.assertIn("gets", r["summary"]); self.assertIn("drops", r["summary"]); self.assertIn("TRADE ·", r["summary"])
         self.assertGreaterEqual(r["meters"], 3)
         self.assertGreaterEqual(r["payShown"], 2)
         self.assertNotIn("$", r["text"])
@@ -705,6 +744,57 @@ class TestRenderedCards(unittest.TestCase):
         self.assertEqual(again["on"], 2)                                          # the shared link restores the same players
         self.assertEqual(again["cols"], 3)                                        # and the third team
         self.assertFalse(again["hidden"])                                         # on the Trade Lab tab
+
+    def test_trade_machine_picks_and_il_controls(self):
+        r = self._drive("""
+          var q=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+          var D2=NBA_NAV.D,ids=D2.teams.map(function(t){return t.id;});
+          var cols=q('#chk .chk-col');R.cols=cols.length;
+          var col=cols[0];R.pickRows=col.querySelectorAll('.pickrow').length;R.locked=col.querySelectorAll('.pickrow .hold').length;
+          R.pickLabels=Array.prototype.map.call(col.querySelectorAll('.pickrow .pname'),function(x){return x.textContent;});
+          // a 1st-round pick is not on the table, but if one arrives by link the rules still block it
+          var res=NBA_NAV.check([{key:'2027-R1-'+ids[0],type:'pick',from:ids[0],to:ids[1]}],'2026-12-31T00:00:00Z');
+          R.r1Blocked=res.rules.some(function(x){return x.rule==='pick'&&x.level==='blocked'&&x.reason.indexOf('1st-round')>=0;});
+          var rows=col.querySelectorAll('.pickrow');rows[0].click();                      // a 2nd
+          var rev=document.querySelector('#chk .chk-r.review[data-rule="pick"]');R.r2Review=!!rev&&rev.textContent.indexOf('Trade Tank')>=0;
+          R.sendsPick=q('#chk .chk-fl.send .fl-p.pk').length;R.pickOut=q('#chk .pickrow.tm-out').length;R.url=location.search;
+          R.slotsInSummary=q('#chk .chk-sc .ck').some(function(c){return c.textContent.indexOf('SLOTS')>=0;});
+          // the injured list is its own group, and IL players carry an IL chip
+          var il=q('#chk .nc-div.il');R.ilGroups=il.length;R.ilHead=il.length?il[0].textContent:'';
+          var ilRows=q('#chk .player-row.il-row');R.ilRows=ilRows.length;R.ilChips=ilRows.filter(function(x){return x.querySelector('.st-chip.il');}).length;
+          R.ilAfterHeader=il.length?(il[0].nextElementSibling&&il[0].nextElementSibling.classList.contains('il-row')):null;
+          // the action tray offers IL only for injured players
+          var m=q('#chk .chk-col')[0].querySelector('.tm-more');m.click();R.tray=!!document.querySelector('#chk .chk-tray .tr-btn.drop');""")
+        self.assertEqual(r["cols"], 2)
+        self.assertEqual(r["pickRows"], 2)                                         # 2nd and 3rd round of next season only: 1sts are not on the table
+        self.assertEqual(r["locked"], 0)
+        self.assertTrue(all("Round 1" not in x for x in r["pickLabels"]), r["pickLabels"])
+        self.assertTrue(r["r1Blocked"])
+        self.assertTrue(r["r2Review"])
+        self.assertEqual((r["sendsPick"], r["pickOut"]), (1, 1))
+        self.assertIn("check=", r["url"])
+        self.assertTrue(r["slotsInSummary"])
+        self.assertGreaterEqual(r["ilGroups"], 1)                                  # an injured-list section per team that has IL players
+        self.assertRegex(r["ilHead"], r"injured list · \d/3")
+        self.assertTrue(r["ilAfterHeader"])
+        self.assertEqual(r["ilRows"], r["ilChips"])                                # every IL player says IL, not only his Yahoo status
+        self.assertTrue(r["tray"])
+
+    def test_held_players_show_when_the_hold_lifts_not_the_date(self):
+        r = self._drive("""
+          var q=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+          R.pills=q('#chk .hold').map(function(x){return x.textContent;});R.titles=q('#chk .hold').map(function(x){return x.title;});
+          var D2=NBA_NAV.D,base=D2.scenarios[''].teams,held=null;
+          D2.teams.forEach(function(t){base[t.id].roster.forEach(function(p){if(!held&&NBA_NAV.D.trade.acq[p.k+'|'+t.id]){held={k:p.k,f:t.id};}});});
+          var other=D2.teams.filter(function(t){return t.id!==held.f;})[0].id;
+          var res=NBA_NAV.check([{key:held.k,from:held.f,to:other},{key:base[other].roster[base[other].roster.length-1].k,from:other,to:held.f}],'2026-10-21T00:00:00Z');
+          R.reason=(res.rules.filter(function(x){return x.rule==='cooldown'&&x.level==='blocked';})[0]||{}).reason||'';""")
+        self.assertTrue(r["pills"])
+        for p in r["pills"]:
+            self.assertRegex(p, r"^FREE IN \d+ DAYS?$")                           # days left, not a date to count back from
+        for t in r["titles"]:
+            self.assertRegex(t, r"can be traded again on 20\d\d-\d\d-\d\d")  # the date stays in the tooltip
+        self.assertRegex(r["reason"], r"can't be traded for \d+ more days? \(until 20\d\d-\d\d-\d\d\)")
 
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:
