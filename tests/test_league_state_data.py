@@ -374,7 +374,10 @@ class TestDraftRoom(unittest.TestCase):
     def test_drafted_players_leave_the_pool_and_join_rosters(self):
         avail = {r[1] for r in self.data["available"]["rows"]}
         board = set(re.findall(r'<div class="pool-player">(.*?)</div>', self.html))
-        dropped = {"Zaccharie Risacher"}  # drafted at 3.01, dropped on Yahoo by 2026-10-19: a free agent again
+        owned = set(ss.season_state(ss.load_season(self.i))["playerOwner"])
+        dropped = {c["name"] for c in self.d["completed"]
+                   if c["playerKey"] not in owned and c["playerKey"] in self.i["registry"]}   # dropped on Yahoo: a free agent again
+        # (a dropped provisional rookie has no registry record, so he is not in the available list either way)
         for c in self.d["completed"]:
             self.assertEqual(c["name"] in avail, c["name"] in dropped, c["name"])
             self.assertNotIn(c["name"], board)

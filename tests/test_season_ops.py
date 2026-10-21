@@ -395,7 +395,8 @@ class TestCapCheckpoints(unittest.TestCase):
         self.assertEqual(x["shortfall"], snap["capBand"]["floor"] - top9)       # from the checkpoint's ownership
         self.assertEqual((x["capAtCheckpoint"], x["floor"], x["shortfall"], x["checkpointDate"]), (123, 131, 8, "2026-10-14"))
         self.assertEqual(snap["teamCaps"][DT], 124)  # the checkpoint file itself (all players) is never rewritten
-        self.assertEqual((x["status"], x["penalty"], x["direction"]), ("FINDING_RECORDED", None, "UNCHANGED"))
+        want = "IMPROVING" if x["currentCap"] > x["capAtCheckpoint"] else ("WORSENING" if x["currentCap"] < x["capAtCheckpoint"] else "UNCHANGED")
+        self.assertEqual((x["status"], x["penalty"], x["direction"]), ("FINDING_RECORDED", None, want))   # follows today's payroll
         self.assertFalse(x["deadlineCheckpoint"]["recorded"])
 
     def test_finding_survives_improvement_and_repeat_goes_to_review(self):
