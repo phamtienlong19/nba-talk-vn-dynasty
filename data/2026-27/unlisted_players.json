@@ -2,6 +2,14 @@
   "season": "2026-27",
   "players": [
     {
+      "playerKey": "478.p.10575",
+      "name": "Christian Anderson",
+      "nbaTeam": "CHA",
+      "displayPosition": "PG",
+      "cap": 0.0,
+      "firstSeen": "RS-2026-10-21-92584e3e"
+    },
+    {
       "playerKey": "478.p.10594",
       "name": "Jayden Quaintance",
       "nbaTeam": "SAS",
