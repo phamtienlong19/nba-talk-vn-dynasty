@@ -325,30 +325,39 @@ class TestVerifiedYahooImport(unittest.TestCase):
         self.assertEqual(snap["kind"], "VERIFIED_IMPORT")
         self.assertIn("Yahoo Fantasy league 85092", snap["source"])
         self.assertEqual(ss.pending_completed(self.si), [])
-        self.assertEqual([t["txnId"] for t in ss.reflected_completed(self.si)], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
+        self.assertEqual([t["txnId"] for t in ss.reflected_completed(self.si)][:3], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
 
     def test_reflected_trades_are_history_not_reapplied(self):
         self.assertEqual(self.cur["playerOwner"], ss.snapshot_owner(self.si["rosterSnapshot"]))   # ownership = the snapshot
-        self.assertEqual(self.cur["activeTradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])  # each once
+        self.assertEqual(self.cur["activeTradeIds"][:3], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])  # each once, in ledger order
+        self.assertEqual(len(self.cur["activeTradeIds"]), len(set(self.cur["activeTradeIds"])))
         res = {r["tradeId"]: r for r in self.cur["tradeResults"]}
         self.assertTrue(all(r["reflected"] and r["applied"] for r in res.values()))
         self.assertEqual((res["PROP-2026-001"]["teams"][BSY]["capBefore"], res["PROP-2026-001"]["teams"][BSY]["capAfter"]), (178, 175))
         self.assertEqual((res["PROP-2026-002"]["teams"][BSY]["capBefore"], res["PROP-2026-002"]["teams"][BSY]["capAfter"]), (175, 176))
-        self.assertEqual(self.cur["history"]["player:" + JOKIC], [{"tradeId": "PROP-2026-002", "from": THINH, "to": BSY}])
+        self.assertEqual(self.cur["history"]["player:" + JOKIC][0], {"tradeId": "PROP-2026-002", "from": THINH, "to": BSY})
 
     def test_counts_payroll_and_moves(self):
-        self.assertEqual(len(self.cur["playerOwner"]), 207)
-        caps = {f: ls.team_cap(self.si, self.cur, f) for f in (BSY, SUP, THINH, CC, HCMC, DT)}
-        self.assertEqual(caps, {BSY: 176, SUP: 144, THINH: 176, CC: 145, HCMC: 133, DT: 123})  # adds were all $0
-        bsy = ss.season_view(self.si)["teams"][BSY]
-        self.assertEqual({a["n"] for a in bsy["added"]}, {"Jordan Miller", "Grayson Allen"})
-        self.assertEqual({a["n"] for a in bsy["dropped"]}, {"Zaccharie Risacher"})
-        self.assertNotIn("478.p.10084", bsy["inKeys"])                      # a pickup is not a trade acquisition
-        self.assertIn(JOKIC, bsy["inKeys"])
-        self.assertEqual(bsy["il"], 1)
-        cc = ss.season_view(self.si)["teams"][CC]                            # Nurkić ($4) on IL, inside the counted nine
-        self.assertEqual((cc["cap"], cc["ilCap"], cc["healthyCap"]), (145, 4, 141))
-        self.assertEqual((bsy["ilCap"], bsy["healthyCap"]), (0, 176))       # Miller ($0) is outside the nine
+        # Rosters change with every Yahoo update; everything is derived from the CURRENT snapshot.
+        snap_owner = ss.snapshot_owner(self.si["rosterSnapshot"])
+        self.assertEqual(self.cur["playerOwner"], snap_owner)
+        view = ss.season_view(self.si)["teams"]
+        self.assertEqual(sum(v["count"] for v in view.values()), len(snap_owner))     # nobody appears or vanishes
+        for f in self.si["franchises"]:
+            caps = sorted((ls.player_cap(self.si, k) for k in ls.team_players(self.si, self.cur, f)), reverse=True)
+            self.assertEqual(ls.team_cap(self.si, self.cur, f), sum(caps[:9]), f)        # top 9 of everyone, IL included
+        for f, v in view.items():
+            il = [r for r in v["roster"] if r["s"] in ss.SLOTS_IL]
+            self.assertEqual(v["il"], len(il), f)
+            self.assertEqual(v["ilCap"], sum(r["c"] for r in il if not r["x"]), f)         # only IL salaries inside the counted nine
+            self.assertEqual(v["healthyCap"], v["cap"] - v["ilCap"], f)
+            self.assertFalse({a["k"] for a in v["added"]} & set(v["inKeys"]), f)            # a pickup is not a trade acquisition
+            self.assertFalse({a["k"] for a in v["dropped"]} & set(v["outKeys"]) - {a["k"] for a in v["dropped"]}, f)
+        for t in self.si["seasonTxns"]:                                                      # completed trades: shown as trade acquisitions
+            if t["status"] == "COMPLETED":
+                for a in t["assets"]:
+                    if a["type"] == "player" and self.cur["playerOwner"].get(a["playerKey"]) == a["to"]:
+                        self.assertIn(a["playerKey"], view[a["to"]]["inKeys"], (t["txnId"], a["name"]))
 
 
 class TestFrozenSalaries(unittest.TestCase):

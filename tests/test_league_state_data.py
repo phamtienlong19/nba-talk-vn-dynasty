@@ -562,7 +562,8 @@ class TestEmbeddedPageData(unittest.TestCase):
         rows = self.data["available"]["rows"]
         self.assertGreater(len(rows), 60)
         on_board = [r for r in rows if r[6] is not None]
-        self.assertEqual(len(on_board), 50)  # the 60-player board minus 10 later picked up on Yahoo
+        self.assertTrue(0 < len(on_board) <= 60)                              # the 60-player board minus anyone rostered since
+        self.assertEqual(len({r[6] for r in on_board}), len(on_board))          # board ranks are unique
         outside = [r for r in rows if r[6] is None and r[5] and r[5] > 300]
         self.assertTrue(outside, "a Yahoo-ranked player outside the recommendation board must be selectable")
 
@@ -571,7 +572,8 @@ class TestEmbeddedPageData(unittest.TestCase):
         kept = {k["playerKey"] for t in self.i["freeze"]["teams"] for k in t["keepers"]}
         owned = set(ss.season_state(ss.load_season(self.i))["playerOwner"])
         self.assertFalse(keys & owned)                                       # nobody rostered today is available
-        self.assertEqual({ls.player_name(self.i, k) for k in keys & kept}, {"Santi Aldama", "Will Riley"})  # dropped on Yahoo
+        dropped = {k for k in kept if k not in owned}                         # a keeper-freeze keeper dropped on Yahoo is a free agent again
+        self.assertEqual(keys & kept, dropped & keys)
 
     def test_dynasty_rank_is_not_exposed_in_the_operational_data(self):
         self.assertEqual(self.data["available"]["cols"], ["key", "name", "nba", "pos", "cap", "yahooOr", "board", "src"])

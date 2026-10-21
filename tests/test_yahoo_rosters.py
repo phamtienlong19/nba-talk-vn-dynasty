@@ -392,8 +392,8 @@ class TestUnlistedPlayers(unittest.TestCase):
         si = ss.load_season(ls.load_inputs())
         self.assertEqual(si["unlistedPlayers"][self.QUAINTANCE]["cap"], 0)
         self.assertEqual(ir.resolve_player(si, {}, {"playerId": "10594", "name": "Jayden Quaintance"})[:2], (self.QUAINTANCE, "KEY"))
-        rec = yr.reconcile(si, reference())                                 # the same capture again: nothing new
-        self.assertEqual((rec["report"]["unlisted"], rec["diff"]["added"], rec["diff"]["dropped"]), ([], [], []))
+        rec = yr.reconcile(si, reference())                                 # an older capture of the same league: nothing new unlisted
+        self.assertEqual(rec["report"]["unlisted"], [])                      # he is recorded already, so no second record
 
     def test_commit_records_identity_once_and_never_touches_the_salary_freeze(self):
         with TempData() as td:
@@ -467,7 +467,9 @@ class TestRosterChecks(unittest.TestCase):
     hoarding, position coverage and whether a full lineup can be fielded. Levels only -- never a tanking verdict."""
 
     def setUp(self):
-        self.si = ss.load_season(ls.load_inputs())
+        # Rule logic runs on the frozen draft-night baseline with injuries IMPOSED by each test, so the expectations do not
+        # depend on whichever players managers have added, dropped or hurt on Yahoo this week.
+        self.si = draft_night(ss.load_season(ls.load_inputs()))
         self.cur = ss.season_state(self.si)
         self.rules = ss._load(ss.RULES_PATH)
 
@@ -490,30 +492,38 @@ class TestRosterChecks(unittest.TestCase):
         f = BSY
         keys = sorted(ls.team_players(self.si, self.cur, f), key=lambda k: -ls.player_cap(self.si, k))
         c = ss.roster_checks(self.si, self.cur, f)["injured"]
-        self.assertEqual((c["count"], c["level"]), (1, "ok"))                     # Jordan Miller on IL
-        four_il = {k: "IL" for k in keys[1:4]}
-        out = {keys[0]: "O", keys[4]: "INJ"}                                         # Out but kept off IL still counts
-        c = ss.roster_checks(self.si, self.state_with(f, four_il, out), f)["injured"]
+        self.assertEqual((c["count"], c["level"]), (0, "ok"))                     # baseline: nobody hurt
+        four_il = {k: "IL" for k in keys[1:5]}
+        out = {keys[0]: "O", keys[5]: "INJ"}                                         # Out but kept off IL still counts
+        st = self.state_with(f, four_il, out)
+        c = ss.roster_checks(self.si, st, f)["injured"]
         self.assertEqual((c["count"], c["il"], c["out"], c["level"]), (6, 4, 2, "over"))
-        self.assertEqual(c["countedCap"], sum(ls.player_cap(self.si, k) for k in keys[:5]) + 0)  # their salaries still count
+        counted = sum(r["c"] for r in ls.team_roster(self.si, st, f) if r["k"] in keys[:6] and not r["x"])
+        self.assertEqual(c["countedCap"], counted)                                  # their salaries still count if inside the nine
+        five = ss.roster_checks(self.si, self.state_with(f, {k: "IL" for k in keys[:5]}), f)["injured"]
+        self.assertEqual((five["count"], five["level"]), (5, "watch"))               # at the limit
         q = ss.roster_checks(self.si, self.state_with(f, status={keys[0]: "Q"}), f)["injured"]
-        self.assertEqual(q["count"], 1)                                              # questionable is not injured-list stacking
+        self.assertEqual(q["count"], 0)                                              # questionable is not injured-list stacking
 
     def test_single_position_hoarding_levels(self):
-        levels = {self.si["shorts"][f]: ss.roster_checks(self.si, self.cur, f)["singlePosition"]["level"] for f in self.si["franchises"]}
-        self.assertEqual(levels["Bsy"], "ok")
-        self.assertEqual(levels["HCMC"], "watch")                                   # 6: inside the combo exception -> review
-        c = ss.roster_checks(self.si, self.cur, BSY, dict(self.rules, singlePosition={"max": 2, "maxWithComboTags": 3}))
-        self.assertEqual(c["singlePosition"]["level"], "over")
+        for f in self.si["franchises"]:                                              # the level follows the count, for every team
+            c = ss.roster_checks(self.si, self.cur, f)["singlePosition"]
+            want = "over" if c["count"] > 7 else "watch" if c["count"] > 5 else "ok"  # >5 inside the combo exception: review; >7: over
+            self.assertEqual(c["level"], want, self.si["shorts"][f])
+        tight = dict(self.rules, singlePosition={"max": 0, "maxWithComboTags": 0})
+        self.assertEqual(ss.roster_checks(self.si, self.cur, BSY, tight)["singlePosition"]["level"], "over")
+        loose = dict(self.rules, singlePosition={"max": 0, "maxWithComboTags": 99})
+        self.assertEqual(ss.roster_checks(self.si, self.cur, BSY, loose)["singlePosition"]["level"], "watch")
 
     def test_injured_players_do_not_count_toward_positional_limits(self):
         self.assertTrue(self.rules["positionalLimitsCountHealthyOnly"])
-        sup = ss.roster_checks(self.si, self.cur, SUP)                           # 7 single-position players, 2 of them on IL
-        self.assertEqual((sup["singlePosition"]["count"], sup["singlePosition"]["level"]), (5, "ok"))
-        single = [k for k in ls.team_players(self.si, self.cur, BSY) if len(ss._positions(self.si, k, self.rules["positions"])) == 1]
-        before = ss.roster_checks(self.si, self.cur, BSY)["singlePosition"]["count"]
-        after = ss.roster_checks(self.si, self.state_with(BSY, {single[0]: "IL"}), BSY)["singlePosition"]["count"]
-        self.assertEqual(after, before - (0 if self.cur["slots"].get(single[0]) in ("IL", "IL+") else 1))
+        single = [k for k in ls.team_players(self.si, self.cur, SUP) if len(ss._positions(self.si, k, self.rules["positions"])) == 1]
+        self.assertGreaterEqual(len(single), 3)
+        before = ss.roster_checks(self.si, self.cur, SUP)["singlePosition"]["count"]
+        self.assertEqual(before, len(single))                                    # nobody injured: every single-position player counts
+        for n in (1, 2, 3):                                                      # each one put on IL stops counting
+            st = self.state_with(SUP, {k: "IL" for k in single[:n]})
+            self.assertEqual(ss.roster_checks(self.si, st, SUP)["singlePosition"]["count"], before - n)
 
     def test_two_position_combos_need_three_healthy_players(self):
         self.assertEqual((self.rules["combos"], self.rules["minPerCombo"]), ({"G": ["PG", "SG"], "F": ["SF", "PF"]}, 3))
@@ -531,9 +541,16 @@ class TestRosterChecks(unittest.TestCase):
         self.assertEqual((c["out"], c["count"]), (2, 2))                          # doubtful is not
 
     def test_coverage_and_full_lineup(self):
-        dha = ss.roster_checks(self.si, self.cur, "franchise-08")
-        self.assertEqual((dha["coverage"]["short"], dha["coverage"]["byPosition"]["PG"], dha["coverage"]["level"]), (["PG"], 1, "over"))
-        self.assertEqual((dha["lineup"]["filled"], dha["lineup"]["empty"]), (9, []))
+        def pgs_of(f):
+            return [k for k in ls.team_players(self.si, self.cur, f) if "PG" in ss._positions(self.si, k, self.rules["positions"])]
+        f = max(self.si["franchises"], key=lambda x: len(pgs_of(x)))                # a team with plenty of PG-eligible players
+        pgs = pgs_of(f)
+        self.assertGreaterEqual(len(pgs), 3)
+        base = ss.roster_checks(self.si, self.cur, f)
+        self.assertNotIn("PG", base["coverage"]["short"])
+        keep = pgs[0]                                                              # leave exactly one healthy PG-eligible player
+        short = ss.roster_checks(self.si, self.state_with(f, {k: "IL" for k in pgs if k != keep}), f)
+        self.assertEqual((short["coverage"]["short"].count("PG"), short["coverage"]["byPosition"]["PG"], short["coverage"]["level"]), (1, 1, "over"))
         # put every healthy center on IL: the lineup can no longer be filled
         keys = ls.team_players(self.si, self.cur, BSY)
         centers = [k for k in keys if "C" in ss._positions(self.si, k, self.rules["positions"])]
@@ -567,8 +584,10 @@ class TestRosterChecks(unittest.TestCase):
         self.assertIn("function rosterChecks(c)", html)
         self.assertIn('if(tm.checks)strip.appendChild(rosterChecks(tm.checks));', html)
         data = json.loads(re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1).replace("<\\/", "</"))
-        dha = data["official"]["teams"]["franchise-08"]["checks"]
-        self.assertEqual(dha["coverage"]["short"], ["PG"])
+        si = ss.load_season(ls.load_inputs())                                       # the embedded checks are the engine's, for any roster
+        state = ss.season_state(si)
+        for fid, team in data["official"]["teams"].items():
+            self.assertEqual(team["checks"], json.loads(json.dumps(ss.roster_checks(si, state, fid))), fid)
         for word in ("tank", "Tank", "violator"):                                   # evidence, not a label on a team
             self.assertNotIn(word, json.dumps(data["official"]["teams"]))
 

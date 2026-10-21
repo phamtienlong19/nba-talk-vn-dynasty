@@ -164,36 +164,37 @@ class TestRenderedCards(unittest.TestCase):
             self.assertEqual(c["picks"], " · ".join(rep["picks"]), short)
 
     def test_known_post_trade_rosters(self):
-        sup = _read(_card(self.official, "sup fam"))
-        self.assertNotIn("Jalen Williams", sup["names"])
-        self.assertIn("Julius Randle", sup["names"])
-        # completed Bsy <-> sup fam trade: sup fam 141 -> 144 (Castle $13 + Mitchell $0 in; Coward $10 + Beringer $0 out)
-        self.assertEqual((sup["cap"], sup["rows"], sup["gap"]), ("144", 15, "34 ROOM"))   # + 3 IL pickups at $0 (Yahoo 2026-10-19)
-        self.assertIn("Stephon Castle", sup["names"])
-        self.assertNotIn("Cedric Coward", sup["names"])
-        bsy = _read(_card(self.official, "Bsy"))
-        self.assertEqual((bsy["cap"], bsy["rows"], bsy["gap"]), ("176", 13, "2 ROOM"))
-        self.assertIn("Cedric Coward", bsy["names"])
-        self.assertIn("Joan Beringer", bsy["names"])
-        self.assertNotIn("Stephon Castle", bsy["names"])
-        for n in ("Nikola Jokić", "Oso Ighodaro", "Victor Wembanyama"):   # completed Bsy <-> Thịnh
-            self.assertIn(n, bsy["names"] if n != "Victor Wembanyama" else _read(_card(self.official, "Thịnh"))["names"])
-        thinh = _read(_card(self.official, "Thịnh"))
-        self.assertEqual((thinh["cap"], thinh["rows"], thinh["gap"]), ("176", 13, "2 ROOM"))
-        self.assertIn("Jaylon Tyson", thinh["names"])
-        self.assertNotIn("Nikola Jokić", thinh["names"])
-        bz = _read(_card(self.official, "Bz"))
-        self.assertIn("Derrick White", bz["names"])
-        self.assertNotIn("Franz Wagner", bz["names"])
-        self.assertEqual(sum(1 for n in bz["names"] if n == "Derrick White"), 1)
-        melo = _read(_card(self.official, "Melo"))
-        self.assertNotIn("Aaron Gordon", melo["names"])   # commissioner clarification (TRADE-D-AMEND): Gordon stays with LC
-        self.assertIn("Aaron Gordon", _read(_card(self.official, "LC"))["names"])
-        self.assertEqual(melo["picks"], "2.03 · 2.15 · 3.04")  # Melo holds LC's 3.04
+        # Roster membership changes every time a manager adds or drops, so every expectation here is derived from the
+        # engine for the CURRENT verified roster: the ledger says where each traded player went; the card must agree.
+        shorts = self.si["shorts"]
+        cards = {fid: _read(_card(self.official, shorts[fid])) for fid in self.si["franchises"]}
+        for t in self.si["seasonTxns"]:
+            if t["status"] != "COMPLETED":
+                continue
+            for a in t["assets"]:
+                if a["type"] != "player":
+                    continue
+                name, owner = ls.player_name(self.si, a["playerKey"]), self.cur["playerOwner"].get(a["playerKey"])
+                if owner is not None:                              # still rostered: exactly one card shows him, the owner's
+                    self.assertEqual([f for f, c in cards.items() if name in c["names"]], [owner], (t["txnId"], name))
+                else:                                              # dropped since the trade: no card shows him
+                    self.assertFalse([f for f, c in cards.items() if name in c["names"]], (t["txnId"], name))
+        for fid, c in cards.items():                               # cap / rows / room are the engine's, for every team
+            rep = ls.team_report(self.si, self.cur, fid, self.state)
+            self.assertEqual((float(c["cap"]), c["rows"]), (rep["cap"], rep["count"]), shorts[fid])
+            want = f"{rep['toFloor']:g} TO FLOOR" if rep["toFloor"] > 0 else f"{rep['room']:g} ROOM"
+            self.assertEqual(c["gap"], want, shorts[fid])
+        melo = cards["franchise-03"]
+        self.assertEqual(melo["picks"], "2.03 · 2.15 · 3.04")      # Melo holds LC's 3.04 (commissioner clarification, TRADE-D-AMEND)
 
     def test_untraded_teams_keep_their_keepers_and_add_only_draftees(self):
         drafted = {c["name"] for c in ls.draft_summary(self.i, self.state)["completed"]}
-        for short in ("DHA", "Đạt", "TuLy", "TT"):   # no pre-draft trade, no in-season trade, no Yahoo add/drop
+        pre = {f for t in self.i["trades"]["trades"] for f in t["participants"]}
+        view = ss.season_view(self.si)["teams"]
+        quiet = [self.si["shorts"][f] for f in self.si["franchises"]
+                 if f not in pre and not view[f]["added"] and not view[f]["dropped"] and not view[f]["fold"]["tradeIds"]]
+        self.assertTrue(quiet, "every team has moved since the draft; this check has nothing to compare")
+        for short in quiet:   # no pre-draft trade, no in-season trade, no Yahoo add/drop: keepers + draftees only
             now = _read(_card(self.official, short))["names"]
             before = _read(_card(self.static, short))["names"]
             self.assertEqual(sorted(n for n in now if n not in drafted), sorted(before), short)
@@ -302,14 +303,23 @@ class TestRenderedCards(unittest.TestCase):
             before, after = players[:head], players[head:]
             self.assertNotIn("il-row", before, short)                        # healthy players first
             self.assertEqual(after.count('class="player-row'), after.count("il-row"), short)  # only IL rows below
-        cc = _card(self.official, "CrazyCat")                                # Nurkić ($4) is on IL and inside the nine
-        self.assertRegex(cc, r'class="il-head">.*?Injured list.*?class="il-c"[^>]*>4 counted<')
-        self.assertIn('<div class="nc-div">not counted</div>', cc)           # no "top 9" divider when IL counts
-        self.assertRegex(re.sub(r"<[^>]+>", " ", cc), r"healthy\s+141")     # 145 counted, 4 of it on IL
-        bsy = _card(self.official, "Bsy")                                    # Miller ($0) is outside the nine
-        self.assertIn("beyond top 9 · not counted", re.sub(r"<[^>]+>", "", bsy))
-        self.assertNotIn("healthy", re.sub(r"<[^>]+>", " ", bsy.split('class="players"')[0]))
-        self.assertNotIn('class="il-c"', bsy)
+        view = ss.season_view(self.si)["teams"]
+        seen_counting = seen_free = False
+        for fid, v in view.items():
+            card = _card(self.official, self.si["shorts"][fid])
+            if not v["il"]:
+                self.assertNotIn("il-head", card, fid)
+                continue
+            txt = re.sub(r"<[^>]+>", " ", card)
+            if v["ilCap"]:                                                   # an IL player inside the counted nine: group says so
+                seen_counting = True
+                self.assertRegex(card, r'class="il-c"[^>]*>' + re.escape(f"{v['ilCap']:g}") + r" counted<", fid)
+                self.assertRegex(txt, r"healthy\s+" + re.escape(f"{v['healthyCap']:g}"), fid)
+            else:                                                            # IL players all outside the nine: no counted note, no healthy figure
+                seen_free = True
+                self.assertNotIn('class="il-c"', card, fid)
+                self.assertNotIn("healthy", txt.split("moves")[0], fid)
+        self.assertTrue(seen_counting or seen_free, "no team has an injured-list player to check")
 
     def test_yahoo_status_chips_are_distinct(self):
         snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
