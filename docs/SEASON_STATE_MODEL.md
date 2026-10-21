@@ -43,6 +43,15 @@ B and C and to checkpoint findings (re-derived from each checkpoint's frozen
 ownership); layer A keeps the all-player totals recorded at the time. The draft-night 12-player count is not enforced; the
 importer only warns above the 15 roster spots.
 
+## Page navigation (tabs)
+
+The page shows one view at a time: **TEAMS** (1–8 and 9–16 together), **CAP**, **TRADE LAB**, **DRAFT**. The active tab is in the
+URL hash (`#cap`, `#trade-lab`, `#draft`, `#draft/r2`), so links and the browser's back button work; the old anchors
+(`#rosters-a`, `#rosters-b`, `#draft-order`) still land on the right tab. The Draft Archive has a tab per round (ALL ROUNDS /
+ROUND 1 / 2 / 3; the default is all three side by side on wide screens and Round 1 on narrow ones). Tabs only toggle a CSS class
+(`tab-off` / `sub-off`): every section stays in the page, nothing is generated differently, and printing shows everything.
+What-If keeps its own mode switch (clicking a tab leaves it). On phones the top bar is two rows so all four tabs stay reachable.
+
 ## Team-card display rules
 
 - **Healthy payroll.** The counted payroll (top 9 frozen salaries of everyone, IL included) is unchanged. "Healthy" is that

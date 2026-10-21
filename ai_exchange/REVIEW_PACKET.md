@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-21T04:55:09Z
+Generated: 2026-10-21T05:30:45Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/roster-view-statuses-and-counting
-Commit: a4eb4b4
+Branch: feat/tabbed-views
+Commit: 89be3ad
 Base: main
 Working tree: dirty
 
@@ -55,4 +55,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/roster-view-statuses-and-counting` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/tabbed-views` if not already done, then request human/ChatGPT review of this packet.
