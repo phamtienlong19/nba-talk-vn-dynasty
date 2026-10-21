@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-21T05:30:45Z
+Generated: 2026-10-21T06:03:11Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/tabbed-views
-Commit: 89be3ad
+Branch: feat/search-and-my-team
+Commit: fec8a65
 Base: main
 Working tree: dirty
 
@@ -27,7 +27,11 @@ Fingerprint: FRESH
 
 ## Changes
 ```
-
+ ai_exchange/REVIEW_PACKET.md     |  8 ++---
+ docs/SEASON_STATE_MODEL.md       |  9 ++++++
+ index.html                       | 64 ++++++++++++++++++++++++++++++++++++----
+ tests/test_scenario_rendering.py | 62 ++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 134 insertions(+), 9 deletions(-)
 ```
 
 ## Validation
@@ -42,7 +46,10 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
-(none)
+- ai_exchange/REVIEW_PACKET.md
+- docs/SEASON_STATE_MODEL.md
+- index.html
+- tests/test_scenario_rendering.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
@@ -55,4 +62,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/tabbed-views` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/search-and-my-team` if not already done, then request human/ChatGPT review of this packet.

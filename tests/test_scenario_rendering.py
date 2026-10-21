@@ -523,6 +523,163 @@ class TestRenderedCards(unittest.TestCase):
         self.assertEqual(len(re.findall(r'<a class="navlink"', self.static)), 4)           # nav order is unchanged (tests click navlink[1])
         self.assertIn("window.addEventListener(\"popstate\"", self.static)                 # back / forward switch tabs
 
+    # ---- search, my team, jump chips: driven through the page's own script -----------------------------------------------
+    def _drive(self, js, hash_="", wait=500):
+        """Run `js` (it fills R) inside the loaded page, after `wait` ms of page time; -> the parsed R."""
+        import tempfile
+        with open(INDEX, encoding="utf-8") as f:
+            html = f.read()
+        js = "var D=NBA_NAV.D,view=NBA_NAV.view,norm=NBA_NAV.norm,parseHash=NBA_NAV.parseHash,showTab=NBA_NAV.showTab;" + js
+        script = ("<script>(function(){var R={};function done(){var p=document.createElement('pre');p.id='drive-out';"
+                  "p.textContent=JSON.stringify(R);document.body.appendChild(p);}try{\n" + js + "\n}catch(e){R.error=String(e&&e.stack||e);}"
+                  "setTimeout(function(){try{if(window.__after)window.__after();}catch(e){R.error=String(e);}done();}," + str(wait) + ");})();</script>")
+        d = tempfile.mkdtemp()
+        try:
+            path = os.path.join(d, "index.html")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(html.replace("</body>", script + "</body>", 1))
+            out = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--virtual-time-budget=6000", "--dump-dom",
+                                  "file://" + path + hash_], capture_output=True, text=True, timeout=120).stdout
+        finally:
+            shutil.rmtree(d)
+        m = re.search(r'<pre id="drive-out">(.*?)</pre>', out, re.S)
+        self.assertIsNotNone(m, out[-400:])
+        r = json.loads(html_lib.unescape(m.group(1)))
+        self.assertNotIn("error", r, r.get("error"))
+        return r
+
+    def test_search_finds_players_teams_and_free_agents_without_accents(self):
+        r = self._drive("""
+          var rows=[];D.teams.forEach(function(t){view().teams[t.id].roster.forEach(function(x){rows.push({n:x.n,t:t.id,k:x.k});});});
+          var accent=rows.filter(function(x){return /[^\\x00-\\x7f]/.test(x.n);})[0];R.accent=accent&&accent.n;
+          if(accent){var res=NBA_NAV.search(norm(accent.n)).players;R.playerFound=res.some(function(p){return p.n===accent.n&&p.t===accent.t;});}
+          var t=D.teams[0];R.teamByShort=NBA_NAV.search(t.short).teams.some(function(x){return x.id===t.id;});
+          var word=t.name.split(/[ |]+/).filter(function(w){return w.length>3;})[0];R.word=word;R.teamByName=NBA_NAV.search(word).teams.some(function(x){return x.id===t.id;});
+          var own={};rows.forEach(function(x){own[x.k]=1;});var fa=D.available.rows.filter(function(a){return !own[a[0]];})[0];R.fa=fa&&fa[1];
+          if(fa){var rf=NBA_NAV.search(norm(fa[1]));R.faFound=rf.fa.some(function(p){return p.k===fa[0];});R.faNotRostered=!rf.players.some(function(p){return p.k===fa[0];});}
+          R.none=NBA_NAV.search("zzzzqqqq");R.empty=NBA_NAV.search("   ");
+          R.multi=NBA_NAV.search(norm(accent.n).split(" ").reverse().join(" ")).players.some(function(p){return p.n===accent.n;});""")
+        self.assertTrue(r["accent"], "no rostered player with an accented name to check")
+        self.assertTrue(r["playerFound"], r["accent"])                       # "jokic" finds Jokić, wherever he is rostered now
+        self.assertTrue(r["teamByShort"] and r["teamByName"], r["word"])
+        self.assertTrue(r["faFound"] and r["faNotRostered"], r["fa"])      # free agents are separate from rostered players
+        self.assertEqual(r["none"], {"teams": [], "players": [], "fa": []})
+        self.assertEqual(r["empty"], {"teams": [], "players": [], "fa": []})
+        self.assertTrue(r["multi"])                                          # word order does not matter
+
+    def test_my_team_is_highlighted_across_cap_draft_and_synthetic_views(self):
+        r = self._drive("""
+          var t=D.teams[0];NBA_NAV.setMe(t.id);
+          var host=document.createElement('div');host.id='synth';
+          host.innerHTML='<table class="cmp"><tr><td>'+t.short+'</td></tr><tr><td>Nobody FC</td></tr></table>'
+            +'<div class="lab-card"><span class="tchip">'+t.short+'</span></div><div class="lab-card"><span class="tchip">Nobody FC</span></div>'
+            +'<article class="wi-card"><span class="identity-tag">'+t.short+' | '+t.name+'</span></article>';
+          document.body.appendChild(host);
+          window.__after=function(){var q=function(s){return document.querySelectorAll(s).length;};
+            R.cap=q('.cap-card.mine');R.card=q('section.team-card.mine');R.cmp=q('#synth .cmp tr.mine');R.cmpAll=q('#synth .cmp tr');
+            R.lab=q('#synth .lab-card.mine');R.labAll=q('#synth .lab-card');R.wi=q('#synth article.wi-card.mine');R.star=q('#synth .mine-chip');
+            NBA_NAV.setMe(null);R.cleared=q('.mine')+q('.mine-chip');};""")
+        self.assertEqual((r["cap"], r["card"]), (1, 1))
+        self.assertEqual((r["cmp"], r["cmpAll"], r["lab"], r["labAll"], r["wi"]), (1, 2, 1, 2, 1))   # only my team's rows / folds
+        self.assertEqual(r["star"], 3)
+        self.assertEqual(r["cleared"], 0)
+
+    def test_search_results_style_rookies(self):
+        r = self._drive("""
+          var rook=D.available.rows.filter(function(a){return a[7]==='R';})[0];R.fa=rook&&rook[1];
+          if(rook){NBA_NAV.open();var i=document.getElementById('sp-in');i.value=rook[1];i.dispatchEvent(new Event('input'));
+            R.faTag=!!document.querySelector('#sp-body .sp-n.rk .in-tag.rk');}""")
+        if r.get("fa"):
+            self.assertTrue(r["faTag"], r["fa"])
+
+    def test_mobile_header_keeps_tabs_pinned(self):
+        with open(INDEX, encoding="utf-8") as f:
+            html = f.read()
+        self.assertIn(".topbar.hide .modeswitch{display:none}", html)
+        self.assertNotIn(".topbar.hide{transform", html)                 # the tab row must never slide away
+        self.assertRegex(html, r"\.topbar\{\s*position:sticky;top:0")
+
+    def test_search_palette_opens_from_button_and_keys_and_shows_team_chips(self):
+        r = self._drive("""
+          R.btn=!!document.getElementById('tb-search');R.meBtn=!!document.getElementById('tb-me');
+          document.getElementById('tb-search').click();
+          R.open=document.getElementById('sp').classList.contains('open');R.chips=document.querySelectorAll('#sp-body .sp-chip').length;R.meRow=!!document.querySelector('#sp-body .sp-me');
+          window.__after=function(){R.focus=document.activeElement&&document.activeElement.id;};
+          document.getElementById('sp-in').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+          R.closedByEsc=!document.getElementById('sp').classList.contains('open');
+          document.dispatchEvent(new KeyboardEvent('keydown',{key:'/',bubbles:true}));R.slash=document.getElementById('sp').classList.contains('open');
+          NBA_NAV.close();
+          document.dispatchEvent(new KeyboardEvent('keydown',{key:'k',ctrlKey:true,bubbles:true}));R.ctrlK=document.getElementById('sp').classList.contains('open');
+          NBA_NAV.close();R.bodyUnlocked=document.body.style.overflow==='';
+          NBA_NAV.open();var inp=document.getElementById('sp-in');inp.value='zzzz';inp.dispatchEvent(new Event('input'));R.noMatch=document.querySelector('#sp-body .sp-empty').textContent;""")
+        self.assertTrue(r["btn"] and r["meBtn"])
+        self.assertEqual((r["open"], r["chips"], r["meRow"]), (True, 16, True))                        # empty box: 16 team chips + my-team row
+        self.assertEqual(r["focus"], "sp-in")                                                           # and the input is focused (checked a moment later)
+        self.assertTrue(r["closedByEsc"] and r["slash"] and r["ctrlK"] and r["bodyUnlocked"])
+        self.assertIn("No team or player matches", r["noMatch"])
+
+    def test_picking_a_result_jumps_to_the_team_or_player_on_the_teams_tab(self):
+        r = self._drive("""
+          var t=D.teams[2],tm=view().teams[t.id],pl=tm.roster[0];
+          location.hash='#cap';var ps=parseHash();showTab(ps.tab,ps.sub);R.startTab=parseHash().tab;
+          window.__after=function(){
+            R.hash=location.hash;R.teamsShown=!document.getElementById('rosters-a').classList.contains('tab-off');R.capHidden=document.getElementById('cap').classList.contains('tab-off');
+            var card=document.querySelector('section.team-card[data-team="'+t.id+'"]');R.card=!!card;
+            var row=card&&card.querySelector('.player-row[data-k="'+pl.k+'"]');R.row=!!row;R.flash=!!(row&&row.classList.contains('flash-row'));R.name=pl.n;
+          };
+          NBA_NAV.goPlayer(pl.k,t.id);
+          R.teamRowsHaveKeys=Array.prototype.every.call(document.querySelectorAll('section.team-card[data-team]'),function(c){return c.querySelectorAll('.player-row[data-k]').length>0;});""")
+        self.assertEqual(r["hash"], "#teams")
+        self.assertTrue(r["teamsShown"] and r["capHidden"] and r["card"] and r["row"] and r["flash"], r)
+        self.assertTrue(r["teamRowsHaveKeys"])                                   # every card's rows carry their player key
+        r = self._drive("""
+          var t=D.teams[5];window.__after=function(){var c=document.querySelector('section.team-card[data-team="'+t.id+'"]');
+            R.flash=!!(c&&c.classList.contains('flash-card'));R.hash=location.hash;};NBA_NAV.goTeam(t.id);""")
+        self.assertTrue(r["flash"])
+        self.assertEqual(r["hash"], "#teams")
+
+    def test_my_team_is_remembered_marked_and_one_tap_away(self):
+        r = self._drive("""
+          var t=D.teams[3],key='nbaTalkVN.myTeam';
+          R.initial=NBA_NAV.getMe();R.lblBefore=document.querySelector('#tb-me .tb-lbl').textContent;
+          document.getElementById('tb-me').click();R.chooseMode=NBA_NAV.state.mode;R.chooseRows=document.querySelectorAll('#sp-body .sp-it').length;
+          R.chooseHead=document.querySelector('#sp-body .sp-h').textContent;NBA_NAV.close();
+          NBA_NAV.setMe(t.id);
+          R.stored=localStorage.getItem(key);R.lbl=document.querySelector('#tb-me .tb-lbl').textContent;R.short=t.short;
+          R.mineCards=Array.prototype.map.call(document.querySelectorAll('section.team-card.mine'),function(c){return c.dataset.team;});
+          R.mineCap=document.querySelectorAll('.cap-card.mine').length;
+          R.firstChip=document.querySelector('#team-jump .tj-chip').textContent;R.chips=document.querySelectorAll('#team-jump .tj-chip').length;
+          R.setClass=document.getElementById('tb-me').classList.contains('set');
+          window.__after=function(){R.hash=location.hash;var c=document.querySelector('section.team-card[data-team="'+t.id+'"]');R.flash=!!(c&&c.classList.contains('flash-card'));
+            localStorage.setItem(key,'franchise-99');R.bogus=NBA_NAV.getMe();
+            var orig=Storage.prototype.getItem;Storage.prototype.getItem=function(){throw new Error('blocked');};
+            R.blocked=NBA_NAV.getMe();try{NBA_NAV.setMe(null);R.setNoThrow=true;}catch(e){R.setNoThrow=false;}Storage.prototype.getItem=orig;};
+          document.getElementById('tb-me').click();                              // with a team set: one tap jumps to it""")
+        self.assertIsNone(r["initial"])
+        self.assertEqual(r["lblBefore"], "My team")
+        self.assertEqual((r["chooseMode"], r["chooseRows"], r["chooseHead"]), ("choose", 16, "Which team is yours?"))   # first tap asks which team
+        self.assertEqual((r["stored"] is not None, r["lbl"], r["setClass"]), (True, r["short"], True))
+        self.assertEqual(len(r["mineCards"]), 1)
+        self.assertEqual(r["mineCap"], 1)                                          # the Cap page marks it too
+        self.assertEqual((r["firstChip"], r["chips"]), ("\u2605 " + r["short"], 16))   # my team's chip leads the jump bar
+        self.assertEqual(r["hash"], "#teams")
+        self.assertTrue(r["flash"])
+        self.assertIsNone(r["bogus"])                                              # an unknown stored id is ignored
+        self.assertIsNone(r["blocked"])                                            # storage that throws never breaks the page
+        self.assertTrue(r["setNoThrow"])
+
+    def test_leaving_what_if_when_jumping_and_static_hooks(self):
+        r = self._drive("""
+          document.querySelector('.modeswitch button[data-mode=WHATIF]').click();R.wi=document.body.classList.contains('whatif-mode');
+          NBA_NAV.goTeam(D.teams[0].id);R.after=document.body.classList.contains('whatif-mode');""")
+        self.assertTrue(r["wi"])
+        self.assertFalse(r["after"])                                                # jumping to a team leaves What-If mode
+        css = self.static
+        for needle in (".sp-in{", ".team-jump{", ".tb-btn{", ".team-card.mine{", "@keyframes hitrow", "font:500 16px"):   # 16px input: no iOS zoom
+            self.assertIn(needle, css)
+        self.assertRegex(css, r"@media\(max-width:680px\)\{\.sp-box\{top:0;left:0;transform:none;width:100%;height:100dvh")  # full-screen sheet on phones
+        self.assertIn('data-team="', self.static.split("function cardOf")[1][:120])
+
     def test_full_team_names_and_no_health_badges(self):
         bsy = _card(self.official, "Bsy")
         self.assertIn('<div class="team-name">Hai | Bulls Dynasty</div>', bsy)    # one style, no lighter manager part

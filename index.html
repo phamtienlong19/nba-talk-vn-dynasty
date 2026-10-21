@@ -393,13 +393,74 @@ span.num{font-family:"Roboto Mono",ui-monospace,Menlo,monospace!important;font-w
 /* phones: brand + mode switch on one row, the four tabs as an evenly spaced row beneath (nothing hides off-screen) */
 @media(max-width:680px){
   .topbar-inner{flex-wrap:wrap;overflow-x:visible;row-gap:6px}
-  .brand{font-size:12px;order:1;white-space:nowrap}
-  .modeswitch{order:1;margin-left:auto}
-  .modeswitch button{padding:7px 7px;font-size:9.5px}
-  .topbar-inner::after{content:"";order:2;flex-basis:100%;height:0}   /* forces the tabs onto their own row */
+  .brand{font-size:12px;order:1;white-space:nowrap;flex:1 1 auto;min-width:0}
+  .tb-actions{order:1;margin-left:auto}
+  .modeswitch{order:2;flex:1 1 100%;display:flex}
+  .modeswitch button{flex:1;padding:8px 6px;font-size:10px}
   .navlink{order:3;flex:1 1 22%;text-align:center;padding:8px 4px;font-size:11px}
   .navlink.on{background:#ffffff22}
+    .topbar.hide .modeswitch{display:none}                                 /* tabs + search stay pinned; only the mode switch folds away while scrolling down */
 }
+/* ---- navigation helpers: search palette, my team, team jump chips ---- */
+.tb-actions{display:flex;gap:6px;align-items:center}
+.tb-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:999px;border:1px solid #ffffff2b;background:#ffffff10;color:#e6ecf8;font:700 11px/1 "Inter",Arial,sans-serif;letter-spacing:.04em;cursor:pointer;white-space:nowrap}
+.tb-btn:hover{background:#ffffff1c}
+.tb-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.tb-btn.me.set{border-color:#ffcf3377;color:#ffe08a}
+.tb-btn kbd{font:600 10px/1 "Roboto Mono",ui-monospace,Menlo,monospace;border:1px solid #ffffff33;border-radius:4px;padding:2px 5px;color:#b8c3da}
+@media(max-width:680px){.tb-btn{height:36px;min-width:36px;justify-content:center;padding:0 11px}.tb-btn .tb-lbl,.tb-btn kbd{display:none}.tb-btn.me.set .tb-lbl{display:inline}}
+.sp{position:fixed;inset:0;z-index:300;display:none;background:rgba(8,14,30,.55);backdrop-filter:blur(3px)}
+.sp.open{display:block}
+.sp-box{position:absolute;left:50%;top:9vh;transform:translateX(-50%);width:min(660px,calc(100% - 24px));max-height:80vh;display:flex;flex-direction:column;background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(5,12,30,.45);overflow:hidden;font-family:"Inter","Helvetica Neue",Arial,sans-serif}
+.sp-top{display:flex;gap:8px;align-items:center;padding:12px;border-bottom:1px solid #e6eaf2}
+.sp-in{flex:1;min-width:0;height:46px;border:1px solid #cfd7e6;border-radius:12px;padding:0 14px;font:500 16px "Inter",Arial,sans-serif;color:#12264d;outline:none;background:#fff}
+.sp-in:focus{border-color:#2f5fd0;box-shadow:0 0 0 3px #2f5fd01f}
+.sp-x{flex:0 0 auto;height:46px;min-width:46px;border:0;border-radius:12px;background:#eef1f7;color:#4a5875;font:700 12px "Inter",Arial,sans-serif;cursor:pointer}
+.sp-body{overflow-y:auto;padding:4px 8px 14px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sp-h{font:800 9.5px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#8a94a8;text-transform:uppercase;padding:12px 8px 5px}
+.sp-it{display:flex;align-items:center;gap:10px;min-height:50px;padding:6px 10px;border-radius:11px;cursor:pointer}
+.sp-it:hover,.sp-it.sel{background:#eef3fc}
+.sp-dot{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:var(--team-color,#9aa6bd);box-shadow:0 0 0 2px #fff,0 0 0 3px #d6dde8}
+.sp-main{flex:1;min-width:0}
+.sp-n{font:700 14.5px/1.25 "Inter",Arial,sans-serif;color:#12264d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-s{font:500 11.5px/1.3 "Inter",Arial,sans-serif;color:#6b7791;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-s b{color:#12264d;font-weight:700}
+.sp-r{flex:0 0 auto;font:700 13px "Roboto Mono",ui-monospace,Menlo,monospace;color:#12264d}
+.sp-r.nc{color:#7b869c;font-weight:500}
+.sp-it .st-chip{margin:0 6px 0 0;position:static;transform:none;vertical-align:1px}
+.sp-tag{display:inline-block;font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;padding:2px 5px;border-radius:4px;border:1px solid #cfd7e6;color:#4a5875;margin-right:6px;vertical-align:1px}
+.sp-tag.fa{border-color:#a9d6bd;color:#17734c}
+.sp-empty{padding:26px 12px;text-align:center;color:#6b7791;font:500 13px "Inter",Arial,sans-serif}
+.sp-chips{display:flex;flex-wrap:wrap;gap:7px;padding:2px 8px 6px}
+.sp-me{display:flex;align-items:center;gap:10px;margin:8px 4px 2px;padding:10px 12px;border-radius:12px;background:#fffaeb;border:1px solid #ecd28b;cursor:pointer;font:700 13px "Inter",Arial,sans-serif;color:#6b4a00}
+.sp-me small{margin-left:auto;font:600 11px "Inter",Arial,sans-serif;color:#9b7a2a;text-decoration:underline}
+@media(max-width:680px){.sp-box{top:0;left:0;transform:none;width:100%;height:100dvh;max-height:100dvh;border-radius:0}.sp-it{min-height:54px}}
+.team-jump{display:flex;gap:6px;overflow-x:auto;padding:2px 1px 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.team-jump::-webkit-scrollbar{display:none}
+.tj-chip,.sp-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border-radius:999px;border:1px solid #d6dde8;background:#fff;color:#243252;font:700 11.5px/1 "Inter",Arial,sans-serif;cursor:pointer}
+.tj-chip i,.sp-chip i{width:9px;height:9px;border-radius:50%;background:var(--team-color,#9aa6bd)}
+.tj-chip:hover,.sp-chip:hover{border-color:#aab6cc}
+.tj-chip.mine,.sp-chip.mine{border-color:#0a162f;background:#0a162f;color:#fff}
+.team-card,.cap-card{scroll-margin-top:72px}
+.player-row{scroll-margin-top:96px}
+@media(max-width:680px){.team-card,.cap-card{scroll-margin-top:14px}.player-row{scroll-margin-top:90px}}
+.team-card.mine{box-shadow:0 0 0 2px #0a162f,0 0 0 5px #fff,0 0 0 7px #0a162f,0 8px 24px rgba(15,30,60,.14)}
+.team-card.mine .team-index{position:relative}
+.team-card.mine .team-index::after{content:"\2605";position:absolute;right:-7px;top:-8px;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;background:#0a162f;color:#ffcf33;font-size:11px;box-shadow:0 0 0 2px #fff}
+.cap-card.mine{box-shadow:0 0 0 2px #0a162f,0 0 0 5px #fff,0 0 0 7px #0a162f}
+/* my team, everywhere: a star on the chip and a gold edge on the card or row that holds it */
+.mine-chip::before{content:"\2605";display:inline-grid;place-items:center;width:15px;height:15px;margin-right:6px;border-radius:50%;background:#0a162f;color:#ffcf33;font-size:9px;line-height:1;vertical-align:1px;box-shadow:0 0 0 1px #fff}
+.tchip.mine-chip::before,.pick-chip.mine-chip::before{font-size:9px}
+.pick-row.mine,.wi-trow.mine{background-color:#eef2fb;box-shadow:inset 4px 0 0 #0a162f}
+.tcard.mine,.lab-card.mine,article.wi-card.mine{outline:2px solid #0a162f;outline-offset:-2px;box-shadow:0 0 0 3px #fff,0 0 0 5px #0a162f}
+.cmp tr.mine td{background:#eef2fb;font-weight:800;box-shadow:inset 0 1px 0 #0a162f,inset 0 -1px 0 #0a162f}
+.cmp tr.mine td:first-child{box-shadow:inset 4px 0 0 #0a162f,inset 0 1px 0 #0a162f,inset 0 -1px 0 #0a162f}
+.sp-n.rk{color:#5d2796}
+.flash-card{animation:hitcard 2s ease-out}
+.flash-row{animation:hitrow 2s ease-out}
+@keyframes hitcard{0%{outline:4px solid #ffcf33;outline-offset:3px}100%{outline:4px solid rgba(255,207,51,0);outline-offset:8px}}
+@keyframes hitrow{0%,35%{background:#ffe9a3}100%{background:transparent}}
+@media(prefers-reduced-motion:reduce){.flash-card{animation:none;outline:3px solid #ffcf33}.flash-row{animation:none;background:#ffe9a3}.topbar{transition:none}}
 .order-panel{background:#fff;border:1px solid #dce2ea;border-radius:16px;overflow:hidden;box-shadow:0 5px 18px rgba(28,45,72,.06)}
 .order-tabs{display:flex;gap:10px;padding:16px 16px 12px}
 .tab{display:inline-flex;padding:10px 18px;border-radius:14px;border:1px solid #cfd6df;background:#fff;font-weight:700;font-size:16px;color:#1d1d22}
@@ -2115,7 +2176,7 @@ function renderTeamCards(){
   /* always start from the pristine OFFICIAL baseline, then render the derived state over it */
   card.querySelector(".players").innerHTML=P.players;box.className=P.boxCls;box.querySelector(".cap-total").innerHTML=P.total;box.querySelector(".gap-big").textContent=P.gap;
   if(pt)pt.textContent=P.picks;if(cl)cl.textContent=P.cuts;card.classList.remove("scn-card");
-  var t=D.teams.filter(function(x){return x.short===short;})[0];var tm=t&&v.teams[t.id];if(!tm)return;
+  var t=D.teams.filter(function(x){return x.short===short;})[0];var tm=t&&v.teams[t.id];if(!tm)return;card.dataset.team=t.id;
   var o=D.official.teams[t.id],f=tm.fold,st=ST[tm.status],offIn=(o&&o.inKeys)||[];
   var host=card.querySelector(".players");host.textContent="";
   host.classList.toggle("has-st",tm.roster.some(function(r){return r.st||r.s==="IL"||r.s==="IL+";}));  /* align names past the status gutter */
@@ -2145,7 +2206,7 @@ function renderTeamCards(){
     var why=(tx?tx.label+(tx.effectiveAt?" · "+tx.effectiveAt.slice(0,10):""):"")+(d?" · drafted by "+T[d.franchiseId].short+" at "+d.label:"");
     pn.appendChild(h("span",{class:"tr-tag"+(done?"":" scn"),title:(done?"Traded in-season: ":"Scenario only: ")+why,"aria-label":done?"traded in-season":"scenario acquisition",text:"⇄"}));
     if(d)pn.appendChild(h("span",{class:"in-tag dr-other"+(d.rookie?" rk":""),title:(d.rookie?"Rookie drafted":"Drafted")+" by "+T[d.franchiseId].short+" at "+d.label,text:d.label}));}
-   host.appendChild(row);});
+   row.setAttribute("data-k",r.k);host.appendChild(row);});
   box.className="cap-box "+st[2];box.querySelector(".cap-total").innerHTML=money(tm.cap).replace("$","")+"<span>/"+D.cap.ceiling+"</span>";box.querySelector(".gap-big").textContent=stText(tm);
   if(pt)pt.textContent=tm.picks.join(" · ");if(cl)cl.textContent="KEEPER-FREEZE CUTS";
   card.classList.add("scn-card");
@@ -2238,7 +2299,7 @@ function renderAvail(){
  f.slice(0,60).forEach(function(r){body.appendChild(h("tr",null,[h("td",{class:"n",text:r[6]?String(r[6]):"—"}),h("td",{class:"p",text:r[1]}),h("td",{text:r[2]||""}),h("td",{class:"hide-m",text:r[3]||""}),h("td",{class:"n",text:"$"+r[4]}),h("td",{class:"n",text:r[5]?"Y! "+r[5]:"—"}),h("td",null,[h("span",{class:"chip",text:r[7]})])]));});
  document.getElementById("avail-more").textContent=f.length>60?"Showing 60 of "+f.length+" — keep typing to narrow.":f.length+" match"+(f.length===1?"":"es");
 }
-function renderAll(){if(window.NBA_WHATIF)window.NBA_WHATIF.setActive(S.mode==="WHATIF");renderMode();renderSeasonMeta();renderFindings();renderTrades();renderDone();renderFolds();renderCompare();renderPicks();renderTeamCards();renderStandings();renderCapPage();syncUrl();monoDigits(document.body);}
+function renderAll(){if(window.NBA_WHATIF)window.NBA_WHATIF.setActive(S.mode==="WHATIF");renderMode();renderSeasonMeta();renderFindings();renderTrades();renderDone();renderFolds();renderCompare();renderPicks();renderTeamCards();renderStandings();renderCapPage();paintMe();syncUrl();monoDigits(document.body);}
 /* ---------- standings: once the season starts the team pages run worst record first (toggle back to team #) ---------- */
 function ordinal(n){var s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
 function renderStandings(){
@@ -2296,13 +2357,131 @@ function initTabs(){
  window.addEventListener("popstate",function(){var p=parseHash();if(S.mode==="WHATIF"){S.mode="OFFICIAL";renderAll();}showTab(p.tab,p.sub);});
  var p=parseHash();showTab(p.tab,p.sub);
  if(p.anchor){var e=document.getElementById(p.anchor);if(e)setTimeout(function(){e.scrollIntoView();},0);}}
+/* ---------- navigation helpers: search (teams / players / free agents), my team, team chips ---------- */
+var ME_KEY="nbaTalkVN.myTeam",NAV={sel:0,items:[],mode:"search",open:false,from:null};
+function norm(s){return String(s==null?"":s).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"d").toLowerCase();}
+function getMe(){try{var v=window.localStorage.getItem(ME_KEY);return v&&T[v]?v:null;}catch(e){return null;}}   /* stored only in this browser */
+function setMe(id){try{if(id&&T[id])window.localStorage.setItem(ME_KEY,id);else window.localStorage.removeItem(ME_KEY);}catch(e){}paintMe();}
+function teamsMeFirst(){var me=getMe();return D.teams.slice().sort(function(a,b){return (b.id===me)-(a.id===me);});}
+function cardOf(fid){return document.querySelector('section.team-card[data-team="'+fid+'"]');}
+function paintMe(){
+ var me=getMe(),b=document.getElementById("tb-me");
+ if(b){b.classList.toggle("set",!!me);b.querySelector(".tb-lbl").textContent=me?T[me].short:"My team";
+  b.setAttribute("aria-label",me?"Go to my team, "+T[me].short:"Choose my team");b.title=me?"My team: "+T[me].short+" (tap to jump; change it from Search)":"Choose which team is yours";}
+ markMine(document);
+ var nav=document.getElementById("team-jump");
+ if(nav){nav.textContent="";teamsMeFirst().forEach(function(t){nav.appendChild(teamChip(t,"tj-chip",function(){goTeam(t.id);}));});}}
+/* "My team" everywhere: any chip that names my team (card header, cap card, draft pick, trade card, impact / compare row,
+   What-If card or row) gets a star, and the card or row that holds it is highlighted. Re-applied whenever a view re-renders. */
+var MINE_CHIPS=".identity-tag,.tchip,.pick-chip,.cap-team b,.cmp td:first-child";
+var MINE_UNITS="section.team-card,.cap-card,article.wi-card,.pick-row,.wi-trow,.tcard,.lab-card,.cmp tr";
+function chipText(s){return String(s||"").replace(/^[^A-Za-z0-9À-ỹ]+/,"").replace(/\s+/g," ").trim();}
+function markMine(root){
+ root=root||document;var me=getMe(),t=me&&T[me];
+ [].slice.call(root.querySelectorAll(".mine,.mine-chip")).forEach(function(e){e.classList.remove("mine");e.classList.remove("mine-chip");});
+ if(!t)return;
+ var names={};names[t.short]=1;names[t.name]=1;names[t.short+" | "+t.name]=1;
+ [].slice.call(root.querySelectorAll(MINE_CHIPS)).forEach(function(c){
+  if(!names[chipText(c.textContent)])return;
+  c.classList.add("mine-chip");var u=c.closest(MINE_UNITS);if(u)u.classList.add("mine");});}
+var mineTimer=0;
+function scheduleMine(){if(mineTimer)return;var run=function(){mineTimer=0;markMine(document);};mineTimer=window.requestAnimationFrame?window.requestAnimationFrame(run):setTimeout(run,16);}
+function teamChip(t,cls,fn){var me=getMe()===t.id,c=h("button",{type:"button",class:cls+(me?" mine":""),style:"--team-color:"+t.color},[h("i"),(me?"★ ":"")+t.short]);c.addEventListener("click",fn);return c;}
+function navIndex(){
+ var v=view(),own={},players=[],fa=[];
+ D.teams.forEach(function(t){var tm=v.teams[t.id];if(!tm)return;tm.roster.forEach(function(r){own[r.k]=1;var d=DR.byKey[r.k]||{};
+  players.push({k:r.k,n:r.n,t:t.id,pos:r.pos||d.pos||"",nba:r.nba||d.nba||"",c:r.c,x:r.x,s:r.s,st:r.st,rk:!!d.rookie,slot:d.rookie?d.label:"",q:norm(r.n)});});});
+ (D.available.rows||[]).forEach(function(a){if(!own[a[0]])fa.push({k:a[0],n:a[1],nba:a[2],pos:a[3],c:a[4],rk:a[7]==="R",slot:"",q:norm(a[1])});});
+ return {players:players,fa:fa};}
+function navSearch(q){
+ var toks=norm(q).split(/\s+/).filter(Boolean);if(!toks.length)return {teams:[],players:[],fa:[]};
+ function score(s){var tot=0;for(var i=0;i<toks.length;i++){var j=s.indexOf(toks[i]);if(j<0)return -1;tot+=(j===0||s.charAt(j-1)===" "?0:10)+j/100;}return tot;}
+ function rank(list,key,max){return list.map(function(x){return {x:x,s:score(key(x))};}).filter(function(o){return o.s>=0;})
+  .sort(function(a,b){return a.s-b.s||(a.x.n||a.x.short||"").localeCompare(b.x.n||b.x.short||"");}).slice(0,max).map(function(o){return o.x;});}
+ var ix=navIndex();
+ return {teams:rank(D.teams,function(t){return norm(t.short+" "+t.name);},6),players:rank(ix.players,function(p){return p.q;},14),fa:rank(ix.fa,function(p){return p.q;},6)};}
+function jumpTo(el,cls,block){if(!el)return;
+ var tb=document.querySelector(".topbar");if(tb&&window.matchMedia("(max-width:680px)").matches)tb.classList.add("hide");
+ try{el.scrollIntoView({behavior:"smooth",block:block||"start"});}catch(e){el.scrollIntoView();}
+ el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);setTimeout(function(){el.classList.remove(cls);},2100);}
+function leaveWhatIf(){if(S.mode==="WHATIF"){S.mode="OFFICIAL";renderAll();}}
+function goTeam(fid){closeSearch();leaveWhatIf();goTab("teams","");setTimeout(function(){jumpTo(cardOf(fid),"flash-card","start");},40);}
+function goPlayer(k,fid){closeSearch();leaveWhatIf();goTab("teams","");setTimeout(function(){
+ var c=cardOf(fid),r=c&&c.querySelector('.player-row[data-k="'+k+'"]');if(r)jumpTo(r,"flash-row","center");else jumpTo(c,"flash-card","start");},40);}
+function navItem(kind,payload,node,act){return {kind:kind,payload:payload,node:node,act:act};}
+function statusLine(p){return [p.pos,p.nba].filter(Boolean).join(" · ");}
+function teamRow(t){var me=getMe()===t.id;
+ var n=h("div",{class:"sp-it",role:"option",style:"--team-color:"+t.color},[h("span",{class:"sp-dot"}),
+  h("div",{class:"sp-main"},[h("div",{class:"sp-n",text:(me?"★ ":"")+t.name}),h("div",{class:"sp-s"},[h("b",{text:t.short})])])]);return n;}
+function playerRow(p,fa){var t=p.t&&T[p.t],cap=money(p.c).replace("$","");
+ var sub=h("div",{class:"sp-s"},[fa?h("span",{class:"sp-tag fa",text:"FREE AGENT"}):(t?h("b",{text:t.short}):null),(t&&!fa?" · ":""),statusLine(p)]);
+ var head=h("div",{class:"sp-n"+(p.rk?" rk":"")},[p.st?statusChip(p.st):null,p.n,p.rk?h("span",{class:"in-tag rk",title:p.slot?"2026 rookie, drafted at "+p.slot:"2026 rookie",text:"R"+(p.slot?" · "+p.slot:"")}):null]);
+ return h("div",{class:"sp-it",role:"option",style:t?"--team-color:"+t.color:""},[h("span",{class:"sp-dot"}),h("div",{class:"sp-main"},[head,sub]),
+  h("div",{class:"sp-r"+(p.x?" nc":""),title:p.x?"Not counted toward the cap":"",text:cap})]);}
+function renderSearch(){
+ var body=document.getElementById("sp-body"),q=document.getElementById("sp-in").value,me=getMe();body.textContent="";NAV.items=[];
+ function add(kind,payload,node,act){node.addEventListener("click",function(e){act(e);});body.appendChild(node);NAV.items.push(navItem(kind,payload,node,act));}
+ function head(t){body.appendChild(h("div",{class:"sp-h",text:t}));}
+ if(NAV.mode==="choose"){head("Which team is yours?");D.teams.forEach(function(t){add("pick",t,teamRow(t),function(){setMe(t.id);goTeam(t.id);});});}
+ else if(!q.trim()){
+  var m=h("div",{class:"sp-me",role:"option"},[me?"★ My team: "+T[me].short:"★ Choose my team",h("small",{text:me?"change":"set once, remembered on this device"})]);
+  add("me",me,m,function(e){var change=e&&e.target&&e.target.tagName==="SMALL";if(me&&!change)goTeam(me);else{NAV.mode="choose";renderSearch();}});
+  head("Teams");var chips=h("div",{class:"sp-chips"});teamsMeFirst().forEach(function(t){var c=teamChip(t,"sp-chip",function(){goTeam(t.id);});chips.appendChild(c);});body.appendChild(chips);
+  body.appendChild(h("div",{class:"sp-empty",text:"Type a player or team — accents don’t matter (jokic finds Jokić)."}));}
+ else{
+  var r=navSearch(q);
+  if(r.teams.length){head("Teams");r.teams.forEach(function(t){add("team",t,teamRow(t),function(){goTeam(t.id);});});}
+  if(r.players.length){head("Players on a roster");r.players.forEach(function(p){add("player",p,playerRow(p,false),function(){goPlayer(p.k,p.t);});});}
+  if(r.fa.length){head("Free agents");r.fa.forEach(function(p){add("fa",p,playerRow(p,true),function(){closeSearch();});});}
+  if(!NAV.items.length)body.appendChild(h("div",{class:"sp-empty",text:"No team or player matches “"+q.trim()+"”."}));}
+ NAV.sel=0;markSel();}
+function markSel(){NAV.items.forEach(function(it,i){it.node.classList.toggle("sel",i===NAV.sel);if(i===NAV.sel)it.node.setAttribute("aria-selected","true");else it.node.removeAttribute("aria-selected");});
+ var s=NAV.items[NAV.sel];if(s&&s.node.scrollIntoView&&NAV.open)try{s.node.scrollIntoView({block:"nearest"});}catch(e){}}
+function buildSearch(){
+ if(document.getElementById("sp"))return;
+ var x=h("button",{type:"button",class:"sp-x","aria-label":"Close search",text:"Close"}),inp=h("input",{id:"sp-in",class:"sp-in",type:"search",placeholder:"Search players or teams",autocomplete:"off",autocapitalize:"off",spellcheck:"false","aria-label":"Search players or teams"});
+ var box=h("div",{class:"sp-box",role:"dialog","aria-modal":"true","aria-label":"Search"},[h("div",{class:"sp-top"},[inp,x]),h("div",{id:"sp-body",class:"sp-body",role:"listbox"})]);
+ var sp=h("div",{id:"sp",class:"sp"},[box]);document.body.appendChild(sp);
+ x.addEventListener("click",closeSearch);sp.addEventListener("mousedown",function(e){if(e.target===sp)closeSearch();});
+ inp.addEventListener("input",function(){NAV.mode="search";renderSearch();});
+ inp.addEventListener("keydown",function(e){
+  if(e.key==="ArrowDown"){e.preventDefault();NAV.sel=Math.min(NAV.items.length-1,NAV.sel+1);markSel();}
+  else if(e.key==="ArrowUp"){e.preventDefault();NAV.sel=Math.max(0,NAV.sel-1);markSel();}
+  else if(e.key==="Enter"){e.preventDefault();var s=NAV.items[NAV.sel];if(s)s.act();}
+  else if(e.key==="Escape"){e.preventDefault();closeSearch();}});}
+function openSearch(mode){buildSearch();NAV.mode=mode==="choose"?"choose":"search";NAV.open=true;NAV.from=document.activeElement;
+ var sp=document.getElementById("sp"),inp=document.getElementById("sp-in");inp.value="";sp.classList.add("open");document.body.style.overflow="hidden";renderSearch();
+ setTimeout(function(){try{inp.focus();}catch(e){}},30);}
+function closeSearch(){var sp=document.getElementById("sp");if(!sp||!NAV.open)return;NAV.open=false;sp.classList.remove("open");document.body.style.overflow="";
+ try{if(NAV.from&&NAV.from.focus)NAV.from.focus();}catch(e){}}
+function initNav(){
+ var inner=document.querySelector(".topbar-inner"),ms=inner&&inner.querySelector(".modeswitch");
+ if(inner&&!document.getElementById("tb-search")){
+  var sb=h("button",{type:"button",id:"tb-search",class:"tb-btn","aria-label":"Search players and teams",title:"Search players and teams ( / )"}),
+      mb=h("button",{type:"button",id:"tb-me",class:"tb-btn me"},[h("span",{class:"tb-ico",text:"★"}),h("span",{class:"tb-lbl",text:"My team"})]);
+  sb.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><span class="tb-lbl">Search</span><kbd>/</kbd>';
+  sb.addEventListener("click",function(){openSearch();});
+  mb.addEventListener("click",function(){var me=getMe();if(me)goTeam(me);else openSearch("choose");});
+  inner.insertBefore(h("div",{class:"tb-actions"},[sb,mb]),ms);}
+ var a=document.getElementById("rosters-a");
+ if(a&&!document.getElementById("team-jump")){var strip=a.querySelector(".meta-strip"),nav=h("nav",{id:"team-jump",class:"team-jump","aria-label":"Jump to a team"});
+  if(strip&&strip.nextSibling)a.insertBefore(nav,strip.nextSibling);else a.appendChild(nav);}
+ document.addEventListener("keydown",function(e){var t=e.target,typing=t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable);
+  if((e.key==="/"&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey)||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k")){e.preventDefault();openSearch();}
+  else if(e.key==="Escape"&&NAV.open)closeSearch();});
+ var tb=document.querySelector(".topbar"),last=window.pageYOffset,mq=window.matchMedia("(max-width:680px)");
+ window.addEventListener("scroll",function(){var y=window.pageYOffset;if(!tb)return;if(!mq.matches||y<80){tb.classList.remove("hide");last=y;return;}
+  if(y>last+10)tb.classList.add("hide");else if(y<last-10)tb.classList.remove("hide");last=y;},{passive:true});
+ if(window.MutationObserver)new MutationObserver(function(m){if(m.some(function(x){return x.addedNodes&&x.addedNodes.length;}))scheduleMine();}).observe(document.body,{childList:true,subtree:true});   /* views that re-render: What-If, Trade Lab, scenarios */
+ window.NBA_NAV={markMine:markMine,open:openSearch,close:closeSearch,search:navSearch,setMe:setMe,getMe:getMe,goTeam:goTeam,goPlayer:goPlayer,render:renderSearch,state:NAV,D:D,view:view,norm:norm,parseHash:parseHash,showTab:showTab};
+ paintMe();}
 function init(){
  document.getElementById("lab-cap").textContent=D.cap.floor+"–"+D.cap.ceiling;
  document.querySelectorAll(".modeswitch button").forEach(function(b){b.addEventListener("click",function(){S.mode=b.dataset.mode;renderAll();});});
  document.getElementById("avail-q").addEventListener("input",renderAvail);
  var qs=new URLSearchParams(location.search);
  document.addEventListener("whatif:change",syncUrl);
-  initTabs();
+  initTabs();initNav();
   if(qs.get("mode")==="whatif"&&window.NBA_WHATIF){S.mode="WHATIF";window.NBA_WHATIF.restore(qs);}
   if(qs.get("order")==="team")S.order="team";
   if(qs.get("mode")==="scenario"){S.mode="SCENARIO";(qs.get("trades")||"").split(",").forEach(function(k){if(TR[k])S.sel[k]=true;});}

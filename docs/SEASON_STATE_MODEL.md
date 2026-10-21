@@ -114,3 +114,9 @@ To record the deadline checkpoint: after the deadline, commit a verified roster
 snapshot (`docs/ROSTER_REFRESH.md`), then
 `python3 scripts/season_state.py record-checkpoint POST_TRADE_DEADLINE --date YYYY-MM-DD`
 (freezes every team's current payroll; refuses to re-record).
+
+## Search and "my team" (page navigation)
+
+- Top bar: **Search** (`/` or Ctrl/Cmd-K) finds teams, rostered players and free agents (accent-insensitive); a pick jumps to the team card / player row on the Teams tab. Rookies keep their purple name plus an `R · slot` tag.
+- **My team** (★ button, remembered in the browser's localStorage only) is one tap away and is marked everywhere a chip names it: Teams, Cap, Draft pick rows/chips, Trade Lab cards/folds/compare, What-If and scenario views. Marker is ink-navy (double frame + star badge), deliberately not gold/green/red, which carry status/trade meaning. See `markMine` in `index.html`.
+- Mobile: the tab row and search stay pinned while scrolling; only the Official/Scenario/What-If switch folds away.
