@@ -12,6 +12,10 @@ on:
 
 jobs:
   claude-review:
+    # The Update Yahoo Rosters workflow opens its draft PRs as github-actions[bot], which this action refuses to review
+    # ("non-human actor"). Those PRs are generated roster data with their own report, tests and human review, so skip them.
+    if: ${{ !startsWith(github.head_ref, 'automation/yahoo-rosters-') }}
+
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||

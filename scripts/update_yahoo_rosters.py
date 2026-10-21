@@ -110,8 +110,9 @@ def double_checks(si_new, aliases, obs, snap, baseline_checks, new_state) -> dic
             il_ok = "IL" in elig if elig else None  # Yahoo's own IL eligibility; None = unknown (provisional / unlisted player)
             if slot in ss.SLOTS_IL:
                 il_in_obs.add(key)
-                if il_ok is False:
-                    out["healthyOnIL"].append(f"{p['name']} (team {t['teamId']}) is on IL but Yahoo does not list him as IL-eligible")
+                if il_ok is False and status not in LONG_TERM:
+                    # IL eligibility comes from the player registry, which can lag a day: a player Yahoo now shows as Out is fine
+                    out["healthyOnIL"].append(f"{p['name']} (team {t['teamId']}) is on IL but Yahoo lists him as neither IL-eligible nor Out/injured")
                 elif il_ok is None and status in (None, "P"):
                     out["healthyOnIL"].append(f"{p['name']} (team {t['teamId']}) is on IL but Yahoo shows no injury status")
             elif il_ok or status in LONG_TERM:

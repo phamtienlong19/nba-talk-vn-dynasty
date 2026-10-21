@@ -264,10 +264,17 @@ class TestDoubleChecks(RunCase):
             next(p for p in team(o, 8)["players"] if p["name"] == "Grayson Allen")["injury"] = "OFS"     # out for the season, on the bench
             next(p for p in team(o, 2)["players"] if p["name"] == "Kristaps Porziņģis")["injury"] = None  # IL-eligible, benched, no status
         report = self.report(mutate)
-        self.assertIn("Nikola Jokić (team 8) is on IL but Yahoo does not list him as IL-eligible", report)
+        self.assertIn("Nikola Jokić (team 8) is on IL but Yahoo lists him as neither IL-eligible nor Out/injured", report)
         self.assertNotIn("Jordan Miller (team 8) is on IL", report)
         self.assertIn("Grayson Allen (team 8) is injured (", report)
         self.assertIn("Kristaps Porziņģis (team 2) is injured (IL-eligible per Yahoo) but sits in BN, not IL", report)
+
+    def test_a_player_just_injured_is_not_flagged_when_the_registry_lags(self):
+        """The registry's IL eligibility can be a day old: Out on IL is compliant even if it does not list IL yet."""
+        def mutate(o):
+            p = next(p for p in team(o, 8)["players"] if p["name"] == "Nikola Jokić")
+            p["slot"], p["injury"] = "IL", "O"                      # healthy-looking star, registry says not IL-eligible, Yahoo says Out
+        self.assertIn("- Parked on IL but not IL-eligible: none", self.report(mutate))
 
     def test_il_eligible_players_in_il_slots_are_not_flagged(self):
         report = self.report(lambda o: None)
