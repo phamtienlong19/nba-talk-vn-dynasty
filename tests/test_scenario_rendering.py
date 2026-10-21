@@ -595,8 +595,9 @@ class TestRenderedCards(unittest.TestCase):
     def test_mobile_header_keeps_tabs_pinned(self):
         with open(INDEX, encoding="utf-8") as f:
             html = f.read()
-        self.assertIn(".topbar.hide .modeswitch{display:none}", html)
-        self.assertNotIn(".topbar.hide{transform", html)                 # the tab row must never slide away
+        self.assertIn(".topbar{top:calc(-1 * var(--tb-fold,44px))}", html)   # pure CSS: no scroll handler resizes the header
+        self.assertNotIn("topbar.hide", html)                                # (a size change under the finger made it flicker)
+        self.assertNotIn('classList.add("hide")', html)
         self.assertRegex(html, r"\.topbar\{\s*position:sticky;top:0")
 
     def test_search_palette_opens_from_button_and_keys_and_shows_team_chips(self):

@@ -395,11 +395,14 @@ span.num{font-family:"Roboto Mono",ui-monospace,Menlo,monospace!important;font-w
   .topbar-inner{flex-wrap:wrap;overflow-x:visible;row-gap:6px}
   .brand{font-size:12px;order:1;white-space:nowrap;flex:1 1 auto;min-width:0}
   .tb-actions{order:1;margin-left:auto}
-  .modeswitch{order:2;flex:1 1 100%;display:flex}
+  .modeswitch{order:0;flex:1 1 100%;display:flex}
   .modeswitch button{flex:1;padding:8px 6px;font-size:10px}
-  .navlink{order:3;flex:1 1 22%;text-align:center;padding:8px 4px;font-size:11px}
+  .topbar-inner::after{content:"";flex:1 1 100%;order:2;height:0;margin-top:-6px}   /* row break: brand + search, then the tabs on their own line */
+  .navlink{order:3;flex:1 1 20%;text-align:center;padding:8px 4px;font-size:11px}
   .navlink.on{background:#ffffff22}
-    .topbar.hide .modeswitch{display:none}                                 /* tabs + search stay pinned; only the mode switch folds away while scrolling down */
+  /* The mode switch is the first row and simply scrolls away: the header sticks with its top edge pulled up by that row's height
+     (--tb-fold, measured in initNav), so brand/search + tabs stay pinned and nothing changes size while scrolling (no flicker). */
+  .topbar{top:calc(-1 * var(--tb-fold,44px))}
 }
 /* ---- navigation helpers: search palette, my team, team jump chips ---- */
 .tb-actions{display:flex;gap:6px;align-items:center}
@@ -2401,7 +2404,6 @@ function navSearch(q){
  var ix=navIndex();
  return {teams:rank(D.teams,function(t){return norm(t.short+" "+t.name);},6),players:rank(ix.players,function(p){return p.q;},14),fa:rank(ix.fa,function(p){return p.q;},6)};}
 function jumpTo(el,cls,block){if(!el)return;
- var tb=document.querySelector(".topbar");if(tb&&window.matchMedia("(max-width:680px)").matches)tb.classList.add("hide");
  try{el.scrollIntoView({behavior:"smooth",block:block||"start"});}catch(e){el.scrollIntoView();}
  el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);setTimeout(function(){el.classList.remove(cls);},2100);}
 function leaveWhatIf(){if(S.mode==="WHATIF"){S.mode="OFFICIAL";renderAll();}}
@@ -2469,9 +2471,9 @@ function initNav(){
  document.addEventListener("keydown",function(e){var t=e.target,typing=t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable);
   if((e.key==="/"&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey)||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k")){e.preventDefault();openSearch();}
   else if(e.key==="Escape"&&NAV.open)closeSearch();});
- var tb=document.querySelector(".topbar"),last=window.pageYOffset,mq=window.matchMedia("(max-width:680px)");
- window.addEventListener("scroll",function(){var y=window.pageYOffset;if(!tb)return;if(!mq.matches||y<80){tb.classList.remove("hide");last=y;return;}
-  if(y>last+10)tb.classList.add("hide");else if(y<last-10)tb.classList.remove("hide");last=y;},{passive:true});
+ var tb=document.querySelector(".topbar"),brand=document.querySelector(".topbar .brand");
+ function foldH(){if(!tb||!brand)return;var f=Math.max(0,Math.round(brand.getBoundingClientRect().top-tb.getBoundingClientRect().top-6));tb.style.setProperty("--tb-fold",f+"px");}
+ foldH();window.addEventListener("resize",foldH);window.addEventListener("load",foldH);
  if(window.MutationObserver)new MutationObserver(function(m){if(m.some(function(x){return x.addedNodes&&x.addedNodes.length;}))scheduleMine();}).observe(document.body,{childList:true,subtree:true});   /* views that re-render: What-If, Trade Lab, scenarios */
  window.NBA_NAV={markMine:markMine,open:openSearch,close:closeSearch,search:navSearch,setMe:setMe,getMe:getMe,goTeam:goTeam,goPlayer:goPlayer,render:renderSearch,state:NAV,D:D,view:view,norm:norm,parseHash:parseHash,showTab:showTab};
  paintMe();}
