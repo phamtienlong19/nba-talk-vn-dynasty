@@ -54,7 +54,7 @@ function keepCount(set){return Object.keys(set).length;}
 function provenance(m){
   return "Source file: "+m.sourceFile+" (sha256 "+m.sourceSha256.slice(0,10)+"…). File acquired "+m.fileAcquiredAt+". Yahoo league "+m.yahoo.leagueKey+
    ", league edit key "+m.yahoo.leagueEditKey+", newest player note "+(m.yahoo.latestPlayerNoteAt||"n/a")+". Hypothetical effective date "+m.effectiveDate+
-   ". Salary = projected_auction_value ("+m.playerCount+" ranked players); players outside the list count as $0.";}
+   ". Salary = projected_auction_value ("+m.playerCount+" ranked players); players outside the list count as 0.";}
 function header(){
   var s=snap(),m=s.meta,b=s.band;
   var bar=h("div",{class:"wi-bar"});
@@ -109,7 +109,7 @@ function cardA(t){
     var d=p.c1-p.c0,big=Math.abs(d)>=3;
     var row=h("div",{class:"player-row"+(big?" big "+dcls(d):"")});
     row.appendChild(h("div",{class:"pos",text:p.pos}));
-    row.appendChild(h("div",{class:"pname",title:p.n,text:p.n},p.miss?[h("span",{class:"wi-tag miss",title:"Not in the Yahoo snapshot — counted as $0",text:"∅"})]:[]));
+    row.appendChild(h("div",{class:"pname",title:p.n,text:p.n},p.miss?[h("span",{class:"wi-tag miss",title:"Not in the Yahoo snapshot — counted as 0",text:"∅"})]:[]));
     row.appendChild(h("div",{class:"c0",text:String(p.c0)}));
     var c1=h("div",{class:"c1"});animNum(c1,p.c0,p.c1);row.appendChild(c1);
     row.appendChild(h("div",{class:"cd "+dcls(d),text:d?sgn(d):"·"}));host.appendChild(row);});
@@ -160,7 +160,7 @@ function cardNow(t,idx){
     var d=p.c1-p.c0,big=Math.abs(d)>=3;
     var row=h("div",{class:"player-row"+(big?" big "+dcls(d):"")+(p.x?" nc":"")+(p.rk?" rookie-row":"")});
     var tags=[];if(p.rk)tags.push(h("span",{class:"wi-tag rk",text:"R"}));if(p.s==="IL"||p.s==="IL+")tags.push(h("span",{class:"il-tag",text:p.s}));
-    if(p.miss)tags.push(h("span",{class:"wi-tag miss",title:"Not in the Yahoo snapshot — counted as $0",text:"∅"}));
+    if(p.miss)tags.push(h("span",{class:"wi-tag miss",title:"Not in the Yahoo snapshot — counted as 0",text:"∅"}));
     row.appendChild(h("div",{class:"pos",text:p.pos}));
     row.appendChild(h("div",{class:"pname",title:p.n,text:p.n},tags));
     row.appendChild(h("div",{class:"c0",text:String(p.c0)}));
@@ -246,13 +246,13 @@ function cardB(t){
     if(cls==="in")tags.push(h("span",{class:"wi-tag in",text:"IN"}));
     if(cls==="out")tags.push(h("span",{class:"wi-tag out",text:"OUT"}));
     if(opt[p.k]&&!ed)tags.push(h("span",{class:"wi-tag opt",title:opt[p.k].note,text:"OPT"}));
-    if(p.miss)tags.push(h("span",{class:"wi-tag miss",title:"Not in the Yahoo snapshot — counted as $0",text:"∅"}));
+    if(p.miss)tags.push(h("span",{class:"wi-tag miss",title:"Not in the Yahoo snapshot — counted as 0",text:"∅"}));
     row.appendChild(h("div",{class:"pos",text:p.pos}));
     row.appendChild(h("div",{class:"pname",title:p.n+(p.c0!==p.c1?" — official "+p.c0:""),text:p.n},tags));
     var c1=h("div",{class:"c1"});c1.textContent=String(p.c1);if(p.c0!==p.c1)c1.appendChild(h("small",{style:"display:block;font:500 9px Roboto Mono,monospace;color:#7a869c",text:"was "+p.c0}));row.appendChild(c1);
     var lockCut=isK&&p.lock&&p.k0,full=!isK&&keepCount(ks)>=max;
     var tg=h("button",{type:"button",class:"wi-tg","aria-pressed":isK?"true":"false",text:isK?"✓ KEPT":"✕ CUT",
-      title:lockCut?"A $"+p.c1+" player can never be dropped":full?"Nine keepers maximum — cut someone first":(p.rev&&isK&&p.k0?"$10–19 drops need commissioner review":"Toggle keep / cut (simulation only)")});
+      title:lockCut?"A "+p.c1+" player can never be dropped":full?"Nine keepers maximum — cut someone first":(p.rev&&isK&&p.k0?"10–19 drops need commissioner review":"Toggle keep / cut (simulation only)")});
     if(lockCut||full)tg.disabled=true;
     tg.addEventListener("click",function(){var s=Object.assign({},keepSet(t));if(isK)delete s[p.k];else s[p.k]=true;setKeep(t,s);S.flash=t.id;S.flashKey=p.k;S.animate=false;render();});
     row.appendChild(h("div",{style:"text-align:center"},[tg]));return row;}

@@ -1,0 +1,29 @@
+{
+  "note": "Trade-checker numbers (docs/LEAGUE_RULES_MODEL.md, 'Trades' and 'Salary cap application'; owner decisions in docs/GOVERNANCE_ROADMAP.md). scripts/trade_checker.py is the source of truth; index.html carries a thin port that is tested against it. The tool flags what a trade cannot do; it never says a trade is good or fair.",
+  "cooldown": {
+    "days": 14,
+    "daysTopRanked": 28,
+    "topRankedCutoff": 32,
+    "rankSource": "oRank in data/yahoo/player_registry.json (the preseason Yahoo O-Rank)",
+    "restricts": "trading the acquired player again",
+    "note": "Counted from the recorded effectiveAt of the trade that brought the player to his current team. Ledger dates are report dates, not Yahoo timestamps, so a countdown is 'from the recorded date'."
+  },
+  "capLadder": {
+    "threshold": 5,
+    "under": "Under 5 outside the band: trade-restricted for 2 weeks, and a repeat adds a 3-point allowance penalty.",
+    "over": "Over 5 outside the band: trade-restricted for 1 month, and a repeat adds a 5-point allowance penalty.",
+    "exactly": "Exactly 5 outside the band: the commissioner decides which step applies.",
+    "nearDeadline": "Near the trade deadline the restriction extends through next season's draft regardless of size (deadline date not yet set).",
+    "note": "Displayed only. The tool keeps no memory of past violations; the commissioner tracks restrictions."
+  },
+  "pendingDays": 2,
+  "roster": {
+    "spots": 15,
+    "source": "docs/LEAGUE_RULES_MODEL.md: 9 keepers, 15 total roster spots. Yahoo makes a team over the limit drop players when a trade is processed."
+  },
+  "drops": {
+    "neverAtOrAbove": 20,
+    "reviewFrom": 10,
+    "source": "docs/LEAGUE_RULES_MODEL.md (salary-drop limits); mirrors config/what_if_assumptions.json"
+  }
+}

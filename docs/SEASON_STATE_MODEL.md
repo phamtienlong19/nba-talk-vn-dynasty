@@ -120,3 +120,7 @@ snapshot (`docs/ROSTER_REFRESH.md`), then
 - Top bar: **Search** (`/` or Ctrl/Cmd-K) finds teams, rostered players and free agents (accent-insensitive); a pick jumps to the team card / player row on the Teams tab. Rookies keep their purple name plus an `R · slot` tag.
 - **My team** (★ button, remembered in the browser's localStorage only) is one tap away and is marked everywhere a chip names it: Teams, Cap, Draft pick rows/chips, Trade Lab cards/folds/compare, What-If and scenario views. Marker is ink-navy (double frame + star badge), deliberately not gold/green/red, which carry status/trade meaning. See `markMine` in `index.html`.
 - Mobile: the tab row and search stay pinned while scrolling; only the Official/Scenario/What-If switch folds away.
+
+## Trade checker
+
+`scripts/trade_checker.py` `check_proposal(si, state, moves, now)` returns per-rule rows `{rule, team, level (ok/info/review/blocked), source, reason}` and an overall `LEGAL` / `COMMISSIONER REVIEW` / `BLOCKED`. It reads the current-season state and never writes. The page embeds `trade` (rules, roster limits, preseason top-32, acquisition dates) and runs a port of the same logic; `tests/test_scenario_rendering.py` compares the two on every 1-for-1 swap.

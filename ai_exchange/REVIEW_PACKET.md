@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-21T06:03:11Z
+Generated: 2026-10-21T10:54:50Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/search-and-my-team
-Commit: fec8a65
+Branch: feat/trade-checker
+Commit: 6e74489
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: none
-CI: no runs found for this branch
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/75 (OPEN)
+CI: validate: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,17 +27,23 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md     |  8 ++---
- docs/SEASON_STATE_MODEL.md       |  9 ++++++
- index.html                       | 64 ++++++++++++++++++++++++++++++++++++----
- tests/test_scenario_rendering.py | 62 ++++++++++++++++++++++++++++++++++++++
- 4 files changed, 134 insertions(+), 9 deletions(-)
+ ai_exchange/REVIEW_PACKET.md     |  35 ++-
+ config/trade_rules.json          |  29 ++
+ docs/GOVERNANCE_ROADMAP.md       |   3 +
+ docs/SEASON_STATE_MODEL.md       |  19 ++
+ index.html                       | 596 +++++++++++++++++++++++++++++++++++++--
+ scripts/build_league_state.py    |  12 +
+ scripts/trade_checker.py         | 195 +++++++++++++
+ scripts/what_if_app.js           |  10 +-
+ tests/test_scenario_rendering.py | 340 +++++++++++++++++++++-
+ tests/test_trade_checker.py      | 231 +++++++++++++++
+ 10 files changed, 1427 insertions(+), 43 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
 - tests: PASS (keeper freeze is LOCKED -- baseline not regenerated (immutable).)
-- Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
+- Yahoo refresh: not run this session
 - live HTTP: OK
 
 ## Canonical State
@@ -47,9 +53,15 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
 - ai_exchange/REVIEW_PACKET.md
+- config/trade_rules.json
+- docs/GOVERNANCE_ROADMAP.md
 - docs/SEASON_STATE_MODEL.md
 - index.html
+- scripts/build_league_state.py
+- scripts/trade_checker.py
+- scripts/what_if_app.js
 - tests/test_scenario_rendering.py
+- tests/test_trade_checker.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
@@ -62,4 +74,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/search-and-my-team` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/trade-checker` if not already done, then request human/ChatGPT review of this packet.

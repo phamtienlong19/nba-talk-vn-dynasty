@@ -28,6 +28,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_fa_draft_pool as pool  # noqa: E402
 import league_state as ls
+import trade_checker as tc
 import season_state as ss  # noqa: E402
 
 REPO_ROOT = ls.REPO_ROOT
@@ -438,6 +439,13 @@ def standings_view(si: dict):
             "teams": teams, "worstFirst": order}
 
 
+def _public(obj):
+    """Config for the public page: the rule numbers and wording, without the internal 'note' commentary."""
+    if isinstance(obj, dict):
+        return {k: _public(v) for k, v in obj.items() if not k.endswith(("Note", "Source")) and k not in ("note", "source")}
+    return obj
+
+
 def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_YAHOO_PATH) -> dict:
     floor, ceiling = ls.cap_band(inputs)
     fr = inputs["franchises"]
@@ -536,6 +544,10 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         "trades": trades,
         "draft": ls.draft_summary(inputs, official),
         "scenarios": views,
+        # trade checker inputs: rule numbers, roster limits, the preseason top-N and who acquired whom (cooldowns). The page's
+        # checker is a port of scripts/trade_checker.py and is tested against it.
+        "trade": {"rules": _public(tc.load_rules()), "roster": _public(ss._load(ss.RULES_PATH)), "top": sorted(tc.top_ranked(si)),
+                  "acq": {f"{k}|{f}": at for (k, f), at in sorted(tc.acquisitions(si).items())}},
         "available": {"cols": ["key", "name", "nba", "pos", "cap", "yahooOr", "board", "src"], "rows": rows,
                       "curatedYahooMissing": extras},
     }
