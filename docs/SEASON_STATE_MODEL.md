@@ -43,6 +43,20 @@ B and C and to checkpoint findings (re-derived from each checkpoint's frozen
 ownership); layer A keeps the all-player totals recorded at the time. The draft-night 12-player count is not enforced; the
 importer only warns above the 15 roster spots.
 
+## Team-card display rules
+
+- **Healthy payroll.** The counted payroll (top 9 frozen salaries of everyone, IL included) is unchanged. "Healthy" is that
+  figure minus the counted salaries of *injured* players: an IL / IL+ slot **or** a long-term Yahoo status (Out, INJ, OFS) even if
+  the manager has not moved the player to IL (`season_state.injured_keys`, `config/roster_rules.json`).
+- **Which nine are shown as counted.** Salary decides, with ties at the ninth salary resolved for the healthy player
+  (`season_state.rank_roster`): an injured $0 player is never the counted one just because of name order. The payroll number is
+  identical either way; only the display, and the IL group's "N counted", change.
+- **Not-counted rows** are not faded (a fade also dims status chips): names keep full contrast, the salary sits in a dashed
+  outline, and a divider labels the group.
+- **Colour roles.** Status = solid fill, white text, white halo (P green, Q blue, D orange, INJ red with an inner ring, OUT red,
+  OFS ink, NA charcoal). Where a player came from (trade, scenario, own draft) = a thin edge bar and an *outlined* tag, never a
+  tinted row. Rookies stay purple. NA (not active, no NBA team) also gets a hatched row and a NO TEAM marker.
+
 ## Roster checks (anti-tank limits)
 
 `season_state.roster_checks` reports the countable limits from the dynasty rules

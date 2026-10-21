@@ -535,6 +535,33 @@ class TestRosterChecks(unittest.TestCase):
         c = ss.roster_checks(self.si, self.state_with(BSY, {k: "IL" for k in guards if k not in keep}), BSY)["coverage"]
         self.assertEqual((c["byCombo"]["G"], c["shortCombo"], c["level"]), (2, ["G"], "over"))
 
+    def test_healthy_cap_excludes_out_players_even_off_il_and_ties_prefer_healthy(self):
+        base = ss.post_draft_state(self.si)
+        f = max(self.si["franchises"], key=lambda x: max(ls.player_cap(self.si, k) for k in ls.team_players(self.si, self.cur, x)))
+        keys = sorted(ls.team_players(self.si, self.cur, f), key=lambda k: -ls.player_cap(self.si, k))
+        star = keys[0]
+        plain = ss.team_view(self.si, self.cur, f, base)
+        self.assertEqual((plain["injuredCap"], plain["healthyCap"]), (0, plain["cap"]))
+        out = ss.team_view(self.si, self.state_with(f, status={star: "O"}), f, base)            # Out, still in a lineup slot
+        self.assertEqual(out["cap"], plain["cap"])                                                 # payroll is unchanged
+        self.assertEqual(out["injuredCap"], ls.player_cap(self.si, star))
+        self.assertEqual(out["healthyCap"], plain["cap"] - ls.player_cap(self.si, star))         # but "healthy" drops him
+        q = ss.team_view(self.si, self.state_with(f, status={star: "Q"}), f, base)
+        self.assertEqual(q["healthyCap"], plain["cap"])                                           # questionable is not injured
+        # ties at the ninth salary: the counted player is the healthy one, never an injured player picked by name order
+        for g in self.si["franchises"]:
+            ks = sorted(ls.team_players(self.si, self.cur, g), key=lambda k: -ls.player_cap(self.si, k))
+            if len(ks) > 10 and ls.player_cap(self.si, ks[8]) == ls.player_cap(self.si, ks[9]):
+                tied = [k for k in ks if ls.player_cap(self.si, k) == ls.player_cap(self.si, ks[8])]
+                first = min(tied, key=lambda k: ls.player_name(self.si, k))                       # name order would pick him
+                v = ss.team_view(self.si, self.state_with(g, {first: "IL"}), g, base)
+                counted = {r["k"] for r in v["roster"] if not r["x"]}
+                self.assertNotIn(first, counted, g)                                              # injured, tied: not the counted one
+                self.assertEqual(v["cap"], ss.team_view(self.si, self.cur, g, base)["cap"], g)  # payroll identical
+                break
+        else:
+            self.fail("no team has a tie at the ninth salary in the frozen baseline")
+
     def test_ofs_and_inj_count_as_long_term_injured(self):
         keys = ls.team_players(self.si, self.cur, TT_)
         c = ss.roster_checks(self.si, self.state_with(TT_, status={keys[0]: "OFS", keys[1]: "INJ", keys[2]: "D"}), TT_)["injured"]

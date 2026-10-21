@@ -154,7 +154,7 @@ def roster_checks(si, state, fid, rules=None) -> dict:
     combo_cover = {c: sum(1 for v in healthy.values() if v & set(ps)) for c, ps in combos.items()}
     short_combo = [c for c in combos if combo_cover[c] < rules.get("minPerCombo", 0)]
     empty = _fillable(healthy, rules["lineupSlots"])
-    cap_il = sum(r["c"] for r in ls.team_roster(si, state, fid) if r["k"] in injured and not r["x"])
+    cap_il = sum(r["c"] for r in ranked_roster(si, state, fid) if r["k"] in injured and not r["x"])
     return {
         "injured": {"count": len(injured), "il": len(on_il), "out": len(out), "max": lim,
                     "level": "over" if len(injured) > lim else "watch" if len(injured) == lim else "ok",
@@ -233,6 +233,28 @@ def post_draft_state(si: dict) -> dict:
     return ls.resolve(si, (), "OFFICIAL")
 
 
+def injured_keys(state, keys) -> set:
+    """Players who cannot contribute right now: in an IL / IL+ slot, or Yahoo lists them Out / injured / out for the season."""
+    out_status = set(_load(RULES_PATH)["longTermInjured"]["outStatuses"])
+    slots, status = state.get("slots", {}), state.get("status", {})
+    return {k for k in keys if slots.get(k) in SLOTS_IL or status.get(k) in out_status}
+
+
+def rank_roster(si, rows, inj) -> list:
+    """Salary order (desc), healthy before injured on equal salary, then name; `x` marks rows beyond the counted nine."""
+    n = si.get("capCountTop")
+    rows = sorted(rows, key=lambda r: (-r["c"], r["k"] in inj, r["n"]))
+    for i, r in enumerate(rows):
+        r["x"] = bool(n) and i >= n
+    return rows
+
+
+def ranked_roster(si, state, fid) -> list:
+    """One team's rows as the cards rank them (see rank_roster) -- for checks and reports that need the same counted set."""
+    rows = ls.team_roster(si, state, fid)
+    return rank_roster(si, rows, injured_keys(state, [r["k"] for r in rows]))
+
+
 def team_view(si, state, fid, base) -> dict:
     rep = ls.team_report(si, state, fid, base)
     rep["fold"] = ls.fold_team(si, state, fid)
@@ -245,9 +267,16 @@ def team_view(si, state, fid, base) -> dict:
         meta = ls.player_meta(si, r["k"])  # display data for players the original board does not list (in-season adds)
         r["pos"], r["nba"] = (meta.get("displayPosition") or "").replace(",", "/"), meta.get("nbaTeam") or ""
     rep["il"] = sum(1 for r in rep["roster"] if r["s"] in SLOTS_IL)
-    # IL players compete for the counted nine like anyone else; "healthy" is the counted payroll without them (display)
+    # Injured = an IL slot OR a long-term Yahoo status (Out / INJ / OFS) even if the manager has not moved him to IL.
+    # Everyone competes for the counted nine on salary alone; when salaries tie at the boundary a healthy player is shown
+    # as the counted one (the payroll number is identical), so an injured $0 player never "uses up" a counted spot by name order.
+    inj = injured_keys(state, [r["k"] for r in rep["roster"]])
+    rep["roster"] = rank_roster(si, rep["roster"], inj)
+    rep["cap"] = sum(r["c"] for r in rep["roster"] if not r["x"])           # unchanged: only ties were reordered
+    # "healthy" is the counted payroll without the injured; ilCap is the IL slots' share (the IL group's "N counted")
     rep["ilCap"] = sum(r["c"] for r in rep["roster"] if r["s"] in SLOTS_IL and not r["x"])
-    rep["healthyCap"] = rep["cap"] - rep["ilCap"]
+    rep["injuredCap"] = sum(r["c"] for r in rep["roster"] if r["k"] in inj and not r["x"])
+    rep["healthyCap"] = rep["cap"] - rep["injuredCap"]
     rep["checks"] = roster_checks(si, state, fid)
     rep["outKeys"] = sorted(set(ls.team_players(si, base, fid)) - {r["k"] for r in rep["roster"]})
     # a trade acquisition (⇄) is not a free-agent add: only players received in a trade count as traded in

@@ -349,18 +349,21 @@ class TestRenderedCards(unittest.TestCase):
         seen_counting = seen_free = False
         for fid, v in view.items():
             card = _card(self.official, self.si["shorts"][fid])
+            txt = re.sub(r"<[^>]+>", " ", card)
+            strip = txt.split("moves")[0]
+            if v["injuredCap"]:                                              # counted salary of IL or Out players: "healthy" says what is left
+                self.assertRegex(strip, r"healthy\s+" + re.escape(f"{v['healthyCap']:g}"), fid)
+            else:
+                self.assertNotIn("healthy", strip, fid)
             if not v["il"]:
                 self.assertNotIn("il-head", card, fid)
                 continue
-            txt = re.sub(r"<[^>]+>", " ", card)
-            if v["ilCap"]:                                                   # an IL player inside the counted nine: group says so
+            if v["ilCap"]:                                                   # an IL player inside the counted nine: the group says so
                 seen_counting = True
                 self.assertRegex(card, r'class="il-c"[^>]*>' + re.escape(f"{v['ilCap']:g}") + r" counted<", fid)
-                self.assertRegex(txt, r"healthy\s+" + re.escape(f"{v['healthyCap']:g}"), fid)
-            else:                                                            # IL players all outside the nine: no counted note, no healthy figure
+            else:                                                            # IL players all outside the nine: no counted note
                 seen_free = True
                 self.assertNotIn('class="il-c"', card, fid)
-                self.assertNotIn("healthy", txt.split("moves")[0], fid)
         self.assertTrue(seen_counting or seen_free, "no team has an injured-list player to check")
 
     def test_yahoo_status_chips_are_distinct(self):
@@ -378,13 +381,40 @@ class TestRenderedCards(unittest.TestCase):
         self.assertTrue(seen, "the snapshot carries no statuses to check")
         self.assertIn('class="players has-st"', _card(self.official, "LC"))   # names aligned past the status gutter
         css = self.static
-        for cls, color in (("st-p", "#17734c"), ("st-q", "#1f5fbf"), ("st-d", "#b45a09"), ("st-inj", "#b3261e")):
-            self.assertIn(f".st-chip.{cls}{{color:{color}", css)
-        self.assertIn(".st-chip.st-out{color:#fff;background:#c9362d}", css)   # out: solid red
-        self.assertIn(".st-chip.st-ofs{color:#fff;background:#1d2330}", css)   # out for the season: ink
+        for cls, color in (("st-p", "#1c9a5e"), ("st-q", "#2b6be0"), ("st-d", "#ee8a0b"), ("st-out", "#c9362d"),
+                           ("st-ofs", "#1d2330"), ("st-na", "#3a3f4c")):         # every status is a SOLID fill with white text
+            self.assertRegex(css, r"\.st-chip\.%s\{background:%s[;}]" % (cls, color), cls)
+        self.assertRegex(css, r"\.st-chip\.st-inj\{background:#d8392f;box-shadow:inset 0 0 0 1\.5px rgba\(255,255,255,\.55\)")   # injured: red with a white inner ring
+        self.assertRegex(css, r"\.st-chip\{[^}]*color:#fff;box-shadow:0 0 0 1\.5px #fff\}")                                       # white text, white halo
         self.assertIn('OFS:["OFS","Out for the season","ofs"]', css)
         self.assertIn('INJ:["INJ","Injured","inj"]', css)
         self.assertIn('D:["D","Doubtful","d"]', css)
+
+    def test_na_players_are_painfully_obvious_as_teamless(self):
+        snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
+        na = [(fid, r["name"]) for fid, rows in snap["teams"].items() for r in rows if r.get("status") == "NA"]
+        if not na:
+            self.skipTest("nobody on a roster is NA right now")
+        for fid, name in na:
+            rowhtml = next(r for r in re.findall(r'<div class="player-row[^"]*".*?<div class="cap">.*?</div>', _card(self.official, self.si["shorts"][fid]), re.S)
+                           if f">{name}<" in r)
+            self.assertIn("is-na", rowhtml.split(">")[0])                        # hatched row
+            self.assertIn('class="st-chip st-na"', rowhtml)                     # charcoal chip
+            self.assertIn('<span class="na-team" title="Not active: no NBA team">NO TEAM</span>', rowhtml)   # in place of the NBA code
+        self.assertRegex(self.static, r"\.player-row\.is-na\{background:repeating-linear-gradient")
+        self.assertIn('NA:["NA","Not active · no NBA team","na"]', self.static)
+
+    def test_colour_roles_do_not_overlap(self):
+        """Status = SOLID fill (gutter chip). Where a player came from (trade, scenario, own draft) = a thin edge bar and an
+        OUTLINED tag, never a tinted row; and nothing is faded, so chips keep their full colour on every row."""
+        css = self.static
+        self.assertNotRegex(css, r"\.player-row\.nc(?:\.[a-z-]+)*\{[^}]*opacity")                    # not-counted rows are not faded
+        self.assertNotRegex(css, r"\.player-row\.row-(?:trade|scn|in)(?:\.[a-z-]+)*\{[^}]*background")  # no tinted origin rows
+        self.assertRegex(css, r"\.player-row\.row-trade\{box-shadow:inset 3px 0 0 #2f5fd0\}")           # a thin edge bar remains
+        self.assertRegex(css, r"\.player-row\.row-scn\{box-shadow:inset 3px 0 0 #e0a21b\}")
+        for tag in (".tr-tag", ".in-tag"):                                                           # outlined: white fill, 1px border
+            self.assertRegex(css, r"%s\{[^}]*background:#fff;border:1px solid" % re.escape(tag), tag)
+        self.assertRegex(css, r"\.player-row\.nc \.cap\{[^}]*border:1px dashed")                         # not-counted salary: dashed ghost outline
 
     def test_preseason_standings_pill_and_team_order(self):
         a = self.official.split('id="rosters-a"')[1].split('id="rosters-b"')[0]
