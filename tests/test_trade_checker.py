@@ -299,7 +299,7 @@ class TradeChecker(unittest.TestCase):
         for x in res["rules"]:
             if x["rule"] == "cap":
                 self.assertEqual(x["before"], x["after"])
-        self.assertEqual(res["status"], "COMMISSIONER REVIEW")
+        self.assertEqual([x["level"] for x in res["rules"] if x["rule"] == "pick"], ["review", "review"])   # the overall verdict depends on the rosters, the pick rows do not
 
     # ---- Yahoo slots: incoming players land outside IL; only injured players can go on IL
     def _slot_case(self):

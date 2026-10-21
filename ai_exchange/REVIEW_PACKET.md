@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-21T12:15:02Z
+Generated: 2026-10-21T12:28:32Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/trade-checker
-Commit: 94c5e92
+Commit: cf05e4d
 Base: main
 Working tree: dirty
 
@@ -18,7 +18,7 @@ Working tree: dirty
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
 PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/75 (MERGED)
-CI: Claude Code Review: completed/success
+CI: validate: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,17 +27,19 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md     |  37 ++-
- config/trade_rules.json          |  29 ++
+ ai_exchange/REVIEW_PACKET.md     |  37 +-
+ config/trade_rules.json          |  54 +++
  docs/GOVERNANCE_ROADMAP.md       |   3 +
- docs/SEASON_STATE_MODEL.md       |  19 ++
- index.html                       | 606 +++++++++++++++++++++++++++++++++++++--
- scripts/build_league_state.py    |  12 +
- scripts/trade_checker.py         | 195 +++++++++++++
+ docs/LEAGUE_RULES_MODEL.md       |   4 +-
+ docs/SEASON_STATE_MODEL.md       |  19 +
+ docs/YAHOO_LEAGUE_SETTINGS.md    |  19 +
+ index.html                       | 724 +++++++++++++++++++++++++++++++++++++--
+ scripts/build_league_state.py    |  14 +
+ scripts/trade_checker.py         | 295 ++++++++++++++++
  scripts/what_if_app.js           |  10 +-
- tests/test_scenario_rendering.py | 344 +++++++++++++++++++++-
- tests/test_trade_checker.py      | 231 +++++++++++++++
- 10 files changed, 1443 insertions(+), 43 deletions(-)
+ tests/test_scenario_rendering.py | 434 ++++++++++++++++++++++-
+ tests/test_trade_checker.py      | 377 ++++++++++++++++++++
+ 12 files changed, 1945 insertions(+), 45 deletions(-)
 ```
 
 ## Validation
@@ -55,7 +57,9 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - ai_exchange/REVIEW_PACKET.md
 - config/trade_rules.json
 - docs/GOVERNANCE_ROADMAP.md
+- docs/LEAGUE_RULES_MODEL.md
 - docs/SEASON_STATE_MODEL.md
+- docs/YAHOO_LEAGUE_SETTINGS.md
 - index.html
 - scripts/build_league_state.py
 - scripts/trade_checker.py
