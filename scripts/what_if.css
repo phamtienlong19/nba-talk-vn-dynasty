@@ -3,9 +3,9 @@
 :root{--wi:#4a56c8;--wi-bg:#eef0fd;--wi-line:#c9cef3;--wi-up:#b4602a;--wi-down:#17734c}
 #what-if[hidden]{display:none!important}
 body.whatif-mode .page:not(#what-if){display:none}
-body.whatif-mode #what-if{display:block;box-shadow:inset 0 0 0 3px var(--wi),var(--shadow)}
+body.whatif-mode #what-if{display:block;box-shadow:none}
 .wi-vi{font-weight:600;font-size:.5em;letter-spacing:.08em;color:var(--wi);margin-left:8px;vertical-align:.15em}
-.scn-banner.wi{background:repeating-linear-gradient(135deg,#4a56c8 0 14px,#5b68d6 14px 28px);color:#fff}
+.scn-banner.wi{background:var(--wi-bg);color:#31389a;border-bottom:1px solid var(--wi-line)}
 .modeswitch button.on.wi{background:var(--wi);color:#fff}
 .wi-bar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:0 0 12px}
 .wi-bar .meta-pill{margin:0}
