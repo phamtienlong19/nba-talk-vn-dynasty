@@ -793,150 +793,123 @@ details.avail>summary::-webkit-details-marker{display:none}
 .tr-tag.scn{border-color:#ecc86b;color:#8a5a00}
 .in-tag.dr-other{background:transparent;border:1px solid #9cd3b5;color:#17734c;padding:1px 3px}
 .in-tag.dr-other.rk{border-color:#c7b0ec;color:#5e2c91}
-/* ---- trade machine: any 2-6 teams, live payroll + roster limits, every rule explained (flags only; no fairness, no advice) ---- */
+/* ---- trade machine: any 2-6 teams; one card per team (payroll, limits, the post-trade roster); flags what the rules block, never advice ---- */
 .tpill{display:inline-flex;align-items:center;font:800 11px/1 "Inter",Arial,sans-serif;letter-spacing:.02em;padding:6px 10px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
 .tpill.sm{font-size:10px;padding:3px 8px;margin-right:7px;vertical-align:1px}
 button.tpill{cursor:pointer;background:#f3f6fa;color:#5b6b85;border-color:#d5dce7;font-family:inherit}
-button.tpill.on{border-color:#0a162f55;box-shadow:0 1px 0 #0a162f22}
+button.tpill.on{border-color:#0a162f55}
 button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
-.chk{background:#fff;border:1px solid #dce3ec;border-radius:14px;padding:14px;margin:0 0 14px}
-.chk-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.chk-h b{font:800 13px/1 "Inter",Arial,sans-serif;letter-spacing:.12em;color:#12264d}
-.chk-h>span{font:500 12px/1.35 "Inter",Arial,sans-serif;color:#5b6b85;flex:1 1 280px}
-.chk-act{margin-left:auto;display:flex;gap:6px;align-items:center}
-.chk-btn{font:700 11px/1 "Inter",Arial,sans-serif;letter-spacing:.04em;padding:8px 12px;border-radius:999px;border:1px solid #d5dce7;background:#f3f6fa;color:#31435e;cursor:pointer}
-.chk-teams{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.chk-hint{font:500 11px/1.3 "Inter",Arial,sans-serif;color:#8a97ad;margin:6px 0 2px}
-.chk-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:10px;align-items:start}
-.chk-col{border:1px solid #e3e9f1;border-radius:12px;overflow:hidden;background:#fff}
-.chk-ch{display:flex;align-items:center;gap:8px;padding:10px 12px;flex-wrap:wrap}
-.chk-ch b{font:800 15px/1 "Inter",Arial,sans-serif}
-.chk-ch small{font:600 11px/1.2 "Inter",Arial,sans-serif;opacity:.85;flex:1;min-width:0}
-.chk-pay{margin-left:auto;font:700 14px "Roboto Mono",monospace;display:flex;gap:4px;align-items:baseline}
-.chk-pay em{font:700 11px "Roboto Mono",monospace;font-style:normal;opacity:.9}
-.chk-cap{padding:10px 12px 4px}
-.meter{position:relative;height:10px;border-radius:6px;background:#eef1f6}
+.chk{background:#fff;border:1px solid #e3e9f1;border-radius:18px;padding:20px;margin:0 0 14px}
+.chk-h{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.chk-ti b{display:block;font:800 12px/1 "Inter",Arial,sans-serif;letter-spacing:.16em;color:#12264d}
+.chk-ti span{display:block;margin-top:7px;font:500 13px/1.45 "Inter",Arial,sans-serif;color:#6b7a93;max-width:52ch}
+.chk-act{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.chk-btn{font:700 11px/1 "Inter",Arial,sans-serif;letter-spacing:.04em;padding:9px 13px;border-radius:999px;border:1px solid #e3e9f1;background:#fff;color:#31435e;cursor:pointer}
+.chk-btn:hover{background:#f3f6fa}
+.chk-tm{margin-top:16px;border:1px solid #e8edf4;border-radius:14px;background:#fbfcfe}
+.chk-tm summary{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;list-style:none}
+.chk-tm summary::-webkit-details-marker{display:none}
+.chk-tm .tm-l{font:800 10px/1 "Inter",Arial,sans-serif;letter-spacing:.14em;color:#8a97ad;margin-right:2px}
+.chk-tm .tm-add{margin-left:auto;font:600 12px/1 "Inter",Arial,sans-serif;color:#6b7a93}
+.chk-tm .tm-add::after{content:" ▾"}.chk-tm[open] .tm-add::after{content:" ▴"}
+.chk-teams{display:flex;flex-wrap:wrap;gap:6px;padding:2px 14px 14px}
+.chk-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:16px;align-items:start}
+.chk-col{border:1px solid #e3e9f1;border-radius:16px;overflow:hidden;background:#fff;box-shadow:inset 0 4px 0 var(--tc,#12264d)}
+.chk-col.mine{box-shadow:inset 0 4px 0 var(--tc,#12264d),0 0 0 2px #0a162f,0 0 0 5px #fff,0 0 0 7px #0a162f}
+.chk-ch{display:flex;align-items:center;gap:12px;padding:20px 18px 6px}
+.chk-mono{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:800 12px/1 "Inter",Arial,sans-serif;letter-spacing:.02em}
+.chk-nm{min-width:0;flex:1}
+.chk-nm b{display:block;font:800 16px/1.15 "Inter",Arial,sans-serif;color:#12264d}
+.chk-nm small{display:block;margin-top:2px;font:500 12px/1.2 "Inter",Arial,sans-serif;color:#8a97ad;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chk-pay{display:flex;align-items:baseline;gap:6px;font:600 13px "Roboto Mono",monospace;color:#8a97ad}
+.chk-pay b{font:700 20px "Roboto Mono",monospace;color:#12264d}
+.chk-pay em{font:700 11px "Roboto Mono",monospace;font-style:normal;padding:2px 6px;border-radius:999px;background:#eef2f7;color:#5b6b85}
+.chk-pay em.up{background:#e8f3ec;color:#17623a}.chk-pay em.dn{background:#fdf0ee;color:#a11a1a}
+.chk-cap{padding:6px 18px 2px}
+.meter{position:relative;height:8px;border-radius:6px;background:#eef1f6;margin-top:8px}
 .meter i{position:absolute;top:0;bottom:0}
 .meter .mband{background:#d7ecdf;border-radius:6px}
-.meter .mnow{width:2px;top:-3px;bottom:-3px;background:#8a97ad;transform:translateX(-1px)}
-.meter .mnew{width:12px;height:12px;top:-1px;bottom:auto;border-radius:50%;background:#12264d;border:2px solid #fff;box-shadow:0 0 0 1px #12264d;transform:translateX(-6px)}
+.meter .mnow{width:2px;top:-3px;bottom:-3px;background:#a4afc2;transform:translateX(-1px)}
+.meter .mnew{width:14px;height:14px;top:-3px;bottom:auto;border-radius:50%;background:#12264d;border:3px solid #fff;box-shadow:0 0 0 1px #12264d;transform:translateX(-7px)}
 .meter .mnew.out{background:#c0392b;box-shadow:0 0 0 1px #c0392b}
-.chk-cap-t{font:600 11px/1.3 "Inter",Arial,sans-serif;color:#31435e;margin-top:7px}
+.chk-cap-t{font:600 12px/1.3 "Inter",Arial,sans-serif;color:#5b6b85;margin-top:9px}
 .chk-cap-t.out{color:#a11a1a}
-.chk-lim{display:flex;flex-wrap:wrap;gap:5px;padding:6px 12px 2px}
-.lim{font:700 9px/1 "Inter",Arial,sans-serif;letter-spacing:.05em;padding:4px 7px;border-radius:999px;background:#f3f6fa;color:#5b6b85;border:1px solid #e3e9f1}
-.lim.watch{background:#fff1d6;color:#8a5a00;border-color:#f0cf8a}.lim.over{background:#fde8e8;color:#a11a1a;border-color:#f1b4b4}
-.lim.chg{box-shadow:0 0 0 2px #12264d22}
-.chk-io{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:6px 12px 2px}
-.chk-io small{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#17623a}
-.io-p{font:700 11px/1 "Inter",Arial,sans-serif;padding:4px 8px;border-radius:999px;background:#e8f3ec;color:#17623a}
-.chk-pw{padding:0 8px}
-.chk-p{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:9px 10px;border:1px solid #e3e9f1;border-radius:10px;background:#fff;margin-top:6px;cursor:pointer;font:600 13px/1.2 "Inter",Arial,sans-serif;color:#12264d}
-.chk-col .chk-pw:last-child{padding-bottom:8px}
-.chk-p.on{border-color:#12264d;background:#eef2fb;box-shadow:inset 4px 0 0 #12264d}
-.chk-p .pn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.chk-p small{font:500 11px "Inter",Arial,sans-serif;color:#6b7a93}
-.chk-p .pc{font:700 13px "Roboto Mono",monospace;min-width:22px;text-align:right}
-.chk-p .pc.x{color:#9aa6ba;font-weight:500}
-.chk-p .hold{font:700 9px/1 "Inter",Arial,sans-serif;letter-spacing:.05em;padding:3px 6px;border-radius:999px;background:#fff1d6;color:#8a5a00;border:1px solid #f0cf8a}
-.chk-to{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:6px 4px 0 14px}
-.chk-to small{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#6b7a93}
-.chk-to .tpill{padding:5px 9px;font-size:10px}
-.chk-v{margin-top:14px;border-top:1px solid #e8edf4;padding-top:12px}
-.chk-st{display:inline-flex;font:800 12px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;padding:7px 13px;border-radius:999px}
-.chk-st.LEGAL{background:#e8f3ec;color:#17623a}.chk-st.REVIEW{background:#fff1d6;color:#8a5a00}.chk-st.BLOCKED{background:#fde8e8;color:#a11a1a}
-.chk-sub{font:500 12px/1.3 "Inter",Arial,sans-serif;color:#6b7a93;margin-left:10px}
-.chk-r{display:flex;gap:10px;align-items:baseline;padding:9px 0;border-top:1px solid #f0f3f8;font:500 13px/1.45 "Inter",Arial,sans-serif;color:#25344f}
-.chk-r:first-of-type{border-top:0}
-.chk-r i{flex:none;border-radius:50%;background:#b9c3d3}
-.chk-r.blocked i{background:#c0392b}.chk-r.review i{background:#e0a020}.chk-r.ok i{background:#9ac5a8}
-.chk-r.ok,.chk-r.info{color:#6b7a93}
-.chk-r em{display:block;font:500 10px/1.3 "Inter",Arial,sans-serif;color:#8a97ad;font-style:normal;margin-top:2px}
-.chk-empty{font:500 13px/1.4 "Inter",Arial,sans-serif;color:#6b7a93;margin-top:12px}
-@media(max-width:680px){.chk{padding:12px}.chk-cols{grid-template-columns:1fr}.chk-act{margin-left:0}.chk-p{padding:11px 10px}}
-/* summary cards: who gives and gets what, per team, with check marks */
-.chk-sec{font:800 10px/1 "Inter",Arial,sans-serif;letter-spacing:.12em;color:#8a97ad;margin:16px 0 4px}
-.chk-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px;align-items:start}
-.chk-sc{border:1px solid #e3e9f1;border-radius:12px;overflow:hidden;background:#fff}
-.chk-sc-h{display:flex;align-items:center;gap:8px;padding:9px 12px;flex-wrap:wrap}
-.chk-sc-h b{font:800 14px/1 "Inter",Arial,sans-serif}.chk-sc-h small{font:600 11px/1.2 "Inter",Arial,sans-serif;opacity:.85;flex:1;min-width:0}
-.chk-sc-b{padding:10px 12px 12px}
-.chk-sc-b .chk-cap-t{margin:7px 0 8px}
-.chk-ck{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}
-.ck{display:inline-flex;align-items:center;gap:5px;font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;padding:4px 8px 4px 5px;border-radius:999px;background:#eef6f1;color:#17623a}
-.ck i{font-style:normal;display:grid;place-items:center;width:14px;height:14px;border-radius:50%;background:#17623a;color:#fff;font-size:9px;line-height:1}
-.ck.info{background:#eef2fb;color:#31435e}.ck.info i{background:#5b6b85}
-.ck.review{background:#fff1d6;color:#8a5a00}.ck.review i{background:#e0a020}
-.ck.blocked{background:#fde8e8;color:#a11a1a}.ck.blocked i{background:#c0392b}
-.chk-fl{margin-top:7px}
-.chk-fl small{display:block;font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.12em;margin-bottom:4px}
-.chk-fl.get small{color:#17623a}.chk-fl.send small{color:#a11a1a}.chk-fl.drop small{color:#6b7a93}
-.fl-p{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:8px;background:#f7f9fc;margin-top:3px;font:600 12.5px/1.2 "Inter",Arial,sans-serif;color:#12264d}
-.chk-fl.get .fl-p{box-shadow:inset 3px 0 0 #4aa36c}.chk-fl.send .fl-p{box-shadow:inset 3px 0 0 #c0392b}.chk-fl.drop .fl-p{box-shadow:inset 3px 0 0 #9aa6ba}
-.fl-p.rk .fl-n{color:#5d2796}
-.fl-n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fl-pos{font:500 10px "Inter",Arial,sans-serif;color:#8a97ad}
-.fl-via{display:inline-flex;align-items:center;gap:3px;color:#6b7a93;font-size:11px}
-.fl-c{font:700 12px "Roboto Mono",monospace}
-.chk-net{font:600 11px/1.3 "Inter",Arial,sans-serif;color:#6b7a93;margin-top:9px}
-/* editor columns: the post-trade roster, styled like the team cards */
-.chk-cnt{font:700 11px "Roboto Mono",monospace;padding:3px 7px;border-radius:999px;background:#ffffff40}
-.chk-cnt.over{background:#c0392b;color:#fff}
-.chk-col .players{padding:4px 6px 8px}
-.chk-col .player-row{cursor:pointer;border-radius:8px;grid-template-columns:92px minmax(0,1fr) 44px 38px}
-.chk-col .player-row .pos{font-size:10.5px;padding-left:6px}
-.hold{font:700 9px/1 "Inter",Arial,sans-serif;letter-spacing:.05em;padding:3px 6px;border-radius:999px;background:#fff1d6;color:#8a5a00;border:1px solid #f0cf8a;white-space:nowrap}
-.chk-col .player-row .pname{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-.chk-col .player-row:hover{background:#f3f7fd}
+.chk-ck{display:flex;flex-wrap:wrap;gap:4px 14px;padding:12px 18px 2px}
+.ck{display:inline-flex;align-items:center;gap:5px;font:800 10px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;color:#8a97ad}
+.ck i{font-style:normal;display:grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#e8f3ec;color:#17623a;font-size:9px;line-height:1}
+.ck.info{color:#6b7a93}.ck.info i{background:#eef2f7;color:#5b6b85}
+.ck.review{color:#8a5a00}.ck.review i{background:#fff1d6;color:#8a5a00}
+.ck.blocked{color:#a11a1a}.ck.blocked i{background:#c0392b;color:#fff}
+.chk-fa{display:flex;flex-wrap:wrap;gap:2px 12px;padding:10px 18px 4px;font:500 12px/1.5 "Inter",Arial,sans-serif;color:#8a97ad}
+.fa.watch{color:#8a5a00;font-weight:700}.fa.over{color:#a11a1a;font-weight:700}.fa.chg{color:#12264d;font-weight:700}
+.chk-warn{margin:10px 18px 0;padding:10px 12px;border-radius:10px;background:#fdf0ee;color:#a11a1a;font:600 12px/1.4 "Inter",Arial,sans-serif}
+.chk-col .players{padding:8px 10px 12px}
+.chk-col .player-row{cursor:pointer;border-radius:10px;grid-template-columns:76px minmax(0,1fr) 40px 34px 30px;min-height:42px;align-items:center}
+.chk-col .player-row .pos{font-size:10px;padding-left:8px}
+.chk-col .player-row .pname{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;padding:6px 0}
+.chk-col .pn-l{display:flex;align-items:center;flex-wrap:wrap;gap:3px 5px;min-width:0;max-width:100%}
+.chk-col .pn-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.chk-col .pn-t{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.chk-col .player-row .cap{justify-self:end}
+.chk-col .player-row:hover{background:#f6f9fd}
 .chk-col .player-row:focus-visible{outline:2px solid #12264d;outline-offset:-2px}
-.chk-col .tm-in{background:#eef8f1;box-shadow:inset 4px 0 0 #4aa36c}
-.chk-col .tm-out{background:#fdf3f2;box-shadow:inset 4px 0 0 #c0392b}
-.chk-col .tm-out .pname,.chk-col .tm-out .cap,.chk-col .tm-out .pos{opacity:.6;text-decoration:line-through}
-.chk-col .tm-out .tm-via{text-decoration:none}
-.chk-col .tm-dropbtn{margin-left:auto;font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;padding:6px 9px;min-height:26px;border-radius:999px;border:1px solid transparent;background:transparent;color:#9aa6ba;cursor:pointer}
-.chk-col .tm-ilbtn{margin-left:auto;font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;padding:6px 9px;min-height:26px;border-radius:999px;border:1px solid #d5dce7;background:#fff;color:#6b7a93;cursor:pointer}
-.chk-col .tm-ilbtn.on{background:#fde8e8;border-color:#f1b4b4;color:#a11a1a}
-.chk-col .tm-ilbtn+.tm-dropbtn{margin-left:4px}
-.tm-more{margin-left:auto;border:0;background:transparent;color:#9aa6ba;font:800 16px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;padding:4px 8px;min-height:28px;border-radius:8px;cursor:pointer}
+.chk-col .tm-in{background:#f1f9f4;box-shadow:inset 3px 0 0 #4aa36c}
+.chk-ol{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:4px 0;padding:8px 10px 8px 12px;border-radius:10px;background:#fdf5f4;box-shadow:inset 3px 0 0 #c0392b}
+.chk-ol .ol-l{display:flex;align-items:center;flex-wrap:wrap;gap:6px;flex:1 1 150px;min-width:0}
+.chk-ol .ol-n{font:700 13px/1.2 "Inter",Arial,sans-serif;color:#12264d}
+.chk-ol .ol-m{font:500 11px/1.2 "Inter",Arial,sans-serif;color:#8a97ad}
+.chk-ol .ol-c{font:700 13px "Roboto Mono",monospace;color:#12264d}
+.chk-ol .chk-to{display:flex;align-items:center;gap:5px;padding:0;margin:0;background:none}
+.chk-ol .chk-to .tpill{margin:0}
+.chk-ol .ol-x{border:0;background:#fff;color:#a11a1a;width:28px;height:28px;border-radius:50%;font:800 12px/1 "Inter",Arial,sans-serif;cursor:pointer;box-shadow:0 0 0 1px #f1b4b4}
+.chk-ol .ol-x:hover{background:#fde8e8}
+.chk-col .player-row.tm-drop{background:#f3f4f7;box-shadow:inset 3px 0 0 #9aa6ba;opacity:.8}
+.chk-col .pickrow .pos{font:700 11px "Roboto Mono",monospace}
+.chk-col .nc-div.in{color:#17623a}.chk-col .nc-div.out{color:#a11a1a}.chk-col .nc-div.il{color:#12264d;font-weight:800}
+.tm-via{display:inline-flex;align-items:center;gap:3px;font:700 10px "Inter",Arial,sans-serif;color:#8a97ad}
+.pk-tag{font:800 8px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;padding:3px 5px;border-radius:4px;background:#12264d;color:#fff}
+.hold{font:700 9px/1 "Inter",Arial,sans-serif;letter-spacing:.05em;padding:3px 6px;border-radius:999px;background:#fff1d6;color:#8a5a00;border:1px solid #f0cf8a;white-space:nowrap}
+.chk-to{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:7px 10px 10px 14px;background:#fdf5f4;border-radius:0 0 10px 10px;margin:-2px 0 4px}
+.chk-to small{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#a11a1a;margin-right:2px}
+.chk-to .tpill{padding:6px 10px;font-size:11px}
+.tm-more{justify-self:end;border:0;background:transparent;color:#b3bccb;font:800 16px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;padding:4px 8px;min-height:28px;border-radius:8px;cursor:pointer}
 .tm-more:hover,.tm-more.on{background:#eef2fb;color:#12264d}
-.chk-tray{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:7px 10px 9px 12px;margin:-1px 0 3px;background:#f5f8fd;border-radius:0 0 8px 8px;box-shadow:inset 4px 0 0 #12264d}
+.chk-tray{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 12px 10px 14px;margin:-1px 0 3px;background:#f5f8fd;border-radius:0 0 10px 10px;box-shadow:inset 3px 0 0 #12264d}
 .chk-tray small{font:600 11px/1.3 "Inter",Arial,sans-serif;color:#6b7a93;flex:1 1 160px}
 .chk-tray small.no{color:#a11a1a}.chk-tray small.rv{color:#8a5a00}
 .tr-btn{font:800 10px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;padding:8px 12px;min-height:30px;border-radius:999px;border:1px solid #d5dce7;background:#fff;color:#31435e;cursor:pointer}
 .tr-btn.drop.blocked{border-color:#f1b4b4;color:#a11a1a;background:#fff7f7}.tr-btn.drop.review{border-color:#f0cf8a;color:#8a5a00;background:#fffaf0}
 .tr-btn.il{border-color:#12264d33}.tr-btn.il.on{background:#eef2fb}
-.chk-warn{margin:8px 10px 0;padding:8px 10px;border-radius:8px;background:#fde8e8;color:#a11a1a;font:600 12px/1.35 "Inter",Arial,sans-serif}
-.nc-div.il{color:#12264d;font-weight:800}
-.chk-col .tm-dropbtn.lock{color:#a11a1a;border-color:#f1b4b4;background:#fff7f7}
-.chk-col .tm-dropbtn.rev{color:#8a5a00;border-color:#f0cf8a;background:#fffaf0}
-.chk-col .tm-dropbtn.hot{border-color:#d5dce7;background:#fff;color:#6b7a93}
-.chk-col .tm-dropbtn:hover{background:#fde8e8;color:#a11a1a;border-color:#f1b4b4}
-.chk-col .player-row.tm-drop{background:#f3f4f7;box-shadow:inset 4px 0 0 #9aa6ba;opacity:.8}
-.tm-via.cyc{border:1px solid #d5dce7;border-radius:999px;background:#fff;padding:1px 6px 1px 4px;cursor:pointer;text-decoration:none}
-.tm-via.cyc small{font:700 8px "Inter",Arial,sans-serif;letter-spacing:.06em;color:#6b7a93;text-transform:uppercase}
-.tm-via{display:inline-flex;align-items:center;gap:3px;font:700 10px "Inter",Arial,sans-serif;color:#6b7a93}
-.nc-div.out{color:#a11a1a}
-.chk-to{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:7px 8px 9px 12px;background:#fdf3f2;border-radius:0 0 8px 8px;margin:-2px 0 4px}
-.chk-to small{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#a11a1a;margin-right:2px}
-.chk-to .tpill{padding:6px 10px;font-size:11px}
-/* a sticky verdict bar follows you while you pick players */
-.chk-bar{position:sticky;bottom:10px;display:flex;align-items:center;gap:10px;margin-top:14px;padding:9px 12px;border-radius:12px;background:#fff;border:1px solid #dce3ec;box-shadow:0 8px 24px rgba(15,30,60,.16);z-index:5}
+.chk-st{display:inline-flex;font:800 12px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;padding:8px 14px;border-radius:999px}
+.chk-st.LEGAL{background:#e8f3ec;color:#17623a}.chk-st.REVIEW{background:#fff1d6;color:#8a5a00}.chk-st.BLOCKED{background:#fde8e8;color:#a11a1a}
+.chk-v{margin-top:20px;padding:18px;border:1px solid #e8edf4;border-radius:16px;background:#fbfcfe}
+.chk-vh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.chk-sub{font:500 13px/1.4 "Inter",Arial,sans-serif;color:#6b7a93}
+.chk-r{display:flex;gap:12px;align-items:baseline;padding:11px 0;border-top:1px solid #eef2f7;font:500 13.5px/1.5 "Inter",Arial,sans-serif;color:#25344f}
+.chk-r i{flex:none;display:grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#b9c3d3;color:#fff;font:800 9px/1 "Inter",Arial,sans-serif;font-style:normal;transform:translateY(2px)}
+.chk-r.blocked i{background:#c0392b}.chk-r.review i{background:#e0a020}.chk-r.info i{background:#8a97ad}.chk-r.ok i{background:#9ac5a8}
+.chk-r.ok,.chk-r.info{color:#6b7a93}
+.chk-ok summary{cursor:pointer;font:600 12px/1 "Inter",Arial,sans-serif;color:#6b7a93;padding:12px 0 2px}
+.chk-sec{font:800 10px/1 "Inter",Arial,sans-serif;letter-spacing:.14em;color:#8a97ad;margin:22px 0 6px}
+.chk-yh{margin-top:6px}.chk-yh-n{font:500 13px/1.45 "Inter",Arial,sans-serif;color:#6b7a93;margin-bottom:8px}
+.yh-t{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;border:1px solid #e8edf4;border-radius:12px;margin-top:8px;background:#fbfcfe}
+.yh-t small{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.12em;color:#8a97ad;min-width:52px}
+.yh-s{display:flex;align-items:center;gap:6px;font:600 13px/1.3 "Inter",Arial,sans-serif;color:#12264d;flex:1 1 180px}
+.yh-x{color:#b3bccb;font-weight:800}
+.yh-a{display:flex;flex-direction:column;gap:3px;min-width:0}
+.yh-p{font:600 13px/1.3 "Inter",Arial,sans-serif;color:#12264d}
+.yh-none{font:500 13px "Inter",Arial,sans-serif;color:#b3bccb}
+.yh-hop{display:inline-block;margin-left:7px;padding:2px 7px;border-radius:999px;background:#eef2fb;color:#31435e;font:700 9px/1.3 "Inter",Arial,sans-serif;letter-spacing:.03em}
+.yh-w{margin-top:8px;padding:9px 12px;border-radius:10px;background:#f3f6fa;color:#5b6b85;font:500 12.5px/1.45 "Inter",Arial,sans-serif}
+.yh-w.warn{background:#fff6e2;color:#8a5a00}
+.chk-empty{font:500 13.5px/1.5 "Inter",Arial,sans-serif;color:#6b7a93;margin-top:18px;max-width:64ch}
+.chk-empty b{color:#12264d}
+.chk-bar{position:sticky;bottom:10px;display:flex;align-items:center;gap:12px;margin-top:16px;padding:10px 14px;border-radius:14px;background:#fff;border:1px solid #e3e9f1;box-shadow:0 10px 28px rgba(15,30,60,.16);z-index:5}
 .chk-bar.BLOCKED{border-color:#f1b4b4}.chk-bar.REVIEW{border-color:#f0cf8a}.chk-bar.LEGAL{border-color:#a9d3b8}
-.chk-bar-t{flex:1;min-width:0;font:500 12px/1.3 "Inter",Arial,sans-serif;color:#25344f}
-.chk-bar-n{font:700 11px "Inter",Arial,sans-serif;color:#6b7a93;white-space:nowrap}
-.chk-ok summary{cursor:pointer;font:600 12px/1 "Inter",Arial,sans-serif;color:#6b7a93;padding:9px 0}
-.chk-ok .chk-r.ok i{background:#9ac5a8;color:#fff}
-.chk-r i{display:grid;place-items:center;width:16px;height:16px;font:800 9px/1 "Inter",Arial,sans-serif;color:#fff;font-style:normal;transform:none}
-.chk-r.info i{background:#8a97ad}.chk-r.review i{background:#e0a020}.chk-r.blocked i{background:#c0392b}
-.pk-tag{font:800 8px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;padding:3px 5px;border-radius:4px;background:#12264d;color:#fff}
-.fl-p.pk .fl-n{color:#12264d}
-.chk-col .pickrow .pos{font:700 11px "Roboto Mono",monospace}
-.chk-yh{margin-top:6px}.chk-yh-n{font:500 12px/1.4 "Inter",Arial,sans-serif;color:#5b6b85;margin-bottom:6px}
-.yh-t{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:9px 10px;border:1px solid #e3e9f1;border-radius:10px;margin-top:6px;background:#fbfcfe}
-.yh-t small{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#6b7a93;min-width:48px}
-.yh-s{display:flex;align-items:center;gap:6px;font:600 12.5px/1.3 "Inter",Arial,sans-serif;color:#12264d;flex:1 1 180px}
-.yh-x{color:#8a97ad;font-weight:800}
-@media(max-width:680px){.chk-col .player-row{grid-template-columns:58px minmax(0,1fr) 34px 30px}.chk-col .player-row .pos{font-size:9.5px;padding-left:4px}.chk-col .player-row .nba{font-size:10px}.chk-sum{grid-template-columns:1fr}.chk-bar{bottom:6px}}
+.chk-bar-t{flex:1;min-width:0;font:500 12.5px/1.35 "Inter",Arial,sans-serif;color:#25344f}
+.chk-bar-n{font:700 11px "Inter",Arial,sans-serif;color:#8a97ad;white-space:nowrap}
+@media(max-width:680px){.chk{padding:14px;border-radius:16px}.chk-cols{grid-template-columns:1fr}.chk-ch{padding:18px 14px 4px}.chk-cap,.chk-ck,.chk-fa{padding-left:14px;padding-right:14px}.chk-warn{margin-left:14px;margin-right:14px}
+ .chk-col .player-row{grid-template-columns:54px minmax(0,1fr) 32px 28px 26px}.chk-col .player-row .pos{font-size:9px;padding-left:4px}.chk-col .player-row .nba{font-size:10px}.chk-bar{bottom:6px}.chk-v{padding:14px}}
 .tcard{background:#fff;border:1px solid #dce3ec;border-radius:14px;padding:10px 12px;margin:0 0 10px;box-shadow:0 1px 2px #0d1f420a}
 .tcard.prop{border-color:#d9c48a;background:linear-gradient(180deg,#fffdf6,#fff)}
 .tcard.prop.sel{border:2px solid #e0a21b;box-shadow:0 2px 10px #e0a21b26}
@@ -2624,16 +2597,17 @@ function initNav(){
  function foldH(){if(!tb||!brand)return;var f=Math.max(0,Math.round(brand.getBoundingClientRect().top-tb.getBoundingClientRect().top-6));tb.style.setProperty("--tb-fold",f+"px");}
  foldH();window.addEventListener("resize",foldH);window.addEventListener("load",foldH);
  if(window.MutationObserver)new MutationObserver(function(m){if(m.some(function(x){return x.addedNodes&&x.addedNodes.length;}))scheduleMine();}).observe(document.body,{childList:true,subtree:true});   /* views that re-render: What-If, Trade Lab, scenarios */
- window.NBA_NAV={check:chkRun,markMine:markMine,open:openSearch,close:closeSearch,search:navSearch,setMe:setMe,getMe:getMe,goTeam:goTeam,goPlayer:goPlayer,render:renderSearch,state:NAV,D:D,view:view,norm:norm,parseHash:parseHash,showTab:showTab};
+ window.NBA_NAV={plan:chkPlan,check:chkRun,markMine:markMine,open:openSearch,close:closeSearch,search:navSearch,setMe:setMe,getMe:getMe,goTeam:goTeam,goPlayer:goPlayer,render:renderSearch,state:NAV,D:D,view:view,norm:norm,parseHash:parseHash,showTab:showTab};
  paintMe();}
 
 /* ---------- trade machine: any 2-6 teams; the post-trade roster, live payroll, roster size and limits per team; every rule explained (a port of scripts/trade_checker.py; tests compare the two) ---------- */
 var TK=D.trade,TKR=TK.roster,TKL=TK.rules,TKTOP={};TK.top.forEach(function(k){TKTOP[k]=1;});
-var CHK={teams:[],sel:{},drop:{},il:{},open:{},now:null},CHK_MAX=6;
+var CHK={teams:[],sel:{},drop:{},il:{},open:{},tmOpen:false,now:null},CHK_MAX=6;
 var CHK_SRC={cap:"League rules · Salary cap application",cool:"League rules · Trades (cooldown)",tank:"League rules · Roster / anti-tank governance",pend:"League rules · 2-day pending period",size:"League rules · 15 roster spots (Yahoo enforces it when a trade is processed)",drop:"League rules · Dropping players",pick:"League rules · Draft picks",dead:"Yahoo · Trade End Date",slots:"Yahoo roster slots (trade processing)",il:"League rules · Injured list"};
 var CHK_KIND={injured:"Injured",singlePosition:"Single-position",coverage:"Coverage",lineup:"Lineup"};
 var CHK_OWN={},CHK_ROW={};D.teams.forEach(function(t){D.scenarios[""].teams[t.id].roster.forEach(function(r){CHK_OWN[r.k]=t.id;CHK_ROW[r.k]=r;});});
 function chkRows(){return D.scenarios[""].teams;}
+function chkInitials(n){var w=String(n).trim().split(/\s+/);return (w.length>1?w[0].charAt(0)+w[1].charAt(0):String(n).slice(0,2)).toUpperCase();}
 var TKP=TK.picks;
 function chkIsPick(k){return !!TKP[k];}
 function chkOwnerOf(k){return CHK_OWN[k]||(TKP[k]&&TKP[k].o)||null;}
@@ -2668,6 +2642,17 @@ function chkDetail(kind,b,a){
 function chkEnd(at,days){return new Date(Date.parse(at)+days*864e5).toISOString().slice(0,19)+"Z";}
 var CHK_ELIG={};TKL.yahoo.ilEligibleStatuses.forEach(function(s){CHK_ELIG[s]=1;});
 function chkDropLevel(r){return r.c>=TKL.drops.neverAtOrAbove||TK.rank[r.k]?"blocked":r.c>=TKL.drops.reviewFrom?"review":"ok";}
+/* a player or pick that leaves: one slim line with who gets him (a picker when 3+ teams) and an undo */
+function chkOutLine(k,fid,to){
+ var pick=chkIsPick(k),r=pick?null:CHK_ROW[k],dests=CHK.teams.filter(function(x){return x!==fid;}),left=h("div",{class:"ol-l"});
+ if(pick){left.appendChild(h("span",{class:"pk-tag",text:"PICK"}));left.appendChild(h("span",{class:"ol-n",text:chkPickName(k)}));}
+ else{var sc=statusChip(r.st);if(sc)left.appendChild(sc);left.appendChild(h("span",{class:"ol-n",text:r.n}));
+  if(isRk(k)){var d=DR.byKey[k];left.appendChild(h("span",{class:"in-tag rk",text:d&&d.rookie?"R · "+d.label:"R"}));}
+  left.appendChild(h("span",{class:"ol-m",text:[r.pos,r.nba].filter(Boolean).join(" · ")}));}
+ var dest=h("div",{class:"chk-to",role:"group","aria-label":"Who gets "+chkNm(k)},[h("small",{text:"TO"})].concat(dests.length>1?dests.map(function(x){var on=to===x,tt=T[x],e=h("button",{type:"button",class:"tpill to"+(on?" on":""),style:on?"background:"+tt.color+";color:"+tt.text:"","aria-pressed":on?"true":"false",title:tt.name,text:tt.short});
+  e.addEventListener("click",function(ev){ev.stopPropagation();CHK.sel[k]=x;chkTouch();});return e;}):[tPill(T[to],"")]));
+ var undo=h("button",{type:"button",class:"ol-x","aria-label":"Undo: keep "+chkNm(k),title:"Undo: keep him",text:"✕"});undo.addEventListener("click",function(){delete CHK.sel[k];chkTouch();});
+ return h("div",{class:"chk-ol"},[left,h("span",{class:"ol-c",text:pick?"—":String(r.c)}),dest,undo]);}
 function chkTray(r,onIl,ilOpen){
  var dl=chkDropLevel(r),t=h("div",{class:"chk-tray"}),d=h("button",{type:"button",class:"tr-btn drop "+dl,text:"Drop"});
  d.addEventListener("click",function(e){e.stopPropagation();CHK.drop[r.k]=true;delete CHK.open[r.k];delete CHK.il[r.k];chkTouch();});t.appendChild(d);
@@ -2769,17 +2754,17 @@ function chkRowEl(r,fid,o){
  else if(!d&&isRk(r.k))tags.push(h("span",{class:"in-tag rk",title:"2026 rookie (not drafted in the league draft)",text:"R"}));
  if(tx)tags.push(h("span",{class:"tr-tag",title:"Traded in-season: "+tx.label+(tx.effectiveAt?" · "+tx.effectiveAt.slice(0,10):""),text:"⇄"}));
  var end=at?chkEnd(at,TKL.cooldown[TKTOP[r.k]?"daysTopRanked":"days"]):null;
- if(end&&CHK.now<end&&o.state!=="in"){var left=Math.ceil((Date.parse(end)-Date.parse(CHK.now))/864e5);tags.push(h("span",{class:"hold",title:"Acquired by trade on "+at.slice(0,10)+"; can be traded again on "+end.slice(0,10),text:"FREE IN "+left+" DAY"+(left===1?"":"S")}));}
+ if(end&&CHK.now<end&&o.state!=="in"){var left=Math.ceil((Date.parse(end)-Date.parse(CHK.now))/864e5);tags.push(h("span",{class:"hold",title:"Acquired by trade on "+at.slice(0,10)+"; can be traded again on "+end.slice(0,10),text:"TRADABLE IN "+left+" DAY"+(left===1?"":"S")}));}
  if(o.from)tags.push(h("span",{class:"tm-via"},["←",tPill(T[o.from],"sm")]));
  if(o.to){var vp=tPill(T[o.to],"sm"),vw=h("span",{class:"tm-via"},["→",vp]);
   if(o.cycle){vw=h("button",{type:"button",class:"tm-via cyc",title:"Tap to change who gets him"},["→",vp,h("small",{text:"change"})]);vw.addEventListener("click",function(e){e.stopPropagation();o.cycle();});}
   tags.push(vw);}
- if(o.more)tags.push(o.more);
+ 
  row.appendChild(h("div",{class:"pos",text:r.pos||""}));
- row.appendChild(h("div",{class:"pname",title:r.n},[ilc,sc,r.n].concat(tags)));
+ var pn=h("div",{class:"pname",title:r.n},[h("span",{class:"pn-l"},[ilc,sc,h("span",{class:"pn-n",text:r.n})])]);if(tags.length)pn.appendChild(h("span",{class:"pn-t"},tags));row.appendChild(pn);
  var nba=h("div",{class:"nba",text:r.nba||""});
  if(r.st==="NA"){row.classList.add("is-na");nba.textContent="";nba.appendChild(h("span",{class:"na-team",title:"Not active: no NBA team",text:"NO TEAM"}));}
- row.appendChild(nba);row.appendChild(h("div",{class:"cap",text:String(r.c)}));
+ row.appendChild(nba);row.appendChild(h("div",{class:"cap",text:String(r.c)}));if(o.more)row.appendChild(o.more);
  if(il)row.classList.add("il-row");if(isRk(r.k))row.classList.add("rookie-row");if(o.nc)row.classList.add("nc");
  return row;}
 function chkPickRow(k,fid,o){
@@ -2790,9 +2775,8 @@ function chkPickRow(k,fid,o){
  if(o.to)tags.push(h("span",{class:"tm-via"},["→",tPill(T[o.to],"sm")]));
  var row=h("div",{class:"player-row tmr pickrow"+(o.state?" tm-"+o.state:""),role:"button",tabindex:"0"});
  row.appendChild(h("div",{class:"pos",text:String(p.y)}));
- row.appendChild(h("div",{class:"pname"},[h("span",{class:"pk-tag",text:"PICK"}),"Round "+p.r].concat(tags)));
+ var pnm=h("div",{class:"pname"},[h("span",{class:"pn-l"},[h("span",{class:"pk-tag",text:"PICK"}),h("span",{class:"pn-n",text:"Round "+p.r})])]);if(tags.length)pnm.appendChild(h("span",{class:"pn-t"},tags));row.appendChild(pnm);
  row.appendChild(h("div",{class:"nba",text:""}));row.appendChild(h("div",{class:"cap",text:"—"}));return row;}
-function chkPickLine(k,pill,arrow){var p=TKP[k];return h("div",{class:"fl-p pk"},[h("span",{class:"pk-tag",text:"PICK"}),h("span",{class:"fl-n",text:chkPickName(k)}),p.r===1?h("span",{class:"hold",text:"LOCKED"}):null,pill?h("span",{class:"fl-via"},[arrow,tPill(pill,"sm")]):null,h("b",{class:"fl-c",text:"—"})]);}
 function chkDestChips(k,fid){var dests=CHK.teams.filter(function(x){return x!==fid;});if(dests.length<2)return null;
  return h("div",{class:"chk-to",role:"group","aria-label":"Who gets "+chkNm(k)},[h("small",{text:"GOES TO"})].concat(dests.map(function(x){var on=CHK.sel[k]===x,tt=T[x],e=h("button",{type:"button",class:"tpill to"+(on?" on":""),style:on?"background:"+tt.color+";color:"+tt.text:"","aria-pressed":on?"true":"false",title:tt.name,text:tt.short});
   e.addEventListener("click",function(ev){ev.stopPropagation();CHK.sel[k]=x;chkTouch();});return e;})));}
@@ -2808,99 +2792,119 @@ function chkSummaryText(res,mv,dr){
  var bl=res.rules.filter(function(r){return r.level==="blocked"||r.level==="review";});
  if(bl.length){L.push("");bl.forEach(function(r){L.push((r.level==="blocked"?"✕ ":"! ")+(r.team?r.team+": ":"")+r.reason);});}
  L.push("");L.push(location.href);return L.join("\n");}
-/* Yahoo only runs trades between two teams: list the pair trades to enter, and the drops to make */
+/* Yahoo only runs trades between two teams. Whatever already trades both ways between a pair stays one trade; the rest is routed through
+   a hub team (an asset "hops" through it) so every Yahoo trade has something on both sides, in an order where a hopped asset arrives first. */
+function chkPlan(mv,hubPref){
+ var pairs={},order=[],legs=[],rest=[];
+ mv.forEach(function(m){var a=m.from<m.to?m.from:m.to,b=m.from<m.to?m.to:m.from,k=a+"|"+b;if(!pairs[k]){pairs[k]={a:a,b:b,ab:[],ba:[],all:[]};order.push(k);}pairs[k][m.from===a?"ab":"ba"].push(m.key);pairs[k].all.push(m);});
+ order.forEach(function(k){var p=pairs[k];if(p.ab.length&&p.ba.length)legs.push({a:p.a,b:p.b,ab:p.ab,ba:p.ba,hop:[]});else p.all.forEach(function(m){rest.push(m);});});
+ var plan={legs:legs,hub:null,hops:{}};
+ if(rest.length){
+  var teams=[],deg={};rest.forEach(function(m){[m.from,m.to].forEach(function(f){if(teams.indexOf(f)<0)teams.push(f);deg[f]=(deg[f]||0)+1;});});
+  var cands=teams.slice().sort(function(x,y){return (deg[y]-deg[x])||((y===hubPref)-(x===hubPref));}),best=null;
+  cands.forEach(function(H){
+   var hl={},spokes=teams.filter(function(f){return f!==H;}),hops={};
+   spokes.forEach(function(S){hl[S]={a:H,b:S,ab:[],ba:[],hop:[],needs:[]};});
+   rest.forEach(function(m){
+    if(m.from===H)hl[m.to].ab.push(m.key);
+    else if(m.to===H)hl[m.from].ba.push(m.key);
+    else{hl[m.from].ba.push(m.key);hl[m.to].ab.push(m.key);hl[m.from].hop.push(m.key);hl[m.to].hop.push(m.key);hl[m.to].needs.push(m.from);hops[m.key]={from:m.from,to:m.to};}});
+   var seq=[],done={},left=spokes.slice(),moved=true;
+   while(left.length&&moved){moved=false;for(var i=0;i<left.length;i++){var S=left[i];if(hl[S].needs.every(function(n){return done[n];})){seq.push(hl[S]);done[S]=1;left.splice(i,1);moved=true;break;}}}
+   if(left.length)return;
+   var one=seq.filter(function(l){return !l.ab.length||!l.ba.length;}).length,score=one*100+seq.length*10+Object.keys(hops).length;
+   if(!best||score<best.score)best={score:score,hub:H,legs:seq,hops:hops};});
+  if(best){plan.legs=legs.concat(best.legs);plan.hub=best.hub;plan.hops=best.hops;}
+  else{rest.forEach(function(m){plan.legs.push({a:m.from,b:m.to,ab:[m.key],ba:[],hop:[]});});plan.cycle=true;}}
+ /* walk the trades in order: roster sizes after each one (players only; a team makes its drops in its first trade) */
+ var cnt={},spots=TKL.roster.spots,dropN={};dr_for_plan().forEach(function(x){dropN[x.team]=(dropN[x.team]||0)+1;});
+ function size(f){if(cnt[f]===undefined)cnt[f]=chkRows()[f]?chkRows()[f].roster.length-(dropN[f]||0):0;return cnt[f];}
+ plan.legs.forEach(function(l){l.over=[];var A=l.a,B=l.b;size(A);size(B);
+  l.ab.forEach(function(k){if(!chkIsPick(k)){cnt[A]--;cnt[B]++;}});l.ba.forEach(function(k){if(!chkIsPick(k)){cnt[B]--;cnt[A]++;}});
+  [A,B].forEach(function(f){if(cnt[f]>spots)l.over.push({team:f,n:cnt[f]});});});
+ return plan;}
+function dr_for_plan(){return chkDrops();}
 function chkYahoo(mv,dr){
- var pairs={},order=[];mv.forEach(function(m){var k=[m.from,m.to].sort().join("|");if(!pairs[k]){pairs[k]={a:[m.from,m.to].sort()[0],b:[m.from,m.to].sort()[1],ab:[],ba:[]};order.push(k);}pairs[k][m.from===pairs[k].a?"ab":"ba"].push(m.key);});
+ var plan=chkPlan(mv,getMe()),legs=plan.legs,hopKeys=Object.keys(plan.hops);
  var box=h("div",{class:"chk-yh",id:"chk-yahoo"},[h("div",{class:"chk-sec",text:"TO ENTER IN YAHOO"}),
-  h("div",{class:"chk-yh-n",text:order.length>1?"Yahoo trades are between two teams, so this goes in as "+order.length+" separate trades:":"One two-team trade:"})]);
- order.forEach(function(k,i){var p=pairs[k],side=function(f,keys){return h("div",{class:"yh-s"},[tPill(T[f],"sm"),h("span",{text:keys.length?keys.map(chkNm).join(", "):"nothing"})]);};
-  box.appendChild(h("div",{class:"yh-t"},[h("small",{text:"TRADE "+(i+1)}),side(p.a,p.ab),h("span",{class:"yh-x",text:"⇄"}),side(p.b,p.ba)]));});
- if(dr.length){var d=h("div",{class:"yh-t"},[h("small",{text:"DROPS"})]);dr.forEach(function(x){d.appendChild(h("div",{class:"yh-s"},[tPill(T[x.team],"sm"),h("span",{text:CHK_ROW[x.key].n})]));});box.appendChild(d);}
+  h("div",{class:"chk-yh-n",text:legs.length>1?"Yahoo trades are between two teams, so this goes in as "+legs.length+" trades"+(plan.hub?", in this order, with "+T[plan.hub].short+" as the go-between":"")+":":"One two-team trade:"})]);
+ function side(f,keys,hopLeg){return h("div",{class:"yh-s"},[tPill(T[f],"sm"),h("div",{class:"yh-a"},keys.length?keys.map(function(k){var hp=plan.hops[k],el=h("span",{class:"yh-p"},[chkNm(k)]);
+   if(hp)el.appendChild(h("span",{class:"yh-hop",title:"Passes through "+T[plan.hub].short+" between two trades",text:"↻ hop "+T[hp.from].short+" → "+T[hp.to].short}));return el;}):[h("span",{class:"yh-none",text:"—"})])]);}
+ legs.forEach(function(l,i){box.appendChild(h("div",{class:"yh-t"},[h("small",{text:"TRADE "+(i+1)}),side(l.a,l.ab),h("span",{class:"yh-x",text:"⇄"}),side(l.b,l.ba)]));
+  l.over.forEach(function(o){box.appendChild(h("div",{class:"yh-w",text:"After trade "+(i+1)+", "+T[o.team].short+" would hold "+o.n+" of "+TKL.roster.spots+" players: Yahoo won't accept it. Make the drops first, or change the order."}));});});
+ if(dr.length){var d=h("div",{class:"yh-t"},[h("small",{text:"DROPS"})]);dr.forEach(function(x){d.appendChild(h("div",{class:"yh-s"},[tPill(T[x.team],"sm"),h("div",{class:"yh-a"},[h("span",{class:"yh-p",text:CHK_ROW[x.key].n})])]));});box.appendChild(d);}
+ var hopPlayers=hopKeys.filter(function(k){return !chkIsPick(k);});
+ if(hopPlayers.length)box.appendChild(h("div",{class:"yh-w warn",text:hopPlayers.map(function(k){return CHK_ROW[k].n;}).join(", ")+(hopPlayers.length>1?" pass":" passes")+" through "+T[plan.hub].short+" between two trades. The league holds a traded-for player for "+TKL.cooldown.days+" days, so the commissioner has to allow the second trade straight away."}));
+ var oneWay=legs.filter(function(l){return !l.ab.length||!l.ba.length;}).length;
+ if(oneWay)box.appendChild(h("div",{class:"yh-w",text:oneWay+(oneWay>1?" trades have":" trade has")+" nothing coming back: check Yahoo accepts a one-way trade."}));
  if(mv.some(function(m){return chkIsPick(m.key);}))box.appendChild(h("div",{class:"chk-yh-n",text:"Yahoo allows draft pick trades in this league. Tell the commissioner too, so the pick ledger is updated."}));
  return box;}
 function renderCheck(){
  var box=document.getElementById("chk");if(!box)return;box.textContent="";
  var me=getMe();if(CHK.teams.length<2){CHK.teams=[];if(me&&T[me])CHK.teams.push(me);D.teams.forEach(function(t){if(CHK.teams.length<2&&CHK.teams.indexOf(t.id)<0)CHK.teams.push(t.id);});}
  var mv=chkMoves(),dr=chkDrops(),il=chkIls(),res=mv.length?chkRun(mv,CHK.now,dr,il):null,cls=!res?"":res.status==="LEGAL"?"LEGAL":res.status==="BLOCKED"?"BLOCKED":"REVIEW";
- var spots=TKL.roster.spots;
- box.appendChild(h("div",{class:"chk-h"},[h("b",{text:"TRADE MACHINE"}),h("span",{text:"Pick the teams, tap the players and picks each one sends. It flags what the league rules block and why — never whether a trade is fair."}),
+ var spots=TKL.roster.spots,capNn=TKL.yahoo.activeSlots+TKL.yahoo.benchSlots;
+ function act(el,fn){el.addEventListener("click",fn);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();fn();}});}
+ box.appendChild(h("div",{class:"chk-h"},[h("div",{class:"chk-ti"},[h("b",{text:"TRADE MACHINE"}),h("span",{text:"Tap players and picks to send them. It shows what the league rules block, never whether a trade is fair."})]),
   h("div",{class:"chk-act"},[res?h("span",{class:"chk-st "+cls,id:"chk-top",text:res.status}):null,h("button",{type:"button",class:"chk-btn",id:"chk-reset",text:"Reset"}),h("button",{type:"button",class:"chk-btn",id:"chk-copy",text:"Copy link"}),res?h("button",{type:"button",class:"chk-btn",id:"chk-text",text:"Copy summary"}):null])]));
- box.appendChild(h("div",{class:"chk-teams",role:"group","aria-label":"Teams in the trade"},D.teams.map(function(t){var on=CHK.teams.indexOf(t.id)>=0;
-  var e=h("button",{type:"button",class:"tpill tp-btn"+(on?" on":""),style:on?"background:"+t.color+";color:"+t.text:"","aria-pressed":on?"true":"false",title:t.name,text:t.short});e.addEventListener("click",function(){chkToggleTeam(t.id);});return e;})));
- box.appendChild(h("div",{class:"chk-hint",text:CHK.teams.length+" teams · tap a team to add or remove it (2–"+CHK_MAX+")"}));
+ /* the teams in the trade: a quiet summary line that opens into the full picker */
+ var picker=h("div",{class:"chk-teams",role:"group","aria-label":"Teams in the trade (2 to "+CHK_MAX+")"},D.teams.map(function(t){var on=CHK.teams.indexOf(t.id)>=0;
+  var e=h("button",{type:"button",class:"tpill tp-btn"+(on?" on":""),style:on?"background:"+t.color+";color:"+t.text:"","aria-pressed":on?"true":"false",title:t.name,text:t.short});e.addEventListener("click",function(){chkToggleTeam(t.id);});return e;}));
+ var det=h("details",{class:"chk-tm"},[h("summary",null,[h("span",{class:"tm-l",text:"TEAMS"})].concat(CHK.teams.map(function(f){return tPill(T[f],"");})).concat([h("span",{class:"tm-add",text:"add or remove"})])),picker]);
+ if(CHK.tmOpen)det.open=true;det.addEventListener("toggle",function(){CHK.tmOpen=det.open;});box.appendChild(det);
  var info=res&&res.teams&&Object.keys(res.teams).length?res.teams:null;
- /* --- what happens: one card per team --- */
- if(res&&info){var sum=h("div",{class:"chk-sum",id:"chk-sum"});
-  CHK.teams.forEach(function(fid){var t=T[fid],ia=info[fid];if(!ia)return;
-   var sends=mv.filter(function(m){return m.from===fid;}),gets=mv.filter(function(m){return m.to===fid;}),drs=dr.filter(function(x){return x.team===fid;}),mine=res.rules.filter(function(r){return r.team===t.short;});
-   var d=Math.round((ia.ca-ia.cb)*100)/100,out=ia.ca>D.cap.ceiling||ia.ca<D.cap.floor;
-   var card=h("section",{class:"chk-sc","data-team":fid},[
-    h("div",{class:"chk-sc-h",style:"background:"+t.color+";color:"+t.text},[h("b",{text:t.short}),h("small",{text:tTitle(t)}),h("span",{class:"chk-pay"},[h("span",{text:ia.cb+" → "}),h("b",{text:String(ia.ca)}),d?h("em",{text:(d>0?"+":"")+d}):null])]),
-    h("div",{class:"chk-sc-b"},[chkMeter(ia.cb,ia.ca),h("div",{class:"chk-cap-t"+(out?" out":""),text:(ia.ca>=D.cap.floor&&ia.ca<=D.cap.ceiling?"In the "+D.cap.floor+"–"+D.cap.ceiling+" band":ia.ca>D.cap.ceiling?(Math.round((ia.ca-D.cap.ceiling)*100)/100)+" over the "+D.cap.ceiling+" ceiling":(Math.round((D.cap.floor-ia.ca)*100)/100)+" under the "+D.cap.floor+" floor")+" · room "+Math.round((D.cap.ceiling-ia.ca)*100)/100})]),
-    h("div",{class:"chk-ck"},[["CAP",["cap","ladder"]],["ROSTER "+ia.na+"/"+spots,["size","drop"]],["SLOTS",["slots","il"]],["LIMITS",["antitank"]],["HELD",["cooldown"]]].map(function(c){var rr=mine.filter(function(r){return c[1].indexOf(r.rule)>=0;}),w=chkWorst(rr);return h("span",{class:"ck "+w},[h("i",{text:chkIcon(w)}),c[0]]);}))]);
-   var body=card.querySelector(".chk-sc-b");
-   function list(label,cls,arr,mk){if(!arr.length)return;var g=h("div",{class:"chk-fl "+cls},[h("small",{text:label})]);arr.forEach(function(x){g.appendChild(mk(x));});body.appendChild(g);}
-   function pl(k,pill,arrow){if(chkIsPick(k))return chkPickLine(k,pill,arrow);var r=CHK_ROW[k],dd=DR.byKey[k];return h("div",{class:"fl-p"+(isRk(k)?" rk":"")},[statusChip(r.st),h("span",{class:"fl-n",text:r.n}),isRk(k)?h("span",{class:"in-tag rk",text:dd&&dd.rookie?"R · "+dd.label:"R"}):null,h("span",{class:"fl-pos",text:r.pos||""}),pill?h("span",{class:"fl-via"},[arrow,tPill(pill,"sm")]):null,h("b",{class:"fl-c",text:String(r.c)})]);}
-   list("GETS","get",gets,function(m){return pl(m.key,T[m.from],"←");});
-   list("SENDS","send",sends,function(m){return pl(m.key,T[m.to],"→");});
-   list("DROPS","drop",drs,function(x){return pl(x.key,null,"");});
-   var isP=function(m){return !chkIsPick(m.key);},net=gets.filter(isP).length-sends.filter(isP).length-drs.length;
-   body.appendChild(h("div",{class:"chk-net",text:"Roster "+ia.nb+" → "+ia.na+(ia.na>spots?" — over by "+(ia.na-spots):"")+(net?" ("+(net>0?"+":"")+net+")":"")+" · lineup + bench "+ia.nn+"/"+(TKL.yahoo.activeSlots+TKL.yahoo.benchSlots)+" · IL "+ia.il+"/"+TKL.yahoo.ilSlots}));
-   sum.appendChild(card);});
-  box.appendChild(sum);}
- /* --- editor: the post-trade roster of every team --- */
  var cols=h("div",{class:"chk-cols"});
  CHK.teams.forEach(function(fid){var t=T[fid],base=chkRows()[fid].roster,ia=info&&info[fid],N=D.season.counting.n;
   var out=mv.filter(function(m){return m.from===fid;}).reduce(function(o,m){o[m.key]=m.to;return o;},{}),incoming=mv.filter(function(m){return m.to===fid&&!chkIsPick(m.key);}),inPk=mv.filter(function(m){return m.to===fid&&chkIsPick(m.key);});
-  var outPk=mv.filter(function(m){return m.from===fid&&chkIsPick(m.key);});
+  var outPk=mv.filter(function(m){return m.from===fid&&chkIsPick(m.key);}),mine=ia&&res?res.rules.filter(function(r){return r.team===t.short;}):[];
   var keep=base.filter(function(r){return !out[r.k]&&!CHK.drop[r.k];}).concat(incoming.map(function(m){return CHK_ROW[m.key];})),fromOf={};incoming.forEach(function(m){fromOf[m.key]=m.from;});
   var injS={};keep.forEach(function(r){if(chkInj(r))injS[r.k]=1;});
   keep.sort(function(a,b){return b.c-a.c||(injS[a.k]?1:0)-(injS[b.k]?1:0)||a.n.localeCompare(b.n);});
-  var cb=chkCap(base),ca=ia?ia.ca:cb,overSpots=keep.length>spots,showDrop=true;
-  var head=h("div",{class:"chk-ch",style:"background:"+t.color+";color:"+t.text},[h("b",{text:t.short}),h("small",{text:tTitle(t)}),
-   h("span",{class:"chk-pay"},[h("span",{text:cb+(ia?" → ":"")}),ia?h("b",{text:String(ca)}):null]),h("span",{class:"chk-cnt"+(overSpots?" over":""),text:keep.length+"/"+spots})]);
-  var lim=null;if(ia){var A=ia.a,B=ia.b,chip=function(txt,level,chg){return h("span",{class:"lim "+level+(chg?" chg":""),text:txt});};
-   lim=h("div",{class:"chk-lim"},[chip("INJ "+A.injured.count+"/"+TKR.longTermInjured.max,A.injured.level,A.injured.count!==B.injured.count),chip("1-POS "+A.singlePosition.count+"/"+TKR.singlePosition.max,A.singlePosition.level,A.singlePosition.count!==B.singlePosition.count),
-    chip(A.coverage.level==="ok"?"POSITIONS ✓":"POSITIONS short",A.coverage.level,JSON.stringify(A.coverage.by)!==JSON.stringify(B.coverage.by)),chip(A.lineup.level==="ok"?"LINEUP ✓":"LINEUP short",A.lineup.level,A.lineup.empty.length!==B.lineup.empty.length)]);}
-  var warn=null;if(ia){var parts=[];if(ia.na>spots)parts.push("Over the "+spots+"-player limit by "+(ia.na-spots)+": drop "+(ia.na-spots)+" or send more.");var capNn=TKL.yahoo.activeSlots+TKL.yahoo.benchSlots;if(ia.nn>capNn)parts.push("Lineup + bench would hold "+ia.nn+" of "+capNn+": drop someone, or move an injured player to IL first (incoming players can't go straight on IL).");
+  var cb=chkCap(base),ca=ia?ia.ca:cb,d=Math.round((ca-cb)*100)/100,outBand=ca>D.cap.ceiling||ca<D.cap.floor,overSpots=keep.length>spots;
+  var head=h("div",{class:"chk-ch"},[h("span",{class:"chk-mono",style:"background:"+t.color+";color:"+t.text,text:chkInitials(t.short)}),
+   h("div",{class:"chk-nm"},[h("b",{text:t.short}),h("small",{text:tTitle(t)})]),
+   h("div",{class:"chk-pay"},[h("span",{text:cb+(ia?" → ":"")}),ia?h("b",{text:String(ca)}):null,ia&&d?h("em",{class:d>0?"up":"dn",text:(d>0?"+":"")+d}):null])]);
+  var capLine=h("div",{class:"chk-cap"},[chkMeter(cb,ca),h("div",{class:"chk-cap-t"+(outBand?" out":""),text:(ca>=D.cap.floor&&ca<=D.cap.ceiling?"In the "+D.cap.floor+"–"+D.cap.ceiling+" band":ca>D.cap.ceiling?(Math.round((ca-D.cap.ceiling)*100)/100)+" over the "+D.cap.ceiling+" ceiling":(Math.round((D.cap.floor-ca)*100)/100)+" under the "+D.cap.floor+" floor")+" · room "+Math.round((D.cap.ceiling-ca)*100)/100})]);
+  var checks=null,facts=null,warn=null;
+  if(ia){var A=ia.a,B=ia.b,fa=function(txt,level,chg){return h("span",{class:"fa "+level+(chg?" chg":""),text:txt});};
+   checks=h("div",{class:"chk-ck"},[["CAP",["cap","ladder"]],["ROSTER",["size","drop"]],["SLOTS",["slots","il"]],["LIMITS",["antitank"]],["HELD",["cooldown"]]].map(function(c){var w=chkWorst(mine.filter(function(r){return c[1].indexOf(r.rule)>=0;}));return h("span",{class:"ck "+w},[h("i",{text:chkIcon(w)}),c[0]]);}));
+   facts=h("div",{class:"chk-fa"},[fa("Roster "+ia.nb+" → "+ia.na+"/"+spots,ia.na>spots?"over":"ok",ia.na!==ia.nb),fa("Lineup + bench "+ia.nn+"/"+capNn,ia.nn>capNn?"over":"ok",false),fa("IL "+ia.il+"/"+TKL.yahoo.ilSlots,"ok",false),
+    fa("Injured "+A.injured.count+"/"+TKR.longTermInjured.max,A.injured.level,A.injured.count!==B.injured.count),fa("Single-position "+A.singlePosition.count+"/"+TKR.singlePosition.max,A.singlePosition.level,A.singlePosition.count!==B.singlePosition.count),
+    fa(A.coverage.level==="ok"?"Positions ✓":"Positions short",A.coverage.level,JSON.stringify(A.coverage.by)!==JSON.stringify(B.coverage.by)),fa(A.lineup.level==="ok"?"Lineup ✓":"Lineup short",A.lineup.level,A.lineup.empty.length!==B.lineup.empty.length)]);
+   var parts=[];if(ia.na>spots)parts.push("Over the "+spots+"-player limit by "+(ia.na-spots)+": drop "+(ia.na-spots)+" or send more.");
+   if(ia.nn>capNn)parts.push("Lineup + bench would hold "+ia.nn+" of "+capNn+": drop someone, or move an injured player to IL first (incoming players can't go straight on IL).");
    if(parts.length)warn=h("div",{class:"chk-warn",text:parts.join(" ")});}
-  var col=h("section",{class:"chk-col","data-team":fid},[head,lim,warn]),host=h("div",{class:"players"});col.appendChild(host);
-  var outs=base.filter(function(r){return out[r.k];});
-  if(outs.length||outPk.length){host.appendChild(h("div",{class:"nc-div out",text:"sending out"}));
-   outs.forEach(function(r){var el=chkRowEl(r,fid,{state:"out",to:out[r.k]});var act=function(){delete CHK.sel[r.k];chkTouch();};
-    el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);
-    var dests=CHK.teams.filter(function(x){return x!==fid;});
-    if(dests.length>1)host.appendChild(h("div",{class:"chk-to",role:"group","aria-label":"Who gets "+r.n},[h("small",{text:"GOES TO"})].concat(dests.map(function(x){var on=CHK.sel[r.k]===x,tt=T[x],e=h("button",{type:"button",class:"tpill to"+(on?" on":""),style:on?"background:"+tt.color+";color:"+tt.text:"","aria-pressed":on?"true":"false",title:tt.name,text:tt.short});
-     e.addEventListener("click",function(ev){ev.stopPropagation();CHK.sel[r.k]=x;chkTouch();});return e;}))));});
-   outPk.forEach(function(m){var k=m.key,el=chkPickRow(k,fid,{state:"out",to:m.to});var act=function(){delete CHK.sel[k];chkTouch();};
-    el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);var chips=chkDestChips(k,fid);if(chips)host.appendChild(chips);});
-   host.appendChild(h("div",{class:"nc-div",text:"after the trade"}));}
+  var col=h("section",{class:"chk-col chk-sc","data-team":fid,style:"--tc:"+t.color},[head,capLine,checks,facts,warn]),host=h("div",{class:"players"});col.appendChild(host);
   var ilOcc=keep.filter(function(r){return !fromOf[r.k]&&(r.s==="IL"||r.s==="IL+"||CHK.il[r.k]);}).length,ilOpen=TKL.yahoo.ilSlots-ilOcc;
   var rowsEff=keep.map(function(r,i){var isIn=!!fromOf[r.k];return {r:r,isIn:isIn,nc:i>=N,eff:isIn?chkClone(r,{s:null}):CHK.il[r.k]?chkClone(r,{s:"IL"}):r};});
-  var isIlRow=function(x){return x.eff.s==="IL"||x.eff.s==="IL+";},mainRows=rowsEff.filter(function(x){return !isIlRow(x);}),ilRows=rowsEff.filter(isIlRow);
+  var isIlRow=function(x){return x.eff.s==="IL"||x.eff.s==="IL+";};
   function addRow(x){var r=x.r,isIn=x.isIn,open=!!CHK.open[r.k],onIl=r.s==="IL"||r.s==="IL+",more=null;
    if(!isIn){more=h("button",{type:"button",class:"tm-more"+(open?" on":""),"aria-label":"More for "+r.n+": drop or move to IL","aria-expanded":open?"true":"false",title:"Drop or move to IL",text:"⋯"});
     more.addEventListener("click",function(e){e.stopPropagation();if(CHK.open[r.k])delete CHK.open[r.k];else CHK.open[r.k]=true;renderCheck();});}
    var el=chkRowEl(x.eff,fid,{state:isIn?"in":"",from:fromOf[r.k],nc:x.nc,more:more});
-   var act=function(){if(isIn)delete CHK.sel[r.k];else CHK.sel[r.k]=chkNext(fid);chkTouch();};
-   el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);
+   act(el,function(){if(isIn)delete CHK.sel[r.k];else CHK.sel[r.k]=chkNext(fid);chkTouch();});host.appendChild(el);
    if(open&&!isIn)host.appendChild(chkTray(r,onIl,ilOpen));}
+  var arrivals=rowsEff.filter(function(x){return x.isIn;}),outs=base.filter(function(r){return out[r.k];});
+  /* what leaves, as slim lines; the roster below is the team as it will look after the trade (arrivals highlighted in place) */
+  if(outs.length||outPk.length){host.appendChild(h("div",{class:"nc-div out",text:"sending out"}));
+   outs.forEach(function(r){host.appendChild(chkOutLine(r.k,fid,out[r.k]));});
+   outPk.forEach(function(m){host.appendChild(chkOutLine(m.key,fid,m.to));});}
+  var mainRows=rowsEff.filter(function(x){return !isIlRow(x);}),ilRows=rowsEff.filter(isIlRow);
+  if(arrivals.length||inPk.length||outs.length||outPk.length)host.appendChild(h("div",{class:"nc-div",text:"roster after the trade"}));
   var div=false;
   mainRows.forEach(function(x){if(x.nc&&!div){div=true;host.appendChild(h("div",{class:"nc-div",text:"beyond top "+N+" · not counted"}));}addRow(x);});
   if(ilRows.length){host.appendChild(h("div",{class:"nc-div il",text:"injured list · "+ilRows.length+"/"+TKL.yahoo.ilSlots}));ilRows.forEach(addRow);}
   var drs=base.filter(function(r){return CHK.drop[r.k]&&!out[r.k];});
-  if(drs.length){host.appendChild(h("div",{class:"nc-div out",text:"dropping"}));drs.forEach(function(r){var el=chkRowEl(r,fid,{state:"drop"});var act=function(){delete CHK.drop[r.k];chkTouch();};el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);});}
-  var mine=Object.keys(TKP).filter(function(k){return TKP[k].o===fid&&!CHK.sel[k]&&chkOffered(k);}).sort(),inK={};inPk.forEach(function(m){inK[m.key]=m.from;});
-  var allPk=mine.concat(inPk.map(function(m){return m.key;})).sort();
-  if(allPk.length){host.appendChild(h("div",{class:"nc-div",title:"1st-round picks can only be traded before the draft (after keepers), and only for the current year's draft",text:"next season's picks · 2nd and 3rd round"}));
-   allPk.forEach(function(k){var isIn=!!inK[k],el=chkPickRow(k,fid,{state:isIn?"in":"",from:inK[k]});var act=function(){if(isIn)delete CHK.sel[k];else CHK.sel[k]=chkNext(fid);chkTouch();};
-    el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);});}
+  if(drs.length){host.appendChild(h("div",{class:"nc-div out",text:"dropping"}));drs.forEach(function(r){var el=chkRowEl(r,fid,{state:"drop"});act(el,function(){delete CHK.drop[r.k];chkTouch();});host.appendChild(el);});}
+  var pkFrom={};inPk.forEach(function(m){pkFrom[m.key]=m.from;});
+  var picks=Object.keys(TKP).filter(function(k){return TKP[k].o===fid&&!CHK.sel[k]&&chkOffered(k);}).concat(inPk.map(function(m){return m.key;})).sort();
+  if(picks.length){host.appendChild(h("div",{class:"nc-div",title:"1st-round picks can only be traded before the draft (after keepers), and only for the current year's draft",text:"next season's picks · 2nd and 3rd round"}));
+   picks.forEach(function(k){var isIn=!!pkFrom[k],el=chkPickRow(k,fid,{state:isIn?"in":"",from:pkFrom[k]});act(el,function(){if(isIn)delete CHK.sel[k];else CHK.sel[k]=chkNext(fid);chkTouch();});host.appendChild(el);});}
   cols.appendChild(col);});
- box.appendChild(h("div",{class:"chk-sec",text:"AFTER THE TRADE · tap a player or pick to send it; tap a sent one to undo"}));
  box.appendChild(cols);
  if(!res)box.appendChild(h("div",{class:"chk-empty"},[h("b",{text:"Yahoo can't tell you whether a trade is allowed here. "}),"Tap a player to send him: payroll against the band, cooldowns, roster limits and the drop rule update live, 3+ team deals work, and you get a link and a message to paste into the group chat."]));
  else{var v=h("div",{class:"chk-v",id:"chk-verdict"}),rank={blocked:0,review:1,info:2,ok:3},issues=res.rules.filter(function(r){return r.level!=="ok";}).sort(function(a,b){return rank[a.level]-rank[b.level];}),oks=res.rules.filter(function(r){return r.level==="ok";});
-  v.appendChild(h("div",null,[h("span",{class:"chk-st "+cls,text:res.status}),h("span",{class:"chk-sub",text:res.status==="LEGAL"?"passes the automated rules; approval stays with the group chat / commissioner":res.status==="BLOCKED"?"the league rules do not allow this as it stands":"needs the commissioner to look at it"})]));
+  v.appendChild(h("div",{class:"chk-vh"},[h("span",{class:"chk-st "+cls,text:res.status}),h("span",{class:"chk-sub",text:res.status==="LEGAL"?"Passes the automated rules. Approval stays with the group chat and the commissioner.":res.status==="BLOCKED"?"The league rules don't allow this as it stands.":"Needs the commissioner's review."})]));
   function line(r){var tt=r.team&&D.teams.filter(function(x){return x.short===r.team;})[0];return h("div",{class:"chk-r "+r.level,"data-rule":r.rule,title:r.source},[h("i",{text:chkIcon(r.level)}),h("div",null,[tt?tPill(tt,"sm"):null,r.reason])]);}
   issues.forEach(function(r){v.appendChild(line(r));});
   if(oks.length){var dt=h("details",{class:"chk-ok"},[h("summary",{text:"✓ "+oks.length+" rule"+(oks.length>1?"s":"")+" passed"})]);oks.forEach(function(r){dt.appendChild(line(r));});v.appendChild(dt);}

@@ -692,8 +692,8 @@ class TestRenderedCards(unittest.TestCase):
           R.cols=q('#chk .chk-col').length;
           var btnOf=function(f,k){var col=document.querySelector('#chk .chk-col[data-team="'+f+'"]'),n=base[f].roster.filter(function(r){return r.k===k;})[0].n;return Array.prototype.filter.call(col.querySelectorAll('.player-row'),function(x){return x.querySelector('.pname').textContent.indexOf(n)>=0;})[0];};
           btnOf(R.a,R.ka).click();btnOf(R.b,R.kb).click();
-          R.sumCards=q('#chk .chk-sc').length;R.sends=q('#chk .chk-fl.send .fl-p').length;R.gets=q('#chk .chk-fl.get .fl-p').length;R.checks=q('#chk .chk-sc .ck').length;
-          R.outRows=q('#chk .player-row.tm-out').length;R.inRows=q('#chk .player-row.tm-in').length;R.cyc=q('#chk .chk-to').length;R.bar=!!document.querySelector('#chk .chk-bar');
+          R.sumCards=q('#chk .chk-sc').length;R.sends=q('#chk .chk-ol').length;R.gets=q('#chk .player-row.tm-in').length;R.checkCards=q('#chk .chk-sc .chk-ck').length;R.checks=q('#chk .chk-sc .ck').length;R.sending=q('#chk .nc-div.out').length;
+          R.outRows=q('#chk .chk-ol').length;R.inRows=q('#chk .player-row.tm-in').length;R.cyc=q('#chk .chk-to').length;R.bar=!!document.querySelector('#chk .chk-bar');
           var grp=document.querySelector('#chk .chk-to');R.before=grp.querySelector('.on').textContent;
           var alt=Array.prototype.filter.call(grp.querySelectorAll('.tpill:not(.on)'),function(x){return true;})[0];R.alt=alt.textContent;alt.click();
           R.afterCyc=document.querySelector('#chk .chk-to .on').textContent;R.outFirst=document.querySelector('#chk .chk-col .players').firstElementChild.textContent;
@@ -713,9 +713,11 @@ class TestRenderedCards(unittest.TestCase):
         self.assertGreaterEqual(r["onPills"], 2)
         self.assertTrue(r["pillColored"])
         self.assertGreaterEqual(r["cols"], 3)
-        self.assertGreaterEqual(r["sumCards"], 3)                                  # a summary card per team: who gets and sends what
-        self.assertEqual((r["sends"], r["gets"]), (2, 2))
-        self.assertEqual(r["checks"], r["sumCards"] * 5)                           # CAP / ROSTER / SLOTS / LIMITS / HELD per team
+        self.assertGreaterEqual(r["sumCards"], 3)                                  # one card per team in the trade
+        self.assertEqual((r["sends"], r["gets"]), (2, 2))                          # who sends and who receives what, inside each card
+        self.assertGreaterEqual(r["sending"], 1)
+        self.assertGreaterEqual(r["checkCards"], 2)
+        self.assertEqual(r["checks"], r["checkCards"] * 5)                         # CAP / ROSTER / SLOTS / LIMITS / HELD for each team taking part
         self.assertEqual((r["outRows"], r["inRows"]), (2, 2))                      # the editor shows the post-trade roster: who leaves, who arrives
         self.assertTrue(r["bar"])
         self.assertGreaterEqual(r["cyc"], 2)                                       # with 3+ teams the destination is changeable
@@ -738,7 +740,7 @@ class TestRenderedCards(unittest.TestCase):
         self.assertTrue(r["cleared"])
         self.assertNotIn("check=", r["urlAfterReset"])
         again = self._drive("""
-          R.verdict=!!document.getElementById('chk-verdict');R.on=document.querySelectorAll('#chk .player-row.tm-out').length;R.cols=document.querySelectorAll('#chk .chk-col').length;
+          R.verdict=!!document.getElementById('chk-verdict');R.on=document.querySelectorAll('#chk .chk-ol').length;R.cols=document.querySelectorAll('#chk .chk-col').length;
           R.hidden=document.getElementById('trade-lab').classList.contains('tab-off');""",
                             hash_="?check=%s~%s,%s~%s" % (r["ka"], r["b"], r["kb"], r["c"]))
         self.assertTrue(again["verdict"])
@@ -758,7 +760,7 @@ class TestRenderedCards(unittest.TestCase):
           R.r1Blocked=res.rules.some(function(x){return x.rule==='pick'&&x.level==='blocked'&&x.reason.indexOf('1st-round')>=0;});
           var rows=col.querySelectorAll('.pickrow');rows[0].click();                      // a 2nd
           var rev=document.querySelector('#chk .chk-r.review[data-rule="pick"]');R.r2Review=!!rev&&rev.textContent.indexOf('Trade Tank')>=0;
-          R.sendsPick=q('#chk .chk-fl.send .fl-p.pk').length;R.pickOut=q('#chk .pickrow.tm-out').length;R.url=location.search;
+          R.pickOut=q('#chk .chk-ol').length;R.url=location.search;
           R.slotsInSummary=q('#chk .chk-sc .ck').some(function(c){return c.textContent.indexOf('SLOTS')>=0;});
           // the injured list is its own group, and IL players carry an IL chip
           var il=q('#chk .nc-div.il');R.ilGroups=il.length;R.ilHead=il.length?il[0].textContent:'';
@@ -772,7 +774,7 @@ class TestRenderedCards(unittest.TestCase):
         self.assertTrue(all("Round 1" not in x for x in r["pickLabels"]), r["pickLabels"])
         self.assertTrue(r["r1Blocked"])
         self.assertTrue(r["r2Review"])
-        self.assertEqual((r["sendsPick"], r["pickOut"]), (1, 1))
+        self.assertEqual(r["pickOut"], 1)
         self.assertIn("check=", r["url"])
         self.assertTrue(r["slotsInSummary"])
         self.assertGreaterEqual(r["ilGroups"], 1)                                  # an injured-list section per team that has IL players
@@ -792,7 +794,7 @@ class TestRenderedCards(unittest.TestCase):
           R.reason=(res.rules.filter(function(x){return x.rule==='cooldown'&&x.level==='blocked';})[0]||{}).reason||'';""")
         self.assertTrue(r["pills"])
         for p in r["pills"]:
-            self.assertRegex(p, r"^FREE IN \d+ DAYS?$")                           # days left, not a date to count back from
+            self.assertRegex(p, r"^TRADABLE IN \d+ DAYS?$")                       # days left, not a date to count back from
         for t in r["titles"]:
             self.assertRegex(t, r"can be traded again on 20\d\d-\d\d-\d\d")  # the date stays in the tooltip
         self.assertRegex(r["reason"], r"can't be traded for \d+ more days? \(until 20\d\d-\d\d-\d\d\)")
@@ -815,6 +817,47 @@ class TestRenderedCards(unittest.TestCase):
             self.assertTrue(ok, f"{name}: no rookie styling in the team card")
         for name, ok in zip(r["list"], r["search"]):
             self.assertTrue(ok, f"{name}: not a rookie in search")
+
+    def test_yahoo_steps_route_one_way_flows_through_a_hub_so_every_trade_has_two_sides(self):
+        """Yahoo trades are two-team. A ring (A->B->C->A) must become two-sided trades with assets hopping through a hub, in an order
+        where every asset is owned by the giver at that moment, and the final owners match the proposal exactly."""
+        r = self._drive("""
+          var D2=NBA_NAV.D,base=D2.scenarios[''].teams,ids=D2.teams.map(function(t){return t.id;});
+          var pick=function(i){var rr=base[ids[i]].roster;return rr[rr.length-1-(i%2)].k;};
+          var mk=function(pairs){return pairs.map(function(p){return {key:pick(p[0]),from:ids[p[0]],to:ids[p[1]]};});};
+          var cases={ring3:mk([[0,1],[1,2],[2,0]]),ring4:mk([[0,1],[1,2],[2,3],[3,0]]),ring6:mk([[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]]),
+            star:[1,2,3].map(function(j){return {key:base[ids[0]].roster[j].k,from:ids[0],to:ids[j]};}),chain:mk([[0,1],[1,2]]),mixed:mk([[0,1],[1,0],[1,2],[2,0]]),gift:mk([[0,1]]),
+            twoway:[{key:pick(0),from:ids[0],to:ids[1]},{key:pick(1),from:ids[1],to:ids[0]}]};
+          // the same player can't be in two cases' second pair: give the mixed / twoway cases their own distinct assets
+          cases.mixed=[{key:pick(0),from:ids[0],to:ids[1]},{key:base[ids[1]].roster[0].k,from:ids[1],to:ids[0]},{key:pick(1),from:ids[1],to:ids[2]},{key:pick(2),from:ids[2],to:ids[0]}];
+          R.out={};
+          Object.keys(cases).forEach(function(name){var mv=cases[name],plan=NBA_NAV.plan(mv,null),owner={};mv.forEach(function(m){owner[m.key]=m.from;});var ok=true;
+            plan.legs.forEach(function(l){l.ab.forEach(function(k){if(owner[k]!==l.a)ok=false;owner[k]=l.b;});l.ba.forEach(function(k){if(owner[k]!==l.b)ok=false;owner[k]=l.a;});});
+            mv.forEach(function(m){if(owner[m.key]!==m.to)ok=false;});
+            R.out[name]={ok:ok,legs:plan.legs.length,oneWay:plan.legs.filter(function(l){return !l.ab.length||!l.ba.length;}).length,hub:plan.hub,hops:Object.keys(plan.hops).length};});
+          // and it renders: a ring shows no "nothing" sides, one chip per hopped asset
+          R.ids=ids;R.keys=[pick(0),pick(1),pick(2)];""")
+        for name, o in r["out"].items():
+            self.assertTrue(o["ok"], name)                                         # every step is valid and the end state is exactly the proposal
+        for ring, n in (("ring3", 3), ("ring4", 4), ("ring6", 6)):
+            self.assertEqual(r["out"][ring]["legs"], n - 1, ring)                  # a ring of n teams = n-1 trades through one hub
+            self.assertEqual(r["out"][ring]["oneWay"], 0, ring)                    # none of them is one-sided
+            self.assertEqual(r["out"][ring]["hops"], n - 2, ring)
+        self.assertEqual(r["out"]["twoway"]["legs"], 1)                            # a pair that already trades both ways stays one trade
+        self.assertEqual(r["out"]["twoway"]["hops"], 0)
+        self.assertEqual(r["out"]["gift"]["oneWay"], 1)                            # a true one-way gift can't be made two-sided
+        self.assertLessEqual(r["out"]["chain"]["oneWay"], 1)
+        ids, ks = r["ids"], r["keys"]
+        page = self._drive("""
+          var q=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+          R.legs=q('#chk-yahoo .yh-t').length;R.none=q('#chk-yahoo .yh-none').length;R.hops=q('#chk-yahoo .yh-hop').length;R.intro=document.querySelector('#chk-yahoo .chk-yh-n').textContent;
+          R.warn=q('#chk-yahoo .yh-w.warn').map(function(x){return x.textContent;});""",
+                           hash_="?check=%s~%s,%s~%s,%s~%s" % (ks[0], ids[1], ks[1], ids[2], ks[2], ids[0]))
+        self.assertEqual(page["legs"], 2)                                          # 3-team ring = 2 trades
+        self.assertEqual(page["none"], 0)                                          # no "nothing" sides
+        self.assertGreaterEqual(page["hops"], 2)                                   # the hopped asset is marked on both of its trades
+        self.assertIn("go-between", page["intro"])
+        self.assertTrue(page["warn"] and "commissioner" in page["warn"][0])        # the cooldown caveat for a hopped player
 
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:
