@@ -857,7 +857,8 @@ class TestRenderedCards(unittest.TestCase):
         self.assertEqual(page["none"], 0)                                          # no "nothing" sides
         self.assertGreaterEqual(page["hops"], 2)                                   # the hopped asset is marked on both of its trades
         self.assertIn("go-between", page["intro"])
-        self.assertTrue(page["warn"] and "commissioner" in page["warn"][0])        # the cooldown caveat for a hopped player
+        self.assertTrue(page["warn"] and "only to build the Yahoo trades" in page["warn"][0])
+        self.assertIn("hold is unaffected", page["warn"][0])                      # a hop is a Yahoo construction: the league hold rules still see one move
 
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:
