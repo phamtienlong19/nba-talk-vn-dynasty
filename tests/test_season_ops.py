@@ -350,7 +350,9 @@ class TestVerifiedYahooImport(unittest.TestCase):
             il = [r for r in v["roster"] if r["s"] in ss.SLOTS_IL]
             self.assertEqual(v["il"], len(il), f)
             self.assertEqual(v["ilCap"], sum(r["c"] for r in il if not r["x"]), f)         # only IL salaries inside the counted nine
-            self.assertEqual(v["healthyCap"], v["cap"] - v["ilCap"], f)
+            inj = ss.injured_keys(self.cur, [r["k"] for r in v["roster"]])                   # IL slot OR Out / INJ / OFS status
+            self.assertEqual(v["injuredCap"], sum(r["c"] for r in v["roster"] if r["k"] in inj and not r["x"]), f)
+            self.assertEqual(v["healthyCap"], v["cap"] - v["injuredCap"], f)                   # healthy excludes Out players not on IL too
             self.assertFalse({a["k"] for a in v["added"]} & set(v["inKeys"]), f)            # a pickup is not a trade acquisition
             self.assertFalse({a["k"] for a in v["dropped"]} & set(v["outKeys"]) - {a["k"] for a in v["dropped"]}, f)
         for t in self.si["seasonTxns"]:                                                      # completed trades: shown as trade acquisitions

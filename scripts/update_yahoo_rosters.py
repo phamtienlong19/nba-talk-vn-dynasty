@@ -238,7 +238,7 @@ def build_report(outcome, obs, check, rec, dc, si, baseline, new_state, conflict
     L += ["", "## Salary-cap effects (top 9 frozen salaries, IL included)", "", "| Team | Players | IL | Counted before → after | Healthy | Band |", "|---|---|---|---|---|---|"]
     for p in rec["payroll"]:
         fid = next(f for f, s in si["shorts"].items() if s == p["team"])
-        il_cap = sum(r["c"] for r in ls.team_roster(si, new_state, fid) if new_state["slots"].get(r["k"]) in ss.SLOTS_IL and not r["x"])
+        il_cap = sum(r["c"] for r in ss.ranked_roster(si, new_state, fid) if r["k"] in ss.injured_keys(new_state, [r["k"]]) and not r["x"])  # IL slot or Out status
         move = f"{_fmt_cap(p['capNow'])} → {_fmt_cap(p['capIfImported'])}" + (f" ({p['capIfImported'] - p['capNow']:+g})" if p["capIfImported"] != p["capNow"] else "")
         L.append(f"| {p['team']} | {p['count']} | {p['il']} | {move} | {_fmt_cap(p['capIfImported'] - il_cap)} | {ls.cap_status(si, p['capIfImported'])} |")
     if rec["salaryEvidence"]:
