@@ -600,7 +600,8 @@ class TestRenderedCards(unittest.TestCase):
         self.assertRegex(html, r"\.topbar\{\s*position:sticky;top:0")
 
     def test_trade_checker_page_matches_python_on_every_swap(self):
-        """The page's checker is a port of scripts/trade_checker.py: same overall status and the same (rule, team, level) rows."""
+        """The page's checker is a port of scripts/trade_checker.py: same overall status and the same (rule, team, level) rows,
+        for 2-for-2 swaps, three-team rings, trades that overflow the 15 roster spots, and drops."""
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
         import league_state as ls
         import season_state as ss
@@ -616,47 +617,106 @@ class TestRenderedCards(unittest.TestCase):
             for b in fids[i + 1:]:
                 for ra in (rows[a][0], rows[a][-1]):
                     for rb in (rows[b][0], rows[b][-1]):
-                        cases.append([{"key": ra["k"], "from": a, "to": b}, {"key": rb["k"], "from": b, "to": a}])
+                        cases.append({"moves": [{"key": ra["k"], "from": a, "to": b}, {"key": rb["k"], "from": b, "to": a}], "drops": []})
         for k, f in held:                                                  # trades that include a player inside a cooldown
             g = next(x for x in fids if x != f)
-            cases.append([{"key": k, "from": f, "to": g}, {"key": rows[g][-1]["k"], "from": g, "to": f}])
-        cases.append([{"key": rows[fids[0]][0]["k"], "from": fids[1], "to": fids[0]}])   # invalid: wrong owner
+            cases.append({"moves": [{"key": k, "from": f, "to": g}, {"key": rows[g][-1]["k"], "from": g, "to": f}], "drops": []})
+        cases.append({"moves": [{"key": rows[fids[0]][0]["k"], "from": fids[1], "to": fids[0]}], "drops": []})   # invalid: wrong owner
+        for i in range(0, len(fids) - 2, 3):                                 # three-team rings
+            x, y, z = fids[i:i + 3]
+            for j in (0, -1):
+                cases.append({"moves": [{"key": rows[x][j]["k"], "from": x, "to": y}, {"key": rows[y][j]["k"], "from": y, "to": z}, {"key": rows[z][j]["k"], "from": z, "to": x}], "drops": []})
+        for f in fids:                                                       # 3-for-1 into each team: roster overflow, then with drops of its cheapest players
+            g = next(x for x in fids if x != f)
+            mv = [{"key": r["k"], "from": g, "to": f} for r in rows[g][:3]] + [{"key": rows[f][0]["k"], "from": f, "to": g}]
+            cases.append({"moves": mv, "drops": []})
+            mine = [r for r in rows[f] if r["k"] != rows[f][0]["k"]][-3:]
+            cases.append({"moves": mv, "drops": [{"key": r["k"], "team": f} for r in mine]})
+            big = rows[f][1]                                                 # dropping a protected / review-tier player
+            cases.append({"moves": mv, "drops": [{"key": big["k"], "team": f}]})
         nows = ["2026-10-21T12:00:00Z", "2030-01-01T00:00:00Z"]
-        expect = [[tc.signature(tc.check_proposal(si, state, m, n)) for m in cases] for n in nows]
-        r = self._drive("var C=%s,N=%s,E=[];N.forEach(function(n){E.push(C.map(function(m){var x=NBA_NAV.check(m,n);"
+        expect = [[tc.signature(tc.check_proposal(si, state, c["moves"], n, drops=c["drops"])) for c in cases] for n in nows]
+        r = self._drive("var C=%s,N=%s,E=[];N.forEach(function(n){E.push(C.map(function(m){var x=NBA_NAV.check(m.moves,n,m.drops);"
                         "return {status:x.status,rules:x.rules.map(function(q){return [q.rule,q.team,q.level];}).sort(function(a,b){return a.join('|')<b.join('|')?-1:1;})};}));});R.out=E;"
                         % (json.dumps(cases), json.dumps(nows)), wait=100)
         for n in range(len(nows)):
-            for i, m in enumerate(cases):
+            for i, c in enumerate(cases):
                 want = {"status": expect[n][i]["status"], "rules": sorted(expect[n][i]["rules"])}
-                self.assertEqual(r["out"][n][i], want, (nows[n], m))
-        self.assertGreaterEqual(len({e["status"] for e in expect[1]}), 2)   # the swaps are not all the same verdict
+                self.assertEqual(r["out"][n][i], want, (nows[n], c))
+        self.assertGreaterEqual(len({e["status"] for e in expect[1]}), 2)   # the cases are not all the same verdict
+        self.assertTrue(any(rr[0] == "size" and rr[2] == "blocked" for e in expect[1] for rr in e["rules"]))   # the overflow cases do overflow
+        self.assertTrue(any(rr[0] == "drop" for e in expect[1] for rr in e["rules"]))
 
-    def test_trade_checker_panel_check_url_and_round_trip(self):
+    def test_trade_machine_panel_multi_team_live_cap_url_and_colored_teams(self):
         r = self._drive("""
-          var D2=NBA_NAV.D,base=D2.scenarios[''].teams,a=D2.teams[0].id,b=D2.teams[1].id;
-          R.a=a;R.b=b;R.ka=base[a].roster[base[a].roster.length-1].k;R.kb=base[b].roster[base[b].roster.length-1].k;
-          R.hasPanel=!!document.getElementById('chk');R.empty=!document.getElementById('chk-verdict');
-          document.querySelectorAll('#chk select')[0].value=a;document.querySelectorAll('#chk select')[0].dispatchEvent(new Event('change'));
-          document.querySelectorAll('#chk select')[1].value=b;document.querySelectorAll('#chk select')[1].dispatchEvent(new Event('change'));
-          var btn=function(k){return Array.prototype.filter.call(document.querySelectorAll('#chk .chk-p'),function(x,i){return x.textContent.indexOf(base[a].roster.concat(base[b].roster).filter(function(r){return r.k===k;})[0].n)>=0;})[0];};
-          btn(R.ka).click();btn(R.kb).click();
-          R.verdict=!!document.getElementById('chk-verdict');R.status=(document.querySelector('#chk .chk-st')||{}).textContent;R.rows=document.querySelectorAll('#chk .chk-r').length;
+          var D2=NBA_NAV.D,base=D2.scenarios[''].teams,ids=D2.teams.map(function(t){return t.id;}),a=ids[0],b=ids[1],c=ids[2];
+          var last=function(f){var r=base[f].roster;return r[r.length-1];};
+          R.ka=last(a).k;R.kb=last(b).k;R.kc=last(c).k;R.a=a;R.b=b;R.c=c;
+          var q=function(s){return document.querySelectorAll(s);};
+          R.hasPanel=!!document.getElementById('chk');R.title=document.querySelector('#chk .chk-h b').textContent;R.empty=!document.getElementById('chk-verdict');
+          // team pills are colored buttons, no doubled "|" labels
+          R.pills=q('#chk .chk-teams button').length;R.onPills=q('#chk .chk-teams .on').length;
+          R.pillColored=!!document.querySelector('#chk .chk-teams .on').style.background;
+          // add a third team
+          var third=Array.prototype.filter.call(q('#chk .chk-teams button'),function(x){return x.textContent===D2.teams[2].short;})[0];if(!third.classList.contains('on'))third.click();
+          R.cols=q('#chk .chk-col').length;
+          var btnOf=function(f,k){var col=document.querySelector('#chk .chk-col[data-team="'+f+'"]'),n=base[f].roster.filter(function(r){return r.k===k;})[0].n;return Array.prototype.filter.call(col.querySelectorAll('.player-row'),function(x){return x.querySelector('.pname').textContent.indexOf(n)>=0;})[0];};
+          btnOf(R.a,R.ka).click();btnOf(R.b,R.kb).click();
+          R.sumCards=q('#chk .chk-sc').length;R.sends=q('#chk .chk-fl.send .fl-p').length;R.gets=q('#chk .chk-fl.get .fl-p').length;R.checks=q('#chk .chk-sc .ck').length;
+          R.outRows=q('#chk .player-row.tm-out').length;R.inRows=q('#chk .player-row.tm-in').length;R.cyc=q('#chk .tm-via.cyc').length;R.bar=!!document.querySelector('#chk .chk-bar');
+          var firstCyc=document.querySelector('#chk .tm-via.cyc');R.before=firstCyc.textContent;firstCyc.click();R.afterCyc=document.querySelector('#chk .tm-via.cyc').textContent;
+          R.verdict=!!document.getElementById('chk-verdict');R.status=(document.querySelector('#chk .chk-st')||{}).textContent;R.rows=q('#chk .chk-r').length;
+          R.meters=q('#chk .meter').length;R.payShown=q('#chk .chk-col .chk-pay b').length;                 // live payroll: only teams that move
+          R.text=document.getElementById('chk').textContent;
           R.url=location.search;
           document.getElementById('chk-reset').click();R.cleared=!document.getElementById('chk-verdict');R.urlAfterReset=location.search;""")
         self.assertTrue(r["hasPanel"] and r["empty"])
+        self.assertEqual(r["title"], "TRADE MACHINE")
+        self.assertEqual(r["pills"], 16)
+        self.assertGreaterEqual(r["onPills"], 2)
+        self.assertTrue(r["pillColored"])
+        self.assertGreaterEqual(r["cols"], 3)
+        self.assertGreaterEqual(r["sumCards"], 3)                                  # a summary card per team: who gets and sends what
+        self.assertEqual((r["sends"], r["gets"]), (2, 2))
+        self.assertEqual(r["checks"], r["sumCards"] * 4)                           # CAP / ROSTER / LIMITS / HELD per team
+        self.assertEqual((r["outRows"], r["inRows"]), (2, 2))                      # the editor shows the post-trade roster: who leaves, who arrives
+        self.assertTrue(r["bar"])
+        self.assertGreaterEqual(r["cyc"], 2)                                       # with 3+ teams the destination is changeable
+        self.assertNotEqual(r["before"], r["afterCyc"])
         self.assertTrue(r["verdict"])
         self.assertIn(r["status"], ("LEGAL", "BLOCKED", "COMMISSIONER REVIEW"))
         self.assertGreaterEqual(r["rows"], 4)
+        self.assertGreaterEqual(r["meters"], 3)
+        self.assertGreaterEqual(r["payShown"], 2)
+        self.assertNotIn("$", r["text"])
+        self.assertNotRegex(r["text"], r"\|.*\|")                                # no doubled team-name bars
         self.assertIn("check=", r["url"])
         self.assertTrue(r["cleared"])
         self.assertNotIn("check=", r["urlAfterReset"])
         again = self._drive("""
-          R.verdict=!!document.getElementById('chk-verdict');R.on=document.querySelectorAll('#chk .chk-p.on').length;R.tab=NBA_NAV.parseHash?document.getElementById('trade-lab').classList.contains('tab-off'):null;""",
-                            hash_="?check=%s~%s,%s~%s" % (r["ka"], r["b"], r["kb"], r["a"]))
+          R.verdict=!!document.getElementById('chk-verdict');R.on=document.querySelectorAll('#chk .player-row.tm-out').length;R.cols=document.querySelectorAll('#chk .chk-col').length;
+          R.hidden=document.getElementById('trade-lab').classList.contains('tab-off');""",
+                            hash_="?check=%s~%s,%s~%s" % (r["ka"], r["b"], r["kb"], r["c"]))
         self.assertTrue(again["verdict"])
-        self.assertEqual(again["on"], 2)                                      # the shared link restores the same two players
-        self.assertFalse(again["tab"])                                        # and opens on the Trade Lab tab
+        self.assertEqual(again["on"], 2)                                          # the shared link restores the same players
+        self.assertEqual(again["cols"], 3)                                        # and the third team
+        self.assertFalse(again["hidden"])                                         # on the Trade Lab tab
+
+    def test_no_dollar_signs_anywhere_in_the_tool(self):
+        with open(INDEX, encoding="utf-8") as f:
+            html = f.read()
+        body = re.sub(r'<script[^>]*type="application/json"[^>]*>.*?</script>', "", html, flags=re.S)
+        self.assertNotIn('"$"', body)
+        for m in re.finditer(r'"([^"\n]*\$[^"\n]*)"', body):
+            self.assertRegex(m.group(1), r"\$\(|\$\{|\$/|\^|\\d", m.group(1))     # only regex / template uses of $ remain
+        data = re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1)
+        self.assertNotIn("$", data)
+        r = self._drive("""
+          var t=function(){var c=document.body.cloneNode(true);c.querySelectorAll('script,style').forEach(function(e){e.remove();});return c.textContent;};R.official=t();
+          ['trade-lab','cap','draft'].forEach(function(x){NBA_NAV.showTab(x);R[x]=t();});
+          document.querySelector('.modeswitch button[data-mode=WHATIF]').click();R.whatif=t();""", wait=300)
+        for k, v in r.items():
+            self.assertNotIn("$", v, k)
 
     def test_search_palette_opens_from_button_and_keys_and_shows_team_chips(self):
         r = self._drive("""
@@ -764,7 +824,7 @@ class TestRenderedCards(unittest.TestCase):
         self.assertEqual(re.sub(r"<[^>]+>", "", m.group(1)), _snapshot_label())
         rules = re.findall(r'<span class="meta-pill cap-rule"[^>]*>(.*?)</span><', self.official)
         self.assertEqual(len(rules), 4)
-        self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 $ COUNT · IL ✓" for r in rules), rules)
+        self.assertTrue(all(re.sub(r"<[^>]+>", "", r) == "TOP 9 SALARIES COUNT · IL ✓" for r in rules), rules)
         self.assertNotIn("NOT FROZEN", self.official.split("<body", 1)[1].split('<script id="league-app">')[0])
 
     def test_pick_pill_never_clips(self):

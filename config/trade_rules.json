@@ -10,11 +10,20 @@
   },
   "capLadder": {
     "threshold": 5,
-    "under": "Under $5 outside the band: trade-restricted for 2 weeks; a repeat adds a $3 allowance penalty through next season's draft.",
-    "over": "Over $5 outside the band: trade-restricted for 1 month; a repeat adds a $5 allowance penalty through next season's draft.",
-    "exactly": "Exactly $5 outside the band: the commissioner decides which rung applies.",
+    "under": "Under 5 outside the band: trade-restricted for 2 weeks, and a repeat adds a 3-point allowance penalty.",
+    "over": "Over 5 outside the band: trade-restricted for 1 month, and a repeat adds a 5-point allowance penalty.",
+    "exactly": "Exactly 5 outside the band: the commissioner decides which step applies.",
     "nearDeadline": "Near the trade deadline the restriction extends through next season's draft regardless of size (deadline date not yet set).",
     "note": "Displayed only. The tool keeps no memory of past violations; the commissioner tracks restrictions."
   },
-  "pendingDays": 2
+  "pendingDays": 2,
+  "roster": {
+    "spots": 15,
+    "source": "docs/LEAGUE_RULES_MODEL.md: 9 keepers, 15 total roster spots. Yahoo makes a team over the limit drop players when a trade is processed."
+  },
+  "drops": {
+    "neverAtOrAbove": 20,
+    "reviewFrom": 10,
+    "source": "docs/LEAGUE_RULES_MODEL.md (salary-drop limits); mirrors config/what_if_assumptions.json"
+  }
 }

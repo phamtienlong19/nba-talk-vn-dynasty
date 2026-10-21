@@ -442,7 +442,7 @@ def standings_view(si: dict):
 def _public(obj):
     """Config for the public page: the rule numbers and wording, without the internal 'note' commentary."""
     if isinstance(obj, dict):
-        return {k: _public(v) for k, v in obj.items() if not k.endswith("Note") and k != "note"}
+        return {k: _public(v) for k, v in obj.items() if not k.endswith(("Note", "Source")) and k not in ("note", "source")}
     return obj
 
 

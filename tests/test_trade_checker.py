@@ -38,8 +38,8 @@ class TradeChecker(unittest.TestCase):
         cls.state = ss.season_state(cls.si)
         cls.rules = tc.load_rules()
 
-    def verdict(self, moves, now=LATER, state=None):
-        return tc.check_proposal(self.si, state or self.state, moves, now, self.rules)
+    def verdict(self, moves, now=LATER, state=None, drops=()):
+        return tc.check_proposal(self.si, state or self.state, moves, now, self.rules, drops)
 
     def levels(self, res, rule):
         return [r["level"] for r in res["rules"] if r["rule"] == rule]
@@ -58,7 +58,7 @@ class TradeChecker(unittest.TestCase):
         r = hit[0][1]
         self.assertEqual(r["status"], "BLOCKED")
         self.assertTrue(self.levels(r, "ladder"))
-        self.assertIn("must move a team toward the band", next(x for x in r["rules"] if x["level"] == "blocked" and x["rule"] == "cap")["reason"])
+        self.assertIn("in the band or move it toward it", next(x for x in r["rules"] if x["level"] == "blocked" and x["rule"] == "cap")["reason"])
 
     def test_some_swaps_are_legal_and_legal_means_only_ok_or_info(self):
         legal = [self.verdict(m) for m in swaps(self.si, self.state)]
@@ -134,6 +134,76 @@ class TradeChecker(unittest.TestCase):
         rows = [r for r in res["rules"] if r["rule"] == "antitank" and r.get("check") == "injured"]
         self.assertEqual([r["level"] for r in rows], ["review"])
         self.assertNotEqual(res["status"], "LEGAL")
+
+    def test_three_team_trades_are_checked_per_team(self):
+        a, b, c = sorted(self.si["franchises"])[:3]
+        ra, rb, rc = (ss.ranked_roster(self.si, self.state, f)[-1]["k"] for f in (a, b, c))
+        res = self.verdict([{"key": ra, "from": a, "to": b}, {"key": rb, "from": b, "to": c}, {"key": rc, "from": c, "to": a}])
+        self.assertEqual({r["team"] for r in res["rules"] if r["rule"] == "cap"}, {self.si["shorts"][f] for f in (a, b, c)})
+        self.assertIn(res["status"], ("LEGAL", "BLOCKED", "COMMISSIONER REVIEW"))
+
+    def test_explanations_state_the_numbers_and_never_use_dollar_signs(self):
+        for m in list(swaps(self.si, self.state))[:40]:
+            for r in self.verdict(m)["rules"]:
+                self.assertNotIn("$", r["reason"])
+        cap = next(r for m in swaps(self.si, self.state) for r in self.verdict(m)["rules"] if r["rule"] == "cap")
+        self.assertRegex(cap["reason"], r"Payroll \d+(\.\d+)? → \d+(\.\d+)?")
+        self.assertNotIn("$", json.dumps(self.rules))
+
+    def _roster_pair(self):
+        """(full team, other team) so that a 2-for-1 into the full team overflows the 15 spots."""
+        sizes = {f: len(ls.team_players(self.si, self.state, f)) for f in self.si["franchises"]}
+        spots = self.rules["roster"]["spots"]
+        full = max(sizes, key=sizes.get)
+        other = next(f for f in sorted(sizes) if f != full and sizes[f] >= 2)
+        return full, other, spots, sizes
+
+    def test_roster_over_the_limit_is_blocked_until_drops_bring_it_back(self):
+        full, other, spots, sizes = self._roster_pair()
+        acq = tc.acquisitions(self.si)
+        give = [r["k"] for r in ss.ranked_roster(self.si, self.state, other) if (r["k"], other) not in acq][:2]
+        extra = sizes[full] + 2 - spots
+        if extra <= 0:
+            self.skipTest("no team is close enough to the roster limit")
+        moves = [{"key": k, "from": other, "to": full} for k in give]
+        res = self.verdict(moves)
+        self.assertIn("blocked", self.levels(res, "size"))
+        own = [r for r in ss.ranked_roster(self.si, self.state, full) if self.si["registry"] and ls.player_cap(self.si, r["k"]) < self.rules["drops"]["reviewFrom"]]
+        drops = [{"key": r["k"], "team": full} for r in own[-extra:]]
+        if len(drops) == extra:
+            res2 = self.verdict(moves, drops=drops)
+            self.assertEqual([x["level"] for x in res2["rules"] if x["rule"] == "size" and x["team"] == self.si["shorts"][full]], ["ok"])
+            self.assertEqual({x["level"] for x in res2["rules"] if x["rule"] == "drop"}, {"info"})
+
+    def test_drop_rules_protect_20_plus_and_send_10_to_19_to_review(self):
+        full, other, spots, sizes = self._roster_pair()
+        rows = ss.ranked_roster(self.si, self.state, full)
+        dr = self.rules["drops"]
+        a, b = sorted(self.si["franchises"])[:2]
+        for want, test in (("blocked", lambda c: c >= dr["neverAtOrAbove"]), ("review", lambda c: dr["reviewFrom"] <= c < dr["neverAtOrAbove"]), ("info", lambda c: c < dr["reviewFrom"])):
+            hit = next(((f, r) for f in (a, b) for r in ss.ranked_roster(self.si, self.state, f) if test(r["c"])), None)
+            if hit is None:
+                continue
+            f, r = hit
+            g = b if f == a else a
+            mv = [{"key": ss.ranked_roster(self.si, self.state, g)[-1]["k"], "from": g, "to": f}, {"key": ss.ranked_roster(self.si, self.state, f)[-1]["k"], "from": f, "to": g}]
+            if r["k"] in {m["key"] for m in mv}:
+                continue
+            res = self.verdict(mv, drops=[{"key": r["k"], "team": f}])
+            self.assertEqual([x["level"] for x in res["rules"] if x["rule"] == "drop"], [want], (want, r["n"], r["c"]))
+
+    def test_invalid_drops_are_rejected(self):
+        a, b = sorted(self.si["franchises"])[:2]
+        ra, rb = ss.ranked_roster(self.si, self.state, a)[-1]["k"], ss.ranked_roster(self.si, self.state, b)[-1]["k"]
+        mv = [{"key": ra, "from": a, "to": b}, {"key": rb, "from": b, "to": a}]
+        self.assertEqual(self.verdict(mv, drops=[{"key": ra, "team": a}])["status"], "BLOCKED")     # dropping a player who is also traded
+        self.assertEqual(self.verdict(mv, drops=[{"key": rb, "team": a}])["status"], "BLOCKED")     # dropping someone from the wrong team
+
+    def test_drop_thresholds_mirror_the_keeper_assumptions(self):
+        with open(os.path.join(ROOT, "config", "what_if_assumptions.json"), encoding="utf-8") as f:
+            wi = json.load(f)
+        self.assertEqual(self.rules["drops"]["neverAtOrAbove"], wi["neverDropAtOrAbove"])
+        self.assertEqual(self.rules["drops"]["reviewFrom"], wi["reviewDropFrom"])
 
     def test_checking_never_changes_state(self):
         before = json.dumps(self.state, sort_keys=True, default=str)
