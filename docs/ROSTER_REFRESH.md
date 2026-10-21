@@ -92,7 +92,7 @@ for `import-json`:
 carrying `teamId`.
 
 **Scheduling.** `Update Yahoo Rosters` (docs/YAHOO_ROSTER_WORKFLOW.md) is the manual, GitHub-hosted way to run the fetch,
-report and open a draft PR. For a local scheduled job (not set up), the fetch is safe to run unattended because it never
+report and open a PR. For a local scheduled job (not set up), the fetch is safe to run unattended because it never
 changes official data: a LaunchAgent running `python3 scripts/yahoo_rosters.py fetch` from the repo directory.
 
 **Manual capture (Chrome DevTools).** On any page of the league, logged in,
