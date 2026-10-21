@@ -439,6 +439,17 @@ def standings_view(si: dict):
             "teams": teams, "worstFirst": order}
 
 
+def rookie_keys(si: dict) -> list:
+    """Every player who is a 2026 rookie, wherever he came from: drafted in the league draft, OR on the 2026 draft-class list
+    (`pool.load_rookie_names`) -- so an undrafted rookie picked up from free agency by an automated roster import is still a rookie.
+    Covers the Yahoo registry, provisional players and in-season unlisted players."""
+    names = pool.load_rookie_names()
+    pool_all = {**si["registry"], **si["extraPlayers"], **si.get("unlistedPlayers", {})}
+    keys = {k for k, m in pool_all.items() if pool.normalize_name(m["name"]) in names}
+    keys |= {e["playerKey"] for e in si["draft"]["events"] if e.get("rookie")}
+    return sorted(keys)
+
+
 def _public(obj):
     """Config for the public page: the rule numbers and wording, without the internal 'note' commentary."""
     if isinstance(obj, dict):
@@ -544,6 +555,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         "trades": trades,
         "draft": ls.draft_summary(inputs, official),
         "scenarios": views,
+        "rookies": rookie_keys(si),
         # trade checker inputs: rule numbers, roster limits, the preseason top-N and who acquired whom (cooldowns). The page's
         # checker is a port of scripts/trade_checker.py and is tested against it.
         "trade": {"rules": _public(tc.load_rules()), "roster": _public(ss._load(ss.RULES_PATH)), "top": sorted(tc.top_ranked(si)),

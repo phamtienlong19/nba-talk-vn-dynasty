@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-21T12:28:32Z
+Generated: 2026-10-21T13:38:20Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/trade-checker
-Commit: cf05e4d
+Branch: fix/rookie-detection
+Commit: d6cb819
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/75 (MERGED)
-CI: validate: completed/success
+PR: none
+CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,19 +27,22 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md     |  37 +-
- config/trade_rules.json          |  54 +++
- docs/GOVERNANCE_ROADMAP.md       |   3 +
- docs/LEAGUE_RULES_MODEL.md       |   4 +-
- docs/SEASON_STATE_MODEL.md       |  19 +
- docs/YAHOO_LEAGUE_SETTINGS.md    |  19 +
- index.html                       | 724 +++++++++++++++++++++++++++++++++++++--
- scripts/build_league_state.py    |  14 +
- scripts/trade_checker.py         | 295 ++++++++++++++++
- scripts/what_if_app.js           |  10 +-
- tests/test_scenario_rendering.py | 434 ++++++++++++++++++++++-
- tests/test_trade_checker.py      | 377 ++++++++++++++++++++
- 12 files changed, 1945 insertions(+), 45 deletions(-)
+ ai_exchange/REVIEW_PACKET.md                       |   41 +-
+ config/trade_rules.json                            |   54 +
+ data/2026-27/rosters/index.json                    |   11 +-
+ .../rosters/snapshots/RS-2026-10-21-92584e3e.json  | 1133 ++++++++++++++++++++
+ data/2026-27/unlisted_players.json                 |    8 +
+ docs/GOVERNANCE_ROADMAP.md                         |    3 +
+ docs/LEAGUE_RULES_MODEL.md                         |    4 +-
+ docs/SEASON_STATE_MODEL.md                         |   19 +
+ docs/YAHOO_LEAGUE_SETTINGS.md                      |   19 +
+ index.html                                         |  728 ++++++++++++-
+ scripts/build_league_state.py                      |   14 +
+ scripts/trade_checker.py                           |  295 +++++
+ scripts/what_if_app.js                             |   10 +-
+ tests/test_scenario_rendering.py                   |  435 +++++++-
+ tests/test_trade_checker.py                        |  377 +++++++
+ 15 files changed, 3104 insertions(+), 47 deletions(-)
 ```
 
 ## Validation
@@ -56,6 +59,9 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 ## Files Changed
 - ai_exchange/REVIEW_PACKET.md
 - config/trade_rules.json
+- data/2026-27/rosters/index.json
+- data/2026-27/rosters/snapshots/RS-2026-10-21-92584e3e.json
+- data/2026-27/unlisted_players.json
 - docs/GOVERNANCE_ROADMAP.md
 - docs/LEAGUE_RULES_MODEL.md
 - docs/SEASON_STATE_MODEL.md
@@ -78,4 +84,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/trade-checker` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `fix/rookie-detection` if not already done, then request human/ChatGPT review of this packet.

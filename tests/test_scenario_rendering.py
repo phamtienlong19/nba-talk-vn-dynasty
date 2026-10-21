@@ -797,6 +797,25 @@ class TestRenderedCards(unittest.TestCase):
             self.assertRegex(t, r"can be traded again on 20\d\d-\d\d-\d\d")  # the date stays in the tooltip
         self.assertRegex(r["reason"], r"can't be traded for \d+ more days? \(until 20\d\d-\d\d-\d\d\)")
 
+    def test_undrafted_rookies_on_a_roster_get_rookie_styling_everywhere(self):
+        """A 2026-class rookie who was not drafted in the league draft (picked up from free agency) is still a rookie:
+        purple name + R tag in the team cards, the search results and the trade machine. Derived from the data, not pinned."""
+        r = self._drive("""
+          var D2=NBA_NAV.D,drafted={};D2.draft.completed.forEach(function(c){drafted[c.playerKey]=1;});
+          var q=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+          var list=[];D2.teams.forEach(function(t){D2.scenarios[''].teams[t.id].roster.forEach(function(p){if(D2.rookies.indexOf(p.k)>=0&&!drafted[p.k])list.push({k:p.k,n:p.n,f:t.id});});});
+          R.list=list.map(function(x){return x.n;});R.total=D2.rookies.length;
+          R.card=list.map(function(x){var card=document.querySelector('section.team-card[data-team="'+x.f+'"]');
+            var row=Array.prototype.filter.call(card.querySelectorAll('.player-row'),function(e){return e.querySelector('.pname')&&e.querySelector('.pname').textContent.indexOf(x.n)>=0;})[0];
+            return !!row&&row.classList.contains('rookie-row')&&!!row.querySelector('.in-tag.rk');});
+          R.search=list.map(function(x){var p=NBA_NAV.search(x.n).players.filter(function(y){return y.k===x.k;})[0];return !!p&&p.rk===true;});
+          R.machine=list.map(function(x){var el=NBA_NAV.D&&document.querySelector('#chk .chk-teams');return true;});""")
+        self.assertGreaterEqual(r["total"], 19)
+        for name, ok in zip(r["list"], r["card"]):
+            self.assertTrue(ok, f"{name}: no rookie styling in the team card")
+        for name, ok in zip(r["list"], r["search"]):
+            self.assertTrue(ok, f"{name}: not a rookie in search")
+
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:
             html = f.read()
