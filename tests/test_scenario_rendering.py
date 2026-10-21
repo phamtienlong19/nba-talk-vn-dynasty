@@ -663,8 +663,10 @@ class TestRenderedCards(unittest.TestCase):
           var btnOf=function(f,k){var col=document.querySelector('#chk .chk-col[data-team="'+f+'"]'),n=base[f].roster.filter(function(r){return r.k===k;})[0].n;return Array.prototype.filter.call(col.querySelectorAll('.player-row'),function(x){return x.querySelector('.pname').textContent.indexOf(n)>=0;})[0];};
           btnOf(R.a,R.ka).click();btnOf(R.b,R.kb).click();
           R.sumCards=q('#chk .chk-sc').length;R.sends=q('#chk .chk-fl.send .fl-p').length;R.gets=q('#chk .chk-fl.get .fl-p').length;R.checks=q('#chk .chk-sc .ck').length;
-          R.outRows=q('#chk .player-row.tm-out').length;R.inRows=q('#chk .player-row.tm-in').length;R.cyc=q('#chk .tm-via.cyc').length;R.bar=!!document.querySelector('#chk .chk-bar');
-          var firstCyc=document.querySelector('#chk .tm-via.cyc');R.before=firstCyc.textContent;firstCyc.click();R.afterCyc=document.querySelector('#chk .tm-via.cyc').textContent;
+          R.outRows=q('#chk .player-row.tm-out').length;R.inRows=q('#chk .player-row.tm-in').length;R.cyc=q('#chk .chk-to').length;R.bar=!!document.querySelector('#chk .chk-bar');
+          var grp=document.querySelector('#chk .chk-to');R.before=grp.querySelector('.on').textContent;
+          var alt=Array.prototype.filter.call(grp.querySelectorAll('.tpill:not(.on)'),function(x){return true;})[0];R.alt=alt.textContent;alt.click();
+          R.afterCyc=document.querySelector('#chk .chk-to .on').textContent;R.outFirst=document.querySelector('#chk .chk-col .players').firstElementChild.textContent;
           R.verdict=!!document.getElementById('chk-verdict');R.status=(document.querySelector('#chk .chk-st')||{}).textContent;R.rows=q('#chk .chk-r').length;
           R.meters=q('#chk .meter').length;R.payShown=q('#chk .chk-col .chk-pay b').length;                 // live payroll: only teams that move
           R.text=document.getElementById('chk').textContent;
@@ -683,6 +685,8 @@ class TestRenderedCards(unittest.TestCase):
         self.assertTrue(r["bar"])
         self.assertGreaterEqual(r["cyc"], 2)                                       # with 3+ teams the destination is changeable
         self.assertNotEqual(r["before"], r["afterCyc"])
+        self.assertEqual(r["afterCyc"], r["alt"])                                   # the destination pills change who gets him
+        self.assertEqual(r["outFirst"], "sending out")                              # and sit at the top of the column, where you tapped
         self.assertTrue(r["verdict"])
         self.assertIn(r["status"], ("LEGAL", "BLOCKED", "COMMISSIONER REVIEW"))
         self.assertGreaterEqual(r["rows"], 4)

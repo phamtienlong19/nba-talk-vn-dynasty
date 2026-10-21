@@ -896,7 +896,10 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .tm-via.cyc{border:1px solid #d5dce7;border-radius:999px;background:#fff;padding:1px 6px 1px 4px;cursor:pointer;text-decoration:none}
 .tm-via.cyc small{font:700 8px "Inter",Arial,sans-serif;letter-spacing:.06em;color:#6b7a93;text-transform:uppercase}
 .tm-via{display:inline-flex;align-items:center;gap:3px;font:700 10px "Inter",Arial,sans-serif;color:#6b7a93}
-.nc-div.out{color:#8a97ad}
+.nc-div.out{color:#a11a1a}
+.chk-to{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:7px 8px 9px 12px;background:#fdf3f2;border-radius:0 0 8px 8px;margin:-2px 0 4px}
+.chk-to small{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#a11a1a;margin-right:2px}
+.chk-to .tpill{padding:6px 10px;font-size:11px}
 /* a sticky verdict bar follows you while you pick players */
 .chk-bar{position:sticky;bottom:10px;display:flex;align-items:center;gap:10px;margin-top:14px;padding:9px 12px;border-radius:12px;background:#fff;border:1px solid #dce3ec;box-shadow:0 8px 24px rgba(15,30,60,.16);z-index:5}
 .chk-bar.BLOCKED{border-color:#f1b4b4}.chk-bar.REVIEW{border-color:#f0cf8a}.chk-bar.LEGAL{border-color:#a9d3b8}
@@ -2751,6 +2754,14 @@ function renderCheck(){
    lim=h("div",{class:"chk-lim"},[chip("INJ "+A.injured.count+"/"+TKR.longTermInjured.max,A.injured.level,A.injured.count!==B.injured.count),chip("1-POS "+A.singlePosition.count+"/"+TKR.singlePosition.max,A.singlePosition.level,A.singlePosition.count!==B.singlePosition.count),
     chip(A.coverage.level==="ok"?"POSITIONS ✓":"POSITIONS short",A.coverage.level,JSON.stringify(A.coverage.by)!==JSON.stringify(B.coverage.by)),chip(A.lineup.level==="ok"?"LINEUP ✓":"LINEUP short",A.lineup.level,A.lineup.empty.length!==B.lineup.empty.length)]);}
   var col=h("section",{class:"chk-col","data-team":fid},[head,lim]),host=h("div",{class:"players"});col.appendChild(host);
+  var outs=base.filter(function(r){return out[r.k];});
+  if(outs.length){host.appendChild(h("div",{class:"nc-div out",text:"sending out"}));
+   outs.forEach(function(r){var el=chkRowEl(r,fid,{state:"out",to:out[r.k]});var act=function(){delete CHK.sel[r.k];chkTouch();};
+    el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);
+    var dests=CHK.teams.filter(function(x){return x!==fid;});
+    if(dests.length>1)host.appendChild(h("div",{class:"chk-to",role:"group","aria-label":"Who gets "+r.n},[h("small",{text:"GOES TO"})].concat(dests.map(function(x){var on=CHK.sel[r.k]===x,tt=T[x],e=h("button",{type:"button",class:"tpill to"+(on?" on":""),style:on?"background:"+tt.color+";color:"+tt.text:"","aria-pressed":on?"true":"false",title:tt.name,text:tt.short});
+     e.addEventListener("click",function(ev){ev.stopPropagation();CHK.sel[r.k]=x;chkTouch();});return e;}))));});
+   host.appendChild(h("div",{class:"nc-div",text:"after the trade"}));}
   var div=false;
   keep.forEach(function(r,i){var isIn=!!fromOf[r.k],nc=i>=N;
    if(nc&&!div){div=true;host.appendChild(h("div",{class:"nc-div",text:"beyond top "+N+" · not counted"}));}
@@ -2759,8 +2770,7 @@ function renderCheck(){
    var el=chkRowEl(r,fid,{state:isIn?"in":"",from:fromOf[r.k],nc:nc,dropBtn:dropBtn});
    var act=function(){if(isIn)delete CHK.sel[r.k];else CHK.sel[r.k]=chkNext(fid);chkTouch();};
    el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);});
-  var outs=base.filter(function(r){return out[r.k];}),drs=base.filter(function(r){return CHK.drop[r.k]&&!out[r.k];});
-  if(outs.length){host.appendChild(h("div",{class:"nc-div out",text:"sending out"}));outs.forEach(function(r){var el=chkRowEl(r,fid,{state:"out",to:out[r.k],cycle:CHK.teams.length>2?function(){var opts=CHK.teams.filter(function(x){return x!==fid;}),i=opts.indexOf(CHK.sel[r.k]);CHK.sel[r.k]=opts[(i+1)%opts.length];chkTouch();}:null});var act=function(){delete CHK.sel[r.k];chkTouch();};el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);});}
+  var drs=base.filter(function(r){return CHK.drop[r.k]&&!out[r.k];});
   if(drs.length){host.appendChild(h("div",{class:"nc-div out",text:"dropping"}));drs.forEach(function(r){var el=chkRowEl(r,fid,{state:"drop"});var act=function(){delete CHK.drop[r.k];chkTouch();};el.addEventListener("click",act);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});host.appendChild(el);});}
   cols.appendChild(col);});
  box.appendChild(h("div",{class:"chk-sec",text:"AFTER THE TRADE · tap a player to send him; tap a sent player to undo"}));
