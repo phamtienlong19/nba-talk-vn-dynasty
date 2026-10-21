@@ -5,7 +5,7 @@
 
 It adds no scraper and no ownership model: it calls the existing read-only fetcher and validator (yahoo_rosters.py), the
 existing reconciliation (yahoo_rosters.reconcile, which runs import_rosters.build_snapshot / diff in memory) and, only with
---apply and an unambiguous result, the existing reviewed importer (import_rosters.commit). The draft pull request the
+--apply and an unambiguous result, the existing reviewed importer (import_rosters.commit). The pull request the
 workflow opens is the review.
 
 Outcomes (written to $GITHUB_OUTPUT as `outcome`):
@@ -17,7 +17,7 @@ Outcomes (written to $GITHUB_OUTPUT as `outcome`):
              transaction, a completed transaction Yahoo does not reflect, or any import-blocking problem. Exit 0; the report
              is the deliverable and canonical data is NOT modified.
   READY      only adds / drops / lineup / IL / status changes remain. With --apply the snapshot is committed and the site
-             regenerated, in the working tree only (the workflow puts it in a draft PR).
+             regenerated, in the working tree only (the workflow puts it in a PR).
 
 Payroll is the existing top-9 frozen-salary rule over ALL owned players, IL included; IL labels are kept in the output.
 Frozen salaries, the keeper freeze, the ledger and historical snapshots are never written (checked by hash on --apply).
@@ -319,7 +319,7 @@ def run(cfg, fetcher, out_dir, data_dir=ss.DATA_DIR, apply=False, regenerate=Fal
     report = build_report(outcome, obs, check, rec, dc, si2, baseline, new_state, conflicts, run_info)
     if outcome == "READY" and apply:
         before = protected_files(data_dir)
-        rel = ir.commit(si, snap, rec["report"], d, data_dir, reviewed=True)  # the draft PR is the human review
+        rel = ir.commit(si, snap, rec["report"], d, data_dir, reviewed=True)  # the PR is the human review
         after = protected_files(data_dir)
         changed = [k for k in before if before[k] != after.get(k)]
         if changed or set(after) - set(before) != {os.path.join("rosters", rel)}:

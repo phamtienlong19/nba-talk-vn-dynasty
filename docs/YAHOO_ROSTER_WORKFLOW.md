@@ -14,7 +14,7 @@ importer (`scripts/import_rosters.py`). It adds no scraper and no ownership mode
 
 | Outcome | Meaning | What you get |
 |---|---|---|
-| `READY` | only adds, drops, IL moves and status changes | a **draft PR** with the snapshot and regenerated site, and the report as its description |
+| `READY` | only adds, drops, IL moves and status changes | a **pull request** (ready for review, never auto-merged) with the snapshot and regenerated site, and the report as its description |
 | `CONFLICT` | needs a human: a player on a different team than ours (not a recorded completed trade), a completed trade Yahoo does not show, any import-blocking problem | the report only; **canonical data is not modified**; the run shows a warning |
 | `NO_CHANGE` | Yahoo matches the verified snapshot, or only lineup slots moved (bench ↔ active) | no PR, but the **compliance checks still run**: the report lists any anti-tank, IL and roster findings (a count, plus a run annotation), so a no-change run doubles as a weekly check |
 | `FAILED` | see step 2 | the report says why and how to fix it |
@@ -35,7 +35,7 @@ recomputation.
 ## One-time setup
 
 1. **Repository settings** → Actions → General → Workflow permissions: *Read and write permissions* and tick *Allow GitHub
-   Actions to create and approve pull requests* (the workflow only opens a draft PR; it never approves or merges).
+   Actions to create and approve pull requests* (the workflow only opens a PR; it never approves or merges).
 2. **Sign in locally** (needs Python and Playwright: `pip install -r requirements-yahoo-rosters.txt && python3 -m playwright install chromium`):
    ```bash
    python3 scripts/yahoo_rosters.py login          # a browser opens; sign in to Yahoo, then close the window
@@ -58,21 +58,51 @@ treat GitHub's datacenter addresses differently from yours, which is why the sig
 
 ## Run it
 
-Actions → **Update Yahoo Rosters** → *Run workflow* (branch `main`; engine `browser`; leave *Open a draft PR* ticked), or:
+Actions → **Update Yahoo Rosters** → *Run workflow* (branch `main`; engine `browser`; leave *Open a PR* ticked), or:
 
 ```bash
 gh workflow run "Update Yahoo Rosters" --ref main -f engine=browser -f open_pr=true
 gh run watch
 ```
 
-From any other branch, or with *Open a draft PR* unticked, it is a dry run: the report only. Runs are serialized
+From any other branch, or with *Open a PR* unticked, it is a dry run: the report only. Runs are serialized
 (`concurrency`), time out after 25 minutes, and a roster update can only touch `data/2026-27/rosters/`,
 `data/2026-27/unlisted_players.json` and the generated `index.html` (checked before the PR is created).
 
-**Review and merge the draft PR yourself.** The workflow already ran `./validate.sh` and the full test suite before opening it,
-and the repository's `validate` check runs on the PR too (verified on the first real run). The automated Claude Code Review is
-skipped for these PRs (`automation/yahoo-rosters-*` branches): the action refuses PRs opened by a bot, and the content is
-generated roster data that this report already summarises.
+**Review and merge the PR yourself.** The workflow already ran `./validate.sh` and the full test suite before opening it, and
+the repository's `validate` check runs on the PR too. The automated Claude Code Review is skipped for these PRs
+(`automation/yahoo-rosters-*` branches): the action refuses PRs opened by a bot, and the content is generated roster data
+that the report already summarises. The PR is opened **ready for review** (not a draft), so you can merge it straight away.
+
+### Checks and approvals: what happens on every run
+
+Every run that opens a PR does three things afterwards, so you never have to click anything to get a mergeable PR:
+
+1. **Supersedes older roster PRs.** Any other open PR from an `automation/yahoo-rosters-*` branch (for example one a previous
+   run left open) is closed with a pointer to the new one, and its branch is deleted. Only this workflow's own branches are
+   touched.
+2. **Approves the new PR's checks.** GitHub holds the checks of a PR opened by the built-in `github-actions` bot until a
+   maintainer approves them (`action_required`). The workflow approves them itself, which is safe because it has just verified
+   that the PR changes only roster data and the generated page (so no workflow or script in it differs from `main`). The
+   job summary lists each run it approved.
+3. **Opens the PR ready for review**, never as a draft, and never merges it.
+
+If the approval step cannot approve (a warning appears in the run), the fallback below makes the PR author you, which
+needs no approval at all.
+
+### Recommended: open the PR as yourself (the guaranteed route)
+
+PRs authored by a person are never held for approval. Give the workflow a token of yours and the PR is authored by you:
+
+1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token.
+   Resource owner: you; **Only select repositories** → this repository; permissions: **Contents: Read and write**,
+   **Pull requests: Read and write** and **Actions: Read and write** (Metadata read is added automatically); expiration 90 days.
+2. Store it: `gh secret set ROSTER_PR_TOKEN` (paste the token when prompted), or Settings → Secrets and variables → Actions.
+
+The workflow checks the token before using it. If it is missing or expired, it falls back to the built-in token and prints a
+warning (the PR still opens; its checks just wait for the approval click). The token is used only to open the PR; the workflow
+cannot merge, approve, or push to `main` with it (the branch it pushes is always `automation/yahoo-rosters-*`).
+Renew the token when it expires and run `gh secret set ROSTER_PR_TOKEN` again.
 
 ## When it fails
 

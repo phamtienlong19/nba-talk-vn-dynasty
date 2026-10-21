@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-21T01:53:18Z
+Generated: 2026-10-21T04:05:21Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: fix/tests-not-pinned-to-live-roster
-Commit: fce8af4
+Branch: feat/roster-pr-ready-and-ungated
+Commit: ec7d0ee
 Base: main
 Working tree: dirty
 
@@ -27,12 +27,7 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- tests/test_final_keeper_freeze.py |  5 ++-
- tests/test_league_state_data.py   |  6 ++-
- tests/test_scenario_rendering.py  | 80 ++++++++++++++++++++++-----------------
- tests/test_season_ops.py          | 39 +++++++++++--------
- tests/test_yahoo_rosters.py       | 69 +++++++++++++++++++++------------
- 5 files changed, 121 insertions(+), 78 deletions(-)
+
 ```
 
 ## Validation
@@ -47,11 +42,7 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
-- tests/test_final_keeper_freeze.py
-- tests/test_league_state_data.py
-- tests/test_scenario_rendering.py
-- tests/test_season_ops.py
-- tests/test_yahoo_rosters.py
+(none)
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
@@ -64,4 +55,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `fix/tests-not-pinned-to-live-roster` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/roster-pr-ready-and-ungated` if not already done, then request human/ChatGPT review of this packet.

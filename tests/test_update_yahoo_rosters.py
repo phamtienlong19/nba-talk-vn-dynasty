@@ -391,22 +391,43 @@ class TestWorkflowFile(unittest.TestCase):
         self.assertRegex(self.yml, r"\non:\n  workflow_dispatch:")
         for trigger in ("pull_request", "push:", "schedule:", "issue_comment", "workflow_run"):
             self.assertNotIn(trigger + "\n", self.yml.split("jobs:")[0].replace("# ", ""), trigger)
-        self.assertRegex(self.yml, r"permissions:\n  contents: write\n  pull-requests: write\n")
-        self.assertNotIn("actions: write", self.yml)
+        self.assertRegex(self.yml, r"permissions:\n  contents: write\n  pull-requests: write\n  actions: write\n")
         self.assertRegex(self.yml, r"concurrency:\n  group: update-yahoo-rosters\n  cancel-in-progress: false")
         self.assertIn("runs-on: ubuntu-latest", self.yml)
         self.assertIn("timeout-minutes: 25", self.yml)
 
     def test_never_merges_or_pushes_to_main(self):
-        for bad in ("gh pr merge", "--auto", "--admin", "push origin main", "push origin HEAD:main", "--force", "pull_request_target", "approve"):
-            self.assertNotIn(bad, self.yml.replace("create and approve", ""), bad)
-        self.assertIn("gh pr create --draft --base main", self.yml)
+        for bad in ("gh pr merge", "--auto", "--admin", "push origin main", "push origin HEAD:main", "--force", "pull_request_target",
+                    "gh pr review", "--approve", "/reviews", "pulls/", "/merge"):
+            self.assertNotIn(bad, self.yml, bad)                                                    # no merging, no approving a PR review
+        approvals = [l for l in self.yml.splitlines() if "approve" in l and not l.lstrip().startswith("#") and "echo" not in l]
+        self.assertTrue(all("actions/runs/$id/approve" in l or "Approve" in l or "approve" in l.lower() for l in approvals))
+        self.assertEqual([l.strip() for l in self.yml.splitlines() if "/approve" in l],
+                         ['if gh api -X POST "repos/$GITHUB_REPOSITORY/actions/runs/$id/approve" --silent; then'])   # the only approval: a held workflow run
+        self.assertIn('gh pr create --base main --head "$branch"', self.yml)
+        self.assertNotIn("--draft", self.yml)                                                       # opened ready for review (owner, 2026-10-21)
         self.assertIn('git push origin "$branch"', self.yml)
         self.assertIn("github.ref == 'refs/heads/main'", self.yml)                                # PRs only from main
 
+    def test_pr_checks_are_approved_and_stale_roster_prs_superseded(self):
+        step = self.yml.split("- name: Open a pull request")[1]
+        self.assertIn('select(.conclusion == "action_required")', step)                            # only runs GitHub is holding
+        self.assertIn('actions/runs/$id/approve', step)
+        self.assertLess(step.index("gh pr create"), step.index("approve"))                         # approve after the PR exists
+        self.assertIn('startswith("automation/yahoo-rosters-")', step)                             # only this workflow's own branches
+        self.assertIn('gh pr close "$old" --delete-branch --comment "Superseded by #$new_pr', step)
+        self.assertNotIn("gh pr merge", step)
+        guard = self.yml.index("Only roster data and the generated site may have changed")
+        self.assertLess(guard, self.yml.index("actions/runs/$id/approve"))                         # approval only after the path guard passed
+
     def test_secret_handling(self):
-        self.assertEqual(self.yml.count("secrets."), 1)                                           # only the session secret
+        self.assertEqual(self.yml.count("secrets."), 2)                                           # the session and the optional PR token
         self.assertIn("YAHOO_STORAGE_STATE: ${{ secrets.YAHOO_STORAGE_STATE }}", self.yml)
+        self.assertIn("ROSTER_PR_TOKEN: ${{ secrets.ROSTER_PR_TOKEN }}", self.yml)
+        self.assertNotRegex(self.yml, r"echo[^\n]*\$(ROSTER_PR_TOKEN|GH_TOKEN|DEFAULT_TOKEN)")        # tokens are never echoed
+        self.assertIn('GH_TOKEN="$ROSTER_PR_TOKEN" gh api user --silent', self.yml)                # validated first; falls back if invalid
+        self.assertIn("::warning title=PR opened by the bot", self.yml)
+        self.assertNotIn("git push origin main", self.yml)
         self.assertNotRegex(self.yml, r"echo[^\n]*\$YAHOO_STORAGE_STATE[^_]")                      # never echoed
         self.assertNotIn("set -x", self.yml)
         self.assertIn("umask 077", self.yml)
@@ -419,7 +440,7 @@ class TestWorkflowFile(unittest.TestCase):
         guard = self.yml.index("Only roster data and the generated site may have changed")
         self.assertLess(self.yml.index("./validate.sh"), guard)
         self.assertLess(self.yml.index("python3 -m unittest discover -s tests"), guard)
-        self.assertLess(guard, self.yml.index("Open a draft pull request"))
+        self.assertLess(guard, self.yml.index("Open a pull request"))
         self.assertIn("data/2026-27/rosters/", self.yml)
 
     def test_installs_only_what_the_scraper_needs(self):
@@ -439,13 +460,14 @@ class TestWorkflowFile(unittest.TestCase):
         doc = yaml.safe_load(self.yml)
         triggers = doc.get(True, doc.get("on"))                       # YAML 1.1 reads the key `on` as True
         self.assertEqual(list(triggers), ["workflow_dispatch"])
-        self.assertEqual(doc["permissions"], {"contents": "write", "pull-requests": "write"})
+        self.assertEqual(doc["permissions"], {"contents": "write", "pull-requests": "write", "actions": "write"})
         self.assertEqual(list(doc["jobs"]), ["update"])
         names = [st.get("name") for st in doc["jobs"]["update"]["steps"]]
         self.assertEqual(names[0], "Checkout")
-        self.assertEqual(names[-1], "Open a draft pull request")
+        self.assertEqual(names[0], "Checkout")
         self.assertEqual(sum(1 for st in doc["jobs"]["update"]["steps"] if st.get("if") == "always()"), 3)  # report, session cleanup, artifact upload
         self.assertEqual(triggers["workflow_dispatch"]["inputs"]["engine"]["options"], ["browser", "http"])
+        self.assertEqual(names[-1], "Open a pull request")
 
     def test_stress_tool_is_documented_and_never_touches_the_working_tree(self):
         with open(os.path.join(ROOT, "scripts", "stress_roster_tests.py"), encoding="utf-8") as f:
