@@ -599,6 +599,65 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn(".topbar.hide{transform", html)                 # the tab row must never slide away
         self.assertRegex(html, r"\.topbar\{\s*position:sticky;top:0")
 
+    def test_trade_checker_page_matches_python_on_every_swap(self):
+        """The page's checker is a port of scripts/trade_checker.py: same overall status and the same (rule, team, level) rows."""
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
+        import league_state as ls
+        import season_state as ss
+        import trade_checker as tc
+        si = ss.load_season(ls.load_inputs())
+        state = ss.season_state(si)
+        fids = sorted(si["franchises"])
+        rows = {f: ss.ranked_roster(si, state, f) for f in fids}
+        acq = tc.acquisitions(si)
+        held = [(k, f) for (k, f) in acq if state["playerOwner"].get(k) == f]
+        cases = []
+        for i, a in enumerate(fids):
+            for b in fids[i + 1:]:
+                for ra in (rows[a][0], rows[a][-1]):
+                    for rb in (rows[b][0], rows[b][-1]):
+                        cases.append([{"key": ra["k"], "from": a, "to": b}, {"key": rb["k"], "from": b, "to": a}])
+        for k, f in held:                                                  # trades that include a player inside a cooldown
+            g = next(x for x in fids if x != f)
+            cases.append([{"key": k, "from": f, "to": g}, {"key": rows[g][-1]["k"], "from": g, "to": f}])
+        cases.append([{"key": rows[fids[0]][0]["k"], "from": fids[1], "to": fids[0]}])   # invalid: wrong owner
+        nows = ["2026-10-21T12:00:00Z", "2030-01-01T00:00:00Z"]
+        expect = [[tc.signature(tc.check_proposal(si, state, m, n)) for m in cases] for n in nows]
+        r = self._drive("var C=%s,N=%s,E=[];N.forEach(function(n){E.push(C.map(function(m){var x=NBA_NAV.check(m,n);"
+                        "return {status:x.status,rules:x.rules.map(function(q){return [q.rule,q.team,q.level];}).sort(function(a,b){return a.join('|')<b.join('|')?-1:1;})};}));});R.out=E;"
+                        % (json.dumps(cases), json.dumps(nows)), wait=100)
+        for n in range(len(nows)):
+            for i, m in enumerate(cases):
+                want = {"status": expect[n][i]["status"], "rules": sorted(expect[n][i]["rules"])}
+                self.assertEqual(r["out"][n][i], want, (nows[n], m))
+        self.assertGreaterEqual(len({e["status"] for e in expect[1]}), 2)   # the swaps are not all the same verdict
+
+    def test_trade_checker_panel_check_url_and_round_trip(self):
+        r = self._drive("""
+          var D2=NBA_NAV.D,base=D2.scenarios[''].teams,a=D2.teams[0].id,b=D2.teams[1].id;
+          R.a=a;R.b=b;R.ka=base[a].roster[base[a].roster.length-1].k;R.kb=base[b].roster[base[b].roster.length-1].k;
+          R.hasPanel=!!document.getElementById('chk');R.empty=!document.getElementById('chk-verdict');
+          document.querySelectorAll('#chk select')[0].value=a;document.querySelectorAll('#chk select')[0].dispatchEvent(new Event('change'));
+          document.querySelectorAll('#chk select')[1].value=b;document.querySelectorAll('#chk select')[1].dispatchEvent(new Event('change'));
+          var btn=function(k){return Array.prototype.filter.call(document.querySelectorAll('#chk .chk-p'),function(x,i){return x.textContent.indexOf(base[a].roster.concat(base[b].roster).filter(function(r){return r.k===k;})[0].n)>=0;})[0];};
+          btn(R.ka).click();btn(R.kb).click();
+          R.verdict=!!document.getElementById('chk-verdict');R.status=(document.querySelector('#chk .chk-st')||{}).textContent;R.rows=document.querySelectorAll('#chk .chk-r').length;
+          R.url=location.search;
+          document.getElementById('chk-reset').click();R.cleared=!document.getElementById('chk-verdict');R.urlAfterReset=location.search;""")
+        self.assertTrue(r["hasPanel"] and r["empty"])
+        self.assertTrue(r["verdict"])
+        self.assertIn(r["status"], ("LEGAL", "BLOCKED", "COMMISSIONER REVIEW"))
+        self.assertGreaterEqual(r["rows"], 4)
+        self.assertIn("check=", r["url"])
+        self.assertTrue(r["cleared"])
+        self.assertNotIn("check=", r["urlAfterReset"])
+        again = self._drive("""
+          R.verdict=!!document.getElementById('chk-verdict');R.on=document.querySelectorAll('#chk .chk-p.on').length;R.tab=NBA_NAV.parseHash?document.getElementById('trade-lab').classList.contains('tab-off'):null;""",
+                            hash_="?check=%s~%s,%s~%s" % (r["ka"], r["b"], r["kb"], r["a"]))
+        self.assertTrue(again["verdict"])
+        self.assertEqual(again["on"], 2)                                      # the shared link restores the same two players
+        self.assertFalse(again["tab"])                                        # and opens on the Trade Lab tab
+
     def test_search_palette_opens_from_button_and_keys_and_shows_team_chips(self):
         r = self._drive("""
           R.btn=!!document.getElementById('tb-search');R.meBtn=!!document.getElementById('tb-me');
