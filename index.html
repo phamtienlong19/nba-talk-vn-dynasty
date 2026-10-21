@@ -1043,6 +1043,22 @@ body{background:var(--canvas);color:var(--text)}
 .tcard{box-shadow:none}
 .sp-box{border-radius:20px}
 #draft-order .title,.page .title{font-size:26px;line-height:1.1;margin:6px 2px 12px}
+/* cleaner team card: one quiet status line; limits only when they matter; no column-header row; a gentle injured list */
+.scn-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 16px 2px;padding:12px 0 10px;border:0;border-top:1px solid #edf0f5}
+.scn-strip .row{display:contents}
+.scn-strip .sd{font-size:11px;color:var(--faint)}.scn-strip .sd b{color:var(--muted);font-weight:600}
+.scn-strip .sd .k{color:var(--faint);letter-spacing:.04em}
+.scn-strip .rc{flex:0 1 auto;gap:4px 10px;margin-right:auto}
+.rc:not(:has(.rc-i.watch,.rc-i.over))>.rc-i{display:none}
+.rc:not(:has(.rc-i.watch,.rc-i.over))::before{content:"✓ Roster limits OK";font:600 11px/1 "Inter",Arial,sans-serif;color:#17734c}
+.rc:has(.rc-i.watch,.rc-i.over)>.rc-i:not(.watch):not(.over){display:none}
+.scn-strip details{flex:0 0 auto}
+.scn-strip details[open]{flex:1 1 100%;order:9}
+.scn-strip details summary{margin-top:2px;color:var(--faint);font-weight:600}
+.table-head{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;padding:0;border:0}
+.team-card .players{padding-top:2px}
+.il-head{background:none;border-top:1px solid #edf0f5;margin-top:10px;color:#a8483f}
+.il-head .il-c,.il-head .il-n{color:var(--faint)}
 /* team identity: each team's colour shows as a tinted header, a solid tile, a thick rule and tinted chips (no big saturated fills) */
 .team-card{box-shadow:inset 0 5px 0 var(--team-color),var(--shadow)}
 .team-card:hover{box-shadow:inset 0 5px 0 var(--team-color),0 1px 2px rgba(15,27,52,.05),0 14px 34px rgba(15,27,52,.09)}
