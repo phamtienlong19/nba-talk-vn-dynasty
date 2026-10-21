@@ -25,8 +25,8 @@ mechanism is described.
 ## Roster / keepers (2025–26 onward)
 
 - 9 keepers, 15 total roster spots.
-- Active (8 slots): PG, SG, G, SF, PF, F, C, FC.
-- Plus 3 Bench, 2 IL, 2 IL+.
+- Yahoo roster positions (league settings, confirmed 2026-10-21): PG, SG, G, SF, PF, F, C, FC, Util (9 active), 3 Bench, 3 IL
+  = 15 spots. Trade End Date: Feb 18, 2027. Draft pick trades are allowed. Trade review: commissioner (2 days to reject).
 - The whole roster, including IL/IL+, carries into the offseason for
   keeper selection.
 
