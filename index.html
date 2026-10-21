@@ -973,6 +973,109 @@ section.team-card .picks-tag{display:none}
   .modeswitch button{padding:7px 9px;font-size:10px}.scn-banner{font-size:10.5px}.scn-banner span{display:block;margin:3px 0 0}
   .av-table .hide-m{display:none}
 }
+/* ---- design refresh: one quiet system. Ink on white, hairline borders, soft shadows; a team's colour is an accent (dot, thin rule), never a large fill ---- */
+:root{--ink:#0f1b34;--navy:#0f1b34;--text:#25344f;--muted:#66748d;--faint:#98a3b8;--line:#e6ebf2;--canvas:#f4f6fa;--soft:#f8fafd;--r-lg:18px;--r-md:12px;
+  --shadow:0 1px 2px rgba(15,27,52,.04),0 10px 30px rgba(15,27,52,.06)}
+html,body{background:var(--canvas)}
+body{background:var(--canvas);color:var(--text)}
+.page{background:none;border:0;box-shadow:none;padding:4px 0 28px;margin:14px auto}
+.title{text-align:left;font-size:26px;line-height:1.1;letter-spacing:-.02em;font-weight:800;color:var(--ink);margin:6px 2px 12px}
+.meta-strip{justify-content:flex-start;margin:0 0 18px;gap:6px}
+.meta-pill{border:0;background:#fff;box-shadow:0 0 0 1px var(--line);color:var(--muted);font-size:12px;padding:6px 11px}
+.meta-pill-cap{background:#fff;color:var(--ink)}
+/* top bar */
+.topbar{background:rgba(15,27,52,.94);border-bottom:1px solid rgba(255,255,255,.06);box-shadow:none}
+.navlink{font-size:13px;font-weight:600;color:#c7d1e6;padding:8px 13px;border-radius:999px}
+.navlink:hover{background:#ffffff14;color:#fff}
+.navlink.on{background:#ffffff1f;color:#fff;box-shadow:none}
+.tb-btn{border-color:#ffffff1f;background:#ffffff0d}
+/* team cards */
+.team-card{border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:inset 0 3px 0 var(--team-color),var(--shadow);min-height:0}
+.team-card:hover{transform:none;box-shadow:inset 0 3px 0 var(--team-color),0 1px 2px rgba(15,27,52,.05),0 14px 34px rgba(15,27,52,.09)}
+.team-head{display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-areas:"idx name cap" "idx meta cap"!important;gap:3px 12px!important;align-items:center!important;min-height:0!important;padding:18px 16px 12px!important;background:none!important;border-bottom:0!important}
+.team-head .team-id{display:contents!important}
+.team-head .team-index{grid-area:idx;grid-row:1/3}
+.team-head .team-name{grid-area:name;font-size:16px!important;white-space:normal;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.2}
+.team-head .team-meta{grid-area:meta;margin:0!important;align-self:start;display:flex;gap:8px;align-items:center}
+.team-head .cap-box{grid-area:cap!important;min-width:0!important;grid-row:1/3}
+.team-card .team-index{width:38px;height:38px;border-radius:12px;font-size:16px;background:color-mix(in srgb,var(--team-color) 18%,#fff)!important;color:var(--ink)!important;box-shadow:none}
+.identity-tag{background:none!important;border:0!important;color:var(--muted)!important;padding:0;min-height:0;font-size:11px;font-weight:600}
+.identity-tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--team-color);margin-right:5px}
+.picks-tag{background:none!important;border:0!important;color:var(--faint)!important;padding:0;min-height:0}
+.cap-box,.gap-floor,.gap-near,.gap-room,.gap-zero{background:none!important;padding:0}
+.cap-total{font-size:24px;color:var(--ink)}.cap-total span{color:var(--faint);font-size:12px}
+.gap-big{font-size:11px;letter-spacing:.08em;font-weight:700;margin-top:5px}
+.scn-strip{margin:0 14px 10px;padding:10px 0 4px;border:0;border-top:1px solid var(--line);border-radius:0;background:none}
+.scn-strip .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.team-card .player-row .pname{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
+.cap-team b{white-space:nowrap}
+.rc{gap:4px 12px}
+.rc-i{border:0;background:none;padding:0;color:var(--faint);font-size:9px}
+.rc-i b{color:var(--muted)}
+.rc-i.watch{background:#fff6e2;padding:2px 7px;color:#8a5a00}.rc-i.over{background:#fdeeed;padding:2px 7px;color:#a62f29}
+.table-head{font-size:10px;letter-spacing:.1em;color:var(--faint);border-bottom:1px solid var(--line);background:none}
+.player-row{border-bottom:1px solid #f0f3f8}
+/* cap page */
+.cap-grid{gap:12px}
+.cap-card{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"team num" "team gap";gap:2px 14px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-md);box-shadow:inset 3px 0 0 var(--team-color);background:#fff}
+.cap-card.mine{box-shadow:inset 3px 0 0 var(--team-color),0 0 0 2px #0a162f,0 0 0 5px #fff,0 0 0 7px #0a162f}
+.cap-team{grid-area:team;min-width:0}
+.cap-team b{font-size:15px;color:var(--ink)}
+.cap-team small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;color:var(--faint)}
+.cap-dot{display:none}
+.cap-num{grid-area:num;font-size:22px;color:var(--ink)}.cap-num span{color:var(--faint);font-size:10px}
+.cap-gap{grid-area:gap;font-size:11px;letter-spacing:.06em}
+.cap-find{border:1px solid #f0d9d6;background:#fdf7f6;border-radius:var(--r-md)}
+/* draft archive */
+.order-panel{border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow)}
+.order-tabs{padding:18px 18px 8px}
+.tab.active{background:none;border:0;padding:0;color:var(--ink);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.pick-row{border-top:1px solid #f0f3f8}
+.pick-slot{font-size:18px;font-weight:600;color:var(--muted)}
+.pick-chip{background:#fff;color:var(--ink);border-radius:10px;padding:7px 12px 7px 14px;font-size:14px;font-weight:700;box-shadow:inset 0 0 0 1px var(--line),inset 4px 0 0 var(--team-color)}
+.pick-row .pick-chip,.dr-big .pick-chip{font-size:14px;padding:7px 12px 7px 14px}
+.subtab{border-color:var(--line);color:var(--muted);letter-spacing:.05em}
+.subtab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+/* trade lab + cards + palette */
+.tchip{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);padding:3px 10px 3px 8px;font-weight:600}
+.tchip:not(.mine-chip)::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--team-color);margin-right:6px;vertical-align:1px}
+.lab-card,.tcard{border-color:var(--line);border-radius:var(--r-md)}
+.tcard{box-shadow:none}
+.sp-box{border-radius:20px}
+#draft-order .title,.page .title{font-size:26px;line-height:1.1;margin:6px 2px 12px}
+/* cleaner team card: one quiet status line; limits only when they matter; no column-header row; a gentle injured list */
+.scn-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 16px 2px;padding:12px 0 10px;border:0;border-top:1px solid #edf0f5}
+.scn-strip .row{display:contents}
+.scn-strip .sd{font-size:11px;color:var(--faint)}.scn-strip .sd b{color:var(--muted);font-weight:600}
+.scn-strip .sd .k{color:var(--faint);letter-spacing:.04em}
+.scn-strip .rc{flex:0 1 auto;gap:4px 10px;margin-right:auto}
+.rc:not(:has(.rc-i.watch,.rc-i.over))>.rc-i{display:none}
+.rc:not(:has(.rc-i.watch,.rc-i.over))::before{content:"✓ Roster limits OK";font:600 11px/1 "Inter",Arial,sans-serif;color:#17734c}
+.rc:has(.rc-i.watch,.rc-i.over)>.rc-i:not(.watch):not(.over){display:none}
+.scn-strip details{flex:0 0 auto}
+.scn-strip details[open]{flex:1 1 100%;order:9}
+.scn-strip details summary{margin-top:2px;color:var(--faint);font-weight:600}
+.table-head{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;padding:0;border:0}
+.team-card .players{padding-top:2px}
+.il-head{background:none;border-top:1px solid #edf0f5;margin-top:10px;color:#a8483f}
+.il-head .il-c,.il-head .il-n{color:var(--faint)}
+/* team identity: each team's colour shows as a tinted header, a solid tile, a thick rule and tinted chips (no big saturated fills) */
+.team-card{box-shadow:inset 0 5px 0 var(--team-color),var(--shadow)}
+.team-card:hover{box-shadow:inset 0 5px 0 var(--team-color),0 1px 2px rgba(15,27,52,.05),0 14px 34px rgba(15,27,52,.09)}
+.team-head{background:color-mix(in srgb,var(--team-color) 12%,#fff)!important;padding-top:20px!important}
+.team-card .team-index{background:var(--team-color)!important;color:var(--team-text)!important;box-shadow:0 2px 6px color-mix(in srgb,var(--team-color) 40%,transparent)}
+.identity-tag::before{width:9px;height:9px}
+.cap-card{background:color-mix(in srgb,var(--team-color) 8%,#fff);box-shadow:inset 5px 0 0 var(--team-color)}
+.cap-card.mine{box-shadow:inset 5px 0 0 var(--team-color),0 0 0 2px #0a162f,0 0 0 5px #fff,0 0 0 7px #0a162f}
+.pick-chip{background:color-mix(in srgb,var(--team-color) 13%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--team-color) 30%,#fff),inset 6px 0 0 var(--team-color);padding-left:16px}
+.pick-row .pick-chip,.dr-big .pick-chip{padding-left:16px}
+.tchip{background:color-mix(in srgb,var(--team-color) 15%,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--team-color) 32%,#fff)}
+.tchip:not(.mine-chip)::before{width:9px;height:9px}
+.tj-chip{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--team-color,#cfd8e6) 35%,#fff)}
+.chk-col{box-shadow:inset 0 5px 0 var(--tc,#12264d)}
+.chk-col.mine{box-shadow:inset 0 5px 0 var(--tc,#12264d),0 0 0 2px #0a162f,0 0 0 5px #fff,0 0 0 7px #0a162f}
+.chk-ch{background:color-mix(in srgb,var(--tc,#12264d) 11%,#fff);padding-top:22px}
+.chk-mono{box-shadow:0 2px 6px color-mix(in srgb,var(--tc,#12264d) 40%,transparent)}
 </style></head><body>
 <div class="topbar"><div class="topbar-inner">
 <div class="brand">NBA TALK VN DYNASTY</div>
@@ -1614,9 +1717,9 @@ section.team-card .picks-tag{display:none}
 :root{--wi:#4a56c8;--wi-bg:#eef0fd;--wi-line:#c9cef3;--wi-up:#b4602a;--wi-down:#17734c}
 #what-if[hidden]{display:none!important}
 body.whatif-mode .page:not(#what-if){display:none}
-body.whatif-mode #what-if{display:block;box-shadow:inset 0 0 0 3px var(--wi),var(--shadow)}
+body.whatif-mode #what-if{display:block;box-shadow:none}
 .wi-vi{font-weight:600;font-size:.5em;letter-spacing:.08em;color:var(--wi);margin-left:8px;vertical-align:.15em}
-.scn-banner.wi{background:repeating-linear-gradient(135deg,#4a56c8 0 14px,#5b68d6 14px 28px);color:#fff}
+.scn-banner.wi{background:var(--wi-bg);color:#31389a;border-bottom:1px solid var(--wi-line)}
 .modeswitch button.on.wi{background:var(--wi);color:#fff}
 .wi-bar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin:0 0 12px}
 .wi-bar .meta-pill{margin:0}
