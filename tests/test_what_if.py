@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
 import build_fa_draft_pool as pool  # noqa: E402
 import league_state as ls  # noqa: E402
+import season_state as ss  # noqa: E402
 import what_if as wi  # noqa: E402
 
 INDEX = os.path.join(ROOT, "index.html")
@@ -460,7 +461,9 @@ class TestNowView(unittest.TestCase):
             self.assertEqual([p["x"] for p in t["players"]], [i >= 9 for i in range(len(t["players"]))], t["short"])
             self.assertEqual(t["a"]["whatIf"], sum(c1[:9]), t["short"])
             self.assertEqual(t["a"]["official"], sum(sorted((p["c0"] for p in t["players"]), reverse=True)[:9]), t["short"])
-        cc = next(t for t in now["teams"] if t["short"] == "CrazyCat")
-        self.assertIn("Zion Williamson", [p["n"] for p in cc["players"]])           # current roster, not keepers
-        self.assertNotIn("Morez Johnson Jr.", [p["n"] for p in cc["players"]])
-        self.assertEqual(cc["a"]["official"], 145)                                    # matches the Cap page
+        si = ss.load_season(ls.load_inputs())
+        cur = ss.season_state(si)
+        for t in now["teams"]:                                                        # the CURRENT verified roster, not the keepers
+            mine = {ls.player_name(si, k) for k, f in cur["playerOwner"].items() if f == t["id"]}
+            self.assertEqual({p["n"] for p in t["players"]}, mine, t["short"])
+            self.assertEqual(t["a"]["official"], ls.team_cap(si, cur, t["id"]), t["short"])   # matches the Cap page

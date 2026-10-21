@@ -82,3 +82,14 @@ suite before opening it. To get the checks as well, close and reopen the PR.
 | `CONSENT_REQUIRED` | sign in once in the login browser, accept the prompt, export again |
 | `NO_ROSTER_TABLE` | Yahoo changed its page layout: the parser needs updating (nothing was written) |
 | `INCOMPLETE_CAPTURE` / `EMPTY_ROSTER` / `DUPLICATE_OWNERSHIP` | Yahoo returned a partial or inconsistent page set: run again; if it repeats, open the artifact |
+
+## Tests must not pin the current roster
+
+The workflow runs the full suite on the regenerated site before it opens a PR. A test that hard-codes a detail of today's
+rosters (a player count, "X is on team Y", a team's cap) fails on the first real roster change and blocks every later update
+PR. Write expectations from the engine for the current snapshot (`season_state`, `season_view`, `roster_checks`), or run on
+the frozen draft-night baseline with `TempData` / `draft_night()` and impose the situation you need.
+
+`python3 scripts/stress_roster_tests.py [SEED ...]` checks this: each seed applies a random roster change (drops, pickups, IL
+moves, status changes) as a new verified snapshot **in a temporary copy of the repository**, regenerates the site and runs the
+whole suite. Run it after adding tests that read the live data; every failure is a test that pins today's roster.

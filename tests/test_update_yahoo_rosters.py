@@ -440,6 +440,14 @@ class TestWorkflowFile(unittest.TestCase):
         self.assertEqual(sum(1 for st in doc["jobs"]["update"]["steps"] if st.get("if") == "always()"), 3)  # report, session cleanup, artifact upload
         self.assertEqual(triggers["workflow_dispatch"]["inputs"]["engine"]["options"], ["browser", "http"])
 
+    def test_stress_tool_is_documented_and_never_touches_the_working_tree(self):
+        with open(os.path.join(ROOT, "scripts", "stress_roster_tests.py"), encoding="utf-8") as f:
+            src = f.read()
+        self.assertIn("shutil.copytree(ROOT, copy", src)                                           # works on a temp copy
+        self.assertIn('"--apply"', src)
+        with open(os.path.join(ROOT, "docs", "YAHOO_ROSTER_WORKFLOW.md"), encoding="utf-8") as f:
+            self.assertIn("scripts/stress_roster_tests.py", f.read())
+
     def test_documented(self):
         with open(os.path.join(ROOT, "docs", "YAHOO_ROSTER_WORKFLOW.md"), encoding="utf-8") as f:
             doc = f.read()
