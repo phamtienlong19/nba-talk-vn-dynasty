@@ -29,7 +29,7 @@ status changes, **salary-cap effects** per team (counted payroll before → afte
 roster checks on the proposed rosters, the recorded transactions, and unresolved discrepancies. Payroll is the existing rule:
 the top nine frozen salaries over **all** owned players, IL included; frozen salaries are never written (checked by file hash
 before and after). Cross-checks: team and position eligibility vs our data, players in a lineup slot they are not eligible
-for, players parked on IL that Yahoo does not list as IL-eligible, injured players (IL-eligible per Yahoo, or Out) not on IL, IL labels preserved, and an independent top-9 payroll
+for, players parked on IL that Yahoo lists as neither IL-eligible nor Out, injured players (IL-eligible per Yahoo, or Out) not on IL, IL labels preserved, and an independent top-9 payroll
 recomputation.
 
 ## One-time setup
@@ -69,9 +69,10 @@ From any other branch, or with *Open a draft PR* unticked, it is a dry run: the 
 (`concurrency`), time out after 25 minutes, and a roster update can only touch `data/2026-27/rosters/`,
 `data/2026-27/unlisted_players.json` and the generated `index.html` (checked before the PR is created).
 
-**Review and merge the draft PR yourself.** GitHub does not start other workflows for a PR opened with the default
-`GITHUB_TOKEN`, so the usual `validate` check will not run on it; the workflow already ran `./validate.sh` and the full test
-suite before opening it. To get the checks as well, close and reopen the PR.
+**Review and merge the draft PR yourself.** The workflow already ran `./validate.sh` and the full test suite before opening it,
+and the repository's `validate` check runs on the PR too (verified on the first real run). The automated Claude Code Review is
+skipped for these PRs (`automation/yahoo-rosters-*` branches): the action refuses PRs opened by a bot, and the content is
+generated roster data that this report already summarises.
 
 ## When it fails
 
