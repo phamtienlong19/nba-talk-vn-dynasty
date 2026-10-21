@@ -379,6 +379,27 @@ span.num{font-family:"Roboto Mono",ui-monospace,Menlo,monospace!important;font-w
 .team-card{border-color:#dbe3ed}
 .team-card .table-head{background:linear-gradient(90deg,#f8fafc,#f2f6fb)}
 .order-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+/* tabs: one view at a time instead of one long scroll (print still shows everything) */
+.tab-off,.sub-off{display:none!important}
+@media print{.tab-off,.sub-off{display:block!important}}
+.navlink.on{background:#ffffff1c;color:#fff;box-shadow:inset 0 -2px 0 #ffcf33}
+.subtabs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 14px}
+.subtab{font:700 11px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;padding:8px 13px;border-radius:999px;border:1px solid #d6dde8;background:#fff;color:#4a5875;cursor:pointer}
+.subtab:hover{border-color:#aab6cc;color:#12264d}
+.subtab.on{background:#12264d;border-color:#12264d;color:#fff}
+.order-grid.single{grid-template-columns:minmax(0,760px);justify-content:center}
+.order-grid.single .order-tabs{display:none}
+.order-tabs .tab:not(.active){display:none}  /* the old static round pills were decorative: each column keeps only its own heading */
+/* phones: brand + mode switch on one row, the four tabs as an evenly spaced row beneath (nothing hides off-screen) */
+@media(max-width:680px){
+  .topbar-inner{flex-wrap:wrap;overflow-x:visible;row-gap:6px}
+  .brand{font-size:12px;order:1;white-space:nowrap}
+  .modeswitch{order:1;margin-left:auto}
+  .modeswitch button{padding:7px 7px;font-size:9.5px}
+  .topbar-inner::after{content:"";order:2;flex-basis:100%;height:0}   /* forces the tabs onto their own row */
+  .navlink{order:3;flex:1 1 22%;text-align:center;padding:8px 4px;font-size:11px}
+  .navlink.on{background:#ffffff22}
+}
 .order-panel{background:#fff;border:1px solid #dce2ea;border-radius:16px;overflow:hidden;box-shadow:0 5px 18px rgba(28,45,72,.06)}
 .order-tabs{display:flex;gap:10px;padding:16px 16px 12px}
 .tab{display:inline-flex;padding:10px 18px;border-radius:14px;border:1px solid #cfd6df;background:#fff;font-weight:700;font-size:16px;color:#1d1d22}
@@ -774,10 +795,10 @@ section.team-card .picks-tag{display:none}
 </style></head><body>
 <div class="topbar"><div class="topbar-inner">
 <div class="brand">NBA TALK VN DYNASTY</div>
-<a class="navlink" href="#rosters-a">TEAMS</a>
-<a class="navlink" href="#cap">CAP</a>
-<a class="navlink" href="#trade-lab">TRADE LAB</a>
-<a class="navlink" href="#draft-order">DRAFT</a>
+<a class="navlink" href="#teams" data-tab="teams">TEAMS</a>
+<a class="navlink" href="#cap" data-tab="cap">CAP</a>
+<a class="navlink" href="#trade-lab" data-tab="trade-lab">TRADE LAB</a>
+<a class="navlink" href="#draft" data-tab="draft">DRAFT</a>
 <div class="modeswitch" role="group" aria-label="State mode"><button type="button" data-mode="OFFICIAL" class="on">OFFICIAL</button><button type="button" data-mode="SCENARIO">SCENARIO</button><button type="button" data-mode="WHATIF" title="Giả định — post-freeze what-if">WHAT IF</button></div>
 </div><div class="scn-banner" id="scn-banner" hidden></div></div>
 <section class="page" id="rosters-a"><div class="title">TEAMS 1–8</div>
@@ -2242,13 +2263,46 @@ function renderStandings(){
 }
 function syncUrl(){try{var ks=key();var q=S.mode==="SCENARIO"?"?mode=scenario"+(ks?"&trades="+ks:""):S.mode==="WHATIF"&&window.NBA_WHATIF?window.NBA_WHATIF.query():location.pathname;
  if(S.order==="team"&&S.mode!=="WHATIF")q+=(q.indexOf("?")>=0?"&":"?")+"order=team";history.replaceState(null,"",q+location.hash);}catch(e){}}
+/* ---------- tabs: TEAMS / CAP / TRADE LAB / DRAFT show one view at a time; the Draft Archive has a tab per round ---------- */
+var TABS=[{id:"teams",sec:["rosters-a","rosters-b"]},{id:"cap",sec:["cap"]},{id:"trade-lab",sec:["trade-lab"]},{id:"draft",sec:["draft-order"]}];
+var TAB_ALIAS={"rosters-a":"teams","rosters-b":"teams","draft-order":"draft","draft-pool":"draft"};  /* old anchors keep working */
+var ROUNDS=["r1","r2","r3"];
+function parseHash(){
+ var p=(location.hash||"").replace(/^#/,"").split("/"),id=TAB_ALIAS[p[0]]||p[0];
+ return {tab:TABS.some(function(t){return t.id===id;})?id:"teams",sub:p[1]||"",anchor:TAB_ALIAS[p[0]]?p[0]:""};}
+function showRound(sub){
+ var grid=document.querySelector("#draft-order .order-grid");if(!grid)return;
+ var want=sub||(window.matchMedia("(max-width:1250px)").matches?"r1":"all");if(want!=="all"&&ROUNDS.indexOf(want)<0)want="all";
+ [].slice.call(grid.querySelectorAll(".order-panel")).forEach(function(p,i){p.classList.toggle("sub-off",want!=="all"&&ROUNDS[i]!==want);});
+ grid.classList.toggle("single",want!=="all");
+ document.querySelectorAll("#draft-order .subtab").forEach(function(b){var on=b.dataset.sub===want;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on?"true":"false");});}
+function showTab(id,sub){
+ TABS.forEach(function(t){t.sec.forEach(function(sid){var e=document.getElementById(sid);if(e)e.classList.toggle("tab-off",t.id!==id);});});
+ document.querySelectorAll(".navlink").forEach(function(a){var on=a.dataset.tab===id;a.classList.toggle("on",on);if(on)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});
+ if(id==="draft")showRound(sub);}
+function goTab(id,sub){
+ var hash="#"+id+(id==="draft"&&sub?"/"+sub:"");
+ try{if(location.hash!==hash)history.pushState(null,"",location.pathname+location.search+hash);}catch(e){}
+ showTab(id,sub);window.scrollTo(0,0);}
+function initTabs(){
+ var grid=document.querySelector("#draft-order .order-grid");
+ if(grid&&!document.querySelector("#draft-order .subtabs")){
+  var bar=h("div",{class:"subtabs",role:"group","aria-label":"Draft archive rounds"});
+  [["all","ALL ROUNDS"],["r1","ROUND 1"],["r2","ROUND 2"],["r3","ROUND 3"]].forEach(function(o){
+   var b=h("button",{type:"button",class:"subtab","data-sub":o[0],text:o[1]});b.addEventListener("click",function(){goTab("draft",o[0]);});bar.appendChild(b);});
+  grid.parentNode.insertBefore(bar,grid);}
+ document.querySelectorAll(".navlink").forEach(function(a){a.addEventListener("click",function(ev){
+  ev.preventDefault();if(S.mode==="WHATIF"){S.mode="OFFICIAL";renderAll();}goTab(a.dataset.tab,"");});});
+ window.addEventListener("popstate",function(){var p=parseHash();if(S.mode==="WHATIF"){S.mode="OFFICIAL";renderAll();}showTab(p.tab,p.sub);});
+ var p=parseHash();showTab(p.tab,p.sub);
+ if(p.anchor){var e=document.getElementById(p.anchor);if(e)setTimeout(function(){e.scrollIntoView();},0);}}
 function init(){
  document.getElementById("lab-cap").textContent=D.cap.floor+"–"+D.cap.ceiling;
  document.querySelectorAll(".modeswitch button").forEach(function(b){b.addEventListener("click",function(){S.mode=b.dataset.mode;renderAll();});});
  document.getElementById("avail-q").addEventListener("input",renderAvail);
  var qs=new URLSearchParams(location.search);
  document.addEventListener("whatif:change",syncUrl);
-  document.querySelectorAll(".navlink").forEach(function(a){a.addEventListener("click",function(){if(S.mode==="WHATIF"){S.mode="OFFICIAL";renderAll();}});});
+  initTabs();
   if(qs.get("mode")==="whatif"&&window.NBA_WHATIF){S.mode="WHATIF";window.NBA_WHATIF.restore(qs);}
   if(qs.get("order")==="team")S.order="team";
   if(qs.get("mode")==="scenario"){S.mode="SCENARIO";(qs.get("trades")||"").split(",").forEach(function(k){if(TR[k])S.sel[k]=true;});}

@@ -461,6 +461,68 @@ class TestRenderedCards(unittest.TestCase):
         finally:
             shutil.rmtree(d)
 
+    # ---- tabs: one view at a time (TEAMS / CAP / TRADE LAB / DRAFT) and a tab per draft round ------------------------------
+    TAB_SECTIONS = {"teams": ("rosters-a", "rosters-b"), "cap": ("cap",), "trade-lab": ("trade-lab",), "draft": ("draft-order",)}
+
+    def _visible_tabs(self, hash_=""):
+        """-> (set of tabs whose sections are shown, active nav tab, the dom), after the page's own script has run."""
+        dom = _dump("file://" + os.path.abspath(INDEX) + hash_)
+        shown = set()
+        for tab, secs in self.TAB_SECTIONS.items():
+            states = []
+            for sid in secs:
+                tag = re.search(r'<section class="([^"]*)"[^>]*\bid="%s"' % sid, dom) or re.search(r'<section[^>]*\bid="%s"[^>]*class="([^"]*)"' % sid, dom)
+                self.assertIsNotNone(tag, sid)                                  # every section stays in the DOM (printing, tests, links)
+                states.append("tab-off" not in tag.group(1).split())
+            self.assertEqual(len(set(states)), 1, (tab, states))                 # a tab shows or hides all of its sections together
+            if states[0]:
+                shown.add(tab)
+        active = re.findall(r'<a class="navlink on"[^>]*data-tab="([^"]+)"', dom)
+        return shown, active, dom
+
+    def test_tabs_show_one_view_at_a_time(self):
+        shown, active, dom = self._visible_tabs()
+        self.assertEqual((shown, active), ({"teams"}, ["teams"]))                  # default: the teams
+        self.assertIn('aria-current="page"', dom)
+        for hash_, tab in (("#cap", "cap"), ("#trade-lab", "trade-lab"), ("#draft", "draft"), ("#teams", "teams")):
+            shown, active, _ = self._visible_tabs(hash_)
+            self.assertEqual((shown, active), ({tab}, [tab]), hash_)
+
+    def test_old_anchors_still_land_on_the_right_tab(self):
+        for hash_, tab in (("#rosters-a", "teams"), ("#rosters-b", "teams"), ("#draft-order", "draft")):
+            shown, active, _ = self._visible_tabs(hash_)
+            self.assertEqual((shown, active), ({tab}, [tab]), hash_)
+        shown, active, _ = self._visible_tabs("#no-such-tab")
+        self.assertEqual(shown, {"teams"})                                          # an unknown hash falls back to the default
+
+    def test_draft_archive_has_a_tab_per_round(self):
+        def panels(hash_):
+            dom = _dump("file://" + os.path.abspath(INDEX) + hash_)
+            grid = re.search(r'<div class="order-grid([^"]*)">(.*?)</div>\s*</div>\s*</section>', dom, re.S)
+            self.assertIsNotNone(grid)
+            classes = re.findall(r'<div class="order-panel([^"]*)"', dom)
+            bar = re.search(r'<div class="subtabs".*?</div>', dom, re.S).group(0)
+            return grid.group(1).split(), [("sub-off" not in c.split()) for c in classes], re.findall(r'<button[^>]*class="subtab( on)?"[^>]*data-sub="([^"]+)"', bar), dom
+        gridcls, vis, bar, _ = panels("#draft/all")
+        self.assertEqual((vis, "single" in gridcls), ([True, True, True], False))        # all rounds side by side
+        self.assertEqual([b[1] for b in bar], ["all", "r1", "r2", "r3"])
+        for sub, idx in (("r1", 0), ("r2", 1), ("r3", 2)):
+            gridcls, vis, bar, dom = panels("#draft/" + sub)
+            self.assertEqual(vis, [i == idx for i in range(3)], sub)                    # exactly that round
+            self.assertIn("single", gridcls)
+            self.assertEqual([b[1] for b in bar if b[0]], [sub])                         # its tab is the selected one
+        txt = re.sub(r"<[^>]+>", " ", panels("#draft/r2")[3])
+        self.assertNotRegex(txt.split("DRAFT ARCHIVE")[1][:200], r"ROUND 1\s+ROUND 2\s+ROUND 3\s+1\.01")   # no fake round pills
+
+    def test_tab_markup_and_print_and_legacy_nav(self):
+        css = self.static
+        self.assertRegex(css, r"\.tab-off,\.sub-off\{display:none!important\}")
+        self.assertRegex(css, r"@media print\{\.tab-off,\.sub-off\{display:block!important\}\}")   # printing shows every section
+        for tab, label in (("teams", "TEAMS"), ("cap", "CAP"), ("trade-lab", "TRADE LAB"), ("draft", "DRAFT")):
+            self.assertIn(f'<a class="navlink" href="#{tab}" data-tab="{tab}">{label}</a>', self.static)
+        self.assertEqual(len(re.findall(r'<a class="navlink"', self.static)), 4)           # nav order is unchanged (tests click navlink[1])
+        self.assertIn("window.addEventListener(\"popstate\"", self.static)                 # back / forward switch tabs
+
     def test_full_team_names_and_no_health_badges(self):
         bsy = _card(self.official, "Bsy")
         self.assertIn('<div class="team-name">Hai | Bulls Dynasty</div>', bsy)    # one style, no lighter manager part
