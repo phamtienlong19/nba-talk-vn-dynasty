@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-22T01:49:55Z
+Generated: 2026-10-22T02:15:29Z
 
 ## Task
 Active Task
@@ -10,15 +10,15 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: style/card-info
-Commit: cc891c1
+Commit: 7275695
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: none
-CI: no runs found for this branch
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/82 (OPEN)
+CI: Claude Code Review: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,10 +27,11 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md |  22 +++++----
- index.html                   | 107 ++++++++++++++++++++++++++++++++++++++++++-
- scripts/what_if.css          |   4 +-
- 3 files changed, 119 insertions(+), 14 deletions(-)
+ ai_exchange/REVIEW_PACKET.md     |  44 +++-----------
+ index.html                       | 126 ++++++++++++++++++++++++++++++++++++++-
+ scripts/what_if.css              |   4 +-
+ tests/test_scenario_rendering.py |  24 ++++++++
+ 4 files changed, 158 insertions(+), 40 deletions(-)
 ```
 
 ## Validation
@@ -48,6 +49,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - ai_exchange/REVIEW_PACKET.md
 - index.html
 - scripts/what_if.css
+- tests/test_scenario_rendering.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.

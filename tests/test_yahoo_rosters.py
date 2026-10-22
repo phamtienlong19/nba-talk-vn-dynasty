@@ -608,8 +608,9 @@ class TestRosterChecks(unittest.TestCase):
     def test_cards_show_the_checks_quietly(self):
         with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
             html = f.read()
-        self.assertIn("function rosterChecks(c)", html)
-        self.assertIn('if(tm.checks)strip.appendChild(rosterChecks(tm.checks));', html)
+        self.assertIn('class:"tp-l "', html)                                         # each limit is a sentence in the team's detail panel
+        self.assertIn('"Roster limits"', html)
+        self.assertNotIn("rosterChecks", html)                                      # (the old tiny chips are gone)
         data = json.loads(re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1).replace("<\\/", "</"))
         si = ss.load_season(ls.load_inputs())                                       # the embedded checks are the engine's, for any roster
         state = ss.season_state(si)
