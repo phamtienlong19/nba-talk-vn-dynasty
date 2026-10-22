@@ -1055,6 +1055,10 @@ body{background:var(--canvas);color:var(--text)}
 .tc-info:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .tc-info.watch::after,.tc-info.over::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;border:2px solid #fff;background:#e0a020}
 .tc-info.over::after{background:#c0392b}
+/* numbers read as data: heavier and ink-coloured wherever a sentence carries them (detail panel, Trade Machine) */
+.tp-l .num,.tp-r .num,.tp-cap .num,.chk-r .num,.chk-bar-t .num,.chk-cap-t .num,.chk-warn .num,.chk-sub .num,.yh-w .num,.chk-yh-n .num,.chk-fa .num,.chk-empty .num,.yh-p .num{font-weight:800!important;font-size:1.06em!important;color:var(--ink)}
+.chk-r.blocked .num,.chk-r.review .num,.tp-l.over .num,.tp-l.watch .num,.chk-warn .num,.chk-cap-t.out .num,.fa.watch .num,.fa.over .num{color:inherit}
+.chk-r .num,.tp-l .num{letter-spacing:-.01em!important}
 /* team identity: each team's colour shows as a tinted header, a solid tile, a thick rule and tinted chips (no big saturated fills) */
 .team-card{box-shadow:inset 0 5px 0 var(--team-color),var(--shadow)}
 .team-card:hover{box-shadow:inset 0 5px 0 var(--team-color),0 1px 2px rgba(15,27,52,.05),0 14px 34px rgba(15,27,52,.09)}

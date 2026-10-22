@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-22T02:15:29Z
+Generated: 2026-10-22T02:18:57Z
 
 ## Task
 Active Task
@@ -10,7 +10,7 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: style/card-info
-Commit: 7275695
+Commit: 4716cc6
 Base: main
 Working tree: dirty
 
@@ -27,11 +27,12 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md     |  44 +++-----------
- index.html                       | 126 ++++++++++++++++++++++++++++++++++++++-
+ ai_exchange/REVIEW_PACKET.md     |  48 +++--------
+ index.html                       | 179 +++++++++++++++++++++++++++++++--------
  scripts/what_if.css              |   4 +-
- tests/test_scenario_rendering.py |  24 ++++++++
- 4 files changed, 158 insertions(+), 40 deletions(-)
+ tests/test_scenario_rendering.py |  68 ++++++++++++---
+ tests/test_yahoo_rosters.py      |   5 +-
+ 5 files changed, 216 insertions(+), 88 deletions(-)
 ```
 
 ## Validation
@@ -50,6 +51,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - index.html
 - scripts/what_if.css
 - tests/test_scenario_rendering.py
+- tests/test_yahoo_rosters.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
