@@ -16,6 +16,14 @@
       "displayPosition": "PF",
       "cap": 0.0,
       "firstSeen": "RS-2026-10-19-878cd6e3"
+    },
+    {
+      "playerKey": "478.p.10607",
+      "name": "Trevon Brazile",
+      "nbaTeam": "DEN",
+      "displayPosition": "PF",
+      "cap": 0.0,
+      "firstSeen": "RS-2026-10-22-fad0966e"
     }
   ],
   "note": "Players rostered in-season who are not in salary_freeze.json. Salary 0 by league rule (config/cap_policy.json unlistedPlayerSalary). Added only by a reviewed roster import."
