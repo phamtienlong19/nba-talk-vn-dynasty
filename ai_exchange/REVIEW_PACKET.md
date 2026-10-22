@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-21T16:43:24Z
+Generated: 2026-10-22T02:18:57Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: style/modern-refresh
-Commit: 1816379
+Branch: style/card-info
+Commit: 4716cc6
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/80 (OPEN)
-CI: validate: in_progress/
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/82 (OPEN)
+CI: Claude Code Review: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,24 +27,12 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md                       |   45 +-
- config/trade_rules.json                            |   54 +
- data/2026-27/rosters/index.json                    |   11 +-
- .../rosters/snapshots/RS-2026-10-21-92584e3e.json  | 1133 ++++++++++++++++++++
- data/2026-27/unlisted_players.json                 |    8 +
- docs/GOVERNANCE_ROADMAP.md                         |    3 +
- docs/LEAGUE_RULES_MODEL.md                         |    4 +-
- docs/SEASON_STATE_MODEL.md                         |   19 +
- docs/YAHOO_LEAGUE_SETTINGS.md                      |   19 +
- index.html                                         |  832 +++++++++++++-
- scripts/build_league_state.py                      |   26 +
- scripts/trade_checker.py                           |  295 +++++
- scripts/what_if.css                                |    4 +-
- scripts/what_if_app.js                             |   10 +-
- tests/test_rookie_keys.py                          |   49 +
- tests/test_scenario_rendering.py                   |  498 ++++++++-
- tests/test_trade_checker.py                        |  377 +++++++
- 17 files changed, 3336 insertions(+), 51 deletions(-)
+ ai_exchange/REVIEW_PACKET.md     |  48 +++--------
+ index.html                       | 179 +++++++++++++++++++++++++++++++--------
+ scripts/what_if.css              |   4 +-
+ tests/test_scenario_rendering.py |  68 ++++++++++++---
+ tests/test_yahoo_rosters.py      |   5 +-
+ 5 files changed, 216 insertions(+), 88 deletions(-)
 ```
 
 ## Validation
@@ -60,22 +48,10 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
 - ai_exchange/REVIEW_PACKET.md
-- config/trade_rules.json
-- data/2026-27/rosters/index.json
-- data/2026-27/rosters/snapshots/RS-2026-10-21-92584e3e.json
-- data/2026-27/unlisted_players.json
-- docs/GOVERNANCE_ROADMAP.md
-- docs/LEAGUE_RULES_MODEL.md
-- docs/SEASON_STATE_MODEL.md
-- docs/YAHOO_LEAGUE_SETTINGS.md
 - index.html
-- scripts/build_league_state.py
-- scripts/trade_checker.py
 - scripts/what_if.css
-- scripts/what_if_app.js
-- tests/test_rookie_keys.py
 - tests/test_scenario_rendering.py
-- tests/test_trade_checker.py
+- tests/test_yahoo_rosters.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
@@ -88,4 +64,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `style/modern-refresh` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `style/card-info` if not already done, then request human/ChatGPT review of this packet.

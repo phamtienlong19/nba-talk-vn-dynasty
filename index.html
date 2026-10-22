@@ -687,10 +687,7 @@ details.lab-d>summary::before{content:"▸ "}details.lab-d[open]>summary::before
 .pk-hist{grid-column:1/-1;font-size:11.5px;color:#4a5670;background:#fffdf6;border-top:1px dashed #f0d3b0;padding:6px 10px;display:none;line-height:1.55}
 .pk-hist.open{display:block}
 .scn-strip{margin:0 12px 8px;padding:7px 9px;border:1.5px dashed #e69a0a;border-radius:9px;background:#fffaf0;font-size:11px}
-.scn-strip .row{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
 .scn-strip b{font-family:"Roboto Mono",ui-monospace,Menlo,monospace;color:var(--navy)}
-.scn-strip .k{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;color:#8a6a1f;margin-right:3px}
-.scn-strip details summary{cursor:pointer;font:700 10px/1 "Inter",Arial,sans-serif;color:var(--y-purple);margin-top:5px}
 .scn-strip .mv{margin-top:5px;line-height:1.5;color:#3a465e}
 .cap-card.scn-moved{outline:2px solid #ffb020;background:#fffaf0}
 .cap-card .scn-tag{font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;background:#ffb020;color:#2a1a00;border-radius:4px;padding:2px 4px;margin-left:5px;vertical-align:2px}
@@ -754,7 +751,6 @@ details.avail>summary::-webkit-details-marker{display:none}
 .players.has-st .pname{position:relative;padding-left:27px}
 .players.has-st .pname .st-chip{position:absolute;left:0;top:50%;transform:translateY(-50%);margin:0;min-width:22px;padding:3px 3px;font-size:7.8px;letter-spacing:.03em}
 
-.scn-strip .sd.hl b{color:#2b6b4f}
 /* standings */
 .stand-tag{display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap;padding:3px 8px;border-radius:999px;background:#eef3fb;color:#3a4a66;font:600 10px/1.2 "Inter",Arial,sans-serif}
 .stand-tag b{font:700 11px/1 "Roboto Mono",ui-monospace,Menlo,monospace;color:#12264d}
@@ -765,12 +761,6 @@ details.avail>summary::-webkit-details-marker{display:none}
 .stand-pill .so{font:700 9.5px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;border:0;background:transparent;color:#6b7891;padding:3px 7px;border-radius:999px;cursor:pointer}
 .stand-pill .so.on{background:#12264d;color:#fff}
 /* roster checks (anti-tank limits): quiet when fine, amber to review, red when a limit is broken */
-.rc{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
-.rc-i{display:inline-flex;align-items:baseline;gap:2px;padding:2px 5px;border-radius:999px;border:1px solid #e3e8ef;background:#fff;color:#8a94a6;font:600 8px/1.25 "Inter",Arial,sans-serif;letter-spacing:.03em;text-transform:uppercase;cursor:default}
-.rc-i b{font:700 10px/1 "Roboto Mono",ui-monospace,Menlo,monospace;color:#56627a;letter-spacing:0}
-.rc-i .rc-m{font:500 9px/1 "Roboto Mono",ui-monospace,Menlo,monospace;color:#a8b1c0;letter-spacing:0;text-transform:none}
-.rc-i.watch{border-color:#f0d9a6;background:#fffaf0;color:#9a6b00}.rc-i.watch b{color:#8a5a00}
-.rc-i.over{border-color:#efc2bd;background:#fff4f3;color:#a62f29}.rc-i.over b{color:#a62f29}
 /* full team names: one style, wrapping between words only */
 .team-head .team-name{font-size:18px;line-height:1.1;overflow-wrap:break-word;word-break:normal;hyphens:none}
 /* four-across cards: the full name gets its own line above the tags and the cap box */
@@ -949,8 +939,6 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 @media (max-width:420px){.tc-body{grid-template-columns:minmax(0,1fr)}.tc-swap{transform:rotate(90deg)}}
 section.team-card .picks-tag{display:none}
 .team-card .cuts{display:none}
-.scn-strip .row{gap:6px 12px}.scn-strip .sd{display:inline-flex;align-items:baseline;gap:4px}.scn-strip .sd b{font:700 13px "Roboto Mono",ui-monospace,Menlo,monospace;color:#12264d}.scn-strip .sd .k{font-size:10px;letter-spacing:.04em;text-transform:none;color:#8a95b0}
-.scn-strip details summary{font-size:11px;color:#5a6a8c}
 .scn-strip .mv-dr{display:grid;grid-template-columns:56px minmax(0,1fr);align-items:baseline;gap:0 6px;margin:2px 0}.mv-items{display:flex;flex-wrap:wrap;gap:3px 12px}
 .mv-l{font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;color:#8a95b0;min-width:52px}
 .cf-v b{font-family:"Roboto Mono",ui-monospace,Menlo,monospace}.cf-v b.neg{color:#a62f29}.cf-now b{font-family:"Roboto Mono",ui-monospace,Menlo,monospace}
@@ -1006,13 +994,8 @@ body{background:var(--canvas);color:var(--text)}
 .cap-total{font-size:24px;color:var(--ink)}.cap-total span{color:var(--faint);font-size:12px}
 .gap-big{font-size:11px;letter-spacing:.08em;font-weight:700;margin-top:5px}
 .scn-strip{margin:0 14px 10px;padding:10px 0 4px;border:0;border-top:1px solid var(--line);border-radius:0;background:none}
-.scn-strip .row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
 .team-card .player-row .pname{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
 .cap-team b{white-space:nowrap}
-.rc{gap:4px 12px}
-.rc-i{border:0;background:none;padding:0;color:var(--faint);font-size:9px}
-.rc-i b{color:var(--muted)}
-.rc-i.watch{background:#fff6e2;padding:2px 7px;color:#8a5a00}.rc-i.over{background:#fdeeed;padding:2px 7px;color:#a62f29}
 .table-head{font-size:10px;letter-spacing:.1em;color:var(--faint);border-bottom:1px solid var(--line);background:none}
 .player-row{border-bottom:1px solid #f0f3f8}
 /* cap page */
@@ -1044,21 +1027,38 @@ body{background:var(--canvas);color:var(--text)}
 .sp-box{border-radius:20px}
 #draft-order .title,.page .title{font-size:26px;line-height:1.1;margin:6px 2px 12px}
 /* cleaner team card: one quiet status line; limits only when they matter; no column-header row; a gentle injured list */
-.scn-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 16px 2px;padding:12px 0 10px;border:0;border-top:1px solid #edf0f5}
-.scn-strip .row{display:contents}
-.scn-strip .sd{font-size:11px;color:var(--faint)}.scn-strip .sd b{color:var(--muted);font-weight:600}
-.scn-strip .sd .k{color:var(--faint);letter-spacing:.04em}
-.scn-strip .rc{flex:0 1 auto;gap:4px 10px;margin-right:auto}
-.rc:not(:has(.rc-i.watch,.rc-i.over))>.rc-i{display:none}
-.rc:not(:has(.rc-i.watch,.rc-i.over))::before{content:"✓ Roster limits OK";font:600 11px/1 "Inter",Arial,sans-serif;color:#17734c}
-.rc:has(.rc-i.watch,.rc-i.over)>.rc-i:not(.watch):not(.over){display:none}
-.scn-strip details{flex:0 0 auto}
-.scn-strip details[open]{flex:1 1 100%;order:9}
-.scn-strip details summary{margin-top:2px;color:var(--faint);font-weight:600}
 .table-head{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;padding:0;border:0}
 .team-card .players{padding-top:2px}
 .il-head{background:none;border-top:1px solid #edf0f5;margin-top:10px;color:#a8483f}
 .il-head .il-c,.il-head .il-n{color:var(--faint)}
+/* supplementary team detail lives behind one small button */
+.scn-strip{display:none;margin:0 16px 4px;padding:14px 0 6px;border:0;border-top:1px solid #edf0f5;border-radius:0;background:none;font-size:12px}
+.team-card.info-open .scn-strip{display:block}
+.tp-s{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tp-r{font:500 12.5px/1.3 "Inter",Arial,sans-serif;color:var(--muted)}
+.scn-strip .meter{margin:14px 0 8px}
+.tp-cap{font:500 11px/1.3 "Inter",Arial,sans-serif;color:var(--faint)}
+.tp-f{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin:16px 0 4px}
+.tp-f div{display:flex;flex-direction:column;gap:3px}
+.tp-f span{font:700 9.5px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:var(--faint);text-transform:uppercase}
+.tp-f b{font:700 15px/1.1 "Roboto Mono",ui-monospace,Menlo,monospace;color:var(--ink)}
+.tp-h{font:800 9.5px/1 "Inter",Arial,sans-serif;letter-spacing:.12em;color:var(--faint);margin:18px 0 6px;text-transform:uppercase}
+.tp-l{display:flex;gap:9px;align-items:flex-start;padding:5px 0;font:500 12.5px/1.4 "Inter",Arial,sans-serif;color:var(--text)}
+.tp-l i{flex:none;width:16px;height:16px;margin-top:1px;border-radius:50%;display:grid;place-items:center;font:800 9px/1 "Inter",Arial,sans-serif;font-style:normal;background:#e8f3ec;color:#17623a}
+.tp-l.watch i{background:#fff1d6;color:#8a5a00}.tp-l.over i{background:#c0392b;color:#fff}
+.tp-l.watch,.tp-l.over{font-weight:600}
+.tp-l.over{color:#a11a1a}.tp-l.watch{color:#8a5a00}
+.scn-strip .mv{margin-top:2px}
+.team-head{grid-template-columns:auto minmax(0,1fr) auto auto!important;grid-template-areas:"idx name cap info" "idx meta cap info"!important}
+.tc-info{grid-area:info;grid-row:1/3;align-self:start;position:relative;width:26px;height:26px;margin:-4px -4px 0 0;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--faint);font:italic 700 13px/1 Georgia,"Times New Roman",serif;cursor:pointer;padding:0}
+.tc-info:hover,.team-card.info-open .tc-info{background:var(--ink);border-color:var(--ink);color:#fff}
+.tc-info:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tc-info.watch::after,.tc-info.over::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;border:2px solid #fff;background:#e0a020}
+.tc-info.over::after{background:#c0392b}
+/* numbers read as data: heavier and ink-coloured wherever a sentence carries them (detail panel, Trade Machine) */
+.tp-l .num,.tp-r .num,.tp-cap .num,.chk-r .num,.chk-bar-t .num,.chk-cap-t .num,.chk-warn .num,.chk-sub .num,.yh-w .num,.chk-yh-n .num,.chk-fa .num,.chk-empty .num,.yh-p .num{font-weight:800!important;font-size:1.06em!important;color:var(--ink)}
+.chk-r.blocked .num,.chk-r.review .num,.tp-l.over .num,.tp-l.watch .num,.chk-warn .num,.chk-cap-t.out .num,.fa.watch .num,.fa.over .num{color:inherit}
+.chk-r .num,.tp-l .num{letter-spacing:-.01em!important}
 /* team identity: each team's colour shows as a tinted header, a solid tile, a thick rule and tinted chips (no big saturated fills) */
 .team-card{box-shadow:inset 0 5px 0 var(--team-color),var(--shadow)}
 .team-card:hover{box-shadow:inset 0 5px 0 var(--team-color),0 1px 2px rgba(15,27,52,.05),0 14px 34px rgba(15,27,52,.09)}
@@ -2394,7 +2394,7 @@ function renderPicks(){
 }
 /* ---------- team cards + CAP page ---------- */
 function renderTeamCards(){
- document.querySelectorAll(".scn-strip").forEach(function(n){n.remove();});
+ document.querySelectorAll(".scn-strip,.tc-info").forEach(function(n){n.remove();});
  var v=view(),scn=S.mode==="SCENARIO";
  document.querySelectorAll("section.team-card").forEach(function(card){
   var tag=card.querySelector(".identity-tag");if(!tag)return;
@@ -2440,11 +2440,24 @@ function renderTeamCards(){
   card.classList.add("scn-card");
   var ref=scn?o.cap:tm.baselineCap,dl=tm.cap-ref;
   var strip=h("div",{class:"scn-strip"});
-  strip.appendChild(h("div",{class:"row"},[h("span",{class:"chip "+st[1],text:st[0]}),
-   h("span",{class:"sd",title:(scn?"vs current ":"vs post-draft ")+ref},[h("span",{class:"k",text:"Δ"}),h("b",{text:dl?sgn(dl):"0"}),h("span",{class:"k",text:scn?"vs now":"vs draft"})]),
-   h("span",{class:"sd"},[h("b",{text:String(tm.count)}),h("span",{class:"k",text:"players"})]),
-   tm.injuredCap?h("span",{class:"sd hl",title:"Counted payroll without injured players: IL slots and anyone listed Out ("+money(tm.injuredCap)+" of the counted payroll)"},[h("span",{class:"k",text:"healthy"}),h("b",{text:money(tm.healthyCap)})]):null]));
-  if(tm.checks)strip.appendChild(rosterChecks(tm.checks));
+  /* the detail panel behind the team's info button: status in words, where payroll sits in the band, a few facts, each roster limit as a sentence, the moves */
+  var rm=Math.round((D.cap.ceiling-tm.cap)*100)/100,YH=D.trade.rules.yahoo,spots=D.trade.rules.roster.spots;
+  var word={UNDER_FLOOR:"Under the floor",AT_FLOOR:"At the floor",IN_RANGE:"In range",NEAR_CEILING:"Near the ceiling",AT_CEILING:"At the ceiling",OVER_CEILING:"Over the ceiling"}[tm.status]||st[0];
+  var roomText=tm.cap>D.cap.ceiling?(Math.round((tm.cap-D.cap.ceiling)*100)/100)+" over the "+D.cap.ceiling+" ceiling":tm.cap<D.cap.floor?(Math.round((D.cap.floor-tm.cap)*100)/100)+" under the "+D.cap.floor+" floor":rm+" below the "+D.cap.ceiling+" ceiling";
+  strip.appendChild(h("div",{class:"tp-s"},[h("span",{class:"chip "+st[1],text:word}),h("span",{class:"tp-r",text:roomText})]));
+  strip.appendChild(chkMeter(ref,tm.cap));
+  strip.appendChild(h("div",{class:"tp-cap",text:"Band "+D.cap.floor+"–"+D.cap.ceiling+" · the dot is now, the tick is "+(scn?"the current roster":"the draft")}));
+  var facts=[[scn?"Change vs now":"Since the draft",dl?sgn(dl):"0",(scn?"vs current ":"vs post-draft ")+ref],["Players",tm.count+" of "+spots,"Roster spots used, IL included"],["Injured list",(tm.il||0)+" of "+YH.ilSlots,"IL slots in use"]];
+  if(tm.injuredCap)facts.splice(2,0,["Healthy payroll",money(tm.healthyCap),"Counted payroll without injured players: IL slots and anyone listed Out ("+money(tm.injuredCap)+" of the counted payroll)"]);
+  strip.appendChild(h("div",{class:"tp-f"},facts.map(function(x){return h("div",{title:x[2]},[h("span",{text:x[0]}),h("b",{text:x[1]})]);})));
+  if(tm.checks){var c=tm.checks,iv=c.injured,sv=c.singlePosition,cv=c.coverage,lv=c.lineup,rows=[];
+   var lrow=function(lvl,text,tip){rows.push(h("div",{class:"tp-l "+lvl,title:tip||""},[h("i",{text:lvl==="over"?"✕":lvl==="watch"?"!":"✓"}),h("span",{text:text})]));};
+   lrow(iv.level,"Injured or on IL: "+iv.count+" of "+iv.max+" allowed","Long-term injured: an IL slot, or Out / INJ / OFS off IL"+(iv.players.length?" — "+iv.players.join(", "):""));
+   lrow(sv.level,"Single-position players: "+sv.count+" of "+sv.max+(sv.level==="watch"?" (up to "+sv.maxWithCombo+" with combo tags: the commissioner reviews)":" allowed"),sv.players.join(", "));
+   var shortTxt=cv.short.map(function(q){return q+" has "+cv.byPosition[q];}).concat((cv.shortCombo||[]).map(function(q){return q+" has "+cv.byCombo[q];}));
+   lrow(shortTxt.length?"over":"ok",shortTxt.length?"Short: "+shortTxt.join(", ")+" healthy (needs "+cv.min+" per position, "+cv.comboMin+" per G/F)":"Every position has at least "+cv.min+" healthy players",Object.keys(cv.byPosition).map(function(q){return q+" "+cv.byPosition[q];}).join(" · "));
+   lrow(lv.level,"Lineup: "+lv.filled+" of "+lv.slots+" slots can be filled"+(lv.empty.length?" (nobody for "+lv.empty.join(", ")+")":""),"A healthy roster has to fill every lineup slot on a full game day");
+   strip.appendChild(h("div",{class:"tp-h",text:"Roster limits"}));strip.appendChild(h("div",{class:"tp-ls"},rows));}
   var mv=h("div",{class:"mv"});
   function line(l,items){if(items.length)mv.appendChild(h("div",{text:l+" "+items.join(" · ")}));}
   var dr=tm.roster.filter(function(r){return DR.byKey[r.k]&&DR.byKey[r.k].franchiseId===t.id;});  /* own picks only: a draftee acquired by trade is listed under IN + */
@@ -2455,29 +2468,22 @@ function renderTeamCards(){
   plLine("ADDED",tm.added||[]);
   plLine("DROPPED",tm.dropped||[]);
   line("↔ pass-through",f.pass.map(function(p){return (p.asset.t==="p"?p.asset.n:"Pick "+p.asset.n)+" ("+p.chain.join("→")+")";}));
-  strip.appendChild(h("details",null,[h("summary",{text:"moves"}),mv]));
+  if(mv.children.length){strip.appendChild(h("div",{class:"tp-h",text:"Moves"}));strip.appendChild(mv);}
   var head=card.querySelector("header");if(head)head.insertAdjacentElement("afterend",strip);
+  /* the supplementary detail (status, payroll change, healthy payroll, roster limits, moves) sits behind one small button; its dot flags a limit that needs a look */
+  if(head){var worst="",why=[];
+   if(tm.checks){var c=tm.checks;[["injured","Injured "+c.injured.count+"/"+c.injured.max],["singlePosition","Single-position "+c.singlePosition.count+"/"+c.singlePosition.max],["coverage","Short at "+(c.coverage.short.concat(c.coverage.shortCombo||[]).join(", ")||"a position")],["lineup","Lineup can't be filled"]].forEach(function(x){var lv=c[x[0]].level;
+     if(lv==="over"||lv==="watch"){why.push(x[1]+(lv==="over"?" (over)":" (at the limit)"));if(worst!=="over")worst=lv;}});}
+   var open=card.classList.contains("info-open");
+   var btn=h("button",{type:"button",class:"tc-info"+(worst?" "+worst:""),"aria-expanded":open?"true":"false","aria-label":"Team details"+(why.length?": "+why.join("; "):""),title:why.length?why.join(" · "):"Details: status, healthy payroll, roster limits, moves",text:"i"});
+   btn.addEventListener("click",function(){var o=card.classList.toggle("info-open");btn.setAttribute("aria-expanded",o?"true":"false");});
+   head.appendChild(btn);}
  });
 }
 var STATUS={P:["P","Probable","p"],Q:["Q","Questionable","q"],D:["D","Doubtful","d"],GTD:["GTD","Game-time decision","q"],DTD:["DTD","Day-to-day","q"],
  O:["OUT","Out","out"],OUT:["OUT","Out","out"],INJ:["INJ","Injured","inj"],OFS:["OFS","Out for the season","ofs"],SUSP:["SUSP","Suspended","ofs"],NA:["NA","Not active · no NBA team","na"]};
 function statusChip(code){if(!code)return null;var s=STATUS[code]||[code,"Yahoo status "+code,"na"];
  return h("span",{class:"st-chip st-"+s[2],title:s[1]+" (Yahoo)","aria-label":s[1],text:s[0]});}
-function rosterChecks(c){/* countable anti-tank limits (dynasty rules): evidence for review, never a verdict */
- var LV={ok:"",watch:" watch",over:" over"};
- function chip(lv,label,val,max,tip){return h("span",{class:"rc-i"+LV[lv],title:tip},[h("span",{class:"rc-k",text:label}),h("b",{text:String(val)}),max!=null?h("span",{class:"rc-m",text:"/"+max}):null]);}
- var i=c.injured,s=c.singlePosition,v=c.coverage,l=c.lineup,row=h("div",{class:"rc"});
- row.appendChild(chip(i.level,"injured",i.count,i.max,"Long-term injured (IL / IL+ slot, or Out / INJ / OFS off IL): "+i.count+" of max "+i.max+
-  (i.players.length?" — "+i.players.join(", "):"")+(i.countedCap?" · "+money(i.countedCap)+" of their salary counts":"")));
- row.appendChild(chip(s.level,"single-pos",s.count,s.max,"Healthy players who can play only one position: "+s.count+" (max "+s.max+", up to "+s.maxWithCombo+" with combo tags — commissioner review; injured players are not counted)"+
-  (s.players.length?" — "+s.players.join(", "):"")));
- var shortAll=v.short.concat(v.shortCombo||[]);
- v.short.forEach(function(p){row.appendChild(chip("over","short "+p,v.byPosition[p],v.min,"Healthy players who can play "+p+": "+v.byPosition[p]+" (min "+v.min+")"));});
- (v.shortCombo||[]).forEach(function(c){row.appendChild(chip("over","short "+c,v.byCombo[c],v.comboMin,"Healthy players who can play "+v.comboOf[c].join(" or ")+" (the "+c+" combo): "+v.byCombo[c]+" (min "+v.comboMin+")"));});
- if(!shortAll.length)row.appendChild(h("span",{class:"rc-i",title:"Every position (PG, SG, SF, PF, C) has at least "+v.min+" healthy players: "+Object.keys(v.byPosition).map(function(p){return p+" "+v.byPosition[p];}).join(" · ")+
-  (v.byCombo?" · combos (min "+v.comboMin+"): "+Object.keys(v.byCombo).map(function(c){return c+" "+v.byCombo[c];}).join(" · "):"")},[h("span",{class:"rc-k",text:"positions"}),h("b",{text:"✓"})]));
- row.appendChild(chip(l.level,"lineup",l.filled,l.slots,l.empty.length?"Healthy roster cannot fill: "+l.empty.join(", "):"Healthy roster fills every lineup slot on a full game day"));
- return row;}
 function renderCapPage(){
  var v=view();
  document.querySelectorAll(".cap-card").forEach(function(card){
@@ -2540,7 +2546,7 @@ function renderStandings(){
  secs[0].querySelector(".title").textContent=byStand?"STANDINGS 16–9":"TEAMS 1–8";
  secs[1].querySelector(".title").textContent=byStand?"STANDINGS 8–1":"TEAMS 9–16";
  cards.forEach(function(c){var old=c.querySelector(".stand-tag");if(old)old.remove();});
- if(live)D.teams.forEach(function(t){var c=byShort[t.short],s=ST_.teams[t.id];if(!c||!s)return;var row=c.querySelector(".scn-strip .row");if(!row)return;
+ if(live)D.teams.forEach(function(t){var c=byShort[t.short],s=ST_.teams[t.id];if(!c||!s)return;var row=c.querySelector(".team-meta");if(!row)return;   /* the record stays visible in the header, not inside the collapsed detail */
   row.insertBefore(h("span",{class:"stand-tag"+(s.place>8?" low":""),title:(s.division?s.division+" division · ":"")+"Pct "+(s.pct!=null?s.pct.toFixed(3).replace(/^0/,""):"–")+" · GB "+s.gb+" · Div "+s.divRecord+" · Last week "+s.lastWeek+" · as of "+shortDate((ST_.capturedAt||"").slice(0,10))},
    [h("b",{text:ordinal(s.place)}),h("span",{text:s.w+"–"+s.l+"–"+s.t})]),row.firstChild);});
  secs.forEach(function(sec){var strip=sec.querySelector(".meta-strip");if(!strip)return;var p=strip.querySelector(".stand-pill");if(p)p.remove();if(!ST_)return;

@@ -204,7 +204,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_cards_show_in_season_movement_from_the_post_draft_roster(self):
         card = _card(self.official, "Bz")
-        self.assertIn("vs draft", card)                     # delta against the post-draft roster
+        self.assertIn("Since the draft", card)             # delta against the post-draft roster (in the card's detail panel)
         self.assertIn("KEEPER-FREEZE CUTS", card)           # kept in the DOM, hidden in-season
         cc = re.sub(r"<[^>]+>", "", _card(self.official, "CrazyCat"))
         self.assertIn("INZion Williamson", cc)               # the completed in-season trade, applied once
@@ -276,7 +276,7 @@ class TestRenderedCards(unittest.TestCase):
         credited = traded = 0
         for fid, v in view.items():
             short = self.si["shorts"][fid]
-            mv = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, short), re.S).group(1)
+            mv = re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, short), re.S).group(1)
             dr = re.search(r'<span class="mv-l">DRAFTED</span>(.*?)</div>', mv, re.S)
             drafted = re.sub(r"<[^>]+>", " ", dr.group(1)) if dr else ""
             for r in v["roster"]:
@@ -294,12 +294,12 @@ class TestRenderedCards(unittest.TestCase):
         self.assertGreater(traded, 0, "no traded draftee is on a roster any more; nothing to check")
 
     def test_traded_rookie_keeps_rookie_styling_in_summaries(self):
-        mv = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "HCMC"), re.S).group(1)
+        mv = re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, "HCMC"), re.S).group(1)
         morez = re.search(r'<span class="mv-pl rk"><span>Morez Johnson Jr\.</span>(.*?)</span></span>', mv, re.S)
         self.assertIsNotNone(morez, "Morez must keep the purple rookie label in HCMC's movement summary")
         self.assertIn('class="src src-r"', morez.group(1))
         self.assertIn("CrazyCat", morez.group(1))
-        cc = re.search(r'<div class="mv">(.*?)</details>', _card(self.official, "CrazyCat"), re.S).group(1)
+        cc = re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, "CrazyCat"), re.S).group(1)
         self.assertRegex(cc, r'<span class="mv-l">OUT</span><span class="mv-items"><span class="mv-pl rk"><span>Morez Johnson Jr\.</span>')
 
     def test_pickups_are_not_shown_as_trades_and_il_is_tagged(self):
@@ -315,13 +315,13 @@ class TestRenderedCards(unittest.TestCase):
             r = row(short, a["n"])
             self.assertNotIn("tr-tag", r, a["n"])                            # a pickup is not a trade: no ⇄
             self.assertNotIn("row-trade", r, a["n"])
-            mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)</details>', _card(self.official, short), re.S).group(1))
+            mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, short), re.S).group(1))
             self.assertRegex(mv, r"ADDED\s.*" + re.escape(a["n"]), a["n"])
             if status.get(a["k"]) == "O" and self.cur["slots"].get(a["k"]) in ss.SLOTS_IL:
                 self.assertIn('<span class="st-chip st-out" title="Out (Yahoo)" aria-label="Out">OUT</span>' + a["n"], r)  # chip left of the name
         for fid, v in view.items():                                          # drops are listed too
             for dpl in v["dropped"]:
-                mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)</details>', _card(self.official, self.si["shorts"][fid]), re.S).group(1))
+                mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, self.si["shorts"][fid]), re.S).group(1))
                 self.assertRegex(mv, r"DROPPED\s.*" + re.escape(dpl["n"]), dpl["n"])
         for k, p in self.si["unlistedPlayers"].items():                      # unlisted salary: $0 by league rule, still shown with team / position
             fid = self.cur["playerOwner"].get(k)
@@ -350,11 +350,11 @@ class TestRenderedCards(unittest.TestCase):
         for fid, v in view.items():
             card = _card(self.official, self.si["shorts"][fid])
             txt = re.sub(r"<[^>]+>", " ", card)
-            strip = txt.split("moves")[0]
-            if v["injuredCap"]:                                              # counted salary of IL or Out players: "healthy" says what is left
-                self.assertRegex(strip, r"healthy\s+" + re.escape(f"{v['healthyCap']:g}"), fid)
+            strip = txt.split("Roster limits")[0]                            # the detail panel's status + facts, before the limits
+            if v["injuredCap"]:                                              # counted salary of IL or Out players: "healthy payroll" says what is left
+                self.assertRegex(strip, r"Healthy payroll\s+" + re.escape(f"{v['healthyCap']:g}"), fid)
             else:
-                self.assertNotIn("healthy", strip, fid)
+                self.assertNotIn("Healthy payroll", strip, fid)
             if not v["il"]:
                 self.assertNotIn("il-head", card, fid)
                 continue
@@ -450,7 +450,7 @@ class TestRenderedCards(unittest.TestCase):
             self.assertTrue(txt(b).startswith(">STANDINGS 8–1"), txt(b)[:40])
             self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', a)[0], "TT")      # 16th first
             self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', b)[-1], "Bsy")    # 1st last
-            tag = re.search(r'<span class="stand-tag low"[^>]*>(.*?)</span></span>(?=<span class="chip)', _card(dom, "TT"), re.S)
+            tag = re.search(r'<span class="stand-tag low"[^>]*>(.*?)</span></span>(?=\s*<span class="identity-tag)', _card(dom, "TT"), re.S)
             self.assertEqual(txt(tag.group(1)), "16th70–130–3")
             self.assertIn('class="so on">STANDINGS ↓', a)
             dom2 = _dump("file://" + path + "?order=team")                    # toggle back to team number
@@ -859,6 +859,52 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("go-between", page["intro"])
         self.assertTrue(page["warn"] and "only to build the Yahoo trades" in page["warn"][0])
         self.assertIn("hold is unaffected", page["warn"][0])                      # a hop is a Yahoo construction: the league hold rules still see one move
+
+    def test_team_card_detail_is_collapsed_behind_an_info_button_that_flags_limits(self):
+        """The supplementary detail (status, payroll change, roster limits, moves) is hidden by default; a small button toggles it, and
+        its dot flags a limit that is at or over. Derived from each team's own checks, not pinned to live rosters."""
+        r = self._drive("""
+          var D2=NBA_NAV.D,cards=Array.prototype.slice.call(document.querySelectorAll('section.team-card'));
+          R.cards=cards.length;R.buttons=document.querySelectorAll('.tc-info').length;
+          R.hiddenByDefault=cards.every(function(c){var s=c.querySelector('.scn-strip');return s&&getComputedStyle(s).display==='none';});
+          R.flags=cards.map(function(c){var ck=D2.scenarios[''].teams[c.dataset.team].checks,lv=['injured','singlePosition','coverage','lineup'].map(function(k){return ck[k].level;}),
+            want=lv.indexOf('over')>=0?'over':lv.indexOf('watch')>=0?'watch':'',b=c.querySelector('.tc-info');
+            return {want:want,has:want?b.classList.contains(want):(!b.classList.contains('over')&&!b.classList.contains('watch')),title:b.title};});
+          var c0=cards[0],b0=c0.querySelector('.tc-info');b0.click();
+          R.opened=getComputedStyle(c0.querySelector('.scn-strip')).display!=='none';R.expanded=b0.getAttribute('aria-expanded');
+          b0.click();R.closed=getComputedStyle(c0.querySelector('.scn-strip')).display==='none';""")
+        self.assertEqual(r["cards"], 16)
+        self.assertEqual(r["buttons"], 16)
+        self.assertTrue(r["hiddenByDefault"])
+        for f in r["flags"]:
+            self.assertTrue(f["has"], f)                                           # the dot matches the team's own limits
+            if f["want"]:
+                self.assertTrue(f["title"])                                        # and the tooltip says which limit
+        self.assertTrue(r["opened"])
+        self.assertEqual(r["expanded"], "true")
+        self.assertTrue(r["closed"])
+
+    def test_team_detail_panel_states_status_limits_and_facts_in_words(self):
+        r = self._drive("""
+          var D2=NBA_NAV.D,cards=Array.prototype.slice.call(document.querySelectorAll('section.team-card'));
+          R.errors=[];
+          R.cards=cards.map(function(c){var tm=D2.scenarios[''].teams[c.dataset.team],ck=tm.checks,s=c.querySelector('.scn-strip');
+            var lv=['injured','singlePosition','coverage','lineup'].map(function(k){return ck[k].level;});
+            return {status:(s.querySelector('.tp-s .chip')||{}).textContent,room:(s.querySelector('.tp-r')||{}).textContent,meter:!!s.querySelector('.meter'),
+              limits:s.querySelectorAll('.tp-l').length,over:s.querySelectorAll('.tp-l.over').length,watch:s.querySelectorAll('.tp-l.watch').length,
+              wantOver:lv.filter(function(x){return x==='over'}).length,wantWatch:lv.filter(function(x){return x==='watch'}).length,
+              players:Array.prototype.map.call(s.querySelectorAll('.tp-f div'),function(d){return d.textContent;}),count:tm.count,
+              oldChips:s.querySelectorAll('.rc-i').length};});""")
+        words = {"Under the floor", "At the floor", "In range", "Near the ceiling", "At the ceiling", "Over the ceiling"}
+        for c in r["cards"]:
+            self.assertIn(c["status"], words)
+            self.assertRegex(c["room"], r"(below the \d+ ceiling|over the \d+ ceiling|under the \d+ floor)")   # the status is also said in words
+            self.assertTrue(c["meter"])
+            self.assertEqual(c["limits"], 4)                                       # injured, single-position, positions, lineup: one sentence each
+            self.assertEqual((c["over"], c["watch"]), (c["wantOver"], c["wantWatch"]))   # flagged exactly as the team's own checks say
+            self.assertTrue(any(x.startswith("PLAYERS") or x.lower().startswith("players") for x in c["players"]))
+            self.assertIn("%d of 15" % c["count"], " ".join(c["players"]))
+            self.assertEqual(c["oldChips"], 0)                                     # the tiny chips are gone
 
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:
