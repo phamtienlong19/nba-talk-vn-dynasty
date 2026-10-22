@@ -860,6 +860,30 @@ class TestRenderedCards(unittest.TestCase):
         self.assertTrue(page["warn"] and "only to build the Yahoo trades" in page["warn"][0])
         self.assertIn("hold is unaffected", page["warn"][0])                      # a hop is a Yahoo construction: the league hold rules still see one move
 
+    def test_team_card_detail_is_collapsed_behind_an_info_button_that_flags_limits(self):
+        """The supplementary detail (status, payroll change, roster limits, moves) is hidden by default; a small button toggles it, and
+        its dot flags a limit that is at or over. Derived from each team's own checks, not pinned to live rosters."""
+        r = self._drive("""
+          var D2=NBA_NAV.D,cards=Array.prototype.slice.call(document.querySelectorAll('section.team-card'));
+          R.cards=cards.length;R.buttons=document.querySelectorAll('.tc-info').length;
+          R.hiddenByDefault=cards.every(function(c){var s=c.querySelector('.scn-strip');return s&&getComputedStyle(s).display==='none';});
+          R.flags=cards.map(function(c){var ck=D2.scenarios[''].teams[c.dataset.team].checks,lv=['injured','singlePosition','coverage','lineup'].map(function(k){return ck[k].level;}),
+            want=lv.indexOf('over')>=0?'over':lv.indexOf('watch')>=0?'watch':'',b=c.querySelector('.tc-info');
+            return {want:want,has:want?b.classList.contains(want):(!b.classList.contains('over')&&!b.classList.contains('watch')),title:b.title};});
+          var c0=cards[0],b0=c0.querySelector('.tc-info');b0.click();
+          R.opened=getComputedStyle(c0.querySelector('.scn-strip')).display!=='none';R.expanded=b0.getAttribute('aria-expanded');
+          b0.click();R.closed=getComputedStyle(c0.querySelector('.scn-strip')).display==='none';""")
+        self.assertEqual(r["cards"], 16)
+        self.assertEqual(r["buttons"], 16)
+        self.assertTrue(r["hiddenByDefault"])
+        for f in r["flags"]:
+            self.assertTrue(f["has"], f)                                           # the dot matches the team's own limits
+            if f["want"]:
+                self.assertTrue(f["title"])                                        # and the tooltip says which limit
+        self.assertTrue(r["opened"])
+        self.assertEqual(r["expanded"], "true")
+        self.assertTrue(r["closed"])
+
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:
             html = f.read()
