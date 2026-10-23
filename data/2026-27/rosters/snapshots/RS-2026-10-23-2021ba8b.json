@@ -1,0 +1,1133 @@
+{
+  "snapshotId": "RS-2026-10-23-2021ba8b",
+  "season": "2026-27",
+  "verifiedAt": "2026-10-23T08:06:38Z",
+  "source": "Yahoo Fantasy league 85092 team pages, read-only http capture at 2026-10-23T08:06:38Z",
+  "kind": "VERIFIED_IMPORT",
+  "importedAt": "2026-10-23T08:07:05Z",
+  "teams": {
+    "franchise-01": [
+      {
+        "playerKey": "478.p.10084",
+        "name": "Jordan Miller",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.10276",
+        "name": "Jared McCain",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10340",
+        "name": "Jaylen Wells",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.10465",
+        "name": "Cedric Coward",
+        "slot": "G",
+        "status": "D"
+      },
+      {
+        "playerKey": "478.p.10467",
+        "name": "Dylan Harper",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.4472",
+        "name": "Brook Lopez",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.5187",
+        "name": "Dennis Schröder",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.5352",
+        "name": "Nikola Jokić",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5638",
+        "name": "Jamal Murray",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5765",
+        "name": "Jayson Tatum",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.6032",
+        "name": "Grayson Allen",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.6165",
+        "name": "RJ Barrett",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6733",
+        "name": "Moussa Diabaté",
+        "slot": "FC"
+      }
+    ],
+    "franchise-02": [
+      {
+        "playerKey": "478.p.10092",
+        "name": "Jaime Jaquez Jr.",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.10100",
+        "name": "Keyonte George",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.10115",
+        "name": "Brandin Podziemski",
+        "slot": "IL",
+        "status": "Q"
+      },
+      {
+        "playerKey": "478.p.10296",
+        "name": "Zaccharie Risacher",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.4840",
+        "name": "Kyrie Irving",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.5012",
+        "name": "Damian Lillard",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.5324",
+        "name": "Zach LaVine",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.5327",
+        "name": "Jusuf Nurkić",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.5727",
+        "name": "Fred VanVleet",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6016",
+        "name": "Trae Young",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6163",
+        "name": "Zion Williamson",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.6403",
+        "name": "Devin Vassell",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6422",
+        "name": "Desmond Bane",
+        "slot": "SF"
+      }
+    ],
+    "franchise-03": [
+      {
+        "playerKey": "478.p.10096",
+        "name": "Ausar Thompson",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.4622",
+        "name": "Jrue Holiday",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.5185",
+        "name": "Giannis Antetokounmpo",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.5471",
+        "name": "Myles Turner",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.5642",
+        "name": "Domantas Sabonis",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.5858",
+        "name": "Dillon Brooks",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6205",
+        "name": "Nickeil Alexander-Walker",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6513",
+        "name": "Jalen Green",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.6558",
+        "name": "Alperen Şengün",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6581",
+        "name": "Neemias Queta",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6694",
+        "name": "Keegan Murray",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.6720",
+        "name": "Peyton Watson",
+        "slot": "BN"
+      }
+    ],
+    "franchise-04": [
+      {
+        "playerKey": "478.p.10107",
+        "name": "Cason Wallace",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10265",
+        "name": "Matas Buzelis",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.10285",
+        "name": "Donovan Clingan",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.10510",
+        "name": "Dylan Cardwell",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.10582",
+        "name": "Darius Acuff Jr.",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.10588",
+        "name": "Mikel Brown Jr.",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.10599",
+        "name": "AJ Dybantsa",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.5009",
+        "name": "Bradley Beal",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.5295",
+        "name": "Aaron Gordon",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5432",
+        "name": "Karl-Anthony Towns",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.6167",
+        "name": "Darius Garland",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6170",
+        "name": "Jaxson Hayes",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.6212",
+        "name": "Ty Jerome",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6550",
+        "name": "Franz Wagner",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.6692",
+        "name": "Chet Holmgren",
+        "slot": "BN"
+      }
+    ],
+    "franchise-05": [
+      {
+        "playerKey": "478.p.10048",
+        "name": "Scoot Henderson",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10440",
+        "name": "Jeremiah Fears",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10444",
+        "name": "Derik Queen",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10572",
+        "name": "Morez Johnson Jr.",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.10579",
+        "name": "Aday Mara",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.10585",
+        "name": "Keaton Wagler",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.10590",
+        "name": "Darryn Peterson",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6021",
+        "name": "Mikal Bridges",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.6355",
+        "name": "Anthony Edwards",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.6417",
+        "name": "Immanuel Quickley",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6562",
+        "name": "Jalen Johnson",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6571",
+        "name": "Day'Ron Sharpe",
+        "slot": "FC"
+      }
+    ],
+    "franchise-06": [
+      {
+        "playerKey": "478.p.10095",
+        "name": "Anthony Black",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.10445",
+        "name": "Egor Dëmin",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.10571",
+        "name": "Yaxel Lendeborg",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.5769",
+        "name": "Lauri Markkanen",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.5843",
+        "name": "Josh Hart",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6025",
+        "name": "Michael Porter Jr.",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.6044",
+        "name": "Jalen Brunson",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6253",
+        "name": "Naz Reid",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.6516",
+        "name": "Jalen Suggs",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.6703",
+        "name": "Jalen Duren",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6707",
+        "name": "Tari Eason",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6721",
+        "name": "Andrew Nembhard",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6724",
+        "name": "Jaylin Williams",
+        "slot": "F"
+      }
+    ],
+    "franchise-07": [
+      {
+        "playerKey": "478.p.10274",
+        "name": "Kel'el Ware",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.10312",
+        "name": "Pelle Larsson",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10592",
+        "name": "Cameron Boozer",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.5294",
+        "name": "Joel Embiid",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5663",
+        "name": "Ivica Zubac",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.6171",
+        "name": "Rui Hachimura",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.6175",
+        "name": "Tyler Herro",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6218",
+        "name": "Kevin Porter Jr.",
+        "slot": "BN",
+        "status": "NA"
+      },
+      {
+        "playerKey": "478.p.6395",
+        "name": "LaMelo Ball",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6401",
+        "name": "Deni Avdija",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.6402",
+        "name": "Jalen Smith",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6556",
+        "name": "Moses Moody",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.6580",
+        "name": "Ayo Dosunmu",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.6697",
+        "name": "Shaedon Sharpe",
+        "slot": "IL",
+        "status": "O"
+      }
+    ],
+    "franchise-08": [
+      {
+        "playerKey": "478.p.10099",
+        "name": "Bilal Coulibaly",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.10462",
+        "name": "Ace Bailey",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.4896",
+        "name": "Kawhi Leonard",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.4897",
+        "name": "Nikola Vučević",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.5506",
+        "name": "Norman Powell",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.6173",
+        "name": "Cameron Johnson",
+        "slot": "BN",
+        "status": "Q"
+      },
+      {
+        "playerKey": "478.p.6512",
+        "name": "Cade Cunningham",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6514",
+        "name": "Evan Mobley",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6549",
+        "name": "Jonathan Kuminga",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.6559",
+        "name": "Trey Murphy III",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6693",
+        "name": "Jabari Smith Jr.",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.6745",
+        "name": "Gui Santos",
+        "slot": "Util"
+      }
+    ],
+    "franchise-09": [
+      {
+        "playerKey": "478.p.10289",
+        "name": "Yves Missi",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.4614",
+        "name": "DeMar DeRozan",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.4901",
+        "name": "Tobias Harris",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.5069",
+        "name": "Draymond Green",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.5161",
+        "name": "CJ McCollum",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.5602",
+        "name": "Jaylen Brown",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.5767",
+        "name": "De'Aaron Fox",
+        "slot": "PG",
+        "status": "Q"
+      },
+      {
+        "playerKey": "478.p.5827",
+        "name": "Bam Adebayo",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.5832",
+        "name": "John Collins",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5958",
+        "name": "Deandre Ayton",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.6014",
+        "name": "Luka Dončić",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6548",
+        "name": "Josh Giddey",
+        "slot": "G",
+        "status": "P"
+      },
+      {
+        "playerKey": "478.p.6751",
+        "name": "Collin Gillespie",
+        "slot": "BN"
+      }
+    ],
+    "franchise-10": [
+      {
+        "playerKey": "478.p.10287",
+        "name": "Zach Edey",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.10450",
+        "name": "Kon Knueppel",
+        "slot": "BN",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.10496",
+        "name": "Maxime Raynaud",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.10607",
+        "name": "Trevon Brazile",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.4725",
+        "name": "Paul George",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.5473",
+        "name": "Devin Booker",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5601",
+        "name": "Brandon Ingram",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.5658",
+        "name": "Pascal Siakam",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.6073",
+        "name": "Duncan Robinson",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6164",
+        "name": "Ja Morant",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6219",
+        "name": "Nic Claxton",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.6226",
+        "name": "Daniel Gafford",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.6412",
+        "name": "Precious Achiuwa",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6551",
+        "name": "Davion Mitchell",
+        "slot": "G"
+      },
+      {
+        "playerKey": "provisional:dailyn-swain",
+        "name": "Dailyn Swain",
+        "slot": "Util",
+        "status": "Q"
+      }
+    ],
+    "franchise-11": [
+      {
+        "playerKey": "478.p.10094",
+        "name": "Victor Wembanyama",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.10279",
+        "name": "Jaylon Tyson",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10576",
+        "name": "Brayden Burries",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.4912",
+        "name": "Jimmy Butler III",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.5464",
+        "name": "Kristaps Porziņģis",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.5482",
+        "name": "Bobby Portis Jr.",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.5835",
+        "name": "Jarrett Allen",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.5836",
+        "name": "OG Anunoby",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.6404",
+        "name": "Tyrese Haliburton",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6452",
+        "name": "Sam Merrill",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6564",
+        "name": "Isaiah Jackson",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.6606",
+        "name": "Austin Reaves",
+        "slot": "F"
+      },
+      {
+        "playerKey": "provisional:bennett-stirtz",
+        "name": "Bennett Stirtz",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "provisional:sergio-de-larrea",
+        "name": "Sergio de Larrea",
+        "slot": "G"
+      }
+    ],
+    "franchise-12": [
+      {
+        "playerKey": "478.p.10108",
+        "name": "Amen Thompson",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.10272",
+        "name": "Kyshawn George",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.10290",
+        "name": "Stephon Castle",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.10304",
+        "name": "Ajay Mitchell",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10441",
+        "name": "Yanic Konan Niederhäuser",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.10443",
+        "name": "Collin Murray-Boyles",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.10447",
+        "name": "Khaman Maluach",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.10468",
+        "name": "Cooper Flagg",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.10570",
+        "name": "Allen Graves",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.10574",
+        "name": "Kingston Flemings",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.10594",
+        "name": "Jayden Quaintance",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.10595",
+        "name": "Caleb Wilson",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.5007",
+        "name": "Anthony Davis",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.5318",
+        "name": "Julius Randle",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6028",
+        "name": "Donte DiVincenzo",
+        "slot": "IL",
+        "status": "O"
+      }
+    ],
+    "franchise-13": [
+      {
+        "playerKey": "478.p.10104",
+        "name": "Brandon Miller",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.5959",
+        "name": "Marvin Bagley III",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.6018",
+        "name": "Wendell Carter Jr.",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6022",
+        "name": "Shai Gilgeous-Alexander",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6023",
+        "name": "Miles Bridges",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6411",
+        "name": "Saddiq Bey",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.6413",
+        "name": "Tyrese Maxey",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.6567",
+        "name": "Quentin Grimes",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6596",
+        "name": "Sandro Mamukelashvili",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.6597",
+        "name": "Aaron Wiggins",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6691",
+        "name": "Paolo Banchero",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.6696",
+        "name": "Bennedict Mathurin",
+        "slot": "BN"
+      }
+    ],
+    "franchise-14": [
+      {
+        "playerKey": "478.p.3704",
+        "name": "LeBron James",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.4244",
+        "name": "Kevin Durant",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.4612",
+        "name": "Stephen Curry",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.5475",
+        "name": "Kelly Oubre Jr.",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.5636",
+        "name": "Kris Dunn",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.5640",
+        "name": "Jakob Poeltl",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.5754",
+        "name": "Alex Caruso",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6169",
+        "name": "Coby White",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.6174",
+        "name": "P.J. Washington",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.6418",
+        "name": "Payton Pritchard",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6420",
+        "name": "Jaden McDaniels",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6734",
+        "name": "Ryan Rollins",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6757",
+        "name": "Scotty Pippen Jr.",
+        "slot": "Util"
+      }
+    ],
+    "franchise-15": [
+      {
+        "playerKey": "478.p.10065",
+        "name": "Toumani Camara",
+        "slot": "PF"
+      },
+      {
+        "playerKey": "478.p.10288",
+        "name": "Reed Sheppard",
+        "slot": "G",
+        "status": "Q"
+      },
+      {
+        "playerKey": "478.p.5015",
+        "name": "Andre Drummond",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5197",
+        "name": "Rudy Gobert",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.5842",
+        "name": "Derrick White",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.6047",
+        "name": "Mitchell Robinson",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.6433",
+        "name": "Tre Jones",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "478.p.6515",
+        "name": "Scottie Barnes",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.6698",
+        "name": "Dyson Daniels",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6702",
+        "name": "Jalen Williams",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6705",
+        "name": "Mark Williams",
+        "slot": "IL",
+        "status": "O"
+      },
+      {
+        "playerKey": "478.p.6711",
+        "name": "Christian Braun",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.6712",
+        "name": "Walker Kessler",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "provisional:cameron-carr",
+        "name": "Cameron Carr",
+        "slot": "IL",
+        "status": "O"
+      }
+    ],
+    "franchise-16": [
+      {
+        "playerKey": "478.p.10294",
+        "name": "Alex Sarr",
+        "slot": "C"
+      },
+      {
+        "playerKey": "478.p.10454",
+        "name": "VJ Edgecombe",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.4563",
+        "name": "James Harden",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5292",
+        "name": "Andrew Wiggins",
+        "slot": "G"
+      },
+      {
+        "playerKey": "478.p.5660",
+        "name": "Dejounte Murray",
+        "slot": "PG"
+      },
+      {
+        "playerKey": "478.p.5826",
+        "name": "Donovan Mitchell",
+        "slot": "BN"
+      },
+      {
+        "playerKey": "478.p.5856",
+        "name": "Isaiah Hartenstein",
+        "slot": "Util"
+      },
+      {
+        "playerKey": "478.p.6015",
+        "name": "Jaren Jackson Jr.",
+        "slot": "F"
+      },
+      {
+        "playerKey": "478.p.6398",
+        "name": "Onyeka Okongwu",
+        "slot": "FC"
+      },
+      {
+        "playerKey": "478.p.6400",
+        "name": "Obi Toppin",
+        "slot": "SF"
+      },
+      {
+        "playerKey": "478.p.6577",
+        "name": "Herbert Jones",
+        "slot": "SG"
+      },
+      {
+        "playerKey": "provisional:hannes-steinbach",
+        "name": "Hannes Steinbach",
+        "slot": "PF"
+      }
+    ]
+  },
+  "ownershipDigest": "4edd0df350ef4952fded115ccb91e6dad52d3123ff3dccdd18039e4aacedd4e5",
+  "digest": "2021ba8b29db2e72a2a6404ae3f11f487ae521367a5218b1bcefba2046aee857"
+}
