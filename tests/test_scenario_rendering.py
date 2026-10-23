@@ -906,6 +906,114 @@ class TestRenderedCards(unittest.TestCase):
             self.assertIn("%d of 15" % c["count"], " ".join(c["players"]))
             self.assertEqual(c["oldChips"], 0)                                     # the tiny chips are gone
 
+    _PROPOSE = """
+          var q=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+          var D2=NBA_NAV.D,base=D2.scenarios[''].teams;
+          var propose=function(i,j){                                           // the two teams' top-paid players swap places
+            var ids=D2.teams.map(function(t){return t.id;}),a=ids[i],b=ids[j],sh=function(f){return D2.teams.filter(function(t){return t.id===f;})[0].short;};
+            var on=function(){return q('#chk .chk-teams .on').map(function(x){return x.textContent;});},tg=function(s){q('#chk .chk-teams button').filter(function(x){return x.textContent===s;})[0].click();};
+            [sh(a),sh(b)].forEach(function(s){if(on().indexOf(s)<0)tg(s);});on().filter(function(s){return s!==sh(a)&&s!==sh(b);}).forEach(tg);
+            var pick=function(f,k){var col=q('#chk .chk-col').filter(function(c){return c.dataset.team===f;})[0];var n=base[f].roster.filter(function(r){return r.k===k;})[0].n;
+              Array.prototype.filter.call(col.querySelectorAll('.player-row:not(.pickrow)'),function(e){return e.querySelector('.pn-n').textContent===n;})[0].click();};
+            pick(a,base[a].roster[0].k);pick(b,base[b].roster[0].k);return [sh(a),sh(b),base[a].roster[0].n,base[b].roster[0].n];};
+    """
+
+    def test_share_image_draws_the_trade_and_what_it_means_for_each_team(self):
+        r = self._drive(self._PROPOSE + """
+          var orig=CanvasRenderingContext2D.prototype.fillText,texts=[];
+          CanvasRenderingContext2D.prototype.fillText=function(t){texts.push(String(t));return orig.apply(this,arguments);};
+          var who=propose(0,1),cv=NBA_NAV.imageNow();CanvasRenderingContext2D.prototype.fillText=orig;
+          var pays=q('#chk .chk-col .chk-pay b').map(function(b){return b.textContent;});
+          var px=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data,distinct={};for(var i=0;i<px.length;i+=4*9973)distinct[px[i]+','+px[i+1]+','+px[i+2]]=1;
+          R.w=cv.width;R.h=cv.height;R.texts=texts;R.who=who;R.pays=pays;R.status=document.getElementById('chk-top').textContent;R.colours=Object.keys(distinct).length;""")
+        self.assertEqual(r["w"], 2160)                                             # 1080 logical px at 2x
+        self.assertGreaterEqual(r["h"], 1800)
+        self.assertGreater(r["colours"], 3)                                        # not a blank canvas
+        texts = " | ".join(r["texts"])
+        for need in ("TRADE PROPOSAL", r["status"], "GETS", "SENDS", r["who"][0], r["who"][1], r["who"][2], r["who"][3]):
+            self.assertIn(need, texts)                                             # the headline, the verdict, the teams and the players moved
+        for pay in r["pays"]:
+            self.assertIn(pay, r["texts"])                                         # each team's payroll after the trade
+        self.assertTrue(any("band" in x or "ceiling" in x or "floor" in x for x in r["texts"]))   # where payroll sits against the band
+        self.assertTrue(any(re.match(r"^\d{4}-\d\d-\d\d$", x.split(" · ")[-1]) for x in r["texts"]))   # dated
+
+    def test_share_image_says_why_a_blocked_trade_is_blocked(self):
+        r = self._drive(self._PROPOSE + """
+          var ids=D2.teams.map(function(t){return t.id;}),found=null;
+          for(var i=0;i<ids.length&&!found;i++)for(var j=i+1;j<ids.length&&!found;j++){
+            var mv=[{key:base[ids[i]].roster[0].k,from:ids[i],to:ids[j]},{key:base[ids[j]].roster[0].k,from:ids[j],to:ids[i]}];
+            var res=NBA_NAV.check(mv,'2026-12-31T00:00:00Z',[]);if(res.rules.some(function(x){return x.rule==='cap'&&x.level==='blocked';}))found=[i,j];}
+          R.found=found;
+          if(found){var orig=CanvasRenderingContext2D.prototype.fillText,texts=[];CanvasRenderingContext2D.prototype.fillText=function(t){texts.push(String(t));return orig.apply(this,arguments);};
+            propose(found[0],found[1]);NBA_NAV.imageNow();CanvasRenderingContext2D.prototype.fillText=orig;R.texts=texts;R.status=document.getElementById('chk-top').textContent;}""")
+        if not r["found"]:
+            self.skipTest("no top-player swap breaks the cap band right now")
+        self.assertIn("BLOCKED", r["texts"])                                       # the verdict pill
+        self.assertTrue(any(x.startswith("Payroll ") for x in r["texts"]))         # the reason, in words, on the team's card
+        self.assertIn("must keep a team in the band or move it toward it", " ".join(r["texts"]))   # (the sentence wraps across drawn lines)
+
+    def test_teams_after_image_shows_each_new_roster_with_arrivals_and_departures(self):
+        r = self._drive(self._PROPOSE + """
+          var orig=CanvasRenderingContext2D.prototype.fillText,texts=[];
+          CanvasRenderingContext2D.prototype.fillText=function(t){texts.push(String(t));return orig.apply(this,arguments);};
+          var who=propose(0,1),cv=NBA_NAV.rostersNow();CanvasRenderingContext2D.prototype.fillText=orig;
+          // the roster each team will have: everyone who stays + arrivals, never the players who left
+          var cols=q('#chk .chk-col').map(function(c){return {team:c.querySelector('.chk-ch b').textContent,names:q('#chk .chk-col[data-team="'+c.dataset.team+'"] .player-row:not(.pickrow) .pn-n').map(function(n){return n.textContent;}),
+            pay:(c.querySelector('.chk-pay b')||{}).textContent};});
+          R.w=cv.width;R.h=cv.height;R.texts=texts;R.who=who;R.cols=cols;""")
+        self.assertEqual(r["w"], 2160)
+        self.assertGreaterEqual(r["h"], 1400)
+        texts = r["texts"]
+        self.assertIn("TEAMS AFTER THE TRADE", texts)
+        for col in r["cols"]:
+            self.assertIn(col["team"], texts)
+            self.assertIn(col["pay"], texts)                                       # payroll after the trade
+            for name in col["names"]:                                              # every player on the team's new roster is on the image
+                self.assertTrue(any(name == x or x.startswith(name[:10]) for x in texts), name)
+        sender, receiver = r["who"][2], r["who"][3]
+        self.assertIn("Out: " + sender, texts)                                     # who left, and
+        self.assertIn("Out: " + receiver, texts)
+        self.assertTrue(any(x.startswith("BEYOND TOP") for x in texts))            # where the counted top 9 now stops
+
+    def test_the_composite_image_stacks_both_and_stays_within_a_phone_canvas(self):
+        r = self._drive(self._PROPOSE + """
+          propose(0,1);var a=NBA_NAV.imageNow(),b=NBA_NAV.rostersNow(),c=NBA_NAV.compositeNow();
+          R.a=[a.width,a.height];R.b=[b.width,b.height];R.c=[c.width,c.height];
+          var px=c.getContext('2d').getImageData(0,0,c.width,c.height).data,seen={};for(var i=0;i<px.length;i+=4*9973)seen[px[i]+','+px[i+1]+','+px[i+2]]=1;R.colours=Object.keys(seen).length;""")
+        (aw, ah), (bw, bh), (cw, ch) = r["a"], r["b"], r["c"]
+        self.assertEqual(aw, bw)                                                   # both are 1080 px wide at 2x
+        self.assertLessEqual(cw * ch, 16_000_000)                                  # fits the pixel budget of a phone canvas
+        self.assertAlmostEqual(ch / cw, (ah + bh + 56) / aw, delta=0.02)           # a tall stack: the trade above the teams after it
+        self.assertGreater(r["colours"], 3)
+
+    def test_share_image_button_opens_a_preview_with_copy_and_save(self):
+        r = self._drive(self._PROPOSE + """
+          R.before=!!document.getElementById('chk-img');propose(0,1);R.after=!!document.getElementById('chk-img');
+          document.getElementById('chk-img').click();
+          window.__after=function(){var ov=document.getElementById('chk-imgov'),img=ov&&ov.querySelector('img');
+            var tabs=ov?Array.prototype.slice.call(ov.querySelectorAll('.imgov-t')):[];R.tabs=tabs.map(function(t){return t.textContent;});R.alt1=img?img.alt:'';R.dl1=ov.querySelector('a.imgov-b').getAttribute('download');
+            if(tabs[1]){tabs[1].click();R.alt2=img.alt;R.dl2=ov.querySelector('a.imgov-b').getAttribute('download');R.pressed=tabs[1].getAttribute('aria-pressed');}
+            if(tabs[2]){tabs[2].click();R.alt3=img.alt;R.dl3=ov.querySelector('a.imgov-b').getAttribute('download');}
+            R.open=!!ov;R.src=img?img.src.slice(0,5):'';R.labels=ov?Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;}):[];
+            var sv=ov&&ov.querySelector('a.imgov-b');R.download=sv?sv.getAttribute('download'):'';R.alt=img?img.alt:'';
+            document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));R.closed=!document.getElementById('chk-imgov');};""", wait=2200)
+        self.assertFalse(r["before"])                                              # nothing to share until a trade exists
+        self.assertTrue(r["after"])
+        self.assertTrue(r["open"])
+        self.assertEqual(r["src"], "blob:")
+        self.assertIn("Copy image", r["labels"])
+        self.assertIn("Save", r["labels"])
+        self.assertRegex(r["alt"], r"LEGAL|BLOCKED|COMMISSIONER REVIEW")
+        self.assertTrue(r["closed"])                                               # Escape closes it
+        self.assertEqual(r["tabs"], ["Trade", "Teams after", "Both in one"])      # the trade, the teams as they will look, and both in one image
+        self.assertIn("Save 2 images", r["labels"])                                # or the two images separately
+        self.assertIn("proposed trade", r["alt1"])
+        self.assertIn("roster after the trade", r["alt2"])
+        self.assertEqual((r["dl1"], r["dl2"]), ("trade-proposal.png", "teams-after-trade.png"))
+        self.assertEqual(r["pressed"], "true")
+        self.assertIn("in one image", r["alt3"])
+        self.assertEqual(r["dl3"], "trade-and-teams-after.png")
+
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:
             html = f.read()

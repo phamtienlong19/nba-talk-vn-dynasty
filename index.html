@@ -796,6 +796,22 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .chk-act{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .chk-btn{font:700 11px/1 "Inter",Arial,sans-serif;letter-spacing:.04em;padding:9px 13px;border-radius:999px;border:1px solid #e3e9f1;background:#fff;color:#31435e;cursor:pointer}
 .chk-btn:hover{background:#f3f6fa}
+.chk-btn.pri{background:#12264d;border-color:#12264d;color:#fff}.chk-btn.pri:hover{background:#1b3668}
+/* share image: preview, then Share / Copy / Save */
+.imgov{position:fixed;inset:0;z-index:300;background:rgba(10,18,36,.62);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.imgov-box{position:relative;display:flex;flex-direction:column;width:min(620px,100%);max-height:calc(100vh - 32px);background:#fff;border-radius:20px;box-shadow:0 24px 70px rgba(5,12,30,.45);overflow:hidden}
+.imgov-scroll{overflow:auto;padding:54px 16px 8px;background:#f4f6fa}
+.imgov-img{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 1px 3px rgba(15,27,52,.12)}
+.imgov-bar{display:flex;gap:8px;padding:12px 16px 16px;flex-wrap:wrap;justify-content:flex-end}
+.imgov-b{font:700 13px/1 "Inter",Arial,sans-serif;padding:12px 18px;border-radius:999px;border:1px solid #d5dce7;background:#fff;color:#31435e;cursor:pointer;text-decoration:none}
+.imgov-b.pri{background:#12264d;border-color:#12264d;color:#fff}
+.imgov-b.sm{padding:10px 14px;font-size:12px;color:#6b7a93;border-color:#e3e9f1;margin-right:auto}
+.imgov-b.sm+.imgov-b.sm{margin-right:0}
+.imgov-tabs{position:absolute;top:10px;left:12px;z-index:2;display:flex;gap:4px;padding:3px;background:#ffffffd9;border-radius:999px;box-shadow:0 1px 4px rgba(15,27,52,.15)}
+.imgov-t{border:0;background:none;padding:8px 14px;border-radius:999px;font:700 12px/1 "Inter",Arial,sans-serif;color:#6b7a93;cursor:pointer}
+.imgov-t.on{background:#12264d;color:#fff}
+.imgov-x{position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:#ffffffd9;color:#12264d;font:800 14px/1 "Inter",Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(15,27,52,.2)}
+
 .chk-tm{margin-top:16px;border:1px solid #e8edf4;border-radius:14px;background:#fbfcfe}
 .chk-tm summary{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;list-style:none}
 .chk-tm summary::-webkit-details-marker{display:none}
@@ -2706,7 +2722,7 @@ function initNav(){
  function foldH(){if(!tb||!brand)return;var f=Math.max(0,Math.round(brand.getBoundingClientRect().top-tb.getBoundingClientRect().top-6));tb.style.setProperty("--tb-fold",f+"px");}
  foldH();window.addEventListener("resize",foldH);window.addEventListener("load",foldH);
  if(window.MutationObserver)new MutationObserver(function(m){if(m.some(function(x){return x.addedNodes&&x.addedNodes.length;}))scheduleMine();}).observe(document.body,{childList:true,subtree:true});   /* views that re-render: What-If, Trade Lab, scenarios */
- window.NBA_NAV={plan:chkPlan,check:chkRun,markMine:markMine,open:openSearch,close:closeSearch,search:navSearch,setMe:setMe,getMe:getMe,goTeam:goTeam,goPlayer:goPlayer,render:renderSearch,state:NAV,D:D,view:view,norm:norm,parseHash:parseHash,showTab:showTab};
+ window.NBA_NAV={compositeNow:function(){var mv=chkMoves(),dr=chkDrops(),il=chkIls(),res=chkRun(mv,CHK.now,dr,il);return chkCompositeCanvas(chkImageCanvas(res,mv,dr),chkRostersCanvas(res,mv,dr,il));},rostersNow:function(){var mv=chkMoves(),dr=chkDrops(),il=chkIls();return chkRostersCanvas(chkRun(mv,CHK.now,dr,il),mv,dr,il);},imageNow:function(){var mv=chkMoves(),dr=chkDrops(),il=chkIls();return chkImageCanvas(chkRun(mv,CHK.now,dr,il),mv,dr);},image:chkImageCanvas,plan:chkPlan,check:chkRun,markMine:markMine,open:openSearch,close:closeSearch,search:navSearch,setMe:setMe,getMe:getMe,goTeam:goTeam,goPlayer:goPlayer,render:renderSearch,state:NAV,D:D,view:view,norm:norm,parseHash:parseHash,showTab:showTab};
  paintMe();}
 
 /* ---------- trade machine: any 2-6 teams; the post-trade roster, live payroll, roster size and limits per team; every rule explained (a port of scripts/trade_checker.py; tests compare the two) ---------- */
@@ -2948,6 +2964,178 @@ function chkYahoo(mv,dr){
  if(oneWay)box.appendChild(h("div",{class:"yh-w",text:oneWay+(oneWay>1?" trades have":" trade has")+" nothing coming back: check Yahoo accepts a one-way trade."}));
  if(mv.some(function(m){return chkIsPick(m.key);}))box.appendChild(h("div",{class:"chk-yh-n",text:"Yahoo allows draft pick trades in this league. Tell the commissioner too, so the pick ledger is updated."}));
  return box;}
+/* ---------- share the proposed trade as an image: drawn straight onto a canvas, so it looks the same on every phone ---------- */
+var IMG_F='"Inter","Helvetica Neue",Arial,sans-serif',IMG_M='"Roboto Mono",ui-monospace,Menlo,monospace';
+var IMG_C={ink:"#12264d",muted:"#6b7a93",faint:"#98a3b8",line:"#e3e9f1",canvas:"#f4f6fa",green:"#17623a",red:"#a11a1a",amber:"#8a5a00"};
+function imgRR(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function imgFit(c,t,w){t=String(t);if(c.measureText(t).width<=w)return t;while(t.length>1&&c.measureText(t+"…").width>w)t=t.slice(0,-1);return t+"…";}
+function imgWrap(c,t,w){var out=[],line="";String(t).split(/\s+/).forEach(function(word){var tr=line?line+" "+word:word;if(c.measureText(tr).width>w&&line){out.push(line);line=word;}else line=tr;});if(line)out.push(line);return out;}
+function imgT(c,t,x,y,font,color,align){c.font=font;c.fillStyle=color;c.textAlign=align||"left";c.textBaseline="alphabetic";c.fillText(t,x,y);}
+function imgPill(c,x,y,team,size,label){c.font="800 "+size+"px "+IMG_F;var t=label||team.short,w=c.measureText(t).width+size*1.3,hh=size*1.9;imgRR(c,x,y-hh*0.7,w,hh,hh/2);c.fillStyle=team.color;c.fill();c.fillStyle=team.text;c.textAlign="left";c.textBaseline="alphabetic";c.fillText(t,x+size*0.65,y);return w;}
+function imgNames(c,teams,x,y){var big=teams.length<=3,f=big?46:34,r=big?26:20;teams.forEach(function(fid,i){var t=T[fid];
+  if(i){imgT(c,"⇄",x+4,y-8,"600 "+(big?36:28)+"px "+IMG_F,IMG_C.faint);x+=big?50:40;}
+  c.beginPath();c.arc(x+r,y-r*0.55,r,0,6.2832);c.fillStyle=t.color;c.fill();imgT(c,chkInitials(t.short),x+r,y-r*0.55+r*0.36,"800 "+Math.round(r*0.78)+"px "+IMG_F,t.text,"center");
+  c.font="800 "+f+"px "+IMG_F;imgT(c,t.short,x+r*2+14,y,"800 "+f+"px "+IMG_F,IMG_C.ink);x+=r*2+14+c.measureText(t.short).width+(big?22:14);});return x;}
+function imgMoney(n){return String(Math.round(n*100)/100);}
+/* what one team's card shows: what it gets and sends, its payroll, its flags */
+function imgCard(c,fid,res,mv,dr){
+ var t=T[fid],ia=res.teams[fid],short=t.short,item=function(k,other,dir){var pick=chkIsPick(k);
+  if(pick){var p=TKP[k];return {n:p.y+" Round "+p.r+" pick",sub:"Draft pick"+(p.f!==p.o?" · "+T[p.f].short+"'s":""),cap:"—",other:other,dir:dir};}
+  var r=CHK_ROW[k],tags=[r.pos,r.nba];if(isRk(k)){var d=DR.byKey[k];tags.push("Rookie"+(d&&d.rookie?" "+d.label:""));}
+  var sl={O:"Out",OUT:"Out",INJ:"Injured",OFS:"Out for season",D:"Doubtful",Q:"Questionable",NA:"Not active"}[r.st];if(r.st&&sl)tags.push(sl);if(r.s==="IL"||r.s==="IL+")tags.push("IL");
+  return {n:r.n,sub:tags.filter(Boolean).join(" · "),cap:String(r.c),other:other,dir:dir};};
+ var gets=mv.filter(function(m){return m.to===fid;}).map(function(m){return item(m.key,m.from,"from");}),
+     sends=mv.filter(function(m){return m.from===fid;}).map(function(m){return item(m.key,m.to,"to");}),
+     drops=dr.filter(function(x){return x.team===fid;}).map(function(x){var r=CHK_ROW[x.key];return {n:r.n,sub:[r.pos,r.nba].filter(Boolean).join(" · ")+" · released",cap:String(r.c)};});
+ var secs=[["GETS",IMG_C.green,gets],["SENDS",IMG_C.red,sends],["DROPS",IMG_C.muted,drops]].filter(function(s,i){return s[2].length||i<2;});
+ var rightH=secs.reduce(function(a,s){return a+52+Math.max(1,s[2].length)*78;},0);
+ var flags=res.rules.filter(function(r){return r.team===short&&(r.level==="blocked"||r.level==="review");}),more=Math.max(0,flags.length-3);flags=flags.slice(0,3);
+ c.font="500 24px "+IMG_F;var fl=flags.map(function(r){return {lv:r.level,lines:imgWrap(c,r.reason,870)};}),flagsH=fl.reduce(function(a,f){return a+f.lines.length*33+14;},0)+(more?36:0);
+ var leftH=340,top=34,h=top+Math.max(leftH,rightH)+(flagsH?flagsH+26:0)+30;
+ return {fid:fid,t:t,ia:ia,secs:secs,fl:fl,more:more,flagsH:flagsH,h:h,leftH:leftH,rightH:rightH,top:top};}
+function imgDrawCard(c,m,x,y,W){
+ var t=m.t,ia=m.ia,out=ia.ca>D.cap.ceiling||ia.ca<D.cap.floor;
+ c.save();imgRR(c,x,y,W,m.h,28);c.fillStyle="#fff";c.fill();c.strokeStyle=IMG_C.line;c.lineWidth=2;c.stroke();c.clip();
+ c.fillStyle=t.color;c.fillRect(x,y,W,12);c.fillStyle=t.color+"16";c.fillRect(x,y+12,470,m.top+Math.max(m.leftH,m.rightH)+(m.flagsH?8:30)-12);c.restore();
+ var lx=x+40,cy=y+m.top+8;
+ c.beginPath();c.arc(lx+36,cy+36,36,0,6.2832);c.fillStyle=t.color;c.fill();imgT(c,chkInitials(t.short),lx+36,cy+47,"800 28px "+IMG_F,t.text,"center");
+ c.font="800 44px "+IMG_F;imgT(c,imgFit(c,t.short,290),lx+88,cy+36,"800 44px "+IMG_F,IMG_C.ink);
+ c.font="500 24px "+IMG_F;imgT(c,imgFit(c,tTitle(t)||t.name,290),lx+88,cy+70,"500 24px "+IMG_F,IMG_C.muted);
+ /* payroll before -> after */
+ var py=cy+196,bef=imgMoney(ia.cb),aft=imgMoney(ia.ca),d=Math.round((ia.ca-ia.cb)*100)/100;
+ c.font="600 40px "+IMG_M;var bw=c.measureText(bef).width;imgT(c,bef,lx,py,"600 40px "+IMG_M,IMG_C.faint);imgT(c,"→",lx+bw+14,py-4,"600 34px "+IMG_F,IMG_C.faint);
+ c.font="800 84px "+IMG_M;var ax=lx+bw+62;imgT(c,aft,ax,py+8,"800 84px "+IMG_M,out?IMG_C.red:IMG_C.ink);var aw=c.measureText(aft).width;
+ if(d){var dt=(d>0?"+":"")+imgMoney(d);c.font="800 26px "+IMG_M;var dw=c.measureText(dt).width+26;imgRR(c,ax+aw+16,py-30,dw,42,21);c.fillStyle=d>0?"#e8f3ec":"#fdf0ee";c.fill();imgT(c,dt,ax+aw+16+13,py,"800 26px "+IMG_M,d>0?IMG_C.green:IMG_C.red);}
+ /* band meter */
+ var mw=400,my=py+44,lo=100,hi=210,pc=function(v){return Math.max(0,Math.min(1,(v-lo)/(hi-lo)))*mw;};
+ imgRR(c,lx,my,mw,16,8);c.fillStyle="#eef1f6";c.fill();imgRR(c,lx+pc(D.cap.floor),my,pc(D.cap.ceiling)-pc(D.cap.floor),16,8);c.fillStyle="#d7ecdf";c.fill();
+ c.fillStyle="#a4afc2";c.fillRect(lx+pc(ia.cb)-2,my-6,4,28);
+ c.beginPath();c.arc(lx+pc(ia.ca),my+8,15,0,6.2832);c.fillStyle="#fff";c.fill();c.beginPath();c.arc(lx+pc(ia.ca),my+8,11,0,6.2832);c.fillStyle=out?IMG_C.red:IMG_C.ink;c.fill();
+ var band=ia.ca>=D.cap.floor&&ia.ca<=D.cap.ceiling?"In the "+D.cap.floor+"–"+D.cap.ceiling+" band":ia.ca>D.cap.ceiling?imgMoney(ia.ca-D.cap.ceiling)+" over the "+D.cap.ceiling+" ceiling":imgMoney(D.cap.floor-ia.ca)+" under the "+D.cap.floor+" floor";
+ imgT(c,band+"",lx,my+58,"600 25px "+IMG_F,out?IMG_C.red:IMG_C.muted);
+ if(ia.na!==ia.nb||ia.na>TKL.roster.spots)imgT(c,"Roster "+ia.nb+" → "+ia.na+" of "+TKL.roster.spots,lx,my+94,"500 24px "+IMG_F,ia.na>TKL.roster.spots?IMG_C.red:IMG_C.muted);
+ /* what moves */
+ var rx=x+500,rw=W-540,sy=y+m.top+8;
+ m.secs.forEach(function(s){imgT(c,s[0],rx,sy+24,"800 22px "+IMG_F,s[1]);c.fillStyle=IMG_C.line;c.fillRect(rx+78,sy+18,rw-78,2);sy+=52;
+  if(!s[2].length){imgT(c,"—",rx,sy+32,"500 28px "+IMG_F,IMG_C.faint);sy+=78;return;}
+  s[2].forEach(function(it){c.font="800 32px "+IMG_F;imgT(c,imgFit(c,it.n,rw-110),rx,sy+28,"800 32px "+IMG_F,isRkName(it)?"#5d2796":IMG_C.ink);
+   c.font="500 22px "+IMG_F;var sub=imgFit(c,it.sub,rw-200);imgT(c,sub,rx,sy+60,"500 22px "+IMG_F,IMG_C.muted);
+   if(it.other){var sx=rx+c.measureText(sub).width+14;imgT(c,it.dir,sx,sy+60,"600 21px "+IMG_F,IMG_C.faint);imgPill(c,sx+c.measureText(it.dir).width+10,sy+60,T[it.other],18);}
+   imgT(c,it.cap,rx+rw,sy+32,"800 33px "+IMG_M,IMG_C.ink,"right");sy+=78;});});
+ /* flags: what the rules say about this team */
+ if(m.flagsH){var fy=y+m.top+Math.max(m.leftH,m.rightH)+8;c.fillStyle=IMG_C.line;c.fillRect(x+40,fy,W-80,2);fy+=26;
+  m.fl.forEach(function(f){var col=f.lv==="blocked"?"#c0392b":"#e0a020";c.beginPath();c.arc(x+58,fy+9,14,0,6.2832);c.fillStyle=col;c.fill();imgT(c,f.lv==="blocked"?"✕":"!",x+58,fy+16,"800 17px "+IMG_F,"#fff","center");
+   f.lines.forEach(function(ln,i){imgT(c,ln,x+88,fy+16+i*33,"500 24px "+IMG_F,f.lv==="blocked"?IMG_C.red:IMG_C.amber);});fy+=f.lines.length*33+14;});
+  if(m.more)imgT(c,"+"+m.more+" more flagged in the Trade Machine",x+88,fy+10,"500 22px "+IMG_F,IMG_C.faint);}
+}
+function isRkName(it){return /Rookie/.test(it.sub||"");}
+function chkImageCanvas(res,mv,dr){
+ var W=1080,M=40,CW=W-2*M,S=2,probe=document.createElement("canvas").getContext("2d"),teams=CHK.teams.filter(function(f){return res.teams&&res.teams[f];});
+ var cards=teams.map(function(f){return imgCard(probe,f,res,mv,dr);});
+ var nPl=mv.filter(function(m){return !chkIsPick(m.key);}).length,nPk=mv.length-nPl;
+ var general=res.rules.filter(function(r){return !r.team&&(r.level==="blocked"||r.level==="review");});
+ probe.font="500 22px "+IMG_F;var gl=general.map(function(r){return {lv:r.level,lines:imgWrap(probe,r.reason,900)};}),genH=gl.reduce(function(a,g){return a+g.lines.length*30+12;},0);
+ var headH=230,footH=110+(genH?genH+20:0),H=headH+cards.reduce(function(a,m){return a+m.h+26;},0)+footH;
+ var cv=document.createElement("canvas");cv.width=W*S;cv.height=H*S;var c=cv.getContext("2d");c.scale(S,S);
+ c.fillStyle=IMG_C.canvas;c.fillRect(0,0,W,H);
+ /* headline: who, what, and the verdict */
+ imgT(c,"TRADE PROPOSAL",M,70,"800 22px "+IMG_F,IMG_C.muted);
+ imgNames(c,teams,M,142);
+ imgT(c,teams.length+" teams · "+nPl+" player"+(nPl===1?"":"s")+(nPk?" · "+nPk+" pick"+(nPk===1?"":"s"):"")+(dr.length?" · "+dr.length+" drop"+(dr.length===1?"":"s"):""),M,190,"500 26px "+IMG_F,IMG_C.muted);
+ var st=res.status,sc={LEGAL:[ "#e8f3ec",IMG_C.green],BLOCKED:["#fde8e8",IMG_C.red],"COMMISSIONER REVIEW":["#fff1d6",IMG_C.amber]}[st];
+ c.font="800 26px "+IMG_F;var sw=c.measureText(st).width+56;imgRR(c,W-M-sw,44,sw,60,30);c.fillStyle=sc[0];c.fill();imgT(c,st,W-M-sw/2,84,"800 26px "+IMG_F,sc[1],"center");
+ var y=headH;cards.forEach(function(m){imgDrawCard(c,m,M,y,CW);y+=m.h+26;});
+ /* footer */
+ if(gl.length){gl.forEach(function(g){var col=g.lv==="blocked"?"#c0392b":"#e0a020";c.beginPath();c.arc(M+14,y+16,14,0,6.2832);c.fillStyle=col;c.fill();imgT(c,g.lv==="blocked"?"✕":"!",M+14,y+23,"800 17px "+IMG_F,"#fff","center");
+  g.lines.forEach(function(ln,i){imgT(c,ln,M+44,y+22+i*30,"500 22px "+IMG_F,g.lv==="blocked"?IMG_C.red:IMG_C.amber);});y+=g.lines.length*30+12;});y+=20;}
+ imgT(c,st==="LEGAL"?"Passes the automated rules · approval stays with the commissioner":"A rules check, not a verdict on whether the trade is fair",M,y+30,"500 22px "+IMG_F,IMG_C.muted);
+ var site=/^https?:/.test(location.protocol)?location.host+location.pathname.replace(/index\.html$/,""):"";
+ imgT(c,"NBA Talk VN Dynasty · Trade Machine · "+CHK.now.slice(0,10)+(site?" · "+site:""),M,y+68,"600 20px "+IMG_F,IMG_C.faint);
+ return cv;}
+/* ---------- the second image: every team's roster as it will look after the trade (arrivals highlighted, the new top-9 line) ---------- */
+function imgRoster(fid,mv,dr,il){
+ var base=chkRows()[fid].roster,N=D.season.counting.n,out={},dropped={},ilm={},fromOf={};
+ var inc=mv.filter(function(m){return m.to===fid&&!chkIsPick(m.key);});inc.forEach(function(m){fromOf[m.key]=m.from;});
+ mv.filter(function(m){return m.from===fid;}).forEach(function(m){out[m.key]=m.to;});dr.forEach(function(x){if(x.team===fid)dropped[x.key]=1;});il.forEach(function(x){if(x.team===fid)ilm[x.key]=1;});
+ var keep=base.filter(function(r){return !out[r.k]&&!dropped[r.k];}).concat(inc.map(function(m){return CHK_ROW[m.key];})),injured={};keep.forEach(function(r){if(chkInj(r))injured[r.k]=1;});
+ keep.sort(function(a,b){return b.c-a.c||(injured[a.k]?1:0)-(injured[b.k]?1:0)||a.n.localeCompare(b.n);});
+ var rows=keep.map(function(r,i){var isIn=!!fromOf[r.k];return {r:r,from:fromOf[r.k],nc:i>=N,il:!isIn&&(r.s==="IL"||r.s==="IL+"||!!ilm[r.k])};});
+ var main=rows.filter(function(x){return !x.il;}),ilr=rows.filter(function(x){return x.il;}),left=[];
+ base.forEach(function(r){if(out[r.k])left.push({txt:"Out: "+r.n,to:out[r.k]});else if(dropped[r.k])left.push({txt:"Released: "+r.n});});
+ mv.forEach(function(m){if(!chkIsPick(m.key))return;if(m.to===fid)left.push({txt:"Pick in: "+chkPickName(m.key),from:m.from,pick:1});else if(m.from===fid)left.push({txt:"Pick out: "+chkPickName(m.key),to:m.to,pick:1});});
+ var lines=1+main.length+(ilr.length?1+ilr.length:0)+(main.some(function(x){return x.nc;})?1:0);
+ return {fid:fid,t:T[fid],main:main,ilr:ilr,left:left,rowsN:main.length+ilr.length,hasNc:main.some(function(x){return x.nc;}),N:N};}
+function chkRostersCanvas(res,mv,dr,il){
+ var W=1080,M=40,GAP=24,CW=(W-2*M-GAP)/2,S=2,RH=40,teams=CHK.teams.filter(function(f){return res.teams&&res.teams[f];}),models=teams.map(function(f){return imgRoster(f,mv,dr,il);});
+ var hOf=function(m){return 150+m.main.length*RH+(m.hasNc?34:0)+(m.ilr.length?34+m.ilr.length*RH:0)+(m.left.length?24+m.left.length*32:0)+28;};
+ var rowsH=[];for(var i=0;i<models.length;i+=2)rowsH.push(Math.max(hOf(models[i]),models[i+1]?hOf(models[i+1]):0));
+ var headH=200,footH=110,H=headH+rowsH.reduce(function(a,x){return a+x+GAP;},0)+footH;
+ var cv=document.createElement("canvas");cv.width=W*S;cv.height=H*S;var c=cv.getContext("2d");c.scale(S,S);c.fillStyle=IMG_C.canvas;c.fillRect(0,0,W,H);
+ var st=res.status,sc={LEGAL:["#e8f3ec",IMG_C.green],BLOCKED:["#fde8e8",IMG_C.red],"COMMISSIONER REVIEW":["#fff1d6",IMG_C.amber]}[st];
+ imgT(c,"TEAMS AFTER THE TRADE",M,70,"800 22px "+IMG_F,IMG_C.muted);
+ imgNames(c,teams,M,142);
+ c.font="800 26px "+IMG_F;var sw=c.measureText(st).width+56;imgRR(c,W-M-sw,44,sw,60,30);c.fillStyle=sc[0];c.fill();imgT(c,st,W-M-sw/2,84,"800 26px "+IMG_F,sc[1],"center");
+ var y=headH;
+ for(var k=0;k<models.length;k+=2){var rh=rowsH[k/2];[models[k],models[k+1]].forEach(function(m,col){if(!m)return;var x=M+col*(CW+GAP);imgDrawRoster(c,m,res.teams[m.fid],x,y,CW,rh,RH);});y+=rh+GAP;}
+ imgT(c,"Green rows are arrivals · greyed rows fall outside the counted top "+D.season.counting.n,M,y+30,"500 22px "+IMG_F,IMG_C.muted);
+ var site=/^https?:/.test(location.protocol)?location.host+location.pathname.replace(/index\.html$/,""):"";
+ imgT(c,"NBA Talk VN Dynasty · Trade Machine · "+CHK.now.slice(0,10)+(site?" · "+site:""),M,y+66,"600 20px "+IMG_F,IMG_C.faint);
+ return cv;}
+function imgDrawRoster(c,m,ia,x,y,W,H,RH){
+ var t=m.t,out=ia.ca>D.cap.ceiling||ia.ca<D.cap.floor,d=Math.round((ia.ca-ia.cb)*100)/100;
+ c.save();imgRR(c,x,y,W,H,26);c.fillStyle="#fff";c.fill();c.strokeStyle=IMG_C.line;c.lineWidth=2;c.stroke();c.clip();c.fillStyle=t.color;c.fillRect(x,y,W,10);c.fillStyle=t.color+"16";c.fillRect(x,y+10,W,134);c.restore();
+ c.beginPath();c.arc(x+56,y+64,28,0,6.2832);c.fillStyle=t.color;c.fill();imgT(c,chkInitials(t.short),x+56,y+74,"800 22px "+IMG_F,t.text,"center");
+ c.font="800 34px "+IMG_F;imgT(c,imgFit(c,t.short,200),x+96,y+62,"800 34px "+IMG_F,IMG_C.ink);c.font="500 19px "+IMG_F;imgT(c,imgFit(c,tTitle(t)||t.name,170),x+96,y+86,"500 19px "+IMG_F,IMG_C.muted);
+ /* payroll */
+ var aft=imgMoney(ia.ca),bef=imgMoney(ia.cb);imgT(c,aft,x+W-26,y+66,"800 52px "+IMG_M,out?IMG_C.red:IMG_C.ink,"right");c.font="800 52px "+IMG_M;var aw=c.measureText(aft).width;
+ imgT(c,bef+" →",x+W-26-aw-12,y+62,"600 26px "+IMG_M,IMG_C.faint,"right");
+ var band=out?(ia.ca>D.cap.ceiling?imgMoney(ia.ca-D.cap.ceiling)+" over the ceiling":imgMoney(D.cap.floor-ia.ca)+" under the floor"):"In the band";
+ imgT(c,(d?(d>0?"+":"")+imgMoney(d)+" · ":"")+band,x+W-26,y+108,"700 19px "+IMG_F,out?IMG_C.red:(d>0?IMG_C.green:IMG_C.muted),"right");
+ if(ia.na!==ia.nb||ia.na>TKL.roster.spots)imgT(c,"Roster "+ia.nb+" → "+ia.na,x+W-26,y+132,"500 18px "+IMG_F,ia.na>TKL.roster.spots?IMG_C.red:IMG_C.muted,"right");
+ var yy=y+150,row=function(it){var r=it.r,isIn=!!it.from;
+  if(isIn){c.fillStyle="#e6f4ec";c.fillRect(x+10,yy,W-20,RH-4);c.fillStyle="#4aa36c";c.fillRect(x+10,yy,5,RH-4);}
+  imgT(c,(r.pos||"").split("/").slice(0,3).join("/"),x+26,yy+27,"600 15px "+IMG_F,IMG_C.faint);
+  var nc=it.nc&&!it.il,nameCol=isRk(r.k)?"#5d2796":IMG_C.ink;c.font=(isIn?"800":"700")+" 23px "+IMG_F;var nm=imgFit(c,r.n,W-250);imgT(c,nm,x+118,yy+28,(isIn?"800":"700")+" 23px "+IMG_F,nc?IMG_C.faint:nameCol);
+  var tx=x+118+c.measureText(nm).width+10,tag=function(s,col,bg){c.font="800 14px "+IMG_F;var w=c.measureText(s).width+14;imgRR(c,tx,yy+10,w,22,11);c.fillStyle=bg;c.fill();imgT(c,s,tx+7,yy+26,"800 14px "+IMG_F,col);tx+=w+6;};
+  if(isRk(r.k)){var dd=DR.byKey[r.k];tag("R"+(dd&&dd.rookie?" "+dd.label:""),"#5d2796","#f1e9fb");}
+  var sl={O:"OUT",OUT:"OUT",INJ:"INJ",OFS:"OFS",D:"D",Q:"Q",NA:"NA"}[r.st];if(sl)tag(sl,"#fff",(r.st==="O"||r.st==="OUT"||r.st==="INJ"||r.st==="OFS")?"#c0392b":"#e0a020");
+  if(it.from){c.font="800 14px "+IMG_F;var w=c.measureText(T[it.from].short).width+16;if(tx+w<x+W-90){imgRR(c,tx,yy+10,w,22,11);c.fillStyle=T[it.from].color;c.fill();imgT(c,T[it.from].short,tx+8,yy+26,"800 14px "+IMG_F,T[it.from].text);}}
+  imgT(c,String(r.c),x+W-26,yy+28,(nc?"600 ":"800 ")+"23px "+IMG_M,nc?IMG_C.faint:IMG_C.ink,"right");yy+=RH;},
+  div=function(txt,col){c.fillStyle=IMG_C.line;c.fillRect(x+26,yy+16,W-52,2);c.font="800 13px "+IMG_F;var w=c.measureText(txt).width+24;c.fillStyle="#fff";c.fillRect(x+W/2-w/2,yy+6,w,22);imgT(c,txt,x+W/2,yy+22,"800 13px "+IMG_F,col||IMG_C.faint,"center");yy+=34;};
+ var ncDone=false;m.main.forEach(function(it){if(it.nc&&!ncDone){ncDone=true;div("BEYOND TOP "+m.N+" · NOT COUNTED");}row(it);});
+ if(m.ilr.length){div("INJURED LIST · "+m.ilr.length+"/"+TKL.yahoo.ilSlots,IMG_C.ink);m.ilr.forEach(row);}
+ if(m.left.length){yy+=10;m.left.forEach(function(l){var col=l.pick?IMG_C.muted:IMG_C.red;imgT(c,l.txt,x+26,yy+20,"600 18px "+IMG_F,col);
+   var o=l.to||l.from;if(o){c.font="600 18px "+IMG_F;var ox=x+26+c.measureText(l.txt).width+10;imgT(c,l.from?"from":"to",ox,yy+20,"600 16px "+IMG_F,IMG_C.faint);imgPill(c,ox+c.measureText(l.from?"from":"to").width+8,yy+20,T[o],15);}yy+=32;});}
+}
+function chkImageReady(then){var fs=document.fonts,done=false,go=function(){if(done)return;done=true;then();};   /* wait for the fonts, but never hang on them */
+ if(!fs||!fs.load){go();return;}setTimeout(go,1200);Promise.all(['800 40px "Inter"','500 20px "Inter"','800 30px "Roboto Mono"'].map(function(f){return fs.load(f).catch(function(){});})).then(go,go);}
+/* one tall image holding both: the trade on top, the teams after it below (scaled down if it would be too large for a phone canvas) */
+function chkCompositeCanvas(a,b){var W=1080,gap=28,ha=a.height/2,hb=b.height/2,tot=ha+gap+hb,f=Math.min(1.5,Math.sqrt(12000000/(W*tot))),cv=document.createElement("canvas");
+ cv.width=Math.round(W*f);cv.height=Math.round(tot*f);var c=cv.getContext("2d");c.fillStyle=IMG_C.canvas;c.fillRect(0,0,cv.width,cv.height);c.imageSmoothingQuality="high";
+ c.drawImage(a,0,0,cv.width,Math.round(ha*f));c.drawImage(b,0,Math.round((ha+gap)*f),cv.width,Math.round(hb*f));return cv;}
+function chkShareImage(btn){var mv=chkMoves(),dr=chkDrops(),il=chkIls();if(!mv.length)return;var res=chkRun(mv,CHK.now,dr,il);
+ chkImageReady(function(){var jobs=[["Trade","trade-proposal.png","The proposed trade: "+res.status,chkImageCanvas(res,mv,dr)],["Teams after","teams-after-trade.png","Each team's roster after the trade: "+res.status,chkRostersCanvas(res,mv,dr,il)]];
+  jobs.push(["Both in one","trade-and-teams-after.png","The trade and each team's roster after it, in one image: "+res.status,chkCompositeCanvas(jobs[0][3],jobs[1][3])]);
+  Promise.all(jobs.map(function(j){return new Promise(function(ok){j[3].toBlob(function(b){ok({label:j[0],name:j[1],alt:j[2],blob:b});},"image/png");});})).then(function(pages){if(pages.every(function(p){return p.blob;}))chkImagePreview(pages,res);});});}
+function chkImagePreview(pages,res){
+ var old=document.getElementById("chk-imgov");if(old)old.remove();var cur=0,urls=pages.map(function(p){p.url=URL.createObjectURL(p.blob);try{p.file=new File([p.blob],p.name,{type:"image/png"});}catch(e){}return p.url;});
+ var ov=h("div",{class:"imgov",id:"chk-imgov",role:"dialog","aria-modal":"true","aria-label":"Trade images"}),close=function(){urls.forEach(function(u){URL.revokeObjectURL(u);});ov.remove();document.removeEventListener("keydown",esc);};
+ function esc(e){if(e.key==="Escape")close();}
+ var img=h("img",{class:"imgov-img",src:pages[0].url,alt:pages[0].alt}),save=h("a",{class:"imgov-b",href:pages[0].url,download:pages[0].name,text:"Save"}),tabs=[];
+ var canShare=function(){var f=pages[cur].file;return !!(f&&navigator.share&&navigator.canShare&&navigator.canShare({files:[f]}));};
+ var share=canShare()?h("button",{type:"button",class:"imgov-b pri",text:"Share"}):null,copy=h("button",{type:"button",class:"imgov-b"+(share?"":" pri"),text:"Copy image"});
+ var two=pages.length>2?[pages[0],pages[1]]:null,can2=!!(two&&two[0].file&&two[1].file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[two[0].file,two[1].file]}));
+ var share2=can2?h("button",{type:"button",class:"imgov-b sm",text:"Share as 2 images"}):null,save2=h("button",{type:"button",class:"imgov-b sm",text:"Save 2 images"});
+ if(share2)share2.addEventListener("click",function(){navigator.share({files:[two[0].file,two[1].file],title:"Trade proposal",text:res.status}).catch(function(){});});
+ save2.addEventListener("click",function(){two.forEach(function(p,k){setTimeout(function(){var a=document.createElement("a");a.href=p.url;a.download=p.name;document.body.appendChild(a);a.click();a.remove();},k*450);});flash(save2,"Saving…","Save 2 images");});
+ function flash(b,t,orig){b.textContent=t;setTimeout(function(){b.textContent=orig;},1800);}
+ function show(i){cur=i;img.src=pages[i].url;img.alt=pages[i].alt;save.href=pages[i].url;save.setAttribute("download",pages[i].name);tabs.forEach(function(t,k){t.setAttribute("aria-pressed",k===i?"true":"false");t.classList.toggle("on",k===i);});}
+ pages.forEach(function(p,i){var t=h("button",{type:"button",class:"imgov-t"+(i?"":" on"),"aria-pressed":i?"false":"true",text:p.label});t.addEventListener("click",function(){show(i);});tabs.push(t);});
+ if(share)share.addEventListener("click",function(){navigator.share({files:[pages[cur].file],title:"Trade proposal",text:res.status}).catch(function(){});});
+ copy.addEventListener("click",function(){try{navigator.clipboard.write([new ClipboardItem({"image/png":pages[cur].blob})]).then(function(){flash(copy,"Copied","Copy image");},function(){flash(copy,"Not allowed here: use Save","Copy image");});}catch(e){flash(copy,"Not supported: use Save","Copy image");}});
+ var x=h("button",{type:"button",class:"imgov-x","aria-label":"Close",text:"✕"});x.addEventListener("click",close);ov.addEventListener("click",function(e){if(e.target===ov)close();});document.addEventListener("keydown",esc);
+ ov.appendChild(h("div",{class:"imgov-box"},[h("div",{class:"imgov-tabs",role:"group","aria-label":"Which image"},tabs),x,h("div",{class:"imgov-scroll"},[img]),h("div",{class:"imgov-bar"},[share2,save2,share,copy,save])]));document.body.appendChild(ov);
+ var first=ov.querySelector(".imgov-b");if(first)first.focus();}
 function renderCheck(){
  var box=document.getElementById("chk");if(!box)return;box.textContent="";
  var me=getMe();if(CHK.teams.length<2){CHK.teams=[];if(me&&T[me])CHK.teams.push(me);D.teams.forEach(function(t){if(CHK.teams.length<2&&CHK.teams.indexOf(t.id)<0)CHK.teams.push(t.id);});}
@@ -2955,7 +3143,7 @@ function renderCheck(){
  var spots=TKL.roster.spots,capNn=TKL.yahoo.activeSlots+TKL.yahoo.benchSlots;
  function act(el,fn){el.addEventListener("click",fn);el.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();fn();}});}
  box.appendChild(h("div",{class:"chk-h"},[h("div",{class:"chk-ti"},[h("b",{text:"TRADE MACHINE"}),h("span",{text:"Tap players and picks to send them. It shows what the league rules block, never whether a trade is fair."})]),
-  h("div",{class:"chk-act"},[res?h("span",{class:"chk-st "+cls,id:"chk-top",text:res.status}):null,h("button",{type:"button",class:"chk-btn",id:"chk-reset",text:"Reset"}),h("button",{type:"button",class:"chk-btn",id:"chk-copy",text:"Copy link"}),res?h("button",{type:"button",class:"chk-btn",id:"chk-text",text:"Copy summary"}):null])]));
+  h("div",{class:"chk-act"},[res?h("span",{class:"chk-st "+cls,id:"chk-top",text:res.status}):null,h("button",{type:"button",class:"chk-btn",id:"chk-reset",text:"Reset"}),h("button",{type:"button",class:"chk-btn",id:"chk-copy",text:"Copy link"}),res?h("button",{type:"button",class:"chk-btn",id:"chk-text",text:"Copy summary"}):null,res?h("button",{type:"button",class:"chk-btn pri",id:"chk-img",text:"Share image"}):null])]));
  /* the teams in the trade: a quiet summary line that opens into the full picker */
  var picker=h("div",{class:"chk-teams",role:"group","aria-label":"Teams in the trade (2 to "+CHK_MAX+")"},D.teams.map(function(t){var on=CHK.teams.indexOf(t.id)>=0;
   var e=h("button",{type:"button",class:"tpill tp-btn"+(on?" on":""),style:on?"background:"+t.color+";color:"+t.text:"","aria-pressed":on?"true":"false",title:t.name,text:t.short});e.addEventListener("click",function(){chkToggleTeam(t.id);});return e;}));
@@ -2973,7 +3161,7 @@ function renderCheck(){
   var head=h("div",{class:"chk-ch"},[h("span",{class:"chk-mono",style:"background:"+t.color+";color:"+t.text,text:chkInitials(t.short)}),
    h("div",{class:"chk-nm"},[h("b",{text:t.short}),h("small",{text:tTitle(t)})]),
    h("div",{class:"chk-pay"},[h("span",{text:cb+(ia?" → ":"")}),ia?h("b",{text:String(ca)}):null,ia&&d?h("em",{class:d>0?"up":"dn",text:(d>0?"+":"")+d}):null])]);
-  var capLine=h("div",{class:"chk-cap"},[chkMeter(cb,ca),h("div",{class:"chk-cap-t"+(outBand?" out":""),text:(ca>=D.cap.floor&&ca<=D.cap.ceiling?"In the "+D.cap.floor+"–"+D.cap.ceiling+" band":ca>D.cap.ceiling?(Math.round((ca-D.cap.ceiling)*100)/100)+" over the "+D.cap.ceiling+" ceiling":(Math.round((D.cap.floor-ca)*100)/100)+" under the "+D.cap.floor+" floor")+" · room "+Math.round((D.cap.ceiling-ca)*100)/100})]);
+  var capLine=h("div",{class:"chk-cap"},[chkMeter(cb,ca),h("div",{class:"chk-cap-t"+(outBand?" out":""),text:(ca>=D.cap.floor&&ca<=D.cap.ceiling?"In the "+D.cap.floor+"–"+D.cap.ceiling+" band":ca>D.cap.ceiling?(Math.round((ca-D.cap.ceiling)*100)/100)+" over the "+D.cap.ceiling+" ceiling":(Math.round((D.cap.floor-ca)*100)/100)+" under the "+D.cap.floor+" floor")+(!outBand?" · room "+Math.round((D.cap.ceiling-ca)*100)/100:"")})]);
   var checks=null,facts=null,warn=null;
   if(ia){var A=ia.a,B=ia.b,fa=function(txt,level,chg){return h("span",{class:"fa "+level+(chg?" chg":""),text:txt});};
    checks=h("div",{class:"chk-ck"},[["CAP",["cap","ladder"]],["ROSTER",["size","drop"]],["SLOTS",["slots","il"]],["LIMITS",["antitank"]],["HELD",["cooldown"]]].map(function(c){var w=chkWorst(mine.filter(function(r){return c[1].indexOf(r.rule)>=0;}));return h("span",{class:"ck "+w},[h("i",{text:chkIcon(w)}),c[0]]);}));
@@ -3022,6 +3210,7 @@ function renderCheck(){
   var first=issues.filter(function(r){return r.level==="blocked"||r.level==="review";})[0];
   box.appendChild(h("div",{class:"chk-bar "+cls},[h("span",{class:"chk-st "+cls,text:res.status}),h("span",{class:"chk-bar-t",text:first?first.reason:(res.status==="LEGAL"?"Passes the automated rules.":"")}),mv.length?h("span",{class:"chk-bar-n",text:mv.length+" move"+(mv.length>1?"s":"")}):null]));}
  document.getElementById("chk-reset").addEventListener("click",function(){CHK.sel={};CHK.drop={};CHK.il={};CHK.open={};chkTouch();});
+ var ci=document.getElementById("chk-img");if(ci)ci.addEventListener("click",function(){chkShareImage(this);});
  var ct=document.getElementById("chk-text");if(ct)ct.addEventListener("click",function(){var b=this,done=function(){b.textContent="Copied";setTimeout(function(){b.textContent="Copy summary";},1500);};try{navigator.clipboard.writeText(chkSummaryText(res,mv,dr)).then(done,done);}catch(e){done();}});
  document.getElementById("chk-copy").addEventListener("click",function(){var b=this,u=location.href,done=function(){b.textContent="Copied";setTimeout(function(){b.textContent="Copy link";},1500);};
   try{navigator.clipboard.writeText(u).then(done,done);}catch(e){done();}});
