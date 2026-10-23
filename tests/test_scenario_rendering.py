@@ -906,6 +906,71 @@ class TestRenderedCards(unittest.TestCase):
             self.assertIn("%d of 15" % c["count"], " ".join(c["players"]))
             self.assertEqual(c["oldChips"], 0)                                     # the tiny chips are gone
 
+    _PROPOSE = """
+          var q=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+          var D2=NBA_NAV.D,base=D2.scenarios[''].teams;
+          var propose=function(i,j){                                           // the two teams' top-paid players swap places
+            var ids=D2.teams.map(function(t){return t.id;}),a=ids[i],b=ids[j],sh=function(f){return D2.teams.filter(function(t){return t.id===f;})[0].short;};
+            var on=function(){return q('#chk .chk-teams .on').map(function(x){return x.textContent;});},tg=function(s){q('#chk .chk-teams button').filter(function(x){return x.textContent===s;})[0].click();};
+            [sh(a),sh(b)].forEach(function(s){if(on().indexOf(s)<0)tg(s);});on().filter(function(s){return s!==sh(a)&&s!==sh(b);}).forEach(tg);
+            var pick=function(f,k){var col=q('#chk .chk-col').filter(function(c){return c.dataset.team===f;})[0];var n=base[f].roster.filter(function(r){return r.k===k;})[0].n;
+              Array.prototype.filter.call(col.querySelectorAll('.player-row:not(.pickrow)'),function(e){return e.querySelector('.pn-n').textContent===n;})[0].click();};
+            pick(a,base[a].roster[0].k);pick(b,base[b].roster[0].k);return [sh(a),sh(b),base[a].roster[0].n,base[b].roster[0].n];};
+    """
+
+    def test_share_image_draws_the_trade_and_what_it_means_for_each_team(self):
+        r = self._drive(self._PROPOSE + """
+          var orig=CanvasRenderingContext2D.prototype.fillText,texts=[];
+          CanvasRenderingContext2D.prototype.fillText=function(t){texts.push(String(t));return orig.apply(this,arguments);};
+          var who=propose(0,1),cv=NBA_NAV.imageNow();CanvasRenderingContext2D.prototype.fillText=orig;
+          var pays=q('#chk .chk-col .chk-pay b').map(function(b){return b.textContent;});
+          var px=cv.getContext('2d').getImageData(0,0,cv.width,cv.height).data,distinct={};for(var i=0;i<px.length;i+=4*9973)distinct[px[i]+','+px[i+1]+','+px[i+2]]=1;
+          R.w=cv.width;R.h=cv.height;R.texts=texts;R.who=who;R.pays=pays;R.status=document.getElementById('chk-top').textContent;R.colours=Object.keys(distinct).length;""")
+        self.assertEqual(r["w"], 2160)                                             # 1080 logical px at 2x
+        self.assertGreaterEqual(r["h"], 1800)
+        self.assertGreater(r["colours"], 3)                                        # not a blank canvas
+        texts = " | ".join(r["texts"])
+        for need in ("TRADE PROPOSAL", r["status"], "GETS", "SENDS", r["who"][0], r["who"][1], r["who"][2], r["who"][3]):
+            self.assertIn(need, texts)                                             # the headline, the verdict, the teams and the players moved
+        for pay in r["pays"]:
+            self.assertIn(pay, r["texts"])                                         # each team's payroll after the trade
+        self.assertTrue(any(x.startswith("Roster ") for x in r["texts"]))          # roster size
+        self.assertTrue(any("band" in x or "ceiling" in x or "floor" in x for x in r["texts"]))   # where payroll sits against the band
+        self.assertTrue(any(re.match(r"^\d{4}-\d\d-\d\d$", x.split(" · ")[-1]) for x in r["texts"]))   # dated
+
+    def test_share_image_says_why_a_blocked_trade_is_blocked(self):
+        r = self._drive(self._PROPOSE + """
+          var ids=D2.teams.map(function(t){return t.id;}),found=null;
+          for(var i=0;i<ids.length&&!found;i++)for(var j=i+1;j<ids.length&&!found;j++){
+            var mv=[{key:base[ids[i]].roster[0].k,from:ids[i],to:ids[j]},{key:base[ids[j]].roster[0].k,from:ids[j],to:ids[i]}];
+            var res=NBA_NAV.check(mv,'2026-12-31T00:00:00Z',[]);if(res.rules.some(function(x){return x.rule==='cap'&&x.level==='blocked';}))found=[i,j];}
+          R.found=found;
+          if(found){var orig=CanvasRenderingContext2D.prototype.fillText,texts=[];CanvasRenderingContext2D.prototype.fillText=function(t){texts.push(String(t));return orig.apply(this,arguments);};
+            propose(found[0],found[1]);NBA_NAV.imageNow();CanvasRenderingContext2D.prototype.fillText=orig;R.texts=texts;R.status=document.getElementById('chk-top').textContent;}""")
+        if not r["found"]:
+            self.skipTest("no top-player swap breaks the cap band right now")
+        self.assertIn("BLOCKED", r["texts"])                                       # the verdict pill
+        self.assertTrue(any(x.startswith("Payroll ") for x in r["texts"]))         # the reason, in words, on the team's card
+        self.assertIn("must keep a team in the band or move it toward it", " ".join(r["texts"]))   # (the sentence wraps across drawn lines)
+
+    def test_share_image_button_opens_a_preview_with_copy_and_save(self):
+        r = self._drive(self._PROPOSE + """
+          R.before=!!document.getElementById('chk-img');propose(0,1);R.after=!!document.getElementById('chk-img');
+          document.getElementById('chk-img').click();
+          window.__after=function(){var ov=document.getElementById('chk-imgov'),img=ov&&ov.querySelector('img');
+            R.open=!!ov;R.src=img?img.src.slice(0,5):'';R.labels=ov?Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;}):[];
+            var sv=ov&&ov.querySelector('a.imgov-b');R.download=sv?sv.getAttribute('download'):'';R.alt=img?img.alt:'';
+            document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));R.closed=!document.getElementById('chk-imgov');};""", wait=2200)
+        self.assertFalse(r["before"])                                              # nothing to share until a trade exists
+        self.assertTrue(r["after"])
+        self.assertTrue(r["open"])
+        self.assertEqual(r["src"], "blob:")
+        self.assertIn("Copy image", r["labels"])
+        self.assertIn("Save", r["labels"])
+        self.assertEqual(r["download"], "trade-proposal.png")
+        self.assertRegex(r["alt"], r"LEGAL|BLOCKED|COMMISSIONER REVIEW")
+        self.assertTrue(r["closed"])                                               # Escape closes it
+
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:
             html = f.read()
