@@ -975,6 +975,17 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("Out: " + receiver, texts)
         self.assertTrue(any(x.startswith("BEYOND TOP") for x in texts))            # where the counted top 9 now stops
 
+    def test_the_composite_image_stacks_both_and_stays_within_a_phone_canvas(self):
+        r = self._drive(self._PROPOSE + """
+          propose(0,1);var a=NBA_NAV.imageNow(),b=NBA_NAV.rostersNow(),c=NBA_NAV.compositeNow();
+          R.a=[a.width,a.height];R.b=[b.width,b.height];R.c=[c.width,c.height];
+          var px=c.getContext('2d').getImageData(0,0,c.width,c.height).data,seen={};for(var i=0;i<px.length;i+=4*9973)seen[px[i]+','+px[i+1]+','+px[i+2]]=1;R.colours=Object.keys(seen).length;""")
+        (aw, ah), (bw, bh), (cw, ch) = r["a"], r["b"], r["c"]
+        self.assertEqual(aw, bw)                                                   # both are 1080 px wide at 2x
+        self.assertLessEqual(cw * ch, 16_000_000)                                  # fits the pixel budget of a phone canvas
+        self.assertAlmostEqual(ch / cw, (ah + bh + 56) / aw, delta=0.02)           # a tall stack: the trade above the teams after it
+        self.assertGreater(r["colours"], 3)
+
     def test_share_image_button_opens_a_preview_with_copy_and_save(self):
         r = self._drive(self._PROPOSE + """
           R.before=!!document.getElementById('chk-img');propose(0,1);R.after=!!document.getElementById('chk-img');
@@ -982,6 +993,7 @@ class TestRenderedCards(unittest.TestCase):
           window.__after=function(){var ov=document.getElementById('chk-imgov'),img=ov&&ov.querySelector('img');
             var tabs=ov?Array.prototype.slice.call(ov.querySelectorAll('.imgov-t')):[];R.tabs=tabs.map(function(t){return t.textContent;});R.alt1=img?img.alt:'';R.dl1=ov.querySelector('a.imgov-b').getAttribute('download');
             if(tabs[1]){tabs[1].click();R.alt2=img.alt;R.dl2=ov.querySelector('a.imgov-b').getAttribute('download');R.pressed=tabs[1].getAttribute('aria-pressed');}
+            if(tabs[2]){tabs[2].click();R.alt3=img.alt;R.dl3=ov.querySelector('a.imgov-b').getAttribute('download');}
             R.open=!!ov;R.src=img?img.src.slice(0,5):'';R.labels=ov?Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;}):[];
             var sv=ov&&ov.querySelector('a.imgov-b');R.download=sv?sv.getAttribute('download'):'';R.alt=img?img.alt:'';
             document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));R.closed=!document.getElementById('chk-imgov');};""", wait=2200)
@@ -993,11 +1005,14 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("Save", r["labels"])
         self.assertRegex(r["alt"], r"LEGAL|BLOCKED|COMMISSIONER REVIEW")
         self.assertTrue(r["closed"])                                               # Escape closes it
-        self.assertEqual(r["tabs"], ["Trade", "Teams after"])                      # two images: the trade, and the teams as they will look
+        self.assertEqual(r["tabs"], ["Trade", "Teams after", "Both in one"])      # the trade, the teams as they will look, and both in one image
+        self.assertIn("Save 2 images", r["labels"])                                # or the two images separately
         self.assertIn("proposed trade", r["alt1"])
         self.assertIn("roster after the trade", r["alt2"])
         self.assertEqual((r["dl1"], r["dl2"]), ("trade-proposal.png", "teams-after-trade.png"))
         self.assertEqual(r["pressed"], "true")
+        self.assertIn("in one image", r["alt3"])
+        self.assertEqual(r["dl3"], "trade-and-teams-after.png")
 
     def test_no_dollar_signs_anywhere_in_the_tool(self):
         with open(INDEX, encoding="utf-8") as f:

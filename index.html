@@ -805,6 +805,8 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .imgov-bar{display:flex;gap:8px;padding:12px 16px 16px;flex-wrap:wrap;justify-content:flex-end}
 .imgov-b{font:700 13px/1 "Inter",Arial,sans-serif;padding:12px 18px;border-radius:999px;border:1px solid #d5dce7;background:#fff;color:#31435e;cursor:pointer;text-decoration:none}
 .imgov-b.pri{background:#12264d;border-color:#12264d;color:#fff}
+.imgov-b.sm{padding:10px 14px;font-size:12px;color:#6b7a93;border-color:#e3e9f1;margin-right:auto}
+.imgov-b.sm+.imgov-b.sm{margin-right:0}
 .imgov-tabs{position:absolute;top:10px;left:12px;z-index:2;display:flex;gap:4px;padding:3px;background:#ffffffd9;border-radius:999px;box-shadow:0 1px 4px rgba(15,27,52,.15)}
 .imgov-t{border:0;background:none;padding:8px 14px;border-radius:999px;font:700 12px/1 "Inter",Arial,sans-serif;color:#6b7a93;cursor:pointer}
 .imgov-t.on{background:#12264d;color:#fff}
@@ -2720,7 +2722,7 @@ function initNav(){
  function foldH(){if(!tb||!brand)return;var f=Math.max(0,Math.round(brand.getBoundingClientRect().top-tb.getBoundingClientRect().top-6));tb.style.setProperty("--tb-fold",f+"px");}
  foldH();window.addEventListener("resize",foldH);window.addEventListener("load",foldH);
  if(window.MutationObserver)new MutationObserver(function(m){if(m.some(function(x){return x.addedNodes&&x.addedNodes.length;}))scheduleMine();}).observe(document.body,{childList:true,subtree:true});   /* views that re-render: What-If, Trade Lab, scenarios */
- window.NBA_NAV={rostersNow:function(){var mv=chkMoves(),dr=chkDrops(),il=chkIls();return chkRostersCanvas(chkRun(mv,CHK.now,dr,il),mv,dr,il);},imageNow:function(){var mv=chkMoves(),dr=chkDrops(),il=chkIls();return chkImageCanvas(chkRun(mv,CHK.now,dr,il),mv,dr);},image:chkImageCanvas,plan:chkPlan,check:chkRun,markMine:markMine,open:openSearch,close:closeSearch,search:navSearch,setMe:setMe,getMe:getMe,goTeam:goTeam,goPlayer:goPlayer,render:renderSearch,state:NAV,D:D,view:view,norm:norm,parseHash:parseHash,showTab:showTab};
+ window.NBA_NAV={compositeNow:function(){var mv=chkMoves(),dr=chkDrops(),il=chkIls(),res=chkRun(mv,CHK.now,dr,il);return chkCompositeCanvas(chkImageCanvas(res,mv,dr),chkRostersCanvas(res,mv,dr,il));},rostersNow:function(){var mv=chkMoves(),dr=chkDrops(),il=chkIls();return chkRostersCanvas(chkRun(mv,CHK.now,dr,il),mv,dr,il);},imageNow:function(){var mv=chkMoves(),dr=chkDrops(),il=chkIls();return chkImageCanvas(chkRun(mv,CHK.now,dr,il),mv,dr);},image:chkImageCanvas,plan:chkPlan,check:chkRun,markMine:markMine,open:openSearch,close:closeSearch,search:navSearch,setMe:setMe,getMe:getMe,goTeam:goTeam,goPlayer:goPlayer,render:renderSearch,state:NAV,D:D,view:view,norm:norm,parseHash:parseHash,showTab:showTab};
  paintMe();}
 
 /* ---------- trade machine: any 2-6 teams; the post-trade roster, live payroll, roster size and limits per team; every rule explained (a port of scripts/trade_checker.py; tests compare the two) ---------- */
@@ -3107,8 +3109,13 @@ function imgDrawRoster(c,m,ia,x,y,W,H,RH){
 }
 function chkImageReady(then){var fs=document.fonts,done=false,go=function(){if(done)return;done=true;then();};   /* wait for the fonts, but never hang on them */
  if(!fs||!fs.load){go();return;}setTimeout(go,1200);Promise.all(['800 40px "Inter"','500 20px "Inter"','800 30px "Roboto Mono"'].map(function(f){return fs.load(f).catch(function(){});})).then(go,go);}
+/* one tall image holding both: the trade on top, the teams after it below (scaled down if it would be too large for a phone canvas) */
+function chkCompositeCanvas(a,b){var W=1080,gap=28,ha=a.height/2,hb=b.height/2,tot=ha+gap+hb,f=Math.min(1.5,Math.sqrt(12000000/(W*tot))),cv=document.createElement("canvas");
+ cv.width=Math.round(W*f);cv.height=Math.round(tot*f);var c=cv.getContext("2d");c.fillStyle=IMG_C.canvas;c.fillRect(0,0,cv.width,cv.height);c.imageSmoothingQuality="high";
+ c.drawImage(a,0,0,cv.width,Math.round(ha*f));c.drawImage(b,0,Math.round((ha+gap)*f),cv.width,Math.round(hb*f));return cv;}
 function chkShareImage(btn){var mv=chkMoves(),dr=chkDrops(),il=chkIls();if(!mv.length)return;var res=chkRun(mv,CHK.now,dr,il);
  chkImageReady(function(){var jobs=[["Trade","trade-proposal.png","The proposed trade: "+res.status,chkImageCanvas(res,mv,dr)],["Teams after","teams-after-trade.png","Each team's roster after the trade: "+res.status,chkRostersCanvas(res,mv,dr,il)]];
+  jobs.push(["Both in one","trade-and-teams-after.png","The trade and each team's roster after it, in one image: "+res.status,chkCompositeCanvas(jobs[0][3],jobs[1][3])]);
   Promise.all(jobs.map(function(j){return new Promise(function(ok){j[3].toBlob(function(b){ok({label:j[0],name:j[1],alt:j[2],blob:b});},"image/png");});})).then(function(pages){if(pages.every(function(p){return p.blob;}))chkImagePreview(pages,res);});});}
 function chkImagePreview(pages,res){
  var old=document.getElementById("chk-imgov");if(old)old.remove();var cur=0,urls=pages.map(function(p){p.url=URL.createObjectURL(p.blob);try{p.file=new File([p.blob],p.name,{type:"image/png"});}catch(e){}return p.url;});
@@ -3117,13 +3124,17 @@ function chkImagePreview(pages,res){
  var img=h("img",{class:"imgov-img",src:pages[0].url,alt:pages[0].alt}),save=h("a",{class:"imgov-b",href:pages[0].url,download:pages[0].name,text:"Save"}),tabs=[];
  var canShare=function(){var f=pages[cur].file;return !!(f&&navigator.share&&navigator.canShare&&navigator.canShare({files:[f]}));};
  var share=canShare()?h("button",{type:"button",class:"imgov-b pri",text:"Share"}):null,copy=h("button",{type:"button",class:"imgov-b"+(share?"":" pri"),text:"Copy image"});
+ var two=pages.length>2?[pages[0],pages[1]]:null,can2=!!(two&&two[0].file&&two[1].file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[two[0].file,two[1].file]}));
+ var share2=can2?h("button",{type:"button",class:"imgov-b sm",text:"Share as 2 images"}):null,save2=h("button",{type:"button",class:"imgov-b sm",text:"Save 2 images"});
+ if(share2)share2.addEventListener("click",function(){navigator.share({files:[two[0].file,two[1].file],title:"Trade proposal",text:res.status}).catch(function(){});});
+ save2.addEventListener("click",function(){two.forEach(function(p,k){setTimeout(function(){var a=document.createElement("a");a.href=p.url;a.download=p.name;document.body.appendChild(a);a.click();a.remove();},k*450);});flash(save2,"Saving…","Save 2 images");});
  function flash(b,t,orig){b.textContent=t;setTimeout(function(){b.textContent=orig;},1800);}
  function show(i){cur=i;img.src=pages[i].url;img.alt=pages[i].alt;save.href=pages[i].url;save.setAttribute("download",pages[i].name);tabs.forEach(function(t,k){t.setAttribute("aria-pressed",k===i?"true":"false");t.classList.toggle("on",k===i);});}
  pages.forEach(function(p,i){var t=h("button",{type:"button",class:"imgov-t"+(i?"":" on"),"aria-pressed":i?"false":"true",text:p.label});t.addEventListener("click",function(){show(i);});tabs.push(t);});
  if(share)share.addEventListener("click",function(){navigator.share({files:[pages[cur].file],title:"Trade proposal",text:res.status}).catch(function(){});});
  copy.addEventListener("click",function(){try{navigator.clipboard.write([new ClipboardItem({"image/png":pages[cur].blob})]).then(function(){flash(copy,"Copied","Copy image");},function(){flash(copy,"Not allowed here: use Save","Copy image");});}catch(e){flash(copy,"Not supported: use Save","Copy image");}});
  var x=h("button",{type:"button",class:"imgov-x","aria-label":"Close",text:"✕"});x.addEventListener("click",close);ov.addEventListener("click",function(e){if(e.target===ov)close();});document.addEventListener("keydown",esc);
- ov.appendChild(h("div",{class:"imgov-box"},[h("div",{class:"imgov-tabs",role:"group","aria-label":"Which image"},tabs),x,h("div",{class:"imgov-scroll"},[img]),h("div",{class:"imgov-bar"},[share,copy,save])]));document.body.appendChild(ov);
+ ov.appendChild(h("div",{class:"imgov-box"},[h("div",{class:"imgov-tabs",role:"group","aria-label":"Which image"},tabs),x,h("div",{class:"imgov-scroll"},[img]),h("div",{class:"imgov-bar"},[share2,save2,share,copy,save])]));document.body.appendChild(ov);
  var first=ov.querySelector(".imgov-b");if(first)first.focus();}
 function renderCheck(){
  var box=document.getElementById("chk");if(!box)return;box.textContent="";
