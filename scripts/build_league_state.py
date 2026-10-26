@@ -416,6 +416,14 @@ def public_pre_draft(trades: list) -> list:
 
 
 # ------------------------------------------------------------- embedding
+def lottery_view(si: dict):
+    """Inputs of the lottery simulator (docs/STANDINGS_REFRESH.md): the provisional ticket table and eligibility from
+    scripts/lottery_order.py plus the draw order. Data only; the draw itself runs in the page and writes nothing. None before games."""
+    import lottery_order as lo
+    out = lo.provisional_lottery(ys.current_snapshot(os.path.join(si.get("dataDir", DATA_DIR), "standings")))
+    return out
+
+
 def standings_view(si: dict):
     """The published Yahoo standings (data/2026-27/standings/: the `current` snapshot, see docs/STANDINGS_REFRESH.md), plus the card
     order once games have been played: worst record first (best rank last), Yahoo's rank and tie order kept as printed.
@@ -557,6 +565,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
         "history": {"teams": history_teams, "tradeIds": official["activeTradeIds"],
                     "checkpoint": {k: ((si["postDraft"] or {}).get("checkpoint") or {}).get(k) for k in ("id", "date")}},
         "standings": standings_view(si),
+        "lottery": lottery_view(si),
         "season": {"snapshot": {k: snap.get(k) for k in ("snapshotId", "verifiedAt", "source", "kind")},
                    "appliedAfterSnapshot": [t["txnId"] for t in ss.pending_completed(si)],
                    "checkpoints": [{k: c.get(k) for k in ("id", "label", "date", "status")} for c in si["checkpoints"]["checkpoints"]],

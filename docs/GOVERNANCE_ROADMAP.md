@@ -35,7 +35,7 @@ for rule checks. Fairness, tank intent and penalties stay commissioner judgment 
 
 ## Backlog (filed 2026-10-20; not scheduled)
 
-**Lottery simulator on live standings** (inspired by Tankathon's draft-lottery simulator that tanking-franchise fans use).
+**Lottery simulator on live standings — BUILT (provisional, Draft tab)** (inspired by Tankathon's draft-lottery simulator that tanking-franchise fans use).
 - **What:** a page that takes the live Yahoo standings, orders teams worst to best (`standings_view` already provides this once
   games are played) into the projected pre-lottery order, shows each team's odds for each slot, and lets a manager press "Sim
   lottery" to draw one outcome, or run many sims for a probability table. Reset returns to the live order.
@@ -45,7 +45,8 @@ for rule checks. Fairness, tank intent and penalties stay commissioner judgment 
 - **Settled:** the ball allocation is the same for 2027 as for 2026-27 (owner, 2026-10-20) and is recorded as data
   (`lottery` in `config/draft_lottery_rules.json`: 12 teams, tickets 16,16,15,15,14,13,12,11,2,2,2,2 = 120, draw 1.02 then
   1.01, rank 3/4 bonus, rounds 2-3 plain inverse standings). Read it from config; never hard-code it.
-- **Open before building:** how ties in the standings are broken (H2H, per the league rules); how the "same team wins both
+- **Built:** `scripts/lottery_order.py` feeds `D.lottery`; the page draws in the browser (Sim lottery / Run 10,000 sims / Reset), writes nothing, labelled provisional. Assumptions shown on the page: same team winning both draws keeps 1.01 and 1.02 is redrawn; the rank 3/4 bonus is modelled under a labelled reading recorded in config (`lottery.rank3And4`: rank 3 takes pick 9, rank 4 pick 10, the block of ranks 8 to 3) that the commissioner has not confirmed; rounds 2-3 are not shown.
+- **Still open:** how ties in the standings are broken (H2H, per the league rules); how the "same team wins both
   picks" clause interacts with the redraw rule.
 - **Governance, not advice:** it shows odds and eligibility; it never says who should tank or trade.
 - **Reuse:** `standings_view` (live order), `lottery_eligibility.eligibility`, the card/chip styling. Client-side simulation;
