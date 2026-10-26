@@ -338,7 +338,8 @@ class TestStorageState(unittest.TestCase):
         with redirect_stdout(buf):
             rc = up.main(["--engine", "browser", "--storage-state", expired, "--out", out])
         self.assertEqual(rc, 1)
-        report = open(os.path.join(out, "report.md"), encoding="utf-8").read()
+        with open(os.path.join(out, "report.md"), encoding="utf-8") as f:
+            report = f.read()
         self.assertIn("AUTH_REQUIRED", report)
         self.assertIn("update the YAHOO_STORAGE_STATE secret", report)
         for text in (report, buf.getvalue()):
@@ -370,14 +371,16 @@ class TestStorageState(unittest.TestCase):
         self.addCleanup(shutil.rmtree, out)
         with redirect_stdout(io.StringIO()):
             self.assertEqual(up.main(["--engine", "browser", "--storage-state", "/nonexistent", "--out", out]), 1)
-        self.assertIn("no browser-state file", open(os.path.join(out, "report.md"), encoding="utf-8").read())
+        with open(os.path.join(out, "report.md"), encoding="utf-8") as f:
+            self.assertIn("no browser-state file", f.read())
 
     def test_outputs_file_gets_single_line_values_only(self):
         d = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, d)
         p = os.path.join(d, "out.txt")
         up.write_outputs(p, {"outcome": "READY", "report": "a.md\nINJECTED=1"})
-        self.assertEqual(open(p).read(), "outcome=READY\nreport=a.md\n")
+        with open(p, encoding="utf-8") as f:
+            self.assertEqual(f.read(), "outcome=READY\nreport=a.md\n")
 
 
 class TestWorkflowFile(unittest.TestCase):

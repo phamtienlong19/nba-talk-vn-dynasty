@@ -457,6 +457,41 @@ def _public(obj):
     return obj
 
 
+def available_pool(inputs: dict, index_html: str, owned: set, drafted: set, yahoo_path: str = CANONICAL_YAHOO_PATH):
+    """The selectable universe for a GIVEN ownership: the Yahoo registry plus curated Yahoo-missing prospects, minus the players in
+    `owned` (playerKeys) and the already-drafted names in `drafted` (normalized). -> (rows, curated-extras).
+
+    The page uses the CURRENT season's owners. A test (or any audit) asks a historical question -- who was available at the keeper
+    deadline, or right after the draft -- by passing that state's owners instead; the current pool must never be used for that, because
+    managers pick players up and drop them all season."""
+    yahoo = pool.load_yahoo_players(yahoo_path)
+    dyn, dyn_max = pool.load_dynasty_rankings()
+    cands = pool.build_candidates(index_html, yahoo, dyn, dyn_max, rookie_names=pool.load_rookie_names(),
+                                  draft_years=pool.load_draft_years(), drafted=drafted)
+    final = pool.sort_and_truncate(cands)
+    board_rank = {pool.normalize_name(c.name): i for i, c in enumerate(final, 1)}
+    src_by_norm = {k: c for k, c in cands.items()}
+    rows, seen_norm = [], set()
+    for p in inputs["registry"].values():
+        if p["playerKey"] in owned:
+            continue
+        key = pool.normalize_name(p["name"])
+        c = src_by_norm.get(key)
+        src = (c.src_team if c is not None and c.src == "cut" else ("R" if c is not None and c.rookie else "FA"))
+        rows.append([p["playerKey"], p["name"], p["nbaTeam"], (p["displayPosition"] or "").replace(",", "/"), p["projectedAuctionValue"],
+                     p["oRank"], board_rank.get(key), src])
+        seen_norm.add(key)
+    extras = []
+    for key, c in sorted(src_by_norm.items()):
+        if key in seen_norm or key in {pool.normalize_name(ls.player_name(inputs, k)) for k in owned}:
+            continue
+        if key in board_rank or c.name in pool.CURATED_ROOKIE_OVERLAY:
+            rows.append([f"curated:{key}", c.name, c.nba, c.pos, c.cap, None, board_rank.get(key), "R" if c.rookie else "FA"])
+            extras.append(c.name)
+    rows.sort(key=lambda r: (r[6] is None, r[6] or 0, r[5] is None, r[5] or 0, r[1]))
+    return rows, extras
+
+
 def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_YAHOO_PATH) -> dict:
     floor, ceiling = ls.cap_band(inputs)
     fr = inputs["franchises"]
@@ -506,34 +541,9 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
                        "participants": t["participants"], "receives": recv,
                        "pending": bool(t.get("pendingConfirmation")), "amends": t.get("amends"),
                        "effectiveAt": t.get("effectiveAt"), "voidReason": t.get("voidReason")})
-    # available universe: registry + curated Yahoo-missing prospects, minus kept (official state)
-    yahoo = pool.load_yahoo_players(yahoo_path)
-    dyn, dyn_max = pool.load_dynasty_rankings()
+    # available universe: registry + curated Yahoo-missing prospects, minus the players on a roster in the current season
     drafted = {pool.normalize_name(ls.player_name(inputs, c["playerKey"])) for c in official["completedPicks"].values()}
-    cands = pool.build_candidates(index_html, yahoo, dyn, dyn_max, rookie_names=pool.load_rookie_names(),
-                                  draft_years=pool.load_draft_years(), drafted=drafted)
-    final = pool.sort_and_truncate(cands)
-    board_rank = {pool.normalize_name(c.name): i for i, c in enumerate(final, 1)}
-    src_by_norm = {k: c for k, c in cands.items()}
-    owned = set(current["playerOwner"])
-    rows, seen_norm = [], set()
-    for p in inputs["registry"].values():
-        if p["playerKey"] in owned:
-            continue
-        key = pool.normalize_name(p["name"])
-        c = src_by_norm.get(key)
-        src = (c.src_team if c is not None and c.src == "cut" else ("R" if c is not None and c.rookie else "FA"))
-        rows.append([p["playerKey"], p["name"], p["nbaTeam"], (p["displayPosition"] or "").replace(",", "/"), p["projectedAuctionValue"],
-                     p["oRank"], board_rank.get(key), src])
-        seen_norm.add(key)
-    extras = []
-    for key, c in sorted(src_by_norm.items()):
-        if key in seen_norm or key in {pool.normalize_name(ls.player_name(inputs, k)) for k in owned}:
-            continue
-        if key in board_rank or c.name in pool.CURATED_ROOKIE_OVERLAY:
-            rows.append([f"curated:{key}", c.name, c.nba, c.pos, c.cap, None, board_rank.get(key), "R" if c.rookie else "FA"])
-            extras.append(c.name)
-    rows.sort(key=lambda r: (r[6] is None, r[6] or 0, r[5] is None, r[5] or 0, r[1]))
+    rows, extras = available_pool(inputs, index_html, set(current["playerOwner"]), drafted, yahoo_path)
     return {
         "season": inputs["freeze"]["season"],
         "keeperStatus": inputs["freeze"]["status"],
