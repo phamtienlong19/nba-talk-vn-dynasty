@@ -735,6 +735,8 @@ details.avail>summary::-webkit-details-marker{display:none}
 .player-row.il-row{background:#fdf9f8}
 .player-row.il-row:hover{background:#fbf3f2}
 .st-chip{display:inline-block;min-width:21px;margin-right:7px;padding:3px 5px;border-radius:5px;font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;text-align:center;vertical-align:1px;color:#fff;box-shadow:0 0 0 1.5px #fff}
+.st-chip.st-after{margin:0 0 0 7px}
+.players.has-st .pname .st-chip.st-after{position:static;transform:none;min-width:0;margin:0 0 0 7px;padding:3px 5px;font-size:8px}
 .st-chip.il{color:#a62f29;background:#fff;box-shadow:inset 0 0 0 1.5px #d9a9a4,0 0 0 1.5px #fff}
 /* Yahoo player status: probable green, questionable blue, doubtful orange, injured red, out solid red, out-for-season ink */
 .st-chip.st-p{background:#1c9a5e}
@@ -2432,16 +2434,17 @@ function renderTeamCards(){
      ilc?h("span",{class:"il-c",title:"IL salaries inside the top "+N+": counted toward the cap",text:money(ilc)+" counted"}):null]));}
    if(html){var tmp=document.createElement("div");tmp.innerHTML=html;row=tmp.firstChild;}
    else{var dm=DR.byKey[r.k]||{};row=h("div",{class:"player-row"},[h("div",{class:"pos",text:dm.pos||r.pos||""}),h("div",{class:"pname",text:r.n}),h("div",{class:"nba",text:dm.nba||r.nba||""}),h("div",{class:"cap",text:String(r.c)})]);}
-   /* one chip per row, in a left gutter: Yahoo's status; an IL player without one shows his slot (the group header says IL) */
-   var pn0=row.querySelector(".pname"),sc=statusChip(r.st)||(il?h("span",{class:"st-chip il",title:r.s==="IL+"?"Injured list plus":"Injured list",text:r.s}):null);
+   /* one chip per row, in a left gutter: every IL-slot player shows his slot (IL / IL+) with Yahoo's status in the tooltip; everyone else shows Yahoo's status */
+   var pn0=row.querySelector(".pname"),sc=il?h("span",{class:"st-chip il",title:(r.s==="IL+"?"Injured list plus":"Injured list")+(r.st?" · Yahoo status "+((STATUS[r.st]||[])[1]||r.st):""),text:r.s}):statusChip(r.st);
    if(il)row.classList.add("il-row");
    if(r.st==="NA"){row.classList.add("is-na");var nb=row.querySelector(".nba");if(nb){nb.textContent="";nb.appendChild(h("span",{class:"na-team",title:"Not active: no NBA team",text:"NO TEAM"}));}}
-   if(sc){if(il&&r.s==="IL+")sc.title+=" · IL+";pn0.insertBefore(sc,pn0.firstChild);}
+   if(sc){pn0.insertBefore(sc,pn0.firstChild);}
+   if(il&&r.st&&TKR.longTermInjured.outStatuses.indexOf(r.st)<0){var ys_=statusChip(r.st);if(ys_){ys_.classList.add("st-after");pn0.appendChild(ys_);}}  /* sitting on IL while Yahoo says Q / D / P …: say so, it is not the same as being out */
    if(r.x){row.classList.add("nc");row.title="Beyond the top "+N+" salaries: not counted toward the cap";
     if(!il&&!host.querySelector(".nc-div"))host.appendChild(h("div",{class:"nc-div",text:ilCounts?"not counted":"beyond top "+N+" · not counted"}));}
    var d=DR.byKey[r.k],own=d&&d.franchiseId===t.id,isIn=tm.inKeys.indexOf(r.k)>=0,pn=row.querySelector(".pname");
    if(isRk(r.k))row.classList.add("rookie-row");  /* every 2026 rookie keeps the purple name, wherever he plays */
-   if(!d&&isRk(r.k))pn.appendChild(h("span",{class:"in-tag rk",title:"2026 rookie (not drafted in the league draft)",text:"R"}));
+   if(!own&&!(isIn&&d)&&isRk(r.k))pn.appendChild(h("span",{class:"in-tag rk",title:d?"2026 rookie, drafted at "+d.label+" (now on another roster)":"2026 rookie (not drafted in the league draft)",text:d&&d.rookie?"R · "+d.label:"R"}));
    if(own){row.classList.add("row-in");pn.appendChild(h("span",{class:"in-tag"+(d.rookie?" rk":""),title:"Drafted at "+d.label,text:d.rookie?"R · "+d.label:d.label}));}
    else if(isIn){
     /* acquired in-season: completed trade (blue) or only in the ticked scenario (amber) */
@@ -2563,11 +2566,11 @@ function renderStandings(){
  secs[1].querySelector(".title").textContent=byStand?"STANDINGS 8–1":"TEAMS 9–16";
  cards.forEach(function(c){var old=c.querySelector(".stand-tag");if(old)old.remove();});
  if(live)D.teams.forEach(function(t){var c=byShort[t.short],s=ST_.teams[t.id];if(!c||!s)return;var row=c.querySelector(".team-meta");if(!row)return;   /* the record stays visible in the header, not inside the collapsed detail */
-  row.insertBefore(h("span",{class:"stand-tag"+(s.place>8?" low":""),title:(s.division?s.division+" division · ":"")+"Pct "+(s.pct!=null?s.pct.toFixed(3).replace(/^0/,""):"–")+" · GB "+s.gb+" · Div "+s.divRecord+" · Last week "+s.lastWeek+" · as of "+shortDate((ST_.capturedAt||"").slice(0,10))},
+  row.insertBefore(h("span",{class:"stand-tag"+(s.place>8?" low":""),title:(s.division?s.division+" division · ":"")+"Pct "+(s.pct!=null?s.pct.toFixed(3).replace(/^0/,""):"–")+" · GB "+(s.gb==null?"–":s.gb)+" · Div "+s.divRecord+" · Last week "+s.lastWeek+" · as of "+shortDate((ST_.sourceUpdatedAt||ST_.capturedAt||"").slice(0,10))},
    [h("b",{text:ordinal(s.place)}),h("span",{text:s.w+"–"+s.l+"–"+s.t})]),row.firstChild);});
  secs.forEach(function(sec){var strip=sec.querySelector(".meta-strip");if(!strip)return;var p=strip.querySelector(".stand-pill");if(p)p.remove();if(!ST_)return;
   if(!live){strip.appendChild(h("span",{class:"meta-pill stand-pill off",title:"Cards switch to standings order (worst record first) once games are played"},[h("span",{class:"pill-k",text:"STANDINGS"}),h("span",{class:"pill-v",text:"AFTER WEEK 1"})]));return;}
-  var seg=h("span",{class:"meta-pill stand-pill",title:"Yahoo standings as of "+shortDate((ST_.capturedAt||"").slice(0,10))},[h("span",{class:"pill-k",text:"ORDER"})]);
+  var seg=h("span",{class:"meta-pill stand-pill",title:"Yahoo standings as of "+shortDate((ST_.sourceUpdatedAt||ST_.capturedAt||"").slice(0,10))},[h("span",{class:"pill-k",text:"ORDER"})]);
   [["standings","STANDINGS ↓"],["team","TEAM #"]].forEach(function(o){var b=h("button",{type:"button",class:"so"+((S.order||"standings")===o[0]?" on":""),text:o[1]});
    b.addEventListener("click",function(){S.order=o[0];renderStandings();syncUrl();});seg.appendChild(b);});
   strip.appendChild(seg);});

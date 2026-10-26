@@ -35,7 +35,9 @@ PCT_TOLERANCE = 0.00051          # Yahoo prints three decimals
 # header text on the page -> field. Required: every one of these must be present exactly once; extra columns are ignored.
 HEADER_FIELDS = {"rank": "rank", "team": "team", "w-l-t": "record", "pct": "pct", "div": "divRecord", "gb": "gb",
                  "last week": "lastWeek", "waiver": "waiver", "moves": "moves"}
-DIGEST_FIELDS = ("teamId", "rank", "division", "w", "l", "t", "pct", "divRecord", "gb", "lastWeek", "waiver", "moves")
+DIGEST_FIELDS = ("teamId", "rank", "division", "w", "l", "t", "pct", "divRecord", "gb", "lastWeek")
+# waiver priority and the moves counter change all week without a standings update (every add/drop), so they are stored but are
+# not part of the identity of a standings update: the same Yahoo update read twice must be NO_CHANGE.
 MONTHS = {m: i for i, m in enumerate(("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"), 1)}
 WEEKDAYS = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 
@@ -187,7 +189,7 @@ def parse_standings_html(html: str, cfg: dict) -> dict:
                      "gb": _float_or_none(c["gb"]), "lastWeek": c["lastWeek"] if re.fullmatch(r"\d+-\d+-\d+", c["lastWeek"] or "") else None,
                      "waiver": _int_or_none(c["waiver"]), "moves": _int_or_none(c["moves"])})
     page = " ".join(" ".join(p.loose).split())
-    m = re.search(r"Last standings update:\s*((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s+\w{3}\s+\d{1,2}\s+\d{1,2}:\d{2}\s*[ap]m\s+[+-]\d{2}(?::?\d{2})?)", page, re.I)
+    m = re.search(r"Last standings update:\s*((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s+\w{3}\s+\d{1,2}\s+\d{1,2}:\d{2}\s*[ap]m\s+(?:[+-]\d{2}(?::?\d{2})?|[A-Z]{3,4}))", page)
     if m:
         text = m.group(1)
     else:                                  # the label is there but the time is in a shape we do not read: say so, do not guess
@@ -196,13 +198,16 @@ def parse_standings_html(html: str, cfg: dict) -> dict:
     return {"rows": rows, "sourceUpdatedText": text, "headers": p.headers}
 
 
+ZONES = {"UTC": 0, "GMT": 0, "EDT": -4, "EST": -5, "CDT": -5, "CST": -6, "MDT": -6, "MST": -7, "PDT": -7, "PST": -8}
+
+
 def resolve_source_time(text: str, season: str) -> str:
     """'Mon Oct 26 03:00pm +07' -> '2026-10-26T08:00:00Z'. Yahoo prints no year: it comes from the configured fantasy season
     (2026-27: Aug-Dec is 2026, Jan-Jul is 2027) and the weekday must agree with the date, so a wrong guess is rejected."""
-    m = re.fullmatch(r"(\w{3})\s+(\w{3})\s+(\d{1,2})\s+(\d{1,2}):(\d{2})\s*([ap]m)\s+([+-])(\d{2}):?(\d{2})?", (text or "").strip(), re.I)
+    m = re.fullmatch(r"(\w{3})\s+(\w{3})\s+(\d{1,2})\s+(\d{1,2}):(\d{2})\s*([ap]m)\s+(?:([+-])(\d{2}):?(\d{2})?|([A-Z]{3,4}))", (text or "").strip(), re.I)
     if not m:
         raise StandingsError("TIMESTAMP_INVALID", f"cannot read the update time {text!r}")
-    wd, mon, day, hh, mm, ampm, sign, oh, om = m.groups()
+    wd, mon, day, hh, mm, ampm, sign, oh, om, zone = m.groups()
     if mon.lower() not in MONTHS or wd.lower() not in WEEKDAYS:
         raise StandingsError("TIMESTAMP_INVALID", f"unknown weekday or month in {text!r}")
     start = int(season.split("-")[0])
@@ -211,7 +216,12 @@ def resolve_source_time(text: str, season: str) -> str:
     hour = int(hh) % 12 + (12 if ampm.lower() == "pm" else 0)
     if not (1 <= int(hh) <= 12 and int(mm) < 60):
         raise StandingsError("TIMESTAMP_INVALID", f"impossible clock time in {text!r}")
-    tz = datetime.timezone(datetime.timedelta(hours=int(oh), minutes=int(om or 0)) * (1 if sign == "+" else -1))
+    if zone:                               # the logged-out page prints the league's zone by name, e.g. 'EDT'
+        if zone.upper() not in ZONES:
+            raise StandingsError("TIMESTAMP_INVALID", f"unknown time zone {zone!r} in {text!r}")
+        tz = datetime.timezone(datetime.timedelta(hours=ZONES[zone.upper()]))
+    else:
+        tz = datetime.timezone(datetime.timedelta(hours=int(oh), minutes=int(om or 0)) * (1 if sign == "+" else -1))
     try:
         when = datetime.datetime(year, month, int(day), hour, int(mm), tzinfo=tz)
     except ValueError as e:

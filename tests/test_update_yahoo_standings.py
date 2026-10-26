@@ -389,7 +389,9 @@ class TestOutcomes(Base):
         renamed = [dict(r, yahooName="Something else") for r in rows]
         self.assertEqual(base, mk(renamed, SEEN))
         edited = copy.deepcopy(rows)
-        edited[0]["moves"] += 1
+        edited[0]["moves"] += 1                                                    # moves / waiver move all week: not part of the identity
+        self.assertEqual(base, mk(edited, SEEN))
+        edited[0]["lastWeek"] = "0-0-0"
         self.assertNotEqual(base, mk(edited, SEEN))
         self.assertNotEqual(base, mk(rows, SEEN, at="2026-10-26T08:01:00Z"))
 
@@ -508,6 +510,21 @@ class TestCommandLine(Base):
             uys.DEFAULT_OUT = old
             shutil.rmtree(out)
             shutil.rmtree(root)
+
+
+class TestWorkflowFile(unittest.TestCase):
+    def test_the_standings_workflow_is_manual_only_never_merges_and_has_no_session(self):
+        root = os.path.join(os.path.dirname(__file__), "..")
+        text = read(os.path.join(root, ".github", "workflows", "update-yahoo-standings.yml"))
+        head = text.split("jobs:")[0]
+        self.assertIn("workflow_dispatch:", head)
+        for trigger in ("schedule:", "push:", "pull_request:", "pull_request_target:"):
+            self.assertNotIn("\n  " + trigger, head, trigger)
+        for forbidden in ("YAHOO_STORAGE_STATE", "cookie", "gh pr merge", "--auto", "playwright"):
+            self.assertNotIn(forbidden.lower(), text.split("jobs:")[1].lower(), forbidden)
+        self.assertIn("--engine http", text)
+        self.assertIn("update_yahoo_standings.py", text)
+        self.assertNotIn("yahoo_rosters", text)                                        # separate from the roster workflow
 
 
 class TestPublishedOrder(Base):

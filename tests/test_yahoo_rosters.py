@@ -755,7 +755,7 @@ class TestInjuredList(unittest.TestCase):
             self.assertIn(("Nikola Jokić", "IL", "BN"), {(x["player"], x["from"], x["to"]) for x in rec["diff"]["ilMoves"]})
         with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
             html = f.read()
-        self.assertIn('sc=statusChip(r.st)||(il?h("span",{class:"st-chip il"', html)   # status (or IL) chip left of the name
+        self.assertIn('sc=il?h("span",{class:"st-chip il"', html)   # status (or IL) chip left of the name
         self.assertIn('h("div",{class:"il-head"}', html)
         self.assertIn(".player-row.il-row .pname{white-space:normal;overflow:visible", html.replace(",.player-row.il-row", "\n.player-row.il-row"))  # long names wrap
 
