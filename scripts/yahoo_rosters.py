@@ -195,72 +195,6 @@ def parse_team_page(html: str, team_id=None, league_id=None, url: str = "") -> d
     return {"teamId": tid, "teamName": name, "players": players}
 
 
-# -------------------------------------------------------------- standings
-STANDINGS_PATH = os.path.join(ss.DATA_DIR, "standings.json")
-
-
-def _cell_text(html_fragment: str) -> str:
-    return " ".join(htmllib.unescape(re.sub(r"<[^>]+>", " ", html_fragment)).split())
-
-
-def parse_standings(html: str, league_id) -> list:
-    """table#standingstable on the league home page -> [{teamId, teamName, division, rank, w, l, t, pct, divRecord,
-    gb, lastWeek, waiver, moves}]. Division header rows (East / West) set the division of the rows below them."""
-    i = html.find('id="standingstable"')
-    if i < 0:
-        raise classify_unreadable(html)
-    table = html[i:html.index("</table>", i)]
-    rows, division = [], None
-    for tr in re.findall(r"<tr[^>]*>.*?</tr>", table, re.S):
-        h4 = re.search(r"<h4[^>]*>(.*?)</h4>", tr, re.S)
-        if h4:
-            division = _cell_text(h4.group(1))
-            continue
-        m = re.search(r'data-target="/nba/(\d+)/(\d+)"', tr)
-        if not m:
-            continue
-        if str(m.group(1)) != str(league_id):
-            raise FetchError("WRONG_TEAM", f"standings row for league {m.group(1)}")
-        cells = [_cell_text(c) for c in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
-        if len(cells) < 9:
-            raise FetchError("NO_ROSTER_TABLE", f"standings row for team {m.group(2)} has {len(cells)} cells")
-        w, l, t = (int(x) for x in re.fullmatch(r"(\d+)-(\d+)-(\d+)", cells[2]).groups())
-        num = lambda s: int(s) if re.fullmatch(r"\d+", s or "") else None  # noqa: E731
-        rows.append({"teamId": int(m.group(2)), "teamName": cells[1], "division": division, "rank": num(cells[0]),
-                     "w": w, "l": l, "t": t, "pct": float(cells[3]) if re.fullmatch(r"[\d.]+", cells[3]) else None,
-                     "divRecord": cells[4], "gb": cells[5], "lastWeek": cells[6], "waiver": num(cells[7]), "moves": num(cells[8])})
-    return rows
-
-
-def validate_standings(rows, cfg) -> list:
-    problems = []
-    ids = [r["teamId"] for r in rows]
-    if sorted(ids) != sorted(cfg["teamIds"]):
-        problems.append(f"teams {sorted(ids)} are not the league's {cfg['teamIds']}")
-    if len(ids) != len(set(ids)):
-        problems.append("a team appears twice")
-    ranks = [r["rank"] for r in rows if r["rank"] is not None]
-    if len(ranks) != len(set(ranks)):
-        problems.append("duplicate ranks")
-    return problems
-
-
-def standings_doc(cfg, rows, captured_at, data_dir=ss.DATA_DIR) -> dict:
-    """The site's standings record: Yahoo's table as observed, mapped to franchises (display data, never governance)."""
-    team_map, _ = ir.load_maps(data_dir)
-    out = []
-    for r in sorted(rows, key=lambda r: r["teamId"]):
-        fid = franchise_for(cfg, team_map, r["teamId"])
-        if fid is None:
-            raise FetchError("UNMAPPED_TEAM", f"Yahoo team {r['teamId']} has no yahooTeamKey in rosters/team_map.json")
-        out.append({"franchiseId": fid, **{k: v for k, v in r.items() if k != "teamName"}})
-    started = any(r["w"] + r["l"] + r["t"] for r in rows) or any(r["rank"] for r in rows)
-    return {"season": "2026-27", "capturedAt": ss.ts(captured_at), "started": started,
-            "source": f"Yahoo Fantasy league {cfg['leagueId']} standings table (league home page), read-only GET",
-            "note": "Head-to-head category record (W-L-T) as Yahoo shows it. Display only: it orders the team cards once the season starts.",
-            "teams": out}
-
-
 # ----------------------------------------------------------- observations
 def now_utc() -> str:
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -750,32 +684,9 @@ def main(argv=None, fetcher=None, out_dir=None):
             fetcher.close()
         obs = make_observation(cfg, teams, started, args.engine, errors, requested=ids)
         return _finish(obs, cfg, not args.no_save, require_full=not args.team, out_dir=out_dir)
-    if args.cmd == "standings":
-        f = fetcher or HttpFetcher()
-        started = now_utc()
-        url = cfg["leagueUrl"].format(leagueId=cfg["leagueId"])
-        status, final_url, body = f.get(url)
-        if status != 200:
-            print(f"BLOCKED: HTTP_{status} {url}")
-            return 2
-        try:
-            rows = parse_standings(body, cfg["leagueId"])
-        except FetchError as e:
-            print("BLOCKED:", e)
-            return 2
-        problems = validate_standings(rows, cfg)
-        doc = standings_doc(cfg, rows, started)
-        os.makedirs(out_dir or OBS_DIR, exist_ok=True)
-        ss._write(os.path.join(out_dir or OBS_DIR, f"STANDINGS-{doc['capturedAt'].replace(':', '').replace('-', '')}.json"), doc)
-        print(f"standings {doc['capturedAt']} · {'started' if doc['started'] else 'not started (all 0-0-0)'}")
-        for r in sorted(rows, key=lambda r: (r["rank"] or 99, -(r["pct"] or 0))):
-            print(f"  {r['rank'] or '-':>2}  {r['teamName'][:32]:32} {r['w']}-{r['l']}-{r['t']}  {r['division']:5} GB {r['gb']}")
-        for p_ in problems:
-            print("  BLOCKING", p_)
-        if args.write and not problems:
-            ss._write(STANDINGS_PATH, doc)
-            print(f"wrote {os.path.relpath(STANDINGS_PATH, ROOT)}; run build_league_state.py embed to publish")
-        return 1 if problems else 0
+    if args.cmd == "standings":    # one code path: the standings importer (dry run unless --write / --apply)
+        import update_yahoo_standings as uys
+        return uys.main(["--engine", "http"] + (["--apply"] if args.write else []), fetcher=fetcher)
     if args.cmd == "import-json":
         raw = normalize_manual(ss._load(args.file), cfg)
         when = args.captured_at or raw["capturedAt"]

@@ -28,6 +28,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_fa_draft_pool as pool  # noqa: E402
 import league_state as ls
+import yahoo_standings as ys
 import trade_checker as tc
 import season_state as ss  # noqa: E402
 
@@ -416,12 +417,12 @@ def public_pre_draft(trades: list) -> list:
 
 # ------------------------------------------------------------- embedding
 def standings_view(si: dict):
-    """Yahoo standings as recorded in data/2026-27/standings.json (yahoo_rosters.py standings --write), plus the card
-    order once games have been played: worst record first (best rank last). None when nothing is recorded."""
-    path = os.path.join(si.get("dataDir", DATA_DIR), "standings.json")
-    if not os.path.exists(path):
+    """The published Yahoo standings (data/2026-27/standings/: the `current` snapshot, see docs/STANDINGS_REFRESH.md), plus the card
+    order once games have been played: worst record first (best rank last), Yahoo's rank and tie order kept as printed.
+    This is the provisional reverse-standings order, never a draft order. None when nothing is published."""
+    doc = ys.current_snapshot(os.path.join(si.get("dataDir", DATA_DIR), "standings"))
+    if doc is None:
         return None
-    doc = ls._load(path)
     teams = {t["franchiseId"]: {k: t.get(k) for k in ("rank", "w", "l", "t", "pct", "gb", "division", "divRecord", "lastWeek", "waiver", "moves")}
              for t in doc["teams"]}
     order = None
@@ -435,8 +436,8 @@ def standings_view(si: dict):
         for i, fid in enumerate(best, 1):
             teams[fid]["place"] = i  # 1 = best record (Yahoo's rank when it gives one)
         order = list(reversed(best))
-    return {"capturedAt": doc["capturedAt"], "source": doc["source"], "started": bool(doc.get("started")),
-            "teams": teams, "worstFirst": order}
+    return {"capturedAt": doc["capturedAt"], "sourceUpdatedAt": doc.get("sourceUpdatedAt"), "sourceUpdatedText": doc.get("sourceUpdatedText"),
+            "source": doc["source"], "started": bool(doc.get("started")), "teams": teams, "worstFirst": order}
 
 
 def rookie_keys(si: dict) -> list:
