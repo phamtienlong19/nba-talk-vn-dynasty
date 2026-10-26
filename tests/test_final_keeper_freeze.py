@@ -6,6 +6,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
+import build_fa_draft_pool as pool  # noqa: E402
 import build_league_state as bls  # noqa: E402
 import league_state as ls  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -104,24 +105,105 @@ class TestFinalKeeperDeclarations(unittest.TestCase):
         self.assertEqual(post, ls.make_snapshot(before_draft, "PRE_DRAFT_LOCK"))
 
     # ----- availability / recommendation derive from the locked baseline
+    # The page's available pool is "registry minus whoever is on a roster TODAY". Keeper cuts and keepers are facts about the keeper
+    # DEADLINE, so they are checked against the pool as it was at that deadline (the locked baseline), never against today's pool:
+    # managers pick players up and drop them all season (2026-10-26: DHA picked up Max Christie, TuLy's cut).
+    def _pool(self, owners, drafted=()):
+        rows, _ = bls.available_pool(self.i, self.html, set(owners), set(drafted))
+        return rows
+
+    def _deadline_pool(self):
+        return self._pool(self.base["playerOwner"])                       # the locked keeper baseline, before the draft
+
+    def _post_draft_pool(self):
+        official = ls.resolve(self.i, (), "OFFICIAL")                     # baseline + pre-draft trades + the 48 selections
+        drafted = {pool.normalize_name(ls.player_name(self.i, c["playerKey"])) for c in official["completedPicks"].values()}
+        return self._pool(official["playerOwner"], drafted)
+
+    def _cut_names(self):
+        """Every pre-keeper player who was not kept (normalized; the repo's alias table maps the five spelling variants)."""
+        with open(os.path.join(REPO_ROOT, "data", "2026-27", "prekeeper_rosters.json"), encoding="utf-8") as f:
+            pre = json.load(f)["assignments"]
+        with open(os.path.join(REPO_ROOT, "config", "what_if_assumptions.json"), encoding="utf-8") as f:
+            aliases = json.load(f)["aliases"]
+        norm = lambda n: aliases.get(pool.normalize_name(n), pool.normalize_name(n))  # noqa: E731  # one spelling for both lists
+        kept = {norm(ls.player_name(self.i, x["playerKey"])) for t in self.i["freeze"]["teams"] for x in t["keepers"]}
+        return {norm(a["playerName"]) for a in pre if norm(a["playerName"]) not in kept}
+
     def test_new_cuts_are_available_and_new_keepers_are_not(self):
-        keys = {r[1] for r in self.data["available"]["rows"]}
-        for cut in ("Royce O'Neale", "Collin Sexton", "Max Christie"):  # Poeltl (1.09) and Nurkić (3.02) were drafted
-            self.assertIn(cut, keys, cut)
+        """At the keeper deadline: every cut is in the pool, no keeper is."""
+        rows = self._deadline_pool()
+        names = {r[1] for r in rows}
+        for cut in ("Royce O'Neale", "Collin Sexton", "Max Christie", "Jakob Poeltl", "Jusuf Nurkić"):  # (the last two were drafted later)
+            self.assertIn(cut, names, cut)
         for kept in ("Isaiah Jackson", "Bilal Coulibaly", "Jonathan Kuminga", "Dennis Schröder", "Kelly Oubre Jr."):
-            self.assertNotIn(kept, keys, kept)
+            self.assertNotIn(kept, names, kept)
+        pool_names = {pool.normalize_name(n) for n in names}
+        cuts = self._cut_names()
+        self.assertGreaterEqual(len(cuts), 80)
+        self.assertEqual(len(cuts) + len({pool.normalize_name(ls.player_name(self.i, x["playerKey"])) for t in self.i["freeze"]["teams"] for x in t["keepers"]}), 232)  # 232 pre-keeper players = cuts + keepers
+        self.assertEqual({c for c in cuts if c not in pool_names}, set())  # all of them, not three hand-picked names
+        kept_keys = {x["playerKey"] for t in self.i["freeze"]["teams"] for x in t["keepers"]}
+        self.assertEqual(len(kept_keys), 144)
+        self.assertFalse(kept_keys & {r[0] for r in rows})                 # and none of the 144 keepers
+        keys = [r[0] for r in rows]
+        self.assertEqual(len(keys), len(set(keys)))                        # stable identity, no duplicates
+
+    def test_the_current_pool_is_exactly_whoever_no_roster_holds_today(self):
+        """Today's state: the page's pool is the registry minus today's rosters, whoever those are."""
+        import season_state as ss
+        si = ss.load_season(self.i)
+        state = ss.season_state(si)
+        current = set(state["playerOwner"])
         avail_keys = [r[0] for r in self.data["available"]["rows"]]
-        self.assertEqual(len(avail_keys), len(set(avail_keys)))  # stable identity, no duplicates
+        self.assertEqual(len(avail_keys), len(set(avail_keys)))
+        self.assertFalse(current & set(avail_keys))                        # nobody on a roster today is available
+        registry = {p["playerKey"] for p in self.i["registry"].values()}
+        self.assertEqual({k for k in avail_keys if not k.startswith("curated:")}, registry - current)
         owned = set(self.base["playerOwner"])
+        self.assertTrue((owned & set(avail_keys)) <= (owned - current))   # a keeper-freeze keeper in the pool was dropped since
+        official = ls.resolve(self.i, (), "OFFICIAL")                      # the page data really is available_pool(today's owners)
+        drafted = {pool.normalize_name(ls.player_name(self.i, c["playerKey"])) for c in official["completedPicks"].values()}
+        self.assertEqual(self.data["available"]["rows"], self._pool(current, drafted))
+
+    def test_a_keeper_cut_picked_up_since_is_unavailable_today_but_was_available_at_the_deadline(self):
+        """Regression: Max Christie (TuLy's cut) was picked up by DHA on 2026-10-26. He is rightly absent from today's pool and the
+        keeper-deadline pool still lists him: the two states are different questions."""
+        import season_state as ss
+        christie = next(p["playerKey"] for p in self.i["registry"].values() if p["name"] == "Max Christie")
+        self.assertNotIn(christie, self.base["playerOwner"])               # a cut: nobody held him at the keeper deadline
+        self.assertIn(christie, {r[0] for r in self._deadline_pool()})
+        picked_up = {**self.base["playerOwner"], christie: DHA}            # a manager picks him up in-season
+        self.assertNotIn(christie, {r[0] for r in self._pool(picked_up)})  # ... today's pool correctly drops him
+        self.assertIn(christie, {r[0] for r in self._deadline_pool()})     # ... and the deadline pool is unaffected by it
+        # the same for every cut that a roster holds RIGHT NOW (data-derived: whichever they are today)
+        current = set(ss.season_state(ss.load_season(self.i))["playerOwner"])
+        by_name = {pool.normalize_name(p["name"]): p["playerKey"] for p in self.i["registry"].values()}
+        deadline_keys = {r[0] for r in self._deadline_pool()}
+        picked = [by_name[c] for c in self._cut_names() if c in by_name and by_name[c] in current]
+        for k in picked:
+            self.assertIn(k, deadline_keys, ls.player_name(self.i, k))
+            self.assertNotIn(k, {r[0] for r in self.data["available"]["rows"]}, ls.player_name(self.i, k))
+
+    def test_a_keeper_dropped_since_is_available_today_but_was_not_at_the_deadline(self):
+        """The mirror image: a keeper a manager has since dropped is in today's pool, and still was never available at the deadline."""
         import season_state as ss
         current = set(ss.season_state(ss.load_season(self.i))["playerOwner"])
-        self.assertFalse(current & set(avail_keys))                       # nobody on a roster today is available
-        self.assertTrue((owned & set(avail_keys)) <= (owned - current))  # a keeper-freeze keeper in the pool was dropped since
+        kept = {x["playerKey"] for t in self.i["freeze"]["teams"] for x in t["keepers"]}
+        deadline_keys = {r[0] for r in self._deadline_pool()}
+        today_keys = {r[0] for r in self.data["available"]["rows"]}
+        dropped = kept - current
+        for k in dropped:
+            self.assertIn(k, today_keys, ls.player_name(self.i, k))
+            self.assertNotIn(k, deadline_keys, ls.player_name(self.i, k))
+        synthetic = next(iter(kept))                                       # and the same shape when none has been dropped yet
+        self.assertIn(synthetic, {r[0] for r in self._pool(set(self.base["playerOwner"]) - {synthetic})})
+        self.assertNotIn(synthetic, deadline_keys)
 
     def test_nurkic_and_poeltl_cut_sources_and_cap_first_order(self):
-        rows = {r[1]: r for r in self.data["available"]["rows"]}
-        self.assertNotIn("Jusuf Nurkić", rows)  # DHA's cut was selected at 3.02: no longer available
-        self.assertNotIn("Jakob Poeltl", rows)  # DHA's cut was selected at 1.09: no longer available
+        rows = {r[1]: r for r in self._post_draft_pool()}
+        self.assertNotIn("Jusuf Nurkić", rows)  # DHA's cut was selected at 3.02: no longer available once the draft is done
+        self.assertNotIn("Jakob Poeltl", rows)  # DHA's cut was selected at 1.09: no longer available once the draft is done
         on_board = sorted((r for r in self.data["available"]["rows"] if r[6]), key=lambda r: r[6])
         caps = [r[4] for r in on_board]
         self.assertEqual(caps, sorted(caps, reverse=True))  # recommendation board still CAP-first
