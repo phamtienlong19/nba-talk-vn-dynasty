@@ -1,0 +1,25 @@
+{
+  "note": "Yahoo standings snapshots. `current` is the one the site shows; every earlier snapshot is kept.",
+  "current": "snapshots/ST-20261026T080000Z-775801c1.json",
+  "history": [
+    {
+      "snapshotId": "ST-20261020T032209Z-7c49a8e0",
+      "file": "snapshots/ST-20261020T032209Z-7c49a8e0.json",
+      "sourceUpdatedAt": null,
+      "capturedAt": "2026-10-20T03:22:09Z",
+      "digest": "7c49a8e0544bc16a61f8dab18ea073c402e7f5e279ab9a1dc8699ea07648c52f",
+      "action": "MIGRATE",
+      "previous": null,
+      "reason": "pre-season standings.json moved into the snapshot history"
+    },
+    {
+      "snapshotId": "ST-20261026T080000Z-775801c1",
+      "file": "snapshots/ST-20261026T080000Z-775801c1.json",
+      "sourceUpdatedAt": "2026-10-26T08:00:00Z",
+      "capturedAt": "2026-10-26T14:06:52Z",
+      "digest": "775801c13f518cbc0bb4e24d1133640e2266771ef62db5ffa37375f5cf5d4c78",
+      "action": "IMPORT",
+      "previous": "snapshots/ST-20261020T032209Z-7c49a8e0.json"
+    }
+  ]
+}

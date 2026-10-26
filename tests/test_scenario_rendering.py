@@ -318,7 +318,7 @@ class TestRenderedCards(unittest.TestCase):
             mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, short), re.S).group(1))
             self.assertRegex(mv, r"ADDED\s.*" + re.escape(a["n"]), a["n"])
             if status.get(a["k"]) == "O" and self.cur["slots"].get(a["k"]) in ss.SLOTS_IL:
-                self.assertIn('<span class="st-chip st-out" title="Out (Yahoo)" aria-label="Out">OUT</span>' + a["n"], r)  # chip left of the name
+                self.assertIn('<span class="st-chip il" title="Injured list · Yahoo status Out">IL</span>' + a["n"], r)  # every IL player wears the IL chip
         for fid, v in view.items():                                          # drops are listed too
             for dpl in v["dropped"]:
                 mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, self.si["shorts"][fid]), re.S).group(1))
@@ -373,10 +373,11 @@ class TestRenderedCards(unittest.TestCase):
         for fid, rows in snap["teams"].items():                              # whatever the current snapshot says, card by card
             card = _card(self.official, self.si["shorts"][fid])
             chips = {html_lib.unescape(n).strip(): c for c, n in
-                     re.findall(r'<span class="st-chip st-[a-z]+"[^>]*>([^<]*)</span>([^<]*)', card)}
+                     re.findall(r'<span class="st-chip (?:st-[a-z]+|il)"[^>]*>([^<]*)</span>([^<]*)', card)}
             for r in rows:
                 if r.get("status") in want:
-                    self.assertEqual(chips.get(r["name"]), want[r["status"]], (r["name"], r["status"]))
+                    exp = r["slot"] if r.get("slot") in ss.SLOTS_IL else want[r["status"]]      # IL slot players always show IL / IL+
+                    self.assertEqual(chips.get(r["name"]), exp, (r["name"], r["status"]))
                     seen.add(r["status"])
         self.assertTrue(seen, "the snapshot carries no statuses to check")
         self.assertIn('class="players has-st"', _card(self.official, "LC"))   # names aligned past the status gutter
@@ -416,15 +417,57 @@ class TestRenderedCards(unittest.TestCase):
             self.assertRegex(css, r"%s\{[^}]*background:#fff;border:1px solid" % re.escape(tag), tag)
         self.assertRegex(css, r"\.player-row\.nc \.cap\{[^}]*border:1px dashed")                         # not-counted salary: dashed ghost outline
 
+    def test_il_slot_always_shows_il_and_a_non_out_status_is_added_beside_the_name(self):
+        """Sitting in an IL slot is one fact, Yahoo's status another: Out/INJ/OFS is the normal case (IL chip only); Q, D, P … get their own chip."""
+        snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
+        out = set(ss._load(ss.RULES_PATH)["longTermInjured"]["outStatuses"])
+        for fid, rows in snap["teams"].items():
+            card = _card(self.official, self.si["shorts"][fid])
+            for r in rows:
+                if r.get("slot") not in ss.SLOTS_IL:
+                    continue
+                m = re.search(r'<div class="player-row[^"]*il-row[^"]*"[^>]*>.*?<div class="nba">', card, re.S)
+                row = next(x for x in re.findall(r'<div class="player-row[^"]*il-row.*?<div class="nba">', card, re.S) if html_lib.unescape(r["name"]) in html_lib.unescape(x))
+                self.assertIn('<span class="st-chip il"', row, r["name"])
+                self.assertEqual('st-after' in row, bool(r.get("status")) and r["status"] not in out, (r["name"], r.get("status")))
+
+    def test_a_rookie_on_another_roster_keeps_the_rookie_tag(self):
+        """A drafted rookie who is no longer with the drafting team (traded or picked up) still wears the purple name AND the R tag."""
+        data = json.loads(re.search(r'id="league-data">(.*?)</script>', self.official, re.S).group(1).replace("<\\/", "</"))
+        dr = {c["playerKey"]: c for c in data["draft"]["completed"] if c.get("rookie")}
+        for fid, t in self.si["shorts"].items():
+            card = _card(self.official, t)
+            for k, c in dr.items():
+                m = re.search(r'<div class="player-row[^"]*"[^>]*data-k="%s".*?<div class="cap">' % re.escape(k), card, re.S)
+                if m and c["franchiseId"] != fid:
+                    self.assertIn("rookie-row", m.group(0), k)
+                    self.assertEqual(len(re.findall(r'class="in-tag[^"]*"', m.group(0))), 1, k)     # exactly one pick tag, never two
+                    self.assertIn(c["label"], re.sub(r"<[^>]+>", "", m.group(0)), k)
+
     def test_preseason_standings_pill_and_team_order(self):
-        a = self.official.split('id="rosters-a"')[1].split('id="rosters-b"')[0]
+        """Derived from the page's own data with the standings switched to 'not started', so it holds whatever Yahoo has published."""
+        import tempfile, shutil
+        with open(INDEX, encoding="utf-8") as f:
+            html = f.read()
+        m = re.search(r'(id="league-data">)(.*?)(</script>)', html, re.S)
+        data = json.loads(m.group(2).replace("<\\/", "</"))
+        data["standings"] = dict(data["standings"], started=False, worstFirst=None)
+        d = tempfile.mkdtemp()
+        try:
+            path = os.path.join(d, "index.html")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(html[:m.start(2)] + json.dumps(data, ensure_ascii=False).replace("</", "<\\/") + html[m.end(2):])
+            dom = _dump("file://" + path)
+        finally:
+            shutil.rmtree(d)
+        a = dom.split('id="rosters-a"')[1].split('id="rosters-b"')[0]
         txt = lambda x: " ".join(re.sub(r"<[^>]+>", "", x).split())  # noqa: E731  (digits are wrapped in spans)
         self.assertTrue(txt(a).startswith(">TEAMS 1–8"))
         self.assertIn("meta-pill stand-pill off", a)
         self.assertRegex(txt(a), r"STANDINGS\s*AFTER WEEK 1")
         shorts = re.findall(r'<span class="identity-tag">([^<]*)</span>', a)
         self.assertEqual(shorts[:3], ["Bsy", "CrazyCat", "Melo"])          # team # order until games are played
-        self.assertNotIn('<span class="stand-tag', self.official)          # no rank tags before games are played
+        self.assertNotIn('<span class="stand-tag', dom)                     # no rank tags before games are played
 
     def test_started_season_sorts_worst_record_first(self):
         import tempfile, shutil

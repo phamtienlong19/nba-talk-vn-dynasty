@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-26T13:29:47Z
+Generated: 2026-10-26T14:39:42Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: fix/keeper-freeze-availability-test
-Commit: e63b2a5
+Branch: feat/standings-refresh
+Commit: aea67b9
 Base: main
 Working tree: dirty
 
@@ -27,7 +27,20 @@ Fingerprint: FRESH
 
 ## Changes
 ```
-
+ config/yahoo_league.json                           |   4 +-
+ data/2026-27/standings/index.json                  |  25 +
+ .../snapshots/ST-20261020T032209Z-49219eef.json}   |  94 ++--
+ .../snapshots/ST-20261026T080000Z-3dab0aad.json    | 271 ++++++++++
+ index.html                                         |   2 +-
+ scripts/build_league_state.py                      |  15 +-
+ scripts/update_yahoo_standings.py                  | 213 ++++++++
+ scripts/yahoo_rosters.py                           |  95 +---
+ scripts/yahoo_standings.py                         | 435 ++++++++++++++++
+ .../NBA_Talk_Dynasty_Standings_2026-10-26.json     | 252 +++++++++
+ .../yahoo_standings_2026-10-26_real_sanitized.html | 416 +++++++++++++++
+ tests/test_update_yahoo_standings.py               | 571 +++++++++++++++++++++
+ tests/test_yahoo_rosters.py                        |  88 +---
+ 13 files changed, 2259 insertions(+), 222 deletions(-)
 ```
 
 ## Validation
@@ -42,7 +55,19 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
-(none)
+- config/yahoo_league.json
+- data/2026-27/standings/index.json
+- data/2026-27/standings/snapshots/ST-20261020T032209Z-49219eef.json
+- data/2026-27/standings/snapshots/ST-20261026T080000Z-3dab0aad.json
+- index.html
+- scripts/build_league_state.py
+- scripts/update_yahoo_standings.py
+- scripts/yahoo_rosters.py
+- scripts/yahoo_standings.py
+- tests/fixtures/yahoo/NBA_Talk_Dynasty_Standings_2026-10-26.json
+- tests/fixtures/yahoo/yahoo_standings_2026-10-26_real_sanitized.html
+- tests/test_update_yahoo_standings.py
+- tests/test_yahoo_rosters.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
@@ -55,4 +80,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `fix/keeper-freeze-availability-test` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/standings-refresh` if not already done, then request human/ChatGPT review of this packet.

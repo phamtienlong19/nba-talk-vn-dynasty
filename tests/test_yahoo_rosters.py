@@ -755,7 +755,7 @@ class TestInjuredList(unittest.TestCase):
             self.assertIn(("Nikola Jokić", "IL", "BN"), {(x["player"], x["from"], x["to"]) for x in rec["diff"]["ilMoves"]})
         with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
             html = f.read()
-        self.assertIn('sc=statusChip(r.st)||(il?h("span",{class:"st-chip il"', html)   # status (or IL) chip left of the name
+        self.assertIn('sc=il?h("span",{class:"st-chip il"', html)   # status (or IL) chip left of the name
         self.assertIn('h("div",{class:"il-head"}', html)
         self.assertIn(".player-row.il-row .pname{white-space:normal;overflow:visible", html.replace(",.player-row.il-row", "\n.player-row.il-row"))  # long names wrap
 
@@ -777,90 +777,8 @@ class TestInjuredList(unittest.TestCase):
             self.assertEqual(ls.team_cap(si, cur, QUAN), sum(sorted((ls.player_cap(si, k) for k in quan), reverse=True)[:9]))
 
 
+# (The Yahoo standings importer has its own tests: tests/test_update_yahoo_standings.py.)
+
+
 if __name__ == "__main__":
     unittest.main()
-
-
-class TestStandings(unittest.TestCase):
-    """Yahoo standings: read-only, display only. Once games are played the team pages run worst record first."""
-    cfg = yr.load_config()
-
-    def fixture_rows(self):
-        with open(os.path.join(FIX, "standings_2026-10-19.html"), encoding="utf-8") as f:
-            return yr.parse_standings(f.read(), "85092")
-
-    def started_doc(self, root, ranks=True):
-        doc = yr.standings_doc(self.cfg, self.fixture_rows(), "2026-11-02T12:00:00Z")
-        for i, t in enumerate(doc["teams"]):           # made-up records for the test only
-            t.update(w=100 + i * 5, l=150 - i * 5, t=2, pct=round((100 + i * 5 + 1) / 252, 3), rank=(16 - i) if ranks else None)
-        doc["started"] = True
-        os.makedirs(root, exist_ok=True)
-        ss._write(os.path.join(root, "standings.json"), doc)
-        return doc
-
-    def test_parses_the_real_standings_table(self):
-        rows = self.fixture_rows()
-        self.assertEqual(len(rows), 16)
-        self.assertEqual(yr.validate_standings(rows, self.cfg), [])
-        by = {r["teamId"]: r for r in rows}
-        self.assertEqual((by[3]["division"], by[16]["division"]), ("East", "West"))
-        self.assertEqual((by[16]["w"], by[16]["l"], by[16]["t"], by[16]["rank"]), (0, 0, 0, None))   # pre-season
-        self.assertEqual(sum(r["division"] == "East" for r in rows), 8)
-        doc = yr.standings_doc(self.cfg, rows, "2026-10-19T15:34:06Z")
-        self.assertFalse(doc["started"])
-        self.assertEqual({t["franchiseId"] for t in doc["teams"]}, set(ls.load_inputs()["franchises"]))
-
-    def test_invalid_standings_are_reported(self):
-        rows = self.fixture_rows()
-        self.assertTrue(yr.validate_standings(rows[:-1], self.cfg))
-        dup = [dict(r, rank=1) for r in rows]
-        self.assertIn("duplicate ranks", yr.validate_standings(dup, self.cfg))
-        with self.assertRaises(yr.FetchError):
-            yr.parse_standings(LOGIN_PAGE, "85092")
-
-    def test_worst_record_first_once_started(self):
-        import build_league_state as bls
-        root = tempfile.mkdtemp()
-        try:
-            doc = self.started_doc(root)
-            v = bls.standings_view({"dataDir": root})
-            rank = {t["franchiseId"]: t["rank"] for t in doc["teams"]}
-            self.assertEqual([rank[f] for f in v["worstFirst"]], list(range(16, 0, -1)))
-            self.assertEqual({v["teams"][f]["place"] for f in v["teams"]}, set(range(1, 17)))
-            self.started_doc(root, ranks=False)                      # no Yahoo rank: fall back to win %
-            v = bls.standings_view({"dataDir": root})
-            pct = {f: v["teams"][f]["pct"] for f in v["teams"]}
-            self.assertEqual([pct[f] for f in v["worstFirst"]], sorted(pct.values()))
-        finally:
-            shutil.rmtree(root)
-
-    def test_preseason_page_keeps_team_order(self):
-        import build_league_state as bls
-        with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
-            html = f.read()
-        data = json.loads(re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1).replace("<\\/", "</"))
-        self.assertEqual((data["standings"]["started"], data["standings"]["worstFirst"]), (False, None))
-        self.assertEqual(data["standings"], bls.standings_view(ss.load_season(ls.load_inputs())))
-        self.assertIn("function renderStandings()", html)
-        self.assertIn('"STANDINGS 16–9":"TEAMS 1–8"', html)
-
-    def test_cli_writes_only_with_write(self):
-        out_dir, root = tempfile.mkdtemp(), tempfile.mkdtemp()
-        with open(os.path.join(FIX, "standings_2026-10-19.html"), encoding="utf-8") as f:
-            page_html = f.read()
-        fake = FakeFetcher()
-        fake.get = lambda url: (200, url, page_html)
-        old = yr.STANDINGS_PATH
-        yr.STANDINGS_PATH = os.path.join(root, "standings.json")
-        try:
-            with redirect_stdout(io.StringIO()) as out:
-                self.assertEqual(yr.main(["standings"], fetcher=fake, out_dir=out_dir), 0)
-            self.assertFalse(os.path.exists(yr.STANDINGS_PATH))
-            self.assertIn("not started", out.getvalue())
-            with redirect_stdout(io.StringIO()):
-                yr.main(["standings", "--write"], fetcher=fake, out_dir=out_dir)
-            self.assertFalse(ss._load(yr.STANDINGS_PATH)["started"])
-        finally:
-            yr.STANDINGS_PATH = old
-            shutil.rmtree(out_dir)
-            shutil.rmtree(root)

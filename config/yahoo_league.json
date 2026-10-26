@@ -22,5 +22,7 @@
   ],
   "pageUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/{teamId}",
   "requestDelaySeconds": 1.5,
-  "leagueUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/"
+  "leagueUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/",
+  "season": "2026-27",
+  "standingsUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}?lhst=stand"
 }
