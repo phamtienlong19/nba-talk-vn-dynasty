@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-26T14:44:36Z
+Generated: 2026-10-26T14:59:21Z
 
 ## Task
 Active Task
@@ -10,15 +10,15 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/lottery-sim
-Commit: 8cd591c
+Commit: 66f35d6
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: none
-CI: no runs found for this branch
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/91 (OPEN)
+CI: Claude Code Review: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -28,15 +28,16 @@ Fingerprint: FRESH
 ## Changes
 ```
  .github/workflows/update-yahoo-standings.yml       |  82 +++
- ai_exchange/REVIEW_PACKET.md                       |  37 +-
+ ai_exchange/REVIEW_PACKET.md                       |  53 +-
  config/yahoo_league.json                           |   4 +-
  data/2026-27/standings/index.json                  |  25 +
  .../snapshots/ST-20261020T032209Z-7c49a8e0.json}   |  94 ++--
  .../snapshots/ST-20261026T080000Z-775801c1.json    | 271 ++++++++++
+ docs/GOVERNANCE_ROADMAP.md                         |   5 +-
  docs/ROSTER_REFRESH.md                             |  11 +-
  docs/STANDINGS_REFRESH.md                          |  75 +++
- index.html                                         |  17 +-
- scripts/build_league_state.py                      |  15 +-
+ index.html                                         |  65 ++-
+ scripts/build_league_state.py                      |  24 +-
  scripts/lottery_order.py                           |  56 ++
  scripts/update_yahoo_standings.py                  | 213 ++++++++
  scripts/yahoo_rosters.py                           |  95 +---
@@ -45,10 +46,11 @@ Fingerprint: FRESH
  tests/fixtures/yahoo/README.md                     |   7 +
  .../yahoo_standings_2026-10-26_real_sanitized.html | 416 +++++++++++++++
  tests/test_lottery_order.py                        |  60 +++
+ tests/test_lottery_sim.py                          |  60 +++
  tests/test_scenario_rendering.py                   |  53 +-
  tests/test_update_yahoo_standings.py               | 588 +++++++++++++++++++++
  tests/test_yahoo_rosters.py                        |  90 +---
- 21 files changed, 2657 insertions(+), 249 deletions(-)
+ 23 files changed, 2792 insertions(+), 252 deletions(-)
 ```
 
 ## Validation
@@ -69,6 +71,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - data/2026-27/standings/index.json
 - data/2026-27/standings/snapshots/ST-20261020T032209Z-7c49a8e0.json
 - data/2026-27/standings/snapshots/ST-20261026T080000Z-775801c1.json
+- docs/GOVERNANCE_ROADMAP.md
 - docs/ROSTER_REFRESH.md
 - docs/STANDINGS_REFRESH.md
 - index.html
@@ -81,6 +84,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - tests/fixtures/yahoo/README.md
 - tests/fixtures/yahoo/yahoo_standings_2026-10-26_real_sanitized.html
 - tests/test_lottery_order.py
+- tests/test_lottery_sim.py
 - tests/test_scenario_rendering.py
 - tests/test_update_yahoo_standings.py
 - tests/test_yahoo_rosters.py
