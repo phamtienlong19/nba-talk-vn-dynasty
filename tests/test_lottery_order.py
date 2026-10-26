@@ -32,6 +32,14 @@ class TestLotteryOrder(unittest.TestCase):
         for r in range(5, 17):
             self.assertEqual(by[r]["tickets"], CFG["lottery"]["ticketsByRank"][str(r)])
 
+    def test_the_rank_3_4_bonus_block_comes_from_config(self):
+        out = lo.provisional_lottery(snap(), CFG)
+        self.assertEqual(out["bonus"]["ranks"], [3, 4])
+        self.assertEqual(out["bonus"]["block"], [9, 14])                                   # ranks 8..3 of 16 sit at picks 9..14
+        self.assertEqual(out["bonus"]["firstPick"], 9)
+        self.assertIn("not yet confirmed", out["bonus"]["interpretation"])
+        self.assertEqual({t["rank"]: t["naturalPick"] for t in out["teams"]}[16], 1)
+
     def test_everything_is_labelled_provisional_and_no_order_is_assigned(self):
         out = lo.provisional_lottery(snap(), CFG)
         self.assertIn("PROVISIONAL", out["label"])
