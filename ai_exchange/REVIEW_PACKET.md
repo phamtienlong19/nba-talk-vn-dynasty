@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-26T14:39:42Z
+Generated: 2026-10-26T14:44:36Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/standings-refresh
-Commit: aea67b9
+Branch: feat/lottery-sim
+Commit: 8cd591c
 Base: main
 Working tree: dirty
 
@@ -27,20 +27,28 @@ Fingerprint: FRESH
 
 ## Changes
 ```
+ .github/workflows/update-yahoo-standings.yml       |  82 +++
+ ai_exchange/REVIEW_PACKET.md                       |  37 +-
  config/yahoo_league.json                           |   4 +-
  data/2026-27/standings/index.json                  |  25 +
- .../snapshots/ST-20261020T032209Z-49219eef.json}   |  94 ++--
- .../snapshots/ST-20261026T080000Z-3dab0aad.json    | 271 ++++++++++
- index.html                                         |   2 +-
+ .../snapshots/ST-20261020T032209Z-7c49a8e0.json}   |  94 ++--
+ .../snapshots/ST-20261026T080000Z-775801c1.json    | 271 ++++++++++
+ docs/ROSTER_REFRESH.md                             |  11 +-
+ docs/STANDINGS_REFRESH.md                          |  75 +++
+ index.html                                         |  17 +-
  scripts/build_league_state.py                      |  15 +-
+ scripts/lottery_order.py                           |  56 ++
  scripts/update_yahoo_standings.py                  | 213 ++++++++
  scripts/yahoo_rosters.py                           |  95 +---
- scripts/yahoo_standings.py                         | 435 ++++++++++++++++
+ scripts/yahoo_standings.py                         | 445 ++++++++++++++++
  .../NBA_Talk_Dynasty_Standings_2026-10-26.json     | 252 +++++++++
+ tests/fixtures/yahoo/README.md                     |   7 +
  .../yahoo_standings_2026-10-26_real_sanitized.html | 416 +++++++++++++++
- tests/test_update_yahoo_standings.py               | 571 +++++++++++++++++++++
- tests/test_yahoo_rosters.py                        |  88 +---
- 13 files changed, 2259 insertions(+), 222 deletions(-)
+ tests/test_lottery_order.py                        |  60 +++
+ tests/test_scenario_rendering.py                   |  53 +-
+ tests/test_update_yahoo_standings.py               | 588 +++++++++++++++++++++
+ tests/test_yahoo_rosters.py                        |  90 +---
+ 21 files changed, 2657 insertions(+), 249 deletions(-)
 ```
 
 ## Validation
@@ -55,17 +63,25 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
+- .github/workflows/update-yahoo-standings.yml
+- ai_exchange/REVIEW_PACKET.md
 - config/yahoo_league.json
 - data/2026-27/standings/index.json
-- data/2026-27/standings/snapshots/ST-20261020T032209Z-49219eef.json
-- data/2026-27/standings/snapshots/ST-20261026T080000Z-3dab0aad.json
+- data/2026-27/standings/snapshots/ST-20261020T032209Z-7c49a8e0.json
+- data/2026-27/standings/snapshots/ST-20261026T080000Z-775801c1.json
+- docs/ROSTER_REFRESH.md
+- docs/STANDINGS_REFRESH.md
 - index.html
 - scripts/build_league_state.py
+- scripts/lottery_order.py
 - scripts/update_yahoo_standings.py
 - scripts/yahoo_rosters.py
 - scripts/yahoo_standings.py
 - tests/fixtures/yahoo/NBA_Talk_Dynasty_Standings_2026-10-26.json
+- tests/fixtures/yahoo/README.md
 - tests/fixtures/yahoo/yahoo_standings_2026-10-26_real_sanitized.html
+- tests/test_lottery_order.py
+- tests/test_scenario_rendering.py
 - tests/test_update_yahoo_standings.py
 - tests/test_yahoo_rosters.py
 
@@ -80,4 +96,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/standings-refresh` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/lottery-sim` if not already done, then request human/ChatGPT review of this packet.
