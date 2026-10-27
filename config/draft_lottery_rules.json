@@ -74,6 +74,17 @@
     "drawNote": "Pick 1.02 is resolved first, then 1.01. The prior winner remains eligible for 1.01; if the same team wins both, it keeps its choice of pick and the other pick is redrawn.",
     "rank3And4Bonus": "Regular-season ranks 3 and 4 do not enter the lottery. After 1.01 and 1.02 resolve, rank 3 takes the earliest remaining slot in the rank 3-8 round-1 block, then rank 4 takes the next earliest.",
     "rounds2And3": "plain inverse regular-season standings: no lottery, no rank 3/4 bonus",
-    "ineligibleResult": "A draw that lands on a team ineligible under 'rules' is redrawn (owner, 2026-10-20)."
+    "ineligibleResult": "A draw that lands on a team ineligible under 'rules' is redrawn (owner, 2026-10-20).",
+    "rank3And4": {
+      "ranks": [
+        3,
+        4
+      ],
+      "blockRanks": [
+        8,
+        3
+      ],
+      "interpretation": "Reading used by the simulator (not yet confirmed by the commissioner): the 'rank 3-8 round-1 block' is the run of round-1 slots a 16-team reverse order gives ranks 8 down to 3, i.e. picks 9-14. After 1.01 and 1.02 resolve, rank 3 takes the first slot of that block (pick 9) and rank 4 the next (pick 10); the other teams keep reverse-standings order around them."
+    }
   }
 }

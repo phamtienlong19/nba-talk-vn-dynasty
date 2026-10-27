@@ -7,8 +7,8 @@ Four things stay separate: (A) Yahoo's official standings, (B) the provisional r
 lottery inputs (tickets per config/draft_lottery_rules.json, eligibility per scripts/lottery_eligibility.py), and (D) the
 commissioner-adjusted final draft order, which is NOT computed here. Everything returned is labelled provisional.
 
-Deliberately omitted because the rules leave them undecided (docs/STANDINGS_REFRESH.md, 'Open league-rule questions'): how the
-rank 3/4 reward lands in each round, the effect of under-cap penalties on position, any head-to-head tie-break beyond Yahoo's
+The rank 3/4 bonus follows the labelled interpretation recorded in config (lottery.rank3And4). Still omitted because the rules leave them
+undecided (docs/STANDINGS_REFRESH.md, 'Open league-rule questions'): how the reward lands in rounds 2-3, the effect of under-cap penalties on position, any head-to-head tie-break beyond Yahoo's
 printed rank, and the 2027 lottery format. A team's ticket count is a pure function of its Yahoo rank and is only as final as
 that rank. Standard library only.
 """
@@ -41,7 +41,13 @@ def provisional_lottery(snapshot: dict | None, cfg: dict | None = None, draft: i
         teams.append({"franchiseId": t["franchiseId"], "rank": t["rank"], "inLottery": n is not None, "tickets": n,
                       "shareOf%d" % total: None if n is None else round(n / total, 4),
                       "canPick1": e.get("canPick1", True), "canPickTop2": e.get("canPickTop2", True), "restrictions": e.get("reasons", [])})
-    return {"label": LABEL, "draft": draft, "standingsSourceUpdatedAt": snapshot["sourceUpdatedAt"], "totalCombinations": total,
+    b = lot["rank3And4"]
+    n = len(snapshot["teams"])
+    block = [n + 1 - b["blockRanks"][0], n + 1 - b["blockRanks"][1]]                    # ranks 8..3 of 16 -> picks 9..14
+    bonus = {"ranks": b["ranks"], "firstPick": block[0], "block": block, "interpretation": b["interpretation"]}
+    for t in teams:
+        t["naturalPick"] = n + 1 - t["rank"]
+    return {"label": LABEL, "bonus": bonus, "draft": draft, "standingsSourceUpdatedAt": snapshot["sourceUpdatedAt"], "totalCombinations": total,
             "reverseOrder": [t["franchiseId"] for t in teams], "teams": teams,
             "lotteryPicks": lot["drawOrder"], "rounds2And3": lot["rounds2And3"], "rank3And4": lot["rank3And4Bonus"]}
 
