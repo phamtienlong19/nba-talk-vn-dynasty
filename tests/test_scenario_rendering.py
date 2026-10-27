@@ -108,10 +108,19 @@ def _chrome():
     return None
 
 
+def _chrome_run(args, timeout):
+    """Run headless Chrome; a cold CI runner occasionally stalls it past the limit, so retry once before failing."""
+    for attempt in (1, 2):
+        try:
+            return subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox"] + args,
+                                  capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            if attempt == 2:
+                raise
+
+
 def _dump(url):
-    out = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--dump-dom", url],
-                         capture_output=True, text=True, timeout=90)
-    return out.stdout
+    return _chrome_run(["--dump-dom", url], 90).stdout
 
 
 def _snapshot_label():
@@ -581,8 +590,7 @@ class TestRenderedCards(unittest.TestCase):
             path = os.path.join(d, "index.html")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(html.replace("</body>", script + "</body>", 1))
-            out = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--virtual-time-budget=6000", "--dump-dom",
-                                  "file://" + path + hash_], capture_output=True, text=True, timeout=120).stdout
+            out = _chrome_run(["--virtual-time-budget=6000", "--dump-dom", "file://" + path + hash_], 120).stdout
         finally:
             shutil.rmtree(d)
         m = re.search(r'<pre id="drive-out">(.*?)</pre>', out, re.S)
