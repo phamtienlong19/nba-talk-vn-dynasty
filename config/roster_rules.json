@@ -8,6 +8,14 @@
       "INJ",
       "OFS"
     ],
+    "softStatuses": [
+      "P",
+      "Q",
+      "D",
+      "GTD",
+      "DTD"
+    ],
+    "softNote": "Yahoo statuses that mean a player may play. A player in an IL slot with one of these (or with no status) is being held there, not out. Any other code Yahoo invents (SUSP, NA, a new one) is neither out nor soft: shown as-is, never counted as out.",
     "note": "Rule: max 5 long-term-injured players (IL, or GTD with a >2-week-out signal). Counted here: players in an IL / IL+ slot plus players Yahoo lists as Out (O / OUT), injured (INJ) or out for the season (OFS) while not on IL. Yahoo gives no injury duration, so a short absence can be counted; the commissioner judges."
   },
   "minPerPosition": 2,

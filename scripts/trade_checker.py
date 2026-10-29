@@ -66,9 +66,7 @@ def pick_label(si, pk) -> str:
 def acquisitions(si) -> dict:
     """(playerKey, team) -> effectiveAt of the latest completed trade that brought the player to that team."""
     out = {}
-    for t in sorted(si["seasonTxns"], key=lambda t: ss.ts(t["effectiveAt"])):
-        if t["status"] != "COMPLETED":
-            continue
+    for t in sorted((t for t in si["seasonTxns"] if t["status"] == "COMPLETED"), key=lambda t: ss.ts(t["effectiveAt"])):  # staged trades have no effectiveAt
         for a in ls.trade_assets(t):
             if a["type"] == "player":
                 out[(a["playerKey"], a["to"])] = ss.ts(t["effectiveAt"])

@@ -108,7 +108,7 @@ class TestOutcomes(RunCase):
             self.assertEqual(cur["slots"][MILLER], "IL")                                         # and keeps its IL label
             self.assertEqual(ls.team_cap(si, cur, "franchise-12"), 144)                          # top 9 over all owned players
             txns = ss._load(os.path.join(td.dir, "season_transactions.json"))["transactions"]
-            self.assertEqual([t["txnId"] for t in txns], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])  # nothing manufactured
+            self.assertEqual([t["txnId"] for t in txns], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003"])  # nothing manufactured
             report = res["report"]
             self.assertIn("Jordan Miller → Bsy **[IL]** `O`", report)
             self.assertIn("## Salary-cap effects (top 9 frozen salaries, IL included)", report)
