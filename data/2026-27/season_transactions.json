@@ -159,6 +159,74 @@
           "note": "approved 2026-10-17 (owner-reported); promoted in place; staged ownership-consistent direction used"
         }
       ]
+    },
+    {
+      "txnId": "PROP-2026-003",
+      "type": "TRADE",
+      "status": "PROPOSED",
+      "label": "LONG CON ↔ THỊNH",
+      "participants": [
+        "franchise-04",
+        "franchise-11"
+      ],
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.5836",
+          "name": "OG Anunoby",
+          "from": "franchise-11",
+          "to": "franchise-04"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.5835",
+          "name": "Jarrett Allen",
+          "from": "franchise-11",
+          "to": "franchise-04"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.5464",
+          "name": "Kristaps Porziņģis",
+          "from": "franchise-11",
+          "to": "franchise-04"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10285",
+          "name": "Donovan Clingan",
+          "from": "franchise-04",
+          "to": "franchise-11"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.6038",
+          "name": "Robert Williams III",
+          "from": "franchise-04",
+          "to": "franchise-11"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.10107",
+          "name": "Cason Wallace",
+          "from": "franchise-04",
+          "to": "franchise-11"
+        }
+      ],
+      "recordedAt": "2026-10-29T00:00:00Z",
+      "directionCheck": {
+        "status": "VERIFIED",
+        "described": "Long con receives Anunoby, Allen and Porziņģis; Thịnh receives Clingan, Robert Williams and Cason Wallace",
+        "verified": "Roster snapshot RS-2026-10-29-09ccb586: Thịnh owns Anunoby, Jarrett Allen and Porziņģis; Long con owns Clingan, Robert Williams III and Cason Wallace. 'Allen' read as Jarrett Allen (the only Allen on Thịnh's roster; Grayson Allen is on Hai's)."
+      },
+      "note": "Staged for the Trade Lab only. Not executed in Yahoo; never written to state until it is COMPLETED. Cap, roster and cooldown results are computed by the Trade Lab, not decided here.",
+      "source": "League owner request in chat, 2026-10-29.",
+      "statusHistory": [
+        {
+          "status": "PROPOSED",
+          "at": "2026-10-29T00:00:00Z"
+        }
+      ]
     }
   ]
 }

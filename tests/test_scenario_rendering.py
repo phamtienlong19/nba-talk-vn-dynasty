@@ -255,10 +255,12 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_trade_lab_separates_proposals_from_completed_trades(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertEqual(lab.count('class="tcard prop'), 0)           # nothing is pending any more
-        self.assertEqual(lab.count('<input type="checkbox">'), 0)
+        self.assertEqual(lab.count('class="tcard prop'), 1)           # only the staged Long con / Thịnh trade is pending
+        self.assertEqual(lab.count('<input type="checkbox">'), 1)
         text = re.sub(r"<[^>]+>", " ", lab)
-        self.assertIn("No proposals", text)
+        for name in ("OG Anunoby", "Jarrett Allen", "Porziņģis", "Donovan Clingan", "Robert Williams III", "Cason Wallace"):
+            self.assertIn(name, text)                                  # the six players of the staged trade
+        self.assertNotIn("No proposals", text)
         for name in ("Stephon Castle", "Victor Wembanyama"):
             self.assertNotIn(name, text)                               # completed trades are not proposals
         self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
@@ -327,7 +329,7 @@ class TestRenderedCards(unittest.TestCase):
             mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, short), re.S).group(1))
             self.assertRegex(mv, r"ADDED\s.*" + re.escape(a["n"]), a["n"])
             if status.get(a["k"]) == "O" and self.cur["slots"].get(a["k"]) in ss.SLOTS_IL:
-                self.assertIn('<span class="st-chip il" title="Injured list · Yahoo status Out">IL</span>' + a["n"], r)  # every IL player wears the IL chip
+                self.assertIn('<span class="st-chip il" title="Injured list · Yahoo lists him out">IL</span>' + a["n"], r)  # every IL player wears the IL chip
         for fid, v in view.items():                                          # drops are listed too
             for dpl in v["dropped"]:
                 mv = re.sub(r"<[^>]+>", " ", re.search(r'<div class="mv">(.*?)<div class="table-head">', _card(self.official, self.si["shorts"][fid]), re.S).group(1))
@@ -382,7 +384,7 @@ class TestRenderedCards(unittest.TestCase):
         for fid, rows in snap["teams"].items():                              # whatever the current snapshot says, card by card
             card = _card(self.official, self.si["shorts"][fid])
             chips = {html_lib.unescape(n).strip(): c for c, n in
-                     re.findall(r'<span class="st-chip (?:st-[a-z]+|il)"[^>]*>([^<]*)</span>([^<]*)', card)}
+                     re.findall(r'<span class="st-chip (?:st-[a-z]+|il(?: held)?)"[^>]*>([^<]*)</span>([^<]*)', card)}
             for r in rows:
                 if r.get("status") in want:
                     exp = r["slot"] if r.get("slot") in ss.SLOTS_IL else want[r["status"]]      # IL slot players always show IL / IL+
@@ -430,6 +432,7 @@ class TestRenderedCards(unittest.TestCase):
         """Sitting in an IL slot is one fact, Yahoo's status another: Out/INJ/OFS is the normal case (IL chip only); Q, D, P … get their own chip."""
         snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
         out = set(ss._load(ss.RULES_PATH)["longTermInjured"]["outStatuses"])
+        soft = set(ss._load(ss.RULES_PATH)["longTermInjured"]["softStatuses"])
         for fid, rows in snap["teams"].items():
             card = _card(self.official, self.si["shorts"][fid])
             for r in rows:
@@ -437,8 +440,11 @@ class TestRenderedCards(unittest.TestCase):
                     continue
                 m = re.search(r'<div class="player-row[^"]*il-row[^"]*"[^>]*>.*?<div class="nba">', card, re.S)
                 row = next(x for x in re.findall(r'<div class="player-row[^"]*il-row.*?<div class="nba">', card, re.S) if html_lib.unescape(r["name"]) in html_lib.unescape(x))
-                self.assertIn('<span class="st-chip il"', row, r["name"])
-                self.assertEqual('st-after' in row, bool(r.get("status")) and r["status"] not in out, (r["name"], r.get("status")))
+                kind = "out" if r.get("status") in out else "soft" if r.get("status") in soft else "clear" if not r.get("status") else "other"
+                self.assertRegex(row, r'<span class="st-chip il( held)?"', r["name"])
+                self.assertEqual('st-chip il held' in row, kind != "out", (r["name"], r.get("status")))      # held on IL, not out: the IL chip is dashed amber
+                self.assertEqual('st-after' in row, kind != "out", (r["name"], r.get("status")))               # and Yahoo's status (or HEALTHY) sits beside the name
+                self.assertEqual("HEALTHY" in row, kind == "clear", (r["name"], r.get("status")))
 
     def test_a_rookie_on_another_roster_keeps_the_rookie_tag(self):
         """A drafted rookie who is no longer with the drafting team (traded or picked up) still wears the purple name AND the R tag."""

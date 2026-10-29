@@ -548,7 +548,7 @@ class TestEmbeddedPageData(unittest.TestCase):
     def test_all_scenario_combinations_are_present(self):
         self.assertEqual(ls.selectable_trades(self.i), [])  # nothing pre-draft is actionable any more
         # the Trade Lab enumerates every combination of the in-season proposals (layer C)
-        self.assertEqual(sorted(self.data["scenarios"]), [""])  # both Bsy trades are completed: nothing is left to simulate
+        self.assertEqual(sorted(self.data["scenarios"]), ["", "PROP-2026-003"])  # both Bsy trades are completed; only the staged Long con / Thịnh trade is left to simulate
 
     def test_official_view_has_no_movement_and_scenario_view_has_it(self):
         view = self.data["scenarios"][""]

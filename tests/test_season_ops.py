@@ -12,6 +12,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 import build_league_state as bls  # noqa: E402
 import import_rosters as ir  # noqa: E402
+import trade_checker as tc  # noqa: E402
 import league_state as ls  # noqa: E402
 import season_state as ss  # noqa: E402
 
@@ -133,7 +134,7 @@ class TestLayers(unittest.TestCase):
         before = ss._load(ss.TXN_PATH)
         views = ss.enumerate_views(self.si)
         self.assertEqual(ss._load(ss.TXN_PATH), before)  # enumerating writes nothing
-        self.assertEqual(sorted(views), [""])  # both Bsy trades are completed: nothing is left to simulate
+        self.assertEqual(sorted(views), ["", "PROP-2026-003"])  # both Bsy trades are completed; the only thing left to simulate is the staged Long con / Thịnh trade
         cur = ss.season_state(self.si)
         for k, f in ((WEMBY, THINH), (TYSON, THINH), (JOKIC, BSY), (OSO, BSY)):
             self.assertEqual(cur["playerOwner"][k], f)                       # both completed trades are in the baseline
@@ -146,7 +147,7 @@ class TestLayers(unittest.TestCase):
                 ss.season_state(self.si, [done])                               # completed is not a scenario
 
     def test_no_pending_proposals_remain_and_scenarios_start_from_the_updated_baseline(self):
-        self.assertEqual(ss.selectable(self.si), [])
+        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], ["PROP-2026-003"])  # only the staged trade
         base = ss.season_view(self.si, [])
         self.assertEqual({f: base["teams"][f]["cap"] for f in (BSY, THINH, SUP)}, {BSY: 176, THINH: 176, SUP: 144})
         self.assertEqual(sum(t["count"] for t in base["teams"].values()), 192)     # players move, none appear or vanish
@@ -224,7 +225,7 @@ class TestBsyTradesCompleted(unittest.TestCase):
 
     def test_records_are_promoted_in_place_with_an_audit_trail(self):
         ids = [t["txnId"] for t in self.si["seasonTxns"]]
-        self.assertEqual(ids, ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])      # no duplicate records
+        self.assertEqual(ids, ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003"])      # no duplicate records; the last is staged, not completed
         for tid in ("PROP-2026-001", "PROP-2026-002"):
             t = self.si["tradeIndex"][tid]
             self.assertEqual((t["status"], t["phase"]), ("COMPLETED", "IN_SEASON"))
@@ -276,8 +277,8 @@ class TestBsyTradesCompleted(unittest.TestCase):
         again = ss.season_state(draft_night(ss.load_season(ls.load_inputs())))              # a rebuild gives the same state
         self.assertEqual(again["playerOwner"], owners)
         self.assertEqual((owners[MOREZ], owners[ZION]), (HCMC, CC))                         # the earlier completed trade still stands
-        self.assertEqual(ss.selectable(self.si), [])                                        # nothing pending
-        self.assertEqual(sorted(ss.enumerate_views(self.si)), [""])
+        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], ["PROP-2026-003"])              # only the staged trade is pending
+        self.assertEqual(sorted(ss.enumerate_views(self.si)), ["", "PROP-2026-003"])
 
     def test_applying_the_same_trade_twice_fails_loudly(self):
         si = copy.deepcopy(self.si)
@@ -306,7 +307,7 @@ class TestBsyTradesCompleted(unittest.TestCase):
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
         by = {t["id"]: t for t in data["trades"]}
         self.assertEqual((by["PROP-2026-001"]["status"], by["PROP-2026-002"]["status"]), ("COMPLETED", "COMPLETED"))
-        self.assertEqual(sorted(data["scenarios"]), [""])
+        self.assertEqual(sorted(data["scenarios"]), ["", "PROP-2026-003"])
         blob = json.dumps(data)
         for internal in ("statusHistory", "directionCheck", "not supplied", "relayed", "DISCREPANCY", "NOT specified", "RESOLVED_ASSUMED"):
             self.assertNotIn(internal, blob)
@@ -588,3 +589,45 @@ class TestProvisionalPlayers(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestStagedLongConThinhTrade(unittest.TestCase):
+    """PROP-2026-003 is staged for the Trade Lab only (owner request, 2026-10-29): it is evidence, never state."""
+
+    GETS_LC = {"OG Anunoby", "Jarrett Allen", "Kristaps Porziņģis"}
+    GETS_THINH = {"Donovan Clingan", "Robert Williams III", "Cason Wallace"}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.si = ss.load_season(ls.load_inputs())
+        cls.txn = next(t for t in cls.si["seasonTxns"] if t["txnId"] == "PROP-2026-003")
+
+    def test_it_is_proposed_and_has_the_requested_six_players(self):
+        self.assertEqual(self.txn["status"], "PROPOSED")
+        self.assertNotIn("effectiveAt", self.txn)                                          # not executed, so not dated
+        to = {}
+        for a in self.txn["assets"]:
+            to.setdefault(a["to"], set()).add(a["name"])
+        self.assertEqual(to, {"franchise-04": self.GETS_LC, "franchise-11": self.GETS_THINH})
+
+    def test_every_player_starts_on_the_side_that_sends_him(self):
+        owner = ss.season_state(self.si)["playerOwner"]
+        for a in self.txn["assets"]:
+            self.assertEqual(owner[a["playerKey"]], a["from"], a["name"])                  # direction is ownership-consistent
+
+    def test_only_the_scenario_view_moves_them_and_cooldowns_ignore_it(self):
+        cur = ss.season_state(self.si)["playerOwner"]
+        scn = ss.season_state(self.si, ["PROP-2026-003"])["playerOwner"]
+        for a in self.txn["assets"]:
+            self.assertEqual((cur[a["playerKey"]], scn[a["playerKey"]]), (a["from"], a["to"]), a["name"])
+        acq = tc.acquisitions(self.si)
+        self.assertFalse(any(k == a["playerKey"] and f == a["to"] for a in self.txn["assets"] for (k, f) in acq))  # staged: no acquisition yet
+
+
+class TestInjuryStatusPartition(unittest.TestCase):
+    def test_out_and_soft_statuses_never_overlap(self):
+        """Yahoo's codes fall into out / soft / anything else; an unknown or new code is never assumed out (nor hidden)."""
+        r = ss._load(ss.RULES_PATH)["longTermInjured"]
+        self.assertFalse(set(r["outStatuses"]) & set(r["softStatuses"]))
+        for code in ("SUSP", "NA", "SOMETHING-NEW"):
+            self.assertNotIn(code, r["outStatuses"] + r["softStatuses"])
