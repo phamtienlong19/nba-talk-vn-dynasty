@@ -81,10 +81,9 @@ class TestQol(unittest.TestCase):
 
     def test_the_calendar_file_has_both_deadlines(self):
         r = self.drive("""
-          var cap=null;URL.createObjectURL=function(b){cap=b;return 'blob:x';};
+          var OB=window.Blob;window.Blob=function(parts,o){R.ics=parts.join('');return new OB(parts,o);};URL.createObjectURL=function(){return 'blob:x';};
           R.chips=document.querySelectorAll('#chk .chk-cal .cal-d').length;
-          document.getElementById('chk-ics').click();
-          cap.text().then(function(t){R.ics=t;});""", wait=900)
+          document.getElementById('chk-ics').click();""")
         self.assertEqual(r["chips"], 2)
         rules = json.loads(re.search(r'id="league-data">(.*?)</script>', HTML, re.S).group(1).replace("<\\/", "</"))["trade"]["rules"]["yahoo"]
         self.assertIn("DTSTART;VALUE=DATE:" + rules["tradeEndDate"].replace("-", ""), r["ics"])
