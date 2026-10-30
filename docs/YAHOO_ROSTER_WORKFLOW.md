@@ -1,6 +1,6 @@
 # Update Yahoo Rosters (GitHub Actions)
 
-Manual workflow `.github/workflows/update-yahoo-rosters.yml`. A thin wrapper (`scripts/update_yahoo_rosters.py`) around code
+Scheduled (every 3 hours, anonymous `http` engine, no Yahoo credentials) and manual workflow `.github/workflows/update-yahoo-rosters.yml`. A thin wrapper (`scripts/update_yahoo_rosters.py`) around code
 that already exists: the read-only fetcher and validator (`scripts/yahoo_rosters.py`), the reconciliation, and the reviewed
 importer (`scripts/import_rosters.py`). It adds no scraper and no ownership model.
 
@@ -14,10 +14,10 @@ importer (`scripts/import_rosters.py`). It adds no scraper and no ownership mode
 
 | Outcome | Meaning | What you get |
 |---|---|---|
-| `READY` | only adds, drops, IL moves and status changes | a **pull request** (ready for review, never auto-merged) with the snapshot and regenerated site, and the report as its description |
-| `CONFLICT` | needs a human: a player on a different team than ours (not a recorded completed trade), a completed trade Yahoo does not show, any import-blocking problem | the report only; **canonical data is not modified**; the run shows a warning |
+| `READY` | only adds, drops, IL moves and status changes | a **pull request** with the snapshot and regenerated site, and the report as its description. If only free-agent adds / drops, IL moves and statuses changed (and no more than 40 of them), it is queued to **auto-merge** once its checks pass; otherwise it waits for you |
+| `CONFLICT` | needs a human: a player on a different team than ours (not a recorded completed trade), a completed trade Yahoo does not show, any import-blocking problem | the report only; **canonical data is not modified**; the run shows a warning and a **GitHub issue** (label `roster-refresh`) is opened, then closed by the first run that recovers |
 | `NO_CHANGE` | Yahoo matches the verified snapshot, or only lineup slots moved (bench ↔ active) | no PR, but the **compliance checks still run**: the report lists any anti-tank, IL and roster findings (a count, plus a run annotation), so a no-change run doubles as a weekly check |
-| `FAILED` | see step 2 | the report says why and how to fix it |
+| `FAILED` | see step 2 | the report says why and how to fix it, plus the same issue |
 
 An unexplained ownership change is always a `CONFLICT`: record the trade in `data/2026-27/season_transactions.json`
 first (a human decision), then run again. The workflow never creates a transaction and never overrides history.
@@ -56,9 +56,23 @@ write access dispatches it; fork pull requests cannot reach the secret.
 If Yahoo's team pages are public (they were on 2026-10-19) you do not need the secret: run with `engine = http`. Yahoo may
 treat GitHub's datacenter addresses differently from yours, which is why the signed-in `browser` engine is the default.
 
+## Schedule and auto-merge
+
+- `schedule: "17 */3 * * *"` runs the workflow with `engine=http` and *Open a PR* on. A `NO_CHANGE` run is silent. The site's roster pill
+  turns amber after 12 h and red after 48 h without a newer snapshot, so a stalled schedule is visible to everyone.
+- **Auto-merge** is requested with `gh pr merge --auto --squash` only when `automerge_ok` (`scripts/update_yahoo_rosters.py`) says so:
+  outcome `READY`, no ownership change, and at most 40 adds + drops + IL moves in one capture (a bigger swing looks like a broken
+  Yahoo page). The path guard (only roster data and the generated page changed) and `./validate.sh` + the unit tests have already
+  passed in the run. GitHub merges only after the repository's required checks are green.
+- **Never auto-merged** (a human decides): any `CONFLICT`, any ownership change, trades, standings, cap-snapshot promotion, anything
+  touching files outside the roster data. A bad merge is reverted with a normal `git revert` PR.
+- **One-time repository settings** (the workflow cannot change these): Settings → General → *Allow auto-merge*; Settings → Branches →
+  protect `main` and require the `validate` status check, otherwise auto-merge has nothing to wait for and merges at once.
+  Keep `ROSTER_PR_TOKEN` valid (90-day expiry) so the PR's checks run without an approval click.
+
 ## Run it
 
-Actions → **Update Yahoo Rosters** → *Run workflow* (branch `main`; engine `browser`; leave *Open a PR* ticked), or:
+Actions → **Update Yahoo Rosters** → *Run workflow* (branch `main`; engine `http` is the default and needs no secret; `browser` needs `YAHOO_STORAGE_STATE`; leave *Open a PR* ticked), or:
 
 ```bash
 gh workflow run "Update Yahoo Rosters" --ref main -f engine=browser -f open_pr=true

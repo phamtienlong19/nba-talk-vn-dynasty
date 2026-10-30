@@ -1,10 +1,15 @@
 name: Update Yahoo Rosters
 
-# Manual only. Reads league 85092's 16 Yahoo team pages (GET only), validates them, reconciles them with the official
-# rosters through the existing reviewed-import code, and either opens a pull request (ready for review) or publishes a
-# review report. It never pushes to main and never merges: you merge. Setup and usage: docs/YAHOO_ROSTER_WORKFLOW.md
+# Every 3 hours (anonymous http engine, no Yahoo credentials) and on demand. Reads league 85092's 16 Yahoo team pages
+# (GET only), validates them, reconciles them with the official rosters through the existing reviewed-import code, and
+# either opens a pull request or publishes a review report. It never pushes to main. A READY update that is only
+# adds / drops / IL moves / statuses is queued for auto-merge once its checks pass (scripts/update_yahoo_rosters.py
+# automerge_ok); anything else, and every CONFLICT or FAILED run (which opens an issue), waits for a human.
+# Setup and usage: docs/YAHOO_ROSTER_WORKFLOW.md
 
 on:
+  schedule:
+    - cron: "17 */3 * * *"
   workflow_dispatch:
     inputs:
       engine:
@@ -13,7 +18,7 @@ on:
         options:
           - browser
           - http
-        default: browser
+        default: http
       open_pr:
         description: "Open a PR when the update is unambiguous (only when run from main)"
         type: boolean
@@ -24,6 +29,7 @@ permissions:
   contents: write
   pull-requests: write
   actions: write
+  issues: write
 
 # One roster update at a time; a second run waits instead of racing the first.
 concurrency:
@@ -35,9 +41,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      ENGINE: ${{ inputs.engine }}
+      ENGINE: ${{ inputs.engine || 'http' }}
       # The importer only commits (and a PR is only opened) from main; from any other ref this is a dry run.
-      APPLY: ${{ inputs.open_pr && github.ref == 'refs/heads/main' }}
+      APPLY: ${{ (github.event_name == 'schedule' || inputs.open_pr) && github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -122,6 +128,7 @@ jobs:
           ROSTER_PR_TOKEN: ${{ secrets.ROSTER_PR_TOKEN }}
           DEFAULT_TOKEN: ${{ github.token }}
           SNAPSHOT: ${{ steps.update.outputs.snapshot }}
+          AUTOMERGE: ${{ steps.update.outputs.automerge }}
         run: |
           if [ -n "$ROSTER_PR_TOKEN" ] && GH_TOKEN="$ROSTER_PR_TOKEN" gh api user --silent 2>/dev/null; then
             export GH_TOKEN="$ROSTER_PR_TOKEN"; opener="your token"
@@ -139,7 +146,11 @@ jobs:
           git push origin "$branch"
           {
             echo "> PR from the **Update Yahoo Rosters** workflow: [run $GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID) (opened with $opener)."
-            echo "> It is not merged automatically. Review the report, then merge or close. Tests and validation passed in the run."
+            if [ "$AUTOMERGE" = "true" ]; then
+              echo "> Only free-agent adds / drops, IL moves and statuses changed: this PR is queued to merge itself once its checks pass."
+            else
+              echo "> It is not merged automatically. Review the report, then merge or close. Tests and validation passed in the run."
+            fi
             echo
             head -c 60000 artifacts/yahoo-roster-update/report.md
           } > artifacts/pr-body.md
@@ -168,4 +179,43 @@ jobs:
               fi
             done
             sleep 10
+          done
+
+          # Safe class only (READY, no ownership change, a plausible number of changes; the path guard above already passed):
+          # ask GitHub to merge once the required checks are green. If auto-merge is not enabled for the repository this
+          # only warns and the PR stays open for you.
+          if [ "$AUTOMERGE" = "true" ]; then
+            if gh pr merge "$new_pr" --auto --squash --delete-branch; then
+              echo "Auto-merge queued for #$new_pr" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "::warning title=Auto-merge not queued::Enable Allow auto-merge in the repository settings (docs/YAHOO_ROSTER_WORKFLOW.md). #$new_pr stays open for you to merge."
+            fi
+          fi
+
+      - name: Open or refresh the "needs attention" issue
+        if: always() && (steps.update.outputs.outcome == 'CONFLICT' || steps.update.outcome == 'failure' || steps.update.outputs.outcome == 'FAILED')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create roster-refresh --color B60205 --description "Automated roster refresh needs a human" 2>/dev/null || true
+          {
+            echo "The scheduled roster refresh could not apply Yahoo's rosters on its own ([run $GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID))."
+            echo "Outcome: **${{ steps.update.outputs.outcome || 'FAILED' }}**. The site still shows the last verified rosters. Nothing was changed."
+            echo
+            if [ -f artifacts/yahoo-roster-update/report.md ]; then head -c 50000 artifacts/yahoo-roster-update/report.md; fi
+          } > artifacts/issue-body.md
+          n=$(gh issue list --label roster-refresh --state open --json number --jq '.[0].number')
+          if [ -n "$n" ]; then
+            gh issue edit "$n" --body-file artifacts/issue-body.md
+          else
+            gh issue create --title "Roster refresh needs attention" --label roster-refresh --body-file artifacts/issue-body.md
+          fi
+
+      - name: Close the "needs attention" issue once the refresh recovers
+        if: always() && (steps.update.outputs.outcome == 'READY' || steps.update.outputs.outcome == 'NO_CHANGE')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --label roster-refresh --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Recovered: the latest run ended ${{ steps.update.outputs.outcome }}."
           done

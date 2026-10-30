@@ -720,6 +720,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 .cmp td.st-under{background:#fff0ef;color:#a62f29}.cmp td.st-floor{background:#eaf1ff;color:#2a5bb5}.cmp td.st-near{background:#fff5e9;color:#b76005}
 .cmp td.st-ceiling{background:#ffe0bd;color:#9c4300}.cmp td.st-over{background:#ffd9d6;color:#8c1d17}.cmp td.st-range{color:#5a6a8c}
 .in-tag{margin-left:6px;font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;background:#fff;border:1px solid #a9d6bd;color:#17734c;border-radius:4px;padding:1px 4px;vertical-align:1px}
+.roster-verified[data-age]{border-color:#f0cf8a;background:#fff8e6;color:#8a5a00}.roster-verified[data-age]::after{content:" · " attr(data-age);font-weight:800}.roster-verified.age-bad{border-color:#e6a9a4;background:#fdf1f0;color:#a62f29}
 .meta-pill.roster-verified,#lab-keeper-status{white-space:normal;text-align:center;line-height:1.35}
 /* not counted toward the cap: nothing is faded (a fade also dims the status chips); the salary sits in a dashed "ghost" outline */
 .player-row.nc .pname{color:#59627a}
@@ -2608,7 +2609,9 @@ function renderWhatsNew(){
 function renderSeasonMeta(){
  var sn=D.season.snapshot,d=(sn.verifiedAt||"").slice(0,10),tx=D.season.appliedAfterSnapshot.length;
  var txt="✓ ROSTERS "+shortDate(d)+(tx?" · +"+tx+" TRADE"+(tx>1?"S":""):"");
- document.querySelectorAll(".roster-verified").forEach(function(e){e.textContent=txt;e.title=sn.source;});
+ var hrs=Date.parse(sn.verifiedAt)?(Date.now()-Date.parse(sn.verifiedAt))/36e5:0,age=hrs>=48?Math.floor(hrs/24)+"D OLD":hrs>=12?Math.floor(hrs)+"H OLD":"";  /* rosters refresh every few hours: say so when they have not */
+ document.querySelectorAll(".roster-verified").forEach(function(e){e.textContent=txt;e.title=sn.source+(age?" · verified "+age.toLowerCase().replace(" old"," ago"):"");
+  if(age){e.setAttribute("data-age",age);e.classList.toggle("age-bad",hrs>=48);}else{e.removeAttribute("data-age");e.classList.remove("age-bad");}});
  var ks=document.getElementById("lab-keeper-status");if(ks){ks.textContent=txt;ks.title=sn.source;}
  var cn=D.season.counting;document.querySelectorAll(".cap-rule").forEach(function(e){e.hidden=!cn;if(cn){e.textContent="TOP "+cn.n+" SALARIES COUNT"+(cn.includesIL?" · IL ✓":"");e.title="League rule: only the top "+cn.n+" salaries on a roster count toward the cap"+(cn.includesIL?", IL included":"");}});
 }

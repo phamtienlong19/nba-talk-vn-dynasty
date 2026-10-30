@@ -610,13 +610,20 @@ class TestStagedLongConThinhTrade(unittest.TestCase):
             to.setdefault(a["to"], set()).add(a["name"])
         self.assertEqual(to, {"franchise-04": self.GETS_LC, "franchise-11": self.GETS_THINH})
 
-    def test_every_player_starts_on_the_side_that_sends_him(self):
+    def _still_valid(self):
+        """Rosters change daily (and the stress tool reshuffles them): the ownership checks apply only while the staged trade is executable."""
         owner = ss.season_state(self.si)["playerOwner"]
+        if any(owner.get(a["playerKey"]) != a["from"] for a in self.txn["assets"]):
+            self.skipTest("a roster change made the staged trade stale: void or restage PROP-2026-003")
+        return owner
+
+    def test_every_player_starts_on_the_side_that_sends_him(self):
+        owner = self._still_valid()
         for a in self.txn["assets"]:
             self.assertEqual(owner[a["playerKey"]], a["from"], a["name"])                  # direction is ownership-consistent
 
     def test_only_the_scenario_view_moves_them_and_cooldowns_ignore_it(self):
-        cur = ss.season_state(self.si)["playerOwner"]
+        cur = self._still_valid()
         scn = ss.season_state(self.si, ["PROP-2026-003"])["playerOwner"]
         for a in self.txn["assets"]:
             self.assertEqual((cur[a["playerKey"]], scn[a["playerKey"]]), (a["from"], a["to"]), a["name"])

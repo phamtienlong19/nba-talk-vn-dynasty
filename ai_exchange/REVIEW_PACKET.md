@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-30T14:51:29Z
+Generated: 2026-10-30T14:13:05Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/qol-batch
-Commit: 6e65889
+Branch: feat/roster-refresh-schedule
+Commit: 67c07f5
 Base: main
 Working tree: dirty
 
@@ -32,12 +32,11 @@ Fingerprint: FRESH
  data/2026-27/rosters/index.json                    |   11 +-
  .../rosters/snapshots/RS-2026-10-30-9ea2295d.json  | 1213 ++++++++++++++++++++
  data/2026-27/unlisted_players.json                 |    8 +
- index.html                                         |   34 +-
+ index.html                                         |   22 +-
  scripts/update_yahoo_rosters.py                    |    4 +-
- tests/test_lottery_sim.py                          |   43 +
  tests/test_scenario_rendering.py                   |   12 +-
  tests/test_season_ops.py                           |    4 +-
- 10 files changed, 1327 insertions(+), 35 deletions(-)
+ 9 files changed, 1276 insertions(+), 31 deletions(-)
 ```
 
 ## Validation
@@ -59,7 +58,6 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - data/2026-27/unlisted_players.json
 - index.html
 - scripts/update_yahoo_rosters.py
-- tests/test_lottery_sim.py
 - tests/test_scenario_rendering.py
 - tests/test_season_ops.py
 
@@ -74,4 +72,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/qol-batch` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/roster-refresh-schedule` if not already done, then request human/ChatGPT review of this packet.

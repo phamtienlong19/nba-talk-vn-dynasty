@@ -674,10 +674,10 @@ class TestGovernance(unittest.TestCase):
         for wf in os.listdir(os.path.join(root, ".github", "workflows")):
             with open(os.path.join(root, ".github", "workflows", wf), encoding="utf-8") as f:
                 text = f.read()
-            if wf == "update-yahoo-rosters.yml":                          # the one workflow the owner authorised (2026-10-20): manual only
+            if wf == "update-yahoo-rosters.yml":                          # the one workflow the owner authorised (2026-10-20); scheduled anonymous http runs added 2026-10-30
                 head = text.split("jobs:")[0]
                 self.assertIn("workflow_dispatch:", head)
-                for trigger in ("schedule:", "push:", "pull_request:", "pull_request_target:"):
+                for trigger in ("push:", "pull_request:", "pull_request_target:"):
                     self.assertNotIn("\n  " + trigger, head, trigger)
             else:
                 self.assertNotIn("yahoo_rosters", text, wf)               # no scheduled or CI fetch anywhere else
