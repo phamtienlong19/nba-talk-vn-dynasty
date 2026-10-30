@@ -482,6 +482,36 @@ def build_now(si: dict, current: dict, snapshot: dict, band1: dict, near: int) -
     return out
 
 
+RANK_SALARY_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "config", "keeper_salary_by_rank.json")
+
+
+def build_keeper_board(si: dict, current: dict, assumptions: dict, rank_cfg: dict | None = None, policy: dict | None = None) -> dict | None:
+    """Data for the KEEPERS view: the stored rank -> salary table, the default ranking, the official band, and every team's
+    CURRENT roster (season_state layer B). The page does the re-ranking and the cap math; nothing here is written anywhere."""
+    if rank_cfg is None:
+        if not os.path.exists(RANK_SALARY_PATH):
+            return None
+        rank_cfg = _load(RANK_SALARY_PATH)
+    policy = policy or cm.load_cap_policy()
+    rookies = {e["playerKey"] for e in si["draft"]["events"] if e.get("rookie")}
+    teams = []
+    for t in si["freeze"]["teams"]:
+        fid = t["franchiseId"]
+        rows = []
+        for k in ls.team_players(si, current, fid):
+            meta = ls.player_meta(si, k)
+            rows.append({"k": k, "n": ls.player_name(si, k), "pos": (meta.get("displayPosition") or "").replace(",", "/"),
+                         "nba": meta.get("nbaTeam", ""), "rk": k in rookies, "s": current.get("slots", {}).get(k),
+                         "c0": _num(ls.player_cap(si, k))})
+        rows.sort(key=lambda r: (-r["c0"], r["n"]))
+        teams.append({"id": fid, "short": t["short"], "name": ls.team_name(si, fid), "color": t["color"], "text": t["text"],
+                      "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME, "players": rows})
+    return {"salaryByRank": rank_cfg["salaryByRank"], "order": rank_cfg["order"], "source": rank_cfg["source"],
+            "band": {"floor": policy["officialFloor"], "ceiling": policy["officialCeiling"], "near": assumptions["nearCeilingRoom"]},
+            "keeperMax": assumptions["keeperMax"], "neverDrop": assumptions["neverDropAtOrAbove"], "reviewFrom": assumptions["reviewDropFrom"],
+            "rosters": {k: si["rosterSnapshot"].get(k) for k in ("snapshotId", "verifiedAt")}, "teams": teams}
+
+
 def build_page_payload(inputs: dict | None = None, ids: list | None = None, **kw) -> dict:
     inputs = inputs or ls.load_inputs()
     ids = ids or list_snapshots()
@@ -496,7 +526,8 @@ def build_page_payload(inputs: dict | None = None, ids: list | None = None, **kw
         s["now"] = {"teams": build_now(si, current, load_snapshot(i), s["band"]["whatIf"], s["band"]["near"]),
                     "countTop": si.get("capCountTop"),
                     "rosters": {k: si["rosterSnapshot"].get(k) for k in ("snapshotId", "verifiedAt")}}
-    return {"default": ids[-1], "order": ids, "snapshots": snaps}
+    kb = build_keeper_board(si, current, kw.get("assumptions") or load_assumptions())
+    return {"default": ids[-1], "order": ids, "snapshots": snaps, **({"keeperBoard": kb} if kb else {})}
 
 
 # ------------------------------------------------------------- embedding

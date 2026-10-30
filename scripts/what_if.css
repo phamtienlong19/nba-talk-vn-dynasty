@@ -136,3 +136,16 @@ tr.wi-detail>td{padding:10px 8px 16px;text-align:left;background:#fbfcff;white-s
 .wi-fr .tchip{font-size:10px;padding:3px 7px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box}
 .wi-fr .src{font-size:9px}
 .wi-tag.rk{background:#eadffa;color:#5e2c91}
+
+/* ---- KEEPERS view (a simulation of next season's keepers) ---- */
+.wi-kb-note{margin:0 0 12px;padding:9px 12px;border-radius:10px;background:var(--wi-bg);border:1px solid var(--wi-line);color:#2d3652;font:500 12.5px/1.5 "Inter",Arial,sans-serif}
+.wi-kb-teams{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.wi-kb-tab{cursor:pointer;opacity:.62}.wi-kb-tab.on{opacity:1;outline:2px solid var(--wi);outline-offset:1px}
+.wi-kb-flags{display:grid;gap:6px;margin:0 0 12px}.wi-kb-flag{padding:8px 11px;border-radius:8px;font:600 12.5px/1.4 "Inter",Arial,sans-serif}
+.wi-kb-flag.bad{background:#fdf1f0;border:1px solid #e6a9a4;color:#8a2a24}.wi-kb-flag.warn{background:#fff8e6;border:1px solid #f0cf8a;color:#7a4f00}
+.wi-kb-wrap{overflow-x:auto}.wi-kb td{padding:7px 8px;border-bottom:1px solid #eef1f6;vertical-align:middle}.wi-kb td.num,.wi-kb th.num{text-align:right;font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-weight:700}
+.wi-kb tr.kept td{background:#f3f6ff}.wi-kb small{color:#6b7a93;font-weight:500}.wi-kb input[type=checkbox]{width:18px;height:18px}
+.wi-kb-rkc{white-space:nowrap}.wi-kb-rk{width:58px;padding:6px 6px;border:1px solid #cfd8e6;border-radius:7px;font:600 13px "Roboto Mono",ui-monospace,Menlo,monospace}
+.wi-kb-rkc.moved .wi-kb-rk{border-color:var(--wi);background:var(--wi-bg)}.wi-kb-mv{border:1px solid #cfd8e6;background:#fff;border-radius:6px;margin-left:3px;padding:5px 7px;font-size:10px;color:#44507a;cursor:pointer}
+.wi-kb-tag{display:inline-block;margin-left:6px;padding:2px 5px;border-radius:5px;border:1px solid #cfd8e6;font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;color:#5a6a8c;vertical-align:1px}.wi-kb-tag.z{color:#8b95a7}
+.wi-kb-act{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}.wi-kb-src{margin:12px 0 0;color:#6b7a93;font:500 11.5px/1.5 "Inter",Arial,sans-serif}
+.wi-kb th:nth-child(3),.wi-kb td:nth-child(3){text-align:left}.wi-kb th:nth-child(2),.wi-kb td:nth-child(2){text-align:left}

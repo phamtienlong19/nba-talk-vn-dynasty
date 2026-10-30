@@ -70,13 +70,14 @@ function header(){
   return bar;}
 function seg(){
   var wrap=h("div");var g=h("div",{class:"wi-seg",role:"group","aria-label":"What-if view"});
-  [["same","SAME KEEPERS"],["redo","REDO CUTS"],["fa","FA 60"]].concat(snap().now?[["now","NOW"]]:[]).forEach(function(v){
+  [["same","SAME KEEPERS"],["redo","REDO CUTS"],["fa","FA 60"]].concat(snap().now?[["now","NOW"]]:[]).concat(W.keeperBoard?[["keepers","KEEPERS"]]:[]).forEach(function(v){
     var b=h("button",{type:"button","aria-pressed":S.view===v[0]?"true":"false",text:v[1]});
     b.addEventListener("click",function(){S.view=v[0];S.animate=true;render();syncUrl();});g.appendChild(b);});
   wrap.appendChild(g);
   var tips={same:"Scenario A — every franchise keeps exactly its official nine, repriced at the snapshot. Deterministic.",
             redo:"Scenario B — a projection, not a reconstruction of intent: fewest-change legal keeper sets if managers had known these prices. Equally good alternatives are listed, never hidden.",
             fa:"The FA/DRAFT 60 rebuilt with the same ranking rules, once with the projected keeper/cut decisions and snapshot prices.",
+            keepers:"Your own simulation of next season's keepers: re-rank players the way you expect them to be ranked and pick up to nine to keep. A player's keeper salary is the salary at his rank in Yahoo's projected-salary order (not his O-Rank). Not official; nothing is saved to league data.",
             now:"Today's rosters (current season) repriced at the snapshot. Sorted by snapshot salary; only the top "+((snap().now||{}).countTop||9)+" salaries count, IL included."};
   wrap.appendChild(help("seg-"+S.view,tips[S.view]));return wrap;}
 
@@ -313,6 +314,82 @@ function viewFa(){
   grid.appendChild(h("div",{class:"wi-p-wi"},[h("div",{class:"wi-fa-h"},[h("span",{text:"WHAT-IF FA 60 · "+fdate(s.meta.effectiveDate)})]),faList(fa.redo,"wi",idx)]));
   frag.appendChild(grid);return frag;}
 
+
+/* ---------- KEEPERS: your own ranking and keeper plan (a simulation; the URL and this browser remember it) ---------- */
+var KB={team:null,keep:{},pins:[],uni:null,rank:null,loaded:false},KB_LS="nbaTalkVN.keeperBoard";
+function kbSave(){try{localStorage.setItem(KB_LS,JSON.stringify({team:KB.team,keep:KB.keep,pins:KB.pins}));}catch(e){}}
+function kbLoad(){KB.loaded=true;try{var o=JSON.parse(localStorage.getItem(KB_LS)||"null");if(o){KB.team=o.team||KB.team;KB.keep=o.keep||{};KB.pins=o.pins||[];}}catch(e){}}
+function kbUniverse(){
+  if(KB.uni)return KB.uni;var kb=W.keeperBoard,seen={},u=[],extra=[];kb.order.forEach(function(k){if(!seen[k]){seen[k]=1;u.push(k);}});
+  kb.teams.forEach(function(t){t.players.forEach(function(p){if(!seen[p.k]){seen[p.k]=1;extra.push(p);}});});
+  extra.sort(function(a,b){return a.n<b.n?-1:a.n>b.n?1:0;});extra.forEach(function(p){u.push(p.k);});KB.uni=u;return u;}
+/* every pinned player sits at exactly the rank asked for (a later edit wins a contested slot; the earlier pin slides down one); everyone else keeps Yahoo's order */
+function kbRanking(){
+  var base=kbUniverse(),pinned={},order=KB.pins.map(function(x,i){return {k:x[0],q:x[1],i:i};});order.forEach(function(x){pinned[x.k]=1;});
+  var list=base.filter(function(k){return !pinned[k];});
+  order.sort(function(a,b){return a.q-b.q||a.i-b.i;}).forEach(function(x){list.splice(Math.min(Math.max(x.q,1),list.length+1)-1,0,x.k);});
+  var rank={};list.forEach(function(k,i){rank[k]=i+1;});KB.rank=rank;return list;}
+function kbSalary(rank){return W.keeperBoard.salaryByRank[rank-1]||0;}
+function kbTeam(){var ts=W.keeperBoard.teams;for(var i=0;i<ts.length;i++)if(ts[i].id===KB.team)return ts[i];KB.team=ts[0].id;return ts[0];}
+function kbKeepSet(t){var a=KB.keep[t.id]||[],o={};a.forEach(function(k){o[k]=1;});return o;}
+function kbPin(k,q){var n=kbUniverse().length;q=Math.max(1,Math.min(n,Math.round(+q)||1));KB.pins=KB.pins.filter(function(x){return x[0]!==k;});
+  var def=kbUniverse().indexOf(k)+1;KB.pins.push([k,q]);kbRanking();
+  if(KB.rank[k]===def&&KB.pins.length===1)KB.pins=[];  /* back at his Yahoo spot with nothing else moved: not a move */
+  kbSave();}
+function kbQuery(){var t=kbTeam(),q="&team="+encodeURIComponent(t.id),keep=KB.keep[t.id]||[];if(keep.length)q+="&keep="+keep.join(",");
+  if(KB.pins.length)q+="&rk="+KB.pins.map(function(x){return x[0]+":"+x[1];}).join(",");return q;}
+function kbRestore(qs){kbLoad();var t=qs.get("team");if(t){KB.team=t;}
+  var k=qs.get("keep"),r=qs.get("rk"),uni=null;
+  if(k!==null||r!==null||t){var u={};kbUniverse().forEach(function(x){u[x]=1;});
+    if(k!==null){var arr=k.split(",").filter(function(x){return u[x];}).slice(0,W.keeperBoard.keeperMax);KB.keep[KB.team||t]=arr;}
+    if(r!==null){KB.pins=r.split(",").map(function(x){var a=x.split(":");return [a[0],+a[1]];}).filter(function(x){return u[x[0]]&&x[1]>=1;});}}
+  kbSave();}
+function viewKeepers(){
+  if(!KB.loaded)kbLoad();
+  var kb=W.keeperBoard,t=kbTeam(),list=kbRanking(),keep=kbKeepSet(t),frag=document.createDocumentFragment(),b=kb.band,max=kb.keeperMax;
+  frag.appendChild(h("div",{class:"wi-kb-note",text:"YOUR ASSUMPTION · NOT OFFICIAL. Re-rank players the way you expect them to be ranked, then pick up to "+max+" to keep. Salary = the salary at the player's rank in the Yahoo projected-salary order (not his O-Rank). Nothing here is saved to league data."}));
+  var tabs=h("div",{class:"wi-kb-teams",role:"group","aria-label":"Team"});
+  kb.teams.forEach(function(x){var on=x.id===t.id,e=tchip(x);e.classList.add("wi-kb-tab");if(on)e.classList.add("on");e.setAttribute("role","button");e.setAttribute("tabindex","0");e.setAttribute("aria-pressed",on?"true":"false");
+    function go(){KB.team=x.id;kbSave();S.animate=false;render();syncUrl();}
+    e.addEventListener("click",go);e.addEventListener("keydown",function(ev){if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();go();}});tabs.appendChild(e);});
+  frag.appendChild(tabs);
+  var rows=t.players.map(function(p){var rk=KB.rank[p.k];return {p:p,rank:rk,sal:kbSalary(rk)};}).sort(function(a,c){return a.rank-c.rank;});
+  var kept=rows.filter(function(x){return keep[x.p.k];}),pay=kept.reduce(function(n,x){return n+x.sal;},0),st=info2(pay,b);
+  var ok=st.cls;
+  frag.appendChild(h("div",{class:"wi-stats"},[
+    h("div",{class:"wi-stat "+(kept.length>max?"bad":"")},[h("b",{text:kept.length+"/"+max}),h("span",{text:"KEEPERS"})]),
+    h("div",{class:"wi-stat "+ok},[h("b",{text:String(pay)}),h("span",{text:"KEEPER PAYROLL"})]),
+    h("div",{class:"wi-stat"},[h("b",{text:b.floor+"–"+b.ceiling}),h("span",{text:"OFFICIAL BAND"})]),
+    h("div",{class:"wi-stat "+ok},[h("b",{text:st.text}),h("span",{text:st.label})])]));
+  var flags=[];
+  if(pay>b.ceiling)flags.push(["bad","Over the ceiling by "+(pay-b.ceiling)+": a team may not exceed the ceiling at declaration."]);
+  if(kept.length)rows.forEach(function(x){if(keep[x.p.k])return;if(x.sal>=kb.neverDrop)flags.push(["bad",x.p.n+" (cap "+x.sal+") is not kept: players at "+kb.neverDrop+"+ cannot be dropped without the commissioner."]);
+    else if(x.sal>=kb.reviewFrom)flags.push(["warn",x.p.n+" (cap "+x.sal+") is not kept: dropping a "+kb.reviewFrom+"–"+(kb.neverDrop-1)+" player needs commissioner review."]);});
+  if(flags.length){var fl=h("div",{class:"wi-kb-flags"});flags.forEach(function(f){fl.appendChild(h("div",{class:"wi-kb-flag "+f[0],text:f[1]}));});frag.appendChild(fl);}
+  var tb=h("table",{class:"wi-table wi-kb"}),hd=h("tr");["Keep","Rank","Player","Salary"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i===3?"num":""}));});tb.appendChild(h("thead",null,[hd]));
+  var body=h("tbody");
+  rows.forEach(function(x){var p=x.p,tr=h("tr",{class:keep[p.k]?"kept":"","data-k":p.k});
+    var cb=h("input",{type:"checkbox","aria-label":"Keep "+p.n});cb.checked=!!keep[p.k];if(!cb.checked&&kept.length>=max)cb.disabled=true;
+    cb.addEventListener("change",function(){var a=(KB.keep[t.id]||[]).filter(function(k){return k!==p.k;});if(cb.checked)a.push(p.k);KB.keep[t.id]=a.slice(0,max);kbSave();S.animate=false;render();syncUrl();});
+    var inp=h("input",{type:"number",class:"wi-kb-rk",min:"1",max:String(kbUniverse().length),value:String(x.rank),"aria-label":"Rank of "+p.n});
+    inp.addEventListener("change",function(){kbPin(p.k,inp.value);S.animate=false;render();syncUrl();});
+    var up=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+p.n+" up one rank",text:"▲"}),dn=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+p.n+" down one rank",text:"▼"});
+    up.addEventListener("click",function(){kbPin(p.k,x.rank-1);S.animate=false;render();syncUrl();});dn.addEventListener("click",function(){kbPin(p.k,x.rank+1);S.animate=false;render();syncUrl();});
+    var moved=KB.pins.some(function(q){return q[0]===p.k;}),nm=h("td",null,[h("b",{text:p.n}),h("small",{text:" "+p.pos+(p.nba?" · "+p.nba:"")})]);
+    if(p.rk)nm.appendChild(h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));if(p.s==="IL"||p.s==="IL+")nm.appendChild(h("span",{class:"wi-kb-tag",title:"On the injured list",text:p.s}));
+    if(!x.sal)nm.appendChild(h("span",{class:"wi-kb-tag z",title:"Ranked outside the paid ranks: cap 0",text:"0"}));
+    tr.appendChild(h("td",null,[cb]));tr.appendChild(h("td",{class:"wi-kb-rkc"+(moved?" moved":"")},[inp,up,dn]));tr.appendChild(nm);tr.appendChild(h("td",{class:"num",text:String(x.sal)}));body.appendChild(tr);});
+  tb.appendChild(body);frag.appendChild(h("div",{class:"wi-kb-wrap"},[tb]));
+  var act=h("div",{class:"wi-kb-act"}),cp=h("button",{type:"button",class:"wi-reset",id:"kb-copy",text:"Copy my link"}),rs=h("button",{type:"button",class:"wi-reset",id:"kb-reset",text:"Reset ranks"}),cl=h("button",{type:"button",class:"wi-reset",id:"kb-clear",text:"Clear keepers"});
+  cp.addEventListener("click",function(){syncUrl();var u=location.href;function done(m){cp.textContent=m;setTimeout(function(){cp.textContent="Copy my link";},1800);}
+    try{navigator.clipboard.writeText(u).then(function(){done("Copied");},function(){done("Copy blocked: use the address bar");});}catch(e){done("Copy blocked: use the address bar");}});
+  rs.addEventListener("click",function(){KB.pins=[];kbSave();S.animate=false;render();syncUrl();});
+  cl.addEventListener("click",function(){KB.keep[t.id]=[];kbSave();S.animate=false;render();syncUrl();});
+  act.appendChild(cp);act.appendChild(rs);act.appendChild(cl);frag.appendChild(act);
+  frag.appendChild(h("div",{class:"wi-kb-src",text:"Rosters as of "+(kb.rosters.verifiedAt||"").slice(0,10)+" (trades applied). Rank→salary table: Yahoo Top 300 fetched "+String(kb.source.fetchedAt||"").slice(0,10)+", "+kb.source.paidRanks+" paid ranks of "+kb.source.players+". Rank is league-wide (1 = highest). Players outside the list are ranked after it at 0, and drafted rookies are not special-cased."}));
+  return frag;}
+function info2(pay,b){var near=b.near,over=pay>b.ceiling;return {cls:over?"bad":(b.ceiling-pay<=near?"warn":"ok"),text:over?String(pay-b.ceiling):String(b.ceiling-pay),label:over?"OVER CEILING":"ROOM TO CEILING"};}
+
 /* ---------- render / wiring ---------- */
 function render(){
   if(!S.on){root.textContent="";return;}
@@ -321,7 +398,8 @@ function render(){
   root.textContent="";
   root.appendChild(header());root.appendChild(seg());
   if(S.view==="now"&&!snap().now)S.view="same";
-  root.appendChild(S.view==="same"?viewSame():S.view==="redo"?viewRedo():S.view==="now"?viewNow():viewFa());
+  if(S.view==="keepers"&&!W.keeperBoard)S.view="same";
+  root.appendChild(S.view==="same"?viewSame():S.view==="redo"?viewRedo():S.view==="now"?viewNow():S.view==="keepers"&&W.keeperBoard?viewKeepers():viewFa());
   if(S.flash){var f=root.querySelector(".player-row[data-k=\""+(S.flashKey||"")+"\"]");if(f&&!reduce)f.classList.add("flash");S.flash=null;S.flashKey=null;}
   S.animate=false;
   if(window.NBA_MONO)window.NBA_MONO(root);
@@ -331,8 +409,8 @@ function setActive(on){
   S.on=on;page.hidden=!on;
   if(on){S.animate=true;render();window.scrollTo(0,0);}else{root.textContent="";}}
 function syncUrl(){try{document.dispatchEvent(new Event("whatif:change"));}catch(e){}}
-function query(){return S.on?"?mode=whatif&view="+S.view+(S.sort!=="team"?"&sort="+S.sort:"")+(W.order.length>1?"&snap="+S.snap:""):"";}
-function restore(qs){var v=qs.get("view");if(v==="same"||v==="redo"||v==="fa"||v==="now")S.view=v;var so=qs.get("sort");if(so)S.sort=so;var sn=qs.get("snap");if(sn&&W.snapshots[sn])S.snap=sn;}
+function query(){return S.on?"?mode=whatif&view="+S.view+(S.sort!=="team"?"&sort="+S.sort:"")+(W.order.length>1?"&snap="+S.snap:"")+(S.view==="keepers"?kbQuery():""):"";}
+function restore(qs){var v=qs.get("view");if(v==="same"||v==="redo"||v==="fa"||v==="now"||(v==="keepers"&&W.keeperBoard)){S.view=v;if(v==="keepers")kbRestore(qs);}var so=qs.get("sort");if(so)S.sort=so;var sn=qs.get("snap");if(sn&&W.snapshots[sn])S.snap=sn;}
 var css=document.createElement("style");css.textContent="@keyframes wi-flash{from{background-color:#dfe3ff}to{background-color:transparent}}.wi-card .player-row.flash{animation:wi-flash .7s ease}@media (prefers-reduced-motion:reduce){.wi-card .player-row.flash{animation:none}}";
 document.head.appendChild(css);
 window.NBA_WHATIF={setActive:setActive,isActive:function(){return S.on;},query:query,restore:restore,classify:classify,compliance:compliance,state:S};
