@@ -628,6 +628,6 @@ class TestInjuryStatusPartition(unittest.TestCase):
     def test_out_and_soft_statuses_never_overlap(self):
         """Yahoo's codes fall into out / soft / anything else; an unknown or new code is never assumed out (nor hidden)."""
         r = ss._load(ss.RULES_PATH)["longTermInjured"]
-        self.assertFalse(set(r["outStatuses"]) & set(r["softStatuses"]))
+        self.assertFalse(set(r["outStatuses"]) & set(r["ineligibleStatuses"]))
         for code in ("SUSP", "NA", "SOMETHING-NEW"):
-            self.assertNotIn(code, r["outStatuses"] + r["softStatuses"])
+            self.assertNotIn(code, r["outStatuses"] + r["ineligibleStatuses"])

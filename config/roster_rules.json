@@ -8,14 +8,14 @@
       "INJ",
       "OFS"
     ],
-    "softStatuses": [
+    "ineligibleStatuses": [
       "P",
       "Q",
       "D",
       "GTD",
       "DTD"
     ],
-    "softNote": "Yahoo statuses that mean a player may play. A player in an IL slot with one of these (or with no status) is being held there, not out. Any other code Yahoo invents (SUSP, NA, a new one) is neither out nor soft: shown as-is, never counted as out.",
+    "ineligibleNote": "Yahoo basketball IL rule (owner pasted from Yahoo, 2026-10-30): only Out (O) and Out For Season (OFS) are IL-eligible; Probable, Questionable and Doubtful are not. Out stays eligible until the next morning, and Out for 3+ games until the player returns, so a player can sit in IL with no status and still be eligible: no status on IL is treated as injured. A player in an IL slot with an ineligible status is shown as such for commissioner review; any other code (SUSP, NA, new ones) is neither out nor ineligible.",
     "note": "Rule: max 5 long-term-injured players (IL, or GTD with a >2-week-out signal). Counted here: players in an IL / IL+ slot plus players Yahoo lists as Out (O / OUT), injured (INJ) or out for the season (OFS) while not on IL. Yahoo gives no injury duration, so a short absence can be counted; the commissioner judges."
   },
   "minPerPosition": 2,

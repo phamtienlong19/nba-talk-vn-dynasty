@@ -113,7 +113,9 @@ def double_checks(si_new, aliases, obs, snap, baseline_checks, new_state) -> dic
                 if il_ok is False and status not in LONG_TERM:
                     # IL eligibility comes from the player registry, which can lag a day: a player Yahoo now shows as Out is fine
                     out["healthyOnIL"].append(f"{p['name']} (team {t['teamId']}) is on IL but Yahoo lists him as neither IL-eligible nor Out/injured")
-                elif il_ok is None and status in (None, "P"):
+                elif status in rules["longTermInjured"]["ineligibleStatuses"]:
+                    out["healthyOnIL"].append(f"{p['name']} (team {t['teamId']}) is on IL with Yahoo status {status}, which is not IL-eligible (Yahoo allows only Out / Out for season)")
+                elif il_ok is None and status is None:
                     out["healthyOnIL"].append(f"{p['name']} (team {t['teamId']}) is on IL but Yahoo shows no injury status")
             elif il_ok or status in LONG_TERM:
                 why = ("IL-eligible per Yahoo" + (f", status {status}" if status else "")) if il_ok else f"status {status}"
