@@ -4,8 +4,10 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import unittest
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(os.path.dirname(__file__), "..", "index.html")
 HTML = open(INDEX, encoding="utf-8").read()
 DATA = json.loads(re.search(r'id="league-data">(.*?)</script>', HTML, re.S).group(1).replace("<\\/", "</"))
@@ -63,3 +65,44 @@ class TestLotterySim(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _chrome_ready():
+    import test_scenario_rendering as tsr
+    return tsr, tsr._chrome()
+
+
+class TestLotteryOnAPhone(unittest.TestCase):
+    """One column: the draw result must sit directly under the buttons, above the odds table, and the pressed button keeps focus."""
+
+    def drive(self, click):
+        import html as html_lib
+        import tempfile
+        tsr, chrome = _chrome_ready()
+        if not chrome:
+            self.skipTest("no Chrome")
+        script = ("<script>(function(){var R={};setTimeout(function(){try{var b=document.querySelectorAll('#lottery-sim .lot-bar button')[%d];b.click();"
+                  "var res=document.getElementById('lot-res'),odds=document.getElementById('lot-odds'),bar=document.querySelector('#lottery-sim .lot-bar');"
+                  "R.resTop=res.getBoundingClientRect().top;R.oddsTop=odds.getBoundingClientRect().top;R.barBottom=bar.getBoundingClientRect().bottom;"
+                  "R.picks=res.querySelectorAll('.lot-pick').length;R.focus=document.activeElement.textContent;R.scroll=document.body.innerText.length>0;"
+                  "}catch(e){R.error=String(e)}var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},400);})();</script>") % click
+        d = tempfile.mkdtemp()
+        try:
+            path = os.path.join(d, "index.html")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(HTML.replace("</body>", script + "</body>", 1))
+            out = tsr._chrome_run(["--window-size=390,844", "--virtual-time-budget=6000", "--dump-dom", "file://" + path + "#draft"], 120).stdout
+        finally:
+            shutil.rmtree(d)
+        m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
+        self.assertIsNotNone(m, out[-300:])
+        r = json.loads(html_lib.unescape(m.group(1)))
+        self.assertNotIn("error", r, r.get("error"))
+        return r
+
+    def test_the_draw_result_is_above_the_odds_table_and_the_button_keeps_focus(self):
+        r = self.drive(0)
+        self.assertEqual(r["picks"], 16)
+        self.assertLess(r["resTop"], r["oddsTop"])                       # results first when the columns stack
+        self.assertGreaterEqual(r["resTop"], r["barBottom"] - 1)         # and directly beneath the buttons
+        self.assertIn("Sim lottery", r["focus"])                         # the re-render did not drop focus to <body>
