@@ -1135,7 +1135,7 @@ body{background:var(--canvas);color:var(--text)}
 .lot-empty{color:#8591a6;font-size:13px;line-height:1.5;padding:18px 0}
 .lot-foot{padding:12px 20px 16px;border-top:1px solid #e5eaf1;background:#fafbfd;font-size:11.5px;line-height:1.5;color:#5b6678}
 @keyframes lotIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-@media(max-width:760px){.lot-cols{grid-template-columns:1fr}.lot-cols>section+section{border-left:0;border-top:1px solid #e5eaf1}.lot-hd h3{font-size:20px}.lot-hd,.lot-bar,.lot-cols>section,.lot-foot{padding-left:14px;padding-right:14px}}
+@media(max-width:760px){.lot-cols{grid-template-columns:1fr}.lot-cols>section+section{border-left:0;border-top:1px solid #e5eaf1}.lot-cols>section:nth-child(2){order:-1;border-top:0;border-bottom:1px solid #e5eaf1}.lot-cols>section{scroll-margin-top:64px}.lot-hd h3{font-size:20px}.lot-hd,.lot-bar,.lot-cols>section,.lot-foot{padding-left:14px;padding-right:14px}}
 @media(prefers-reduced-motion:reduce){.lot-pick{animation:none}}
 </style></head><body>
 <div class="topbar"><div class="topbar-inner">
@@ -2625,11 +2625,11 @@ function renderLottery(){var host=document.getElementById("lottery-sim");if(!hos
  box.appendChild(h("div",{class:"lot-hd"},[h("div",{class:"k",text:"PROVISIONAL · LIVE STANDINGS "+shortDate((L.standingsSourceUpdatedAt||"").slice(0,10))}),h("h3",{text:"Draft lottery simulator"}),
   h("p",{text:"Twelve non-playoff teams hold the balls (ranks 16 to 5); ranks 3 and 4 get a bonus slot instead. Odds and draws only: this is not the draft order and nothing is saved."})]));
  var bar=h("div",{class:"lot-bar"}),b1=h("button",{type:"button",class:"pri",text:"▶  Sim lottery"}),b2=h("button",{type:"button",text:"Run 10,000 sims"}),b3=h("button",{type:"button",text:"Reset"});
- b1.addEventListener("click",function(){LOT.res=lotDraw(L);renderLottery();});
- b2.addEventListener("click",function(){LOT.table=lotRun(L,10000);LOT.n=10000;renderLottery();});
+ b1.addEventListener("click",function(){LOT.res=lotDraw(L);renderLottery();lotReveal("lot-res",0);});
+ b2.addEventListener("click",function(){LOT.table=lotRun(L,10000);LOT.n=10000;renderLottery();lotReveal("lot-odds",1);});
  b3.addEventListener("click",function(){LOT.res=null;LOT.table=null;renderLottery();});
  bar.appendChild(b1);bar.appendChild(b2);bar.appendChild(h("span",{class:"gap"}));bar.appendChild(b3);box.appendChild(bar);
- var cols=h("div",{class:"lot-cols"}),left=h("section"),right=h("section");
+ var cols=h("div",{class:"lot-cols"}),left=h("section",{id:"lot-odds"}),right=h("section",{id:"lot-res"});
  left.appendChild(h("div",{class:"lot-t",text:LOT.table?"ODDS · "+LOT.n.toLocaleString()+" SIMS":"BALLS AND ODDS · WORST RECORD FIRST"}));
  var maxS=Math.max.apply(null,L.teams.map(function(t){return t.shareOf120||0;}))||1;
  L.teams.forEach(function(t){var row=h("div",{class:"lot-row"}),nm=h("div",{style:"min-width:0"}),bars=h("div",{class:"lot-bars"});
@@ -2649,6 +2649,10 @@ function renderLottery(){var host=document.getElementById("lottery-sim");if(!hos
  cols.appendChild(left);cols.appendChild(right);box.appendChild(cols);
  box.appendChild(h("div",{class:"lot-foot",text:"Assumptions: 1.02 is drawn before 1.01; a draw that lands on an ineligible team is redrawn; a team that wins both keeps 1.01 and 1.02 is redrawn. Rank 3/4 bonus: "+L.bonus.interpretation+" Round 2 and 3 are not shown (plain inverse standings)."}));
  host.appendChild(box);}
+/* the render rebuilds the box, so on a phone (one column) bring the part that just changed into view and give the button its focus back */
+function lotReveal(id,btn){var b=document.querySelectorAll("#lottery-sim .lot-bar button")[btn];if(b)b.focus({preventScroll:true});
+ if(!window.matchMedia||!matchMedia("(max-width:760px)").matches)return;var e=document.getElementById(id);
+ if(e)e.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});}
 function renderStandings(){
  var ST_=D.standings,live=!!(ST_&&ST_.started&&ST_.worstFirst),byStand=live&&S.order!=="team";
  var secs=[document.getElementById("rosters-a"),document.getElementById("rosters-b")];if(!secs[0]||!secs[1])return;
