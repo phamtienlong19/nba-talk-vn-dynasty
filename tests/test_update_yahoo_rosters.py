@@ -383,24 +383,47 @@ class TestStorageState(unittest.TestCase):
             self.assertEqual(f.read(), "outcome=READY\nreport=a.md\n")
 
 
+class TestAutoMergeGuard(unittest.TestCase):
+    D = {"changedTeam": [], "added": [1] * 12, "dropped": [1] * 4, "ilMoves": [1] * 5}
+
+    def test_small_free_agent_activity_is_safe(self):
+        self.assertTrue(up.automerge_ok("READY", self.D))
+
+    def test_conflicts_ownership_changes_and_wild_swings_wait_for_a_human(self):
+        self.assertFalse(up.automerge_ok("CONFLICT", self.D))
+        self.assertFalse(up.automerge_ok("NO_CHANGE", self.D))
+        self.assertFalse(up.automerge_ok("READY", dict(self.D, changedTeam=[{"player": "x"}])))
+        self.assertFalse(up.automerge_ok("READY", dict(self.D, added=[1] * (up.AUTOMERGE_MAX_CHANGES + 1))))     # looks like a broken page
+
+
+class TestFreshnessPill(unittest.TestCase):
+    def test_the_roster_pill_says_how_old_the_snapshot_is_without_changing_its_text(self):
+        with open(os.path.join(ROOT, "index.html"), encoding="utf-8") as f:
+            html = f.read()
+        self.assertIn('hrs>=48?Math.floor(hrs/24)+"D OLD":hrs>=12?Math.floor(hrs)+"H OLD":""', html)   # silent under 12h, amber to 48h, red after
+        self.assertIn('.roster-verified[data-age]::after{content:" · " attr(data-age)', html)          # CSS adds the age: textContent stays "✓ ROSTERS <date>"
+
+
 class TestWorkflowFile(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         with open(WORKFLOW, encoding="utf-8") as f:
             cls.yml = f.read()
 
-    def test_manual_only_with_a_serialized_least_privilege_job(self):
+    def test_scheduled_and_manual_only_with_a_serialized_least_privilege_job(self):
         self.assertTrue(self.yml.startswith("name: Update Yahoo Rosters"))
-        self.assertRegex(self.yml, r"\non:\n  workflow_dispatch:")
-        for trigger in ("pull_request", "push:", "schedule:", "issue_comment", "workflow_run"):
+        self.assertRegex(self.yml, r"\non:\n  schedule:\n    - cron: \"17 \*/3 \* \* \*\"\n  workflow_dispatch:")
+        for trigger in ("pull_request", "push:", "issue_comment", "workflow_run"):
             self.assertNotIn(trigger + "\n", self.yml.split("jobs:")[0].replace("# ", ""), trigger)
-        self.assertRegex(self.yml, r"permissions:\n  contents: write\n  pull-requests: write\n  actions: write\n")
+        self.assertRegex(self.yml, r"permissions:\n  contents: write\n  pull-requests: write\n  actions: write\n  issues: write\n")
+        self.assertIn("ENGINE: ${{ inputs.engine || 'http' }}", self.yml)                          # scheduled runs are anonymous: no Yahoo credentials
+        self.assertIn("(github.event_name == 'schedule' || inputs.open_pr) && github.ref == 'refs/heads/main'", self.yml)
         self.assertRegex(self.yml, r"concurrency:\n  group: update-yahoo-rosters\n  cancel-in-progress: false")
         self.assertIn("runs-on: ubuntu-latest", self.yml)
         self.assertIn("timeout-minutes: 25", self.yml)
 
-    def test_never_merges_or_pushes_to_main(self):
-        for bad in ("gh pr merge", "--auto", "--admin", "push origin main", "push origin HEAD:main", "--force", "pull_request_target",
+    def test_never_pushes_to_main_and_only_queues_auto_merge_for_the_safe_class(self):
+        for bad in ("--admin", "--squash --admin", "push origin main", "push origin HEAD:main", "--force", "pull_request_target",
                     "gh pr review", "--approve", "/reviews", "pulls/", "/merge"):
             self.assertNotIn(bad, self.yml, bad)                                                    # no merging, no approving a PR review
         approvals = [l for l in self.yml.splitlines() if "approve" in l and not l.lstrip().startswith("#") and "echo" not in l]
@@ -419,7 +442,10 @@ class TestWorkflowFile(unittest.TestCase):
         self.assertLess(step.index("gh pr create"), step.index("approve"))                         # approve after the PR exists
         self.assertIn('startswith("automation/yahoo-rosters-")', step)                             # only this workflow's own branches
         self.assertIn('gh pr close "$old" --delete-branch --comment "Superseded by #$new_pr', step)
-        self.assertNotIn("gh pr merge", step)
+        self.assertEqual(step.count("gh pr merge"), 1)
+        self.assertIn('gh pr merge "$new_pr" --auto --squash --delete-branch', step)               # GitHub merges only after the required checks pass
+        self.assertIn('if [ "$AUTOMERGE" = "true" ]; then\n            if gh pr merge', step)         # and only for the safe class
+        self.assertLess(step.index("actions/runs/$id/approve"), step.index("gh pr merge"))
         guard = self.yml.index("Only roster data and the generated site may have changed")
         self.assertLess(guard, self.yml.index("actions/runs/$id/approve"))                         # approval only after the path guard passed
 
@@ -462,15 +488,17 @@ class TestWorkflowFile(unittest.TestCase):
             self.skipTest("PyYAML not installed")
         doc = yaml.safe_load(self.yml)
         triggers = doc.get(True, doc.get("on"))                       # YAML 1.1 reads the key `on` as True
-        self.assertEqual(list(triggers), ["workflow_dispatch"])
-        self.assertEqual(doc["permissions"], {"contents": "write", "pull-requests": "write", "actions": "write"})
+        self.assertEqual(sorted(triggers), ["schedule", "workflow_dispatch"])
+        self.assertEqual(doc["permissions"], {"contents": "write", "pull-requests": "write", "actions": "write", "issues": "write"})
         self.assertEqual(list(doc["jobs"]), ["update"])
         names = [st.get("name") for st in doc["jobs"]["update"]["steps"]]
         self.assertEqual(names[0], "Checkout")
         self.assertEqual(names[0], "Checkout")
         self.assertEqual(sum(1 for st in doc["jobs"]["update"]["steps"] if st.get("if") == "always()"), 3)  # report, session cleanup, artifact upload
         self.assertEqual(triggers["workflow_dispatch"]["inputs"]["engine"]["options"], ["browser", "http"])
-        self.assertEqual(names[-1], "Open a pull request")
+        self.assertEqual(names[-3:], ["Open a pull request", 'Open or refresh the "needs attention" issue',
+                                      'Close the "needs attention" issue once the refresh recovers'])
+        self.assertEqual(triggers["workflow_dispatch"]["inputs"]["engine"]["default"], "http")
 
     def test_stress_tool_is_documented_and_never_touches_the_working_tree(self):
         with open(os.path.join(ROOT, "scripts", "stress_roster_tests.py"), encoding="utf-8") as f:

@@ -63,6 +63,10 @@ Do not autonomously decide:
 - canonical roster ownership changes based only on external metadata;
 - destructive correction of historical state.
 
+Exception (owner decision, 2026-10-30): the scheduled **Update Yahoo Rosters** workflow may auto-merge its own PR when it is `READY`,
+only changes roster data / the generated page, has no ownership change and passes validation and tests
+(`docs/YAHOO_ROSTER_WORKFLOW.md`). Agents in a session still never merge.
+
 Software/agents may surface evidence and propose changes. Humans
 approve governance/state changes.
 

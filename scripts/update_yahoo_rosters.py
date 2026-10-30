@@ -39,6 +39,7 @@ import season_state as ss  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+AUTOMERGE_MAX_CHANGES = 40  # adds + drops + IL moves in one capture; a bigger swing looks like a bad page, not a week of pickups
 LONG_TERM = ("O", "OUT", "INJ", "OFS")  # Yahoo statuses that mean out (config/roster_rules.json longTermInjured.outStatuses)
 FAILURE_HELP = {
     "AUTH_REQUIRED": "Yahoo returned a sign-in page or the stored session is unusable. Re-run `yahoo_rosters.py login` and "
@@ -91,6 +92,13 @@ def _fmt_cap(x):
 def _canonical_key(si, aliases, team_row):
     k, _how, _note = ir.resolve_player(si, aliases, team_row)
     return k
+
+
+def automerge_ok(outcome, d) -> bool:
+    """May the workflow merge this PR itself once its checks pass? Only a READY capture whose whole change is free-agent
+    adds / drops, IL moves and statuses (READY already excludes ownership changes, unreflected trades and import-blocking
+    problems) and is small enough to look like real activity rather than a broken page. Everything else waits for a human."""
+    return outcome == "READY" and not d["changedTeam"] and len(d["added"]) + len(d["dropped"]) + len(d["ilMoves"]) <= AUTOMERGE_MAX_CHANGES
 
 
 def double_checks(si_new, aliases, obs, snap, baseline_checks, new_state) -> dict:
@@ -318,6 +326,7 @@ def run(cfg, fetcher, out_dir, data_dir=ss.DATA_DIR, apply=False, regenerate=Fal
                           f"{len(d['lineupOnly'])} players only moved between bench and lineup slots, which does not affect ownership, "
                           "payroll or the checks. Nothing to do.", run_info), 0)
     outcome = "CONFLICT" if conflicts else "READY"
+    result["automerge"] = automerge_ok(outcome, d)
     report = build_report(outcome, obs, check, rec, dc, si2, baseline, new_state, conflicts, run_info)
     if outcome == "READY" and apply:
         before = protected_files(data_dir)
@@ -360,7 +369,8 @@ def main(argv=None, fetcher=None) -> int:
     finally:
         fetcher.close()
     write_outputs(os.environ.get("GITHUB_OUTPUT"), {"outcome": res["outcome"], "report": os.path.join(args.out, "report.md"),
-                                                    "snapshot": res.get("snapshot", ""), "flags": res.get("flags", 0)})
+                                                    "snapshot": res.get("snapshot", ""), "flags": res.get("flags", 0),
+                                                    "automerge": "true" if res.get("automerge") else "false"})
     print(f"{res['outcome']}: report at {os.path.relpath(os.path.join(args.out, 'report.md'), ROOT)}")
     if res.get("flags"):
         print(f"::notice title=Compliance flags::{res['flags']} roster / IL / anti-tank finding(s) for the commissioner. See the report (job summary); nothing was changed.")
