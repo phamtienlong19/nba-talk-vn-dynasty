@@ -44,11 +44,10 @@
       "OUT",
       "INJ",
       "OFS",
-      "SUSP",
-      "D"
+      "SUSP"
     ],
     "tradeEndDate": "2027-02-18",
     "tankCutoffDays": 14,
-    "source": "Yahoo league 85092 settings (owner paste, 2026-10-21): Roster Positions PG, SG, G, SF, PF, F, C, FC, Util, BN x3, IL x3 (= 15 spots); Trade End Date February 18, 2027; Allow Draft Pick Trades: Yes; Trade Review: Commissioner; Trade Reject Time: 2 days. The IL-eligible status list is inferred from the roster snapshots (IL players are Out, one Doubtful)."
+    "source": "Yahoo league 85092 settings (owner paste, 2026-10-21): Roster Positions PG, SG, G, SF, PF, F, C, FC, Util, BN x3, IL x3 (= 15 spots); Trade End Date February 18, 2027; Allow Draft Pick Trades: Yes; Trade Review: Commissioner; Trade Reject Time: 2 days. IL-eligible statuses follow Yahoo's basketball IL rule (owner paste, 2026-10-30): only Out (O) and Out For Season (OFS) qualify; Probable, Questionable and Doubtful do not. INJ and SUSP are kept from the earlier inference (Yahoo's text does not mention them)."
   }
 }
