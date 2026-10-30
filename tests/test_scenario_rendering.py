@@ -440,11 +440,11 @@ class TestRenderedCards(unittest.TestCase):
                     continue
                 m = re.search(r'<div class="player-row[^"]*il-row[^"]*"[^>]*>.*?<div class="nba">', card, re.S)
                 row = next(x for x in re.findall(r'<div class="player-row[^"]*il-row.*?<div class="nba">', card, re.S) if html_lib.unescape(r["name"]) in html_lib.unescape(x))
-                kind = "out" if r.get("status") in out else "soft" if r.get("status") in soft else "clear" if not r.get("status") else "other"
+                kind = "out" if (not r.get("status") or r.get("status") in out) else "soft" if r.get("status") in soft else "other"
                 self.assertRegex(row, r'<span class="st-chip il( held)?"', r["name"])
                 self.assertEqual('st-chip il held' in row, kind != "out", (r["name"], r.get("status")))      # held on IL, not out: the IL chip is dashed amber
                 self.assertEqual('st-after' in row, kind != "out", (r["name"], r.get("status")))               # and Yahoo's status (or HEALTHY) sits beside the name
-                self.assertEqual("HEALTHY" in row, kind == "clear", (r["name"], r.get("status")))
+                self.assertNotIn("HEALTHY", row)                                                                  # no status on IL = presumed hurt
 
     def test_a_rookie_on_another_roster_keeps_the_rookie_tag(self):
         """A drafted rookie who is no longer with the drafting team (traded or picked up) still wears the purple name AND the R tag."""

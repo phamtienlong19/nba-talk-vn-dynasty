@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-29T07:42:48Z
+Generated: 2026-10-30T08:37:54Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/il-status-and-staged-trade
-Commit: f08c9d6
+Branch: data/rosters-20261030
+Commit: 316a69f
 Base: main
 Working tree: dirty
 
@@ -55,4 +55,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/il-status-and-staged-trade` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `data/rosters-20261030` if not already done, then request human/ChatGPT review of this packet.
