@@ -29,9 +29,11 @@ for rule checks. Fairness, tank intent and penalties stay commissioner judgment 
    is undecided (expected: relegation-style zone, limits on top-3 picks for the worst teams, no consecutive No.1s). Model
    odds table, zone, exclusions and no-consecutive rule as config; show the current model as "2026–27 model". The ball allocation is unchanged
    for 2027 (see Backlog).
-4. **Ranking board with live keeper-salary math** (offseason): a manager re-ranks players, keeper salaries move with the
-   ranking, payroll / band room / legality update live. Client-side only, saved in the browser, never written to official
-   data. Needs the exact rank→keeper-salary function confirmed against `docs/CAP_MODEL.md` and how the league actually sets it.
+4. **Ranking board with live keeper-salary math** (offseason) — **BUILT as a What-If simulator (KEEPERS view)**, not a governance
+   layer: a manager re-ranks players, keeper salaries move with the ranking, payroll / band room / drop-rule flags update
+   live. Client-side only (URL + browser memory), never written to official data. Rule (owner, 2026-10-30): salary is set by a
+   player's ACTUAL descending rank (Yahoo projected $ sorted high to low), stored in `config/keeper_salary_by_rank.json`
+   (`scripts/keeper_rank_salary.py`). See `docs/WHAT_IF_MODE.md`. Still open: rookies / players outside the Top 300 are $0.
 
 ## Backlog (filed 2026-10-20; not scheduled)
 

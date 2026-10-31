@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-30T14:13:05Z
+Generated: 2026-10-31T06:58:24Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/roster-refresh-schedule
-Commit: 67c07f5
+Branch: feat/keeper-board
+Commit: 77ea194
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: none
-CI: no runs found for this branch
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/101 (OPEN)
+CI: validate: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,16 +27,32 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md                       |   29 +-
+ .github/workflows/update-yahoo-rosters.yml         |   64 +-
+ CLAUDE.md                                          |    4 +
+ ai_exchange/REVIEW_PACKET.md                       |   45 +-
+ config/keeper_salary_by_rank.json                  |  452 ++++++++
  config/roster_rules.json                           |    4 +-
+ config/trade_rules.json                            |    5 +-
  data/2026-27/rosters/index.json                    |   11 +-
  .../rosters/snapshots/RS-2026-10-30-9ea2295d.json  | 1213 ++++++++++++++++++++
  data/2026-27/unlisted_players.json                 |    8 +
- index.html                                         |   22 +-
- scripts/update_yahoo_rosters.py                    |    4 +-
+ docs/GOVERNANCE_ROADMAP.md                         |    8 +-
+ docs/WHAT_IF_MODE.md                               |   19 +
+ docs/YAHOO_ROSTER_WORKFLOW.md                      |   24 +-
+ index.html                                         |  216 +++-
+ scripts/keeper_rank_salary.py                      |   86 ++
+ scripts/update_yahoo_rosters.py                    |   16 +-
+ scripts/what_if.css                                |   13 +
+ scripts/what_if.py                                 |   33 +-
+ scripts/what_if_app.js                             |   86 +-
+ tests/test_keeper_board.py                         |  150 +++
+ tests/test_lottery_sim.py                          |   43 +
+ tests/test_qol.py                                  |   91 ++
  tests/test_scenario_rendering.py                   |   12 +-
- tests/test_season_ops.py                           |    4 +-
- 9 files changed, 1276 insertions(+), 31 deletions(-)
+ tests/test_season_ops.py                           |   15 +-
+ tests/test_update_yahoo_rosters.py                 |   48 +-
+ tests/test_yahoo_rosters.py                        |    4 +-
+ 25 files changed, 2590 insertions(+), 80 deletions(-)
 ```
 
 ## Validation
@@ -51,15 +67,31 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
+- .github/workflows/update-yahoo-rosters.yml
+- CLAUDE.md
 - ai_exchange/REVIEW_PACKET.md
+- config/keeper_salary_by_rank.json
 - config/roster_rules.json
+- config/trade_rules.json
 - data/2026-27/rosters/index.json
 - data/2026-27/rosters/snapshots/RS-2026-10-30-9ea2295d.json
 - data/2026-27/unlisted_players.json
+- docs/GOVERNANCE_ROADMAP.md
+- docs/WHAT_IF_MODE.md
+- docs/YAHOO_ROSTER_WORKFLOW.md
 - index.html
+- scripts/keeper_rank_salary.py
 - scripts/update_yahoo_rosters.py
+- scripts/what_if.css
+- scripts/what_if.py
+- scripts/what_if_app.js
+- tests/test_keeper_board.py
+- tests/test_lottery_sim.py
+- tests/test_qol.py
 - tests/test_scenario_rendering.py
 - tests/test_season_ops.py
+- tests/test_update_yahoo_rosters.py
+- tests/test_yahoo_rosters.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
@@ -72,4 +104,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/roster-refresh-schedule` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/keeper-board` if not already done, then request human/ChatGPT review of this packet.
