@@ -28,7 +28,7 @@ Current rows: `TXN-2026-001` CrazyCat ↔ HCMC, Morez Johnson Jr. ↔ Zion Willi
 `PROP-2026-001` Bsy ↔ sup fam and `PROP-2026-002` Bsy ↔ Thịnh (both COMPLETED, approved 2026-10-17 per the league
 owner; promoted in place with a `statusHistory`, dated to the 2026-10-18 report; no Yahoo time or id supplied). Bsy ↔ Thịnh
 is recorded in the only ownership-consistent direction (Bsy sends Wembanyama + Tyson): the approval did not state the
-direction, and "Bsy receives Wembanyama + Tyson" cannot execute because Bsy already owns them. No proposals are pending. `TRADE-F-AMEND` in
+direction, and "Bsy receives Wembanyama + Tyson" cannot execute because Bsy already owns them. `PROP-2026-003` Long con ↔ Thịnh (Anunoby, Jarrett Allen, Porziņģis for Clingan, Robert Williams III, Cason Wallace) is COMPLETED, confirmed official by the league owner on 2026-10-31 (dated to the report; the 10-31 snapshot still shows the pre-trade rosters, so it applies on top until Yahoo shows it). No proposals are pending. `TRADE-F-AMEND` in
 `trades.json` is VOID / WITHDRAWN, superseded by `TXN-2026-001`; `TRADE-F` and the
 2.07 selection are unchanged.
 

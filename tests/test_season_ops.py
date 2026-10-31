@@ -36,7 +36,20 @@ def draft_night(si):
     si = dict(si)
     si["rosterSnapshot"] = ss._load(os.path.join(ss.ROSTER_DIR, "snapshots", DRAFT_NIGHT + ".json"))
     si["unlistedPlayers"] = {}
+    si["seasonTxns"] = [_as_of_baseline(t) for t in si["seasonTxns"]]
+    si["tradeIndex"] = dict(si["tradeIndex"], **{t["txnId"]: t for t in si["seasonTxns"]})
     return si
+
+
+BASELINE_END = "2026-10-19T00:00:00Z"
+
+
+def _as_of_baseline(t):
+    """A trade executed after the baseline (it moves players picked up after draft night) is still a proposal here."""
+    if t.get("status") == "COMPLETED" and t.get("effectiveAt", "") > BASELINE_END:
+        t = dict(t, status="PROPOSED")
+        t.pop("effectiveAt", None)
+    return t
 
 
 class TempData:
@@ -61,6 +74,10 @@ class TempData:
                     os.remove(os.path.join(self.dir, "rosters", "snapshots", f))
             if os.path.exists(os.path.join(self.dir, "unlisted_players.json")):
                 os.remove(os.path.join(self.dir, "unlisted_players.json"))
+            txn_path = os.path.join(self.dir, "season_transactions.json")
+            txns = ss._load(txn_path)
+            txns["transactions"] = [_as_of_baseline(t) for t in txns["transactions"]]
+            ss._write(txn_path, txns)
         return self
 
     def __exit__(self, *a):
@@ -81,6 +98,16 @@ class TempData:
 def export_rows(si):
     cur = ss.season_state(si)
     return [[si["shorts"][f], k, "", ls.player_name(si, k), cur["slots"].get(k) or ""] for k, f in cur["playerOwner"].items()]
+
+
+def owners_after_pending(si):
+    """Snapshot ownership with the completed trades Yahoo has not shown yet applied (what the page must display)."""
+    owner = dict(ss.snapshot_owner(si["rosterSnapshot"]))
+    for t in ss.pending_completed(si):
+        for a in t["assets"]:
+            if a["type"] == "player":
+                owner[a["playerKey"]] = a["to"]
+    return owner
 
 
 class TestLayers(unittest.TestCase):
@@ -134,14 +161,14 @@ class TestLayers(unittest.TestCase):
         before = ss._load(ss.TXN_PATH)
         views = ss.enumerate_views(self.si)
         self.assertEqual(ss._load(ss.TXN_PATH), before)  # enumerating writes nothing
-        self.assertEqual(sorted(views), ["", "PROP-2026-003"])  # both Bsy trades are completed; the only thing left to simulate is the staged Long con / Thịnh trade
+        self.assertEqual(sorted(views), ["", "PROP-2026-003"])  # on the baseline the Long con / Thịnh trade is still to simulate
         cur = ss.season_state(self.si)
         for k, f in ((WEMBY, THINH), (TYSON, THINH), (JOKIC, BSY), (OSO, BSY)):
             self.assertEqual(cur["playerOwner"][k], f)                       # both completed trades are in the baseline
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
         live = ss.enumerate_views(ss.load_season(ls.load_inputs()))          # the page renders the live state
         self.assertEqual(data["official"]["teams"], live[""]["teams"])
-        self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
+        self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003"])
         for done in ("TXN-2026-001", "PROP-2026-001", "PROP-2026-002"):
             with self.assertRaises(ls.StateError):
                 ss.season_state(self.si, [done])                               # completed is not a scenario
@@ -307,7 +334,7 @@ class TestBsyTradesCompleted(unittest.TestCase):
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
         by = {t["id"]: t for t in data["trades"]}
         self.assertEqual((by["PROP-2026-001"]["status"], by["PROP-2026-002"]["status"]), ("COMPLETED", "COMPLETED"))
-        self.assertEqual(sorted(data["scenarios"]), ["", "PROP-2026-003"])
+        self.assertEqual(sorted(data["scenarios"]), [""])                      # every trade is completed: nothing left to simulate
         blob = json.dumps(data)
         for internal in ("statusHistory", "directionCheck", "not supplied", "relayed", "DISCREPANCY", "NOT specified", "RESOLVED_ASSUMED"):
             self.assertNotIn(internal, blob)
@@ -325,22 +352,23 @@ class TestVerifiedYahooImport(unittest.TestCase):
         snap = self.si["rosterSnapshot"]
         self.assertEqual(snap["kind"], "VERIFIED_IMPORT")
         self.assertIn("Yahoo Fantasy league 85092", snap["source"])
-        self.assertEqual(ss.pending_completed(self.si), [])
+        self.assertIn([t["txnId"] for t in ss.pending_completed(self.si)], ([], ["PROP-2026-003"]))   # until Yahoo shows the Long con / Thịnh trade
         self.assertEqual([t["txnId"] for t in ss.reflected_completed(self.si)][:3], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
 
     def test_reflected_trades_are_history_not_reapplied(self):
-        self.assertEqual(self.cur["playerOwner"], ss.snapshot_owner(self.si["rosterSnapshot"]))   # ownership = the snapshot
+        self.assertEqual(self.cur["playerOwner"], owners_after_pending(self.si))   # ownership = the snapshot (+ a completed trade Yahoo has not shown yet)
         self.assertEqual(self.cur["activeTradeIds"][:3], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])  # each once, in ledger order
         self.assertEqual(len(self.cur["activeTradeIds"]), len(set(self.cur["activeTradeIds"])))
         res = {r["tradeId"]: r for r in self.cur["tradeResults"]}
-        self.assertTrue(all(r["reflected"] and r["applied"] for r in res.values()))
+        pending = {t["txnId"] for t in ss.pending_completed(self.si)}
+        self.assertTrue(all(r["reflected"] and r["applied"] for k, r in res.items() if k not in pending))
         self.assertEqual((res["PROP-2026-001"]["teams"][BSY]["capBefore"], res["PROP-2026-001"]["teams"][BSY]["capAfter"]), (178, 175))
         self.assertEqual((res["PROP-2026-002"]["teams"][BSY]["capBefore"], res["PROP-2026-002"]["teams"][BSY]["capAfter"]), (175, 176))
         self.assertEqual(self.cur["history"]["player:" + JOKIC][0], {"tradeId": "PROP-2026-002", "from": THINH, "to": BSY})
 
     def test_counts_payroll_and_moves(self):
         # Rosters change with every Yahoo update; everything is derived from the CURRENT snapshot.
-        snap_owner = ss.snapshot_owner(self.si["rosterSnapshot"])
+        snap_owner = owners_after_pending(self.si)
         self.assertEqual(self.cur["playerOwner"], snap_owner)
         view = ss.season_view(self.si)["teams"]
         self.assertEqual(sum(v["count"] for v in view.values()), len(snap_owner))     # nobody appears or vanishes
@@ -591,8 +619,8 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class TestStagedLongConThinhTrade(unittest.TestCase):
-    """PROP-2026-003 is staged for the Trade Lab only (owner request, 2026-10-29): it is evidence, never state."""
+class TestLongConThinhTradeCompleted(unittest.TestCase):
+    """PROP-2026-003 is official (league owner, 2026-10-31): it applies on top of the snapshot until Yahoo shows it."""
 
     GETS_LC = {"OG Anunoby", "Jarrett Allen", "Kristaps Porziņģis"}
     GETS_THINH = {"Donovan Clingan", "Robert Williams III", "Cason Wallace"}
@@ -602,33 +630,29 @@ class TestStagedLongConThinhTrade(unittest.TestCase):
         cls.si = ss.load_season(ls.load_inputs())
         cls.txn = next(t for t in cls.si["seasonTxns"] if t["txnId"] == "PROP-2026-003")
 
-    def test_it_is_proposed_and_has_the_requested_six_players(self):
-        self.assertEqual(self.txn["status"], "PROPOSED")
-        self.assertNotIn("effectiveAt", self.txn)                                          # not executed, so not dated
+    def test_it_is_completed_and_has_the_requested_six_players(self):
+        self.assertEqual(self.txn["status"], "COMPLETED")
+        self.assertEqual([h["status"] for h in self.txn["statusHistory"]], ["PROPOSED", "COMPLETED"])
+        self.assertEqual(self.txn["effectiveAt"][:10], "2026-10-31")
+        self.assertNotIn("yahooTransactionId", self.txn)                                   # no invented Yahoo id
         to = {}
         for a in self.txn["assets"]:
             to.setdefault(a["to"], set()).add(a["name"])
         self.assertEqual(to, {"franchise-04": self.GETS_LC, "franchise-11": self.GETS_THINH})
 
-    def _still_valid(self):
-        """Rosters change daily (and the stress tool reshuffles them): the ownership checks apply only while the staged trade is executable."""
+    def test_the_players_are_on_their_new_teams(self):
         owner = ss.season_state(self.si)["playerOwner"]
-        if any(owner.get(a["playerKey"]) != a["from"] for a in self.txn["assets"]):
-            self.skipTest("a roster change made the staged trade stale: void or restage PROP-2026-003")
-        return owner
-
-    def test_every_player_starts_on_the_side_that_sends_him(self):
-        owner = self._still_valid()
         for a in self.txn["assets"]:
-            self.assertEqual(owner[a["playerKey"]], a["from"], a["name"])                  # direction is ownership-consistent
+            if a["playerKey"] in owner:                                                    # a player Yahoo has since dropped has no owner
+                self.assertEqual(owner[a["playerKey"]], a["to"], a["name"])
+        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], [])                 # nothing left to simulate
 
-    def test_only_the_scenario_view_moves_them_and_cooldowns_ignore_it(self):
-        cur = self._still_valid()
-        scn = ss.season_state(self.si, ["PROP-2026-003"])["playerOwner"]
-        for a in self.txn["assets"]:
-            self.assertEqual((cur[a["playerKey"]], scn[a["playerKey"]]), (a["from"], a["to"]), a["name"])
-        acq = tc.acquisitions(self.si)
-        self.assertFalse(any(k == a["playerKey"] and f == a["to"] for a in self.txn["assets"] for (k, f) in acq))  # staged: no acquisition yet
+    def test_it_is_applied_once_whether_or_not_yahoo_shows_it_yet(self):
+        res = {r["tradeId"]: r for r in ss.season_state(self.si)["tradeResults"]}
+        self.assertTrue(res["PROP-2026-003"]["applied"])
+        pending = [t["txnId"] for t in ss.pending_completed(self.si)]
+        self.assertEqual(bool(res["PROP-2026-003"].get("reflected")), "PROP-2026-003" not in pending)
+        self.assertEqual(ss.season_state(self.si)["activeTradeIds"].count("PROP-2026-003"), 1)
 
 
 class TestInjuryStatusPartition(unittest.TestCase):

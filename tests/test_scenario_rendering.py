@@ -126,7 +126,8 @@ def _dump(url):
 def _snapshot_label():
     snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
     d = datetime.date.fromisoformat(snap["verifiedAt"][:10])
-    return f"✓ ROSTERS {d.strftime('%b').upper()} {d.day}"
+    pending = len(ss.pending_completed(ss.load_season(ls.load_inputs())))        # completed trades Yahoo has not shown yet
+    return f"✓ ROSTERS {d.strftime('%b').upper()} {d.day}" + (f" · +{pending} TRADE" + "S" * (pending > 1) if pending else "")
 
 
 def _card(dom, short):
@@ -255,18 +256,17 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_trade_lab_separates_proposals_from_completed_trades(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertEqual(lab.count('class="tcard prop'), 1)           # only the staged Long con / Thịnh trade is pending
-        self.assertEqual(lab.count('<input type="checkbox">'), 1)
+        self.assertEqual(lab.count('class="tcard prop'), 0)           # every in-season trade is completed: nothing pending
+        self.assertEqual(lab.count('<input type="checkbox">'), 0)
         text = re.sub(r"<[^>]+>", " ", lab)
-        for name in ("OG Anunoby", "Jarrett Allen", "Porziņģis", "Donovan Clingan", "Robert Williams III", "Cason Wallace"):
-            self.assertIn(name, text)                                  # the six players of the staged trade
-        self.assertNotIn("No proposals", text)
-        for name in ("Stephon Castle", "Victor Wembanyama"):
+        self.assertIn("No proposals", text)
+        for name in ("OG Anunoby", "Donovan Clingan", "Stephon Castle", "Victor Wembanyama"):
             self.assertNotIn(name, text)                               # completed trades are not proposals
         self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
         self.assertNotIn("AMENDMENT", lab)                             # withdrawn: not actionable
         done = re.search(r'id="lab-done">(.*?)</details>', self.official, re.S).group(1)
-        self.assertEqual(done.count('class="tcard done'), 3)
+        self.assertEqual(done.count('class="tcard done'), 4)
+        self.assertIn("OG Anunoby", done)                             # the Long con / Thịnh trade, once official
         self.assertIn("Morez Johnson Jr.", done)
         self.assertIn("Stephon Castle", done)
         self.assertIn("Cedric Coward", done)
@@ -381,8 +381,10 @@ class TestRenderedCards(unittest.TestCase):
         snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
         want = {"O": "OUT", "Q": "Q", "P": "P"}
         seen = set()
+        owner = ss.season_state(self.si)["playerOwner"]
         for fid, rows in snap["teams"].items():                              # whatever the current snapshot says, card by card
             card = _card(self.official, self.si["shorts"][fid])
+            rows = [r for r in rows if owner.get(r.get("playerKey")) == fid]    # a completed trade Yahoo has not shown yet moves him
             chips = {html_lib.unescape(n).strip(): c for c, n in
                      re.findall(r'<span class="st-chip (?:st-[a-z]+|il(?: inel)?)"[^>]*>([^<]*)</span>([^<]*)', card)}
             for r in rows:
@@ -433,10 +435,11 @@ class TestRenderedCards(unittest.TestCase):
         snap = ls._load(os.path.join(ls.DATA_DIR, "rosters", ss._load(ss.ROSTER_INDEX)["current"]))
         out = set(ss._load(ss.RULES_PATH)["longTermInjured"]["outStatuses"])
         soft = set(ss._load(ss.RULES_PATH)["longTermInjured"]["ineligibleStatuses"])
+        owner = ss.season_state(self.si)["playerOwner"]
         for fid, rows in snap["teams"].items():
             card = _card(self.official, self.si["shorts"][fid])
             for r in rows:
-                if r.get("slot") not in ss.SLOTS_IL:
+                if r.get("slot") not in ss.SLOTS_IL or owner.get(r.get("playerKey")) != fid:
                     continue
                 m = re.search(r'<div class="player-row[^"]*il-row[^"]*"[^>]*>.*?<div class="nba">', card, re.S)
                 row = next(x for x in re.findall(r'<div class="player-row[^"]*il-row.*?<div class="nba">', card, re.S) if html_lib.unescape(r["name"]) in html_lib.unescape(x))

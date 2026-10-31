@@ -36,6 +36,12 @@ def perturb(seed: int) -> str:
     si = ss.load_season(i)
     snap = json.loads(json.dumps(si["rosterSnapshot"]))
     teams, fids = snap["teams"], list(snap["teams"])
+    for t in ss.pending_completed(si):                                          # the new capture shows the trades Yahoo had not yet
+        for a in t["assets"]:
+            if a["type"] == "player":
+                row = next(r for r in teams[a["from"]] if r["playerKey"] == a["playerKey"])
+                teams[a["from"]].remove(row)
+                teams[a["to"]].append(row)
 
     def rows():
         return [(f, r) for f in fids for r in teams[f]]

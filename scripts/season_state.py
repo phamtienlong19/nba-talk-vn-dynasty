@@ -191,6 +191,9 @@ def _replay_reflected(si: dict, official: dict) -> dict:
     done = reflected_completed(si)
     ids = {t["tradeId"] for t in done}
     for t in done:
+        for a in ls.trade_assets(t):                                            # a player picked up after the draft is not on the post-draft rosters:
+            if a["type"] == "player" and a["playerKey"] not in replay["playerOwner"]:   # the ledger says the sender had him
+                replay["playerOwner"][a["playerKey"]] = a["from"]
         res = ls._apply_trade(si, replay, t, ids)
         res["reflected"] = True
     replay["activeTradeIds"] = [t["tradeId"] for t in done]
