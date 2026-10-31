@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-10-30T16:17:55Z
+Generated: 2026-10-31T06:58:24Z
 
 ## Task
 Active Task
@@ -10,15 +10,15 @@ READY_FOR_REVIEW
 
 ## Git
 Branch: feat/keeper-board
-Commit: 53e6191
+Commit: 77ea194
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: none
-CI: no runs found for this branch
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/101 (OPEN)
+CI: validate: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -29,22 +29,30 @@ Fingerprint: FRESH
 ```
  .github/workflows/update-yahoo-rosters.yml         |   64 +-
  CLAUDE.md                                          |    4 +
- ai_exchange/REVIEW_PACKET.md                       |   29 +-
+ ai_exchange/REVIEW_PACKET.md                       |   45 +-
+ config/keeper_salary_by_rank.json                  |  452 ++++++++
  config/roster_rules.json                           |    4 +-
  config/trade_rules.json                            |    5 +-
  data/2026-27/rosters/index.json                    |   11 +-
  .../rosters/snapshots/RS-2026-10-30-9ea2295d.json  | 1213 ++++++++++++++++++++
  data/2026-27/unlisted_players.json                 |    8 +
+ docs/GOVERNANCE_ROADMAP.md                         |    8 +-
+ docs/WHAT_IF_MODE.md                               |   19 +
  docs/YAHOO_ROSTER_WORKFLOW.md                      |   24 +-
- index.html                                         |  117 +-
+ index.html                                         |  216 +++-
+ scripts/keeper_rank_salary.py                      |   86 ++
  scripts/update_yahoo_rosters.py                    |   16 +-
+ scripts/what_if.css                                |   13 +
+ scripts/what_if.py                                 |   33 +-
+ scripts/what_if_app.js                             |   86 +-
+ tests/test_keeper_board.py                         |  150 +++
  tests/test_lottery_sim.py                          |   43 +
  tests/test_qol.py                                  |   91 ++
  tests/test_scenario_rendering.py                   |   12 +-
  tests/test_season_ops.py                           |   15 +-
  tests/test_update_yahoo_rosters.py                 |   48 +-
  tests/test_yahoo_rosters.py                        |    4 +-
- 17 files changed, 1640 insertions(+), 68 deletions(-)
+ 25 files changed, 2590 insertions(+), 80 deletions(-)
 ```
 
 ## Validation
@@ -62,14 +70,22 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - .github/workflows/update-yahoo-rosters.yml
 - CLAUDE.md
 - ai_exchange/REVIEW_PACKET.md
+- config/keeper_salary_by_rank.json
 - config/roster_rules.json
 - config/trade_rules.json
 - data/2026-27/rosters/index.json
 - data/2026-27/rosters/snapshots/RS-2026-10-30-9ea2295d.json
 - data/2026-27/unlisted_players.json
+- docs/GOVERNANCE_ROADMAP.md
+- docs/WHAT_IF_MODE.md
 - docs/YAHOO_ROSTER_WORKFLOW.md
 - index.html
+- scripts/keeper_rank_salary.py
 - scripts/update_yahoo_rosters.py
+- scripts/what_if.css
+- scripts/what_if.py
+- scripts/what_if_app.js
+- tests/test_keeper_board.py
 - tests/test_lottery_sim.py
 - tests/test_qol.py
 - tests/test_scenario_rendering.py

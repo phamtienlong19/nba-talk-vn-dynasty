@@ -506,7 +506,13 @@ def build_keeper_board(si: dict, current: dict, assumptions: dict, rank_cfg: dic
         rows.sort(key=lambda r: (-r["c0"], r["n"]))
         teams.append({"id": fid, "short": t["short"], "name": ls.team_name(si, fid), "color": t["color"], "text": t["text"],
                       "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME, "players": rows})
-    return {"salaryByRank": rank_cfg["salaryByRank"], "order": rank_cfg["order"], "source": rank_cfg["source"],
+    names = {}
+    for k in rank_cfg["order"]:
+        try:
+            names[k] = ls.player_name(si, k)
+        except Exception:  # a ranked player the league data does not know: his key stands in
+            names[k] = k
+    return {"salaryByRank": rank_cfg["salaryByRank"], "order": rank_cfg["order"], "names": names, "source": rank_cfg["source"],
             "band": {"floor": policy["officialFloor"], "ceiling": policy["officialCeiling"], "near": assumptions["nearCeilingRoom"]},
             "keeperMax": assumptions["keeperMax"], "neverDrop": assumptions["neverDropAtOrAbove"], "reviewFrom": assumptions["reviewDropFrom"],
             "rosters": {k: si["rosterSnapshot"].get(k) for k in ("snapshotId", "verifiedAt")}, "teams": teams}
