@@ -231,11 +231,11 @@ class TestKeeperBoardPage(unittest.TestCase):
         self.assertLessEqual(r["kept"], board["band"]["ceiling"])
         self.assertEqual(r["tag"], len(expected))
         self.assertEqual(r["strip"], "−%d" % len(expected))
-        self.assertIn("Auto-adjusted", r["banner"])
+        self.assertIn("Auto-left out", r["banner"])
         off = self.drive(self.SETUP + """
           R.flag=document.querySelector('#wi-root .wi-kb-flag.bad')?document.querySelector('#wi-root .wi-kb-flag.bad').textContent:'';R.offn=info().filter(function(x){return x.off;}).length;""", qs=qs + "&fit=0")
         self.assertEqual(off["offn"], 0)                                                   # with the switch off nothing is removed ...
-        self.assertIn("Over the ceiling", off["flag"])                                     # ... and the breach is flagged instead
+        self.assertIn("Over by", off["flag"])                                     # ... and the breach is flagged instead
 
     def test_one_rank_move_reprices_every_player_in_between_on_every_team(self):
         board = self.board()
@@ -251,7 +251,7 @@ class TestKeeperBoardPage(unittest.TestCase):
           var d=document.querySelector('#wi-root .wi-kb-rip');R.sum=d?d.querySelector('summary').textContent:'';R.lines=d?d.querySelectorAll('.wi-kb-rl').length:0;
           R.lt=document.querySelectorAll('#wi-root .wi-kb-lt tbody tr').length;""" % k)
         self.assertEqual(r["lt"], 16)
-        self.assertIn("re-priced %d rostered player" % len(changed), r["sum"])
+        self.assertIn("re-priced %d player" % len(changed), r["sum"])
         self.assertIn("on %d team" % len({t for t, _ in changed}), r["sum"])
         self.assertEqual(r["lines"], len({t for t, _ in changed}))                         # one line per affected team
         self.assertGreater(len({t for t, _ in changed}), 1) if len({t for t, _ in changed}) > 1 else None
@@ -277,7 +277,7 @@ class TestKeeperBoardPage(unittest.TestCase):
         self.assertEqual(r["code"], [2, 5])                                                # a ranking code lands exactly
         self.assertEqual(r["opts1"], 2)                                                    # as its own set next to mine
         self.assertEqual(r["tweaked"], 9)                                                  # tweaking edits the imported copy
-        self.assertIn("your tweaks: 1", r["sub"])
+        self.assertIn("1 tweaked", r["sub"])
         self.assertTrue(r["hasReset"])
         self.assertEqual(r["reset"], 2)                                                    # "Reset to imported" goes back to what the friend sent
         self.assertNotEqual(r["mine"], 2)                                                  # my own ranking was never touched

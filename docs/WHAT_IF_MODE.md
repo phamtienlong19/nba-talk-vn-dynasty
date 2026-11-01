@@ -69,4 +69,6 @@ official, never written to league data.
   are labelled YOUR ASSUMPTION · NOT OFFICIAL and their links rebuild the same ranking.
 - Rosters are the latest verified snapshot (trades applied). Drafted rookies are not special-cased.
 
+**Layout (KEEPERS):** below 1100px everything stacks; from 1100px a sticky team rail (payroll meters against the band) sits left of the selected team; from 1500px a third column holds league impact and the last-move ripple. Copy is kept short: long explanations live behind tooltips and the "Not checked here" disclosure.
+
 Export hub catalog: all rosters, my roster, any one team (chips), cap table, top salaries, draft picks by team, injured list (out vs not IL-eligible), trades this season, standings and reverse order, lottery draw, the Trade Machine proposal (3 images) and, on KEEPERS, keeper plan, all plans, league impact, biggest salary swings and the ranking (top 60 + moved).
