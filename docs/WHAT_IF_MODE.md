@@ -68,3 +68,5 @@ official, never written to league data.
   the KEEPERS page the team's plan, all teams' plans, league impact, and the ranking (top 60 plus every player moved). Keeper exports
   are labelled YOUR ASSUMPTION · NOT OFFICIAL and their links rebuild the same ranking.
 - Rosters are the latest verified snapshot (trades applied). Drafted rookies are not special-cased.
+
+Export hub catalog: all rosters, my roster, any one team (chips), cap table, top salaries, draft picks by team, injured list (out vs not IL-eligible), trades this season, standings and reverse order, lottery draw, the Trade Machine proposal (3 images) and, on KEEPERS, keeper plan, all plans, league impact, biggest salary swings and the ranking (top 60 + moved).
