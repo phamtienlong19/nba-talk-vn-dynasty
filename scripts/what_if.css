@@ -209,3 +209,46 @@ body.kbb-open{overflow:hidden}.wi-reset.pri{background:var(--wi);border-color:va
 .kbb-row.just{animation:kbbjust 1.4s ease}@keyframes kbbjust{from{background:#ffe9a8}to{background:transparent}}
 .wi-kb td .kbb-rd{min-width:40px}.wi-kb td.num small{font:800 12px "Roboto Mono",ui-monospace,Menlo,monospace}
 .wi-kb-nc{margin:0 0 10px;padding:7px 11px;border-radius:8px;background:#f6f7fa;border:1px dashed #cdd5e3;font:500 12px/1.5 "Inter",Arial,sans-serif;color:#5b6678}.wi-kb-nc b{color:#12264d}
+/* ---- keepers view: rail / main / side layout, meters, salary bars ---- */
+.wi-kbx{display:grid;grid-template-columns:minmax(0,1fr);gap:14px 20px;align-items:start}
+.wi-kbx-main,.wi-kbx-side,.wi-kbx-rail{min-width:0}
+.wi-kbx .wi-kb-strip{margin:0}
+.kbx-meter{position:relative;display:block;height:6px;border-radius:3px;background:#e8ecf4;flex:1 1 40px;min-width:36px;overflow:visible}
+.kbx-meter .band{position:absolute;top:0;bottom:0;background:#cfe8da;border-radius:3px}
+.kbx-meter .fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#17734c;opacity:.85;max-width:100%}
+.kbx-meter.under .fill{background:#8b95a7}.kbx-meter.near .fill{background:#d9892b}.kbx-meter.over .fill{background:#c9362d}
+.kbx-meter .dot{display:none}.kbx-meter.off{background:repeating-linear-gradient(90deg,#e8ecf4 0 4px,#f4f6fa 4px 8px)}
+.kbx-meter.big{height:12px;border-radius:6px}.kbx-meter.big .band,.kbx-meter.big .fill{border-radius:6px}
+.kbx-meter.big .dot{display:block;position:absolute;top:-3px;width:4px;height:18px;margin-left:-2px;border-radius:2px;background:#12264d}
+.wi-kbx-meter{margin:0 0 12px}.wi-kbx-scale{display:flex;justify-content:space-between;margin-top:5px;font:600 10.5px "Inter",Arial,sans-serif;color:#7b8799}
+.wi-kb-tm{flex-wrap:wrap;row-gap:4px}.wi-kb-tm .kbx-meter{order:3;flex:1 0 100%}
+.wi-kb-tm.on{background:var(--wi-bg)}.wi-kb-tm:hover{border-color:var(--wi-line)}
+.wi-kb-hd h3{font-size:22px;letter-spacing:-.01em}.wi-kb-hd p{max-width:none;color:#5a6a8c}
+.wi-kbx .wi-stats{margin:0 0 10px}.wi-kbx .wi-stat{background:#fff;border:1px solid #e3e8f0;box-shadow:0 1px 0 rgba(18,38,77,.04)}
+.wi-kbx .wi-stat.bad{border-color:#e6a9a4;background:#fdf6f5}.wi-kbx .wi-stat.warn{background:#fffaf0;border-color:#f0cf8a}
+.wi-kb-nc{margin:0 0 10px;padding:0;border:0;background:none;font:500 12px/1.5 "Inter",Arial,sans-serif;color:#5b6678}
+.wi-kb-nc summary{cursor:pointer;display:inline-block;color:#7b8799;font-weight:700;font-size:11.5px;list-style:none}.wi-kb-nc summary::before{content:"ⓘ ";}
+.wi-kbx .wi-kb th{position:sticky;top:0;background:#fff;z-index:1;font:800 9.5px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;color:#8b95a7;border-bottom:2px solid #dce3ec;padding:8px}
+.wi-kb td{padding:6px 8px}.wi-kb tbody tr:hover td{background:#f7f9fd}.wi-kb tr.kept:hover td{background:#eaf0ff}
+.wi-kb td.wi-kb-cap{background-image:linear-gradient(90deg,rgba(74,86,200,.16) var(--w,0%),transparent var(--w,0%));background-repeat:no-repeat;min-width:72px}
+.wi-kb tr.kept td.wi-kb-cap{background-image:linear-gradient(90deg,rgba(74,86,200,.28) var(--w,0%),transparent var(--w,0%))}
+.wi-kb td:nth-child(4){width:100%}
+.wi-kb-rk{width:52px}.wi-kb-mv{opacity:.55}.wi-kb tr:hover .wi-kb-mv,.wi-kb-mv:focus{opacity:1}
+.wi-kb-rip,.wi-kb-lg{margin:0 0 12px}.wi-kbx-side .wi-kb-lt td,.wi-kbx-side .wi-kb-lt th{padding:5px 6px;font-size:12px}
+.wi-kbx-side .wi-kb-lt th{font-size:9.5px}
+@media(min-width:1100px){
+  .wi-kbx{grid-template-columns:200px minmax(0,1fr)}
+  .wi-kbx-rail{position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}
+  .wi-kbx .wi-kb-strip{grid-template-columns:1fr}
+  .wi-kbx-side{grid-column:2}
+}
+@media(min-width:1500px){
+  .wi-kbx{grid-template-columns:210px minmax(0,1fr) 380px}
+  .wi-kbx-side{grid-column:auto;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}
+  .wi-kbx .wi-stat b{font-size:26px}
+}
+@media(max-width:680px){.wi-kb-hd h3{font-size:19px}.wi-kb td.wi-kb-cap{min-width:56px}}
+.wi-kb td:nth-child(4),.wi-kb th:nth-child(4){text-align:left;font-family:"Inter",Arial,sans-serif}.wi-kb td:nth-child(4) b{font-weight:700;color:#12264d}
+.wi-kb td:nth-child(4) small{font-weight:500;color:#7b8799}
+.wi-kb td{font-family:"Inter",Arial,sans-serif}.wi-kb td.num{font-family:"Roboto Mono",ui-monospace,Menlo,monospace}
+.wi-kb-lt td.num{white-space:nowrap}

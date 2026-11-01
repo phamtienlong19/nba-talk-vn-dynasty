@@ -68,3 +68,5 @@ official, never written to league data.
   the KEEPERS page the team's plan, all teams' plans, league impact, and the ranking (top 60 plus every player moved). Keeper exports
   are labelled YOUR ASSUMPTION · NOT OFFICIAL and their links rebuild the same ranking.
 - Rosters are the latest verified snapshot (trades applied). Drafted rookies are not special-cased.
+
+**Layout (KEEPERS):** below 1100px everything stacks; from 1100px a sticky team rail (payroll meters against the band) sits left of the selected team; from 1500px a third column holds league impact and the last-move ripple. Copy is kept short: long explanations live behind tooltips and the "Not checked here" disclosure.
