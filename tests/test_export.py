@@ -61,6 +61,29 @@ class TestExportHub(unittest.TestCase):
         for label in ("Copy link", "Copy text", "Save"):
             self.assertIn(label, r["btns"])
 
+    def test_every_catalog_item_and_every_team_builds_images_and_text(self):
+        r = self.drive("""
+          var cat=NBA_EXPORT.catalog();R.ids=cat.map(function(i){return i.id;});R.bad=[];R.texts={};
+          cat.forEach(function(it){try{var pg=it.pages();if(!pg.length)R.bad.push(it.id+': empty');pg.forEach(function(p){if(!p.doc&&!p.cv)R.bad.push(it.id+': no doc');if(p.doc){var t=NBA_EXPORT.text(p.doc);if(!t||t.indexOf('undefined')>=0||t.indexOf('NaN')>=0)R.bad.push(it.id+': bad text');R.texts[it.id]=t;}});}catch(e){R.bad.push(it.id+': '+e);}});
+          document.getElementById('tb-export').click();R.chips=document.querySelectorAll('#ex-hub .ex-teams .tp-btn').length;
+          document.querySelector('#ex-hub .ex-teams .tp-btn').click();
+          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;},1800);""", wait=4000)
+        for want in ("rosters", "cap", "trades", "il", "salaries", "picks"):
+            self.assertIn(want, r["ids"])
+        self.assertEqual(r["bad"], [])
+        self.assertEqual(r["chips"], 16)                                                   # one chip per team
+        self.assertTrue(r["ov"])
+        self.assertIn("PLAYER", r["texts"]["salaries"])
+
+    def test_the_trade_machine_proposal_is_an_export_with_three_images(self):
+        r = self.drive("""
+          var it=NBA_EXPORT.catalog().filter(function(i){return i.id==='trade';})[0];R.has=!!it;
+          if(it){document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=trade]').click();
+            setTimeout(function(){var ov=document.getElementById('chk-imgov');R.tabs=ov?ov.querySelectorAll('.imgov-t').length:0;},2000);}""",
+                       qs="?check=478.p.5432~franchise-01", wait=4500)
+        self.assertTrue(r["has"])
+        self.assertEqual(r["tabs"], 3)                                                     # proposal, teams after, both
+
     def test_text_is_derived_from_the_same_document(self):
         r = self.drive("""
           var item=NBA_EXPORT.catalog().filter(function(i){return i.id==='cap';})[0];
