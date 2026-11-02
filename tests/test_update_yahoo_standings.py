@@ -455,10 +455,10 @@ class TestCommandLine(Base):
             before = uys.tree_digest(ss.DATA_DIR, exclude=())
             with redirect_stdout(io.StringIO()) as buf:
                 rc = uys.main(["--input", REAL_HTML, "--out", out, "--captured-at", SEEN])
-            self.assertIn(rc, (0,))
+            self.assertIn(rc, (0, 1))                                                          # 1 = STALE once a newer real update is published
             self.assertEqual(uys.tree_digest(ss.DATA_DIR, exclude=()), before)               # the repository's own data: untouched
             self.assertTrue(os.path.exists(os.path.join(out, "report.md")))
-            self.assertRegex(buf.getvalue(), r"(READY|NO_CHANGE): report at")
+            self.assertRegex(buf.getvalue(), r"(READY|NO_CHANGE|STALE): report at")
         finally:
             shutil.rmtree(out)
 
@@ -483,7 +483,7 @@ class TestCommandLine(Base):
             os.environ["GITHUB_OUTPUT"] = gh
             with redirect_stdout(io.StringIO()):
                 uys.main(["--input", REAL_HTML, "--out", out])
-            self.assertRegex(read(gh), r"outcome=(READY|NO_CHANGE)\n")
+            self.assertRegex(read(gh), r"outcome=(READY|NO_CHANGE|STALE)\n")      # the 10-26 page is STALE once the 11-02 update is published
         finally:
             os.environ.pop("GITHUB_OUTPUT", None)
             shutil.rmtree(out)
@@ -504,7 +504,7 @@ class TestCommandLine(Base):
             before = uys.tree_digest(ss.DATA_DIR, exclude=())
             with redirect_stdout(io.StringIO()):
                 rc = yr.main(["standings"], fetcher=Fake(), out_dir=out)
-            self.assertEqual(rc, 0)
+            self.assertIn(rc, (0, 1))                                                       # 1 = STALE: the fake serves the 10-26 page
             self.assertEqual(uys.tree_digest(ss.DATA_DIR, exclude=()), before)
         finally:
             uys.DEFAULT_OUT = old
