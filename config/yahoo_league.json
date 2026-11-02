@@ -24,5 +24,7 @@
   "requestDelaySeconds": 1.5,
   "leagueUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/",
   "season": "2026-27",
-  "standingsUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}?lhst=stand"
+  "standingsUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}?lhst=stand",
+  "matchupUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/matchup?week={week}&mid1={teamId}",
+  "matchupDateParam": "date=YYYY-MM-DD shows each player's slot and stat line for that day; the totals table is always the whole week"
 }
