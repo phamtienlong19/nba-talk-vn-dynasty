@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-01T15:58:56Z
+Generated: 2026-11-02T15:01:21Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/export-more
-Commit: 3e2bd52
+Branch: feat/live-matchups
+Commit: 2d8de13
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/111 (OPEN)
-CI: Claude Code Review: completed/success
+PR: none
+CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,12 +27,19 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md | 63 ++++++--------------------------------------
- docs/WHAT_IF_MODE.md         |  2 ++
- index.html                   | 45 ++++++++++++++++++++++++++++---
- scripts/what_if_app.js       |  7 +++++
- tests/test_export.py         | 23 ++++++++++++++++
- 5 files changed, 82 insertions(+), 58 deletions(-)
+ ai_exchange/REVIEW_PACKET.md                       |   66 +-
+ data/2026-27/rosters/index.json                    |   29 +-
+ .../rosters/snapshots/RS-2026-11-01-cd3eaa64.json  | 1217 ++++++++++++++++++++
+ .../rosters/snapshots/RS-2026-11-02-8964cc4c.json  | 1212 +++++++++++++++++++
+ .../rosters/snapshots/RS-2026-11-02-b17bd5ac.json  | 1206 +++++++++++++++++++
+ docs/PROJECT_CONTEXT.md                            |   90 ++
+ docs/WHAT_IF_MODE.md                               |    4 +
+ index.html                                         |  160 ++-
+ scripts/what_if.css                                |   43 +
+ scripts/what_if_app.js                             |   75 +-
+ tests/test_export.py                               |   23 +
+ tests/test_keeper_board.py                         |    8 +-
+ 12 files changed, 4007 insertions(+), 126 deletions(-)
 ```
 
 ## Validation
@@ -48,10 +55,17 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
 - ai_exchange/REVIEW_PACKET.md
+- data/2026-27/rosters/index.json
+- data/2026-27/rosters/snapshots/RS-2026-11-01-cd3eaa64.json
+- data/2026-27/rosters/snapshots/RS-2026-11-02-8964cc4c.json
+- data/2026-27/rosters/snapshots/RS-2026-11-02-b17bd5ac.json
+- docs/PROJECT_CONTEXT.md
 - docs/WHAT_IF_MODE.md
 - index.html
+- scripts/what_if.css
 - scripts/what_if_app.js
 - tests/test_export.py
+- tests/test_keeper_board.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
@@ -64,4 +78,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/export-more` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/live-matchups` if not already done, then request human/ChatGPT review of this packet.
