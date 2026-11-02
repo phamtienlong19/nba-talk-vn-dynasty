@@ -58,7 +58,9 @@ class TestStoredWeeks(unittest.TestCase):
                     if rows[a["teamId"]]["pct"] > rows[b["teamId"]]["pct"]:
                         self.assertLess(rows[a["teamId"]]["rank"], rows[b["teamId"]]["rank"])
         for t in yahoo_nov2():
-            self.assertEqual(rows[t["teamId"]]["gb"], t["gb"] or 0.0, t["yahooName"])              # games back from the division leader, as Yahoo prints it
+            self.assertEqual(rows[t["teamId"]]["gbDivision"], t["gb"] or 0.0, t["yahooName"])      # Yahoo's own figure is from the division leader
+            top = max(rows.values(), key=lambda r: (r["pct"], -r["rank"]))
+            self.assertEqual(rows[t["teamId"]]["gb"], ((top["w"] - rows[t["teamId"]]["w"]) + (rows[t["teamId"]]["l"] - top["l"])) / 2)   # ours: overall
 
 
 class TestTable(unittest.TestCase):
@@ -109,6 +111,16 @@ class TestPlayoffPicture(unittest.TestCase):
         self.assertEqual(pic["status"][4], "bubble")
         self.assertEqual(pic["status"][5], "bubble")
         self.assertEqual(pic["status"][1], "in")
+
+    def test_games_back_is_from_the_overall_leader_and_the_line_is_the_last_playoff_team(self):
+        spec = [(1, "West", 12, 6), (2, "West", 10, 8), (3, "West", 4, 14), (4, "East", 9, 9), (5, "East", 8, 10), (6, "East", 3, 15)]
+        rows = {r["teamId"]: r for r in self.rows(spec)}
+        self.assertEqual(rows[4]["gb"], 3.0)                                                          # (12-9 + 9-6)/2 from team 1, not from its East leader
+        pic = lst.playoff_picture(list(rows.values()), {"teams": 4})
+        self.assertEqual(pic["lineTeam"], 5)                                                          # the 4th team in
+        self.assertEqual(pic["gbLine"][5], 0.0)
+        self.assertEqual(pic["gbLine"][1], -4.0)                                                      # four games clear of the line
+        self.assertEqual(pic["gbLine"][3], 4.0)                                                       # four games behind
 
     def test_tied_division_leaders_are_marked(self):
         spec = [(1, "West", 10, 8), (2, "West", 10, 8), (3, "West", 2, 16), (4, "East", 9, 9), (5, "East", 1, 17), (6, "East", 0, 18)]

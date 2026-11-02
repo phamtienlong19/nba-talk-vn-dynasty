@@ -21,6 +21,7 @@
 .lv-t td.num,.lv-t th.num,.lv-r td.num,.lv-r th.num{text-align:right;font-family:"Roboto Mono",ui-monospace,Menlo,monospace}
 .lv-t td.mv{font:800 10.5px "Inter",Arial,sans-serif;width:30px}.mv.up{color:#17734c}.mv.down{color:#b4602a}
 .lv-t tr.cut td{border-top:2px dashed #c9362d}.lv-t tr.st-out td{color:#66748d}.lv-t tr.tied td:first-child{color:#9c4300}
+.lv-t td.line.ahead{color:#17734c}.lv-t td.line.behind{color:#b4602a}
 .lv-po{font:800 9.5px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;padding:3px 7px;border-radius:999px}
 .lv-po.in{background:#e4f6ec;color:#17734c}.lv-po.bubble{background:#fff4e0;color:#9c4300}.lv-po.out{background:#f1f3f7;color:#7b8799}
 .lv-foot{margin:8px 0 0;font:500 11.5px/1.45 "Inter",Arial,sans-serif;color:#7b8799}

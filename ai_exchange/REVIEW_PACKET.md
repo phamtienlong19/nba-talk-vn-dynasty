@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-02T15:36:19Z
+Generated: 2026-11-02T16:23:01Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/live-standings
-Commit: eddce54
+Branch: feat/live-tab
+Commit: 1351473
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: none
-CI: no runs found for this branch
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/117 (OPEN)
+CI: Claude Code Review: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -27,19 +27,31 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md                       |   78 +-
- config/yahoo_league.json                           |    4 +-
+ .github/workflows/update-live-data.yml             |   55 +
+ ai_exchange/REVIEW_PACKET.md                       |  108 +-
+ config/yahoo_league.json                           |   20 +-
+ data/2026-27/matchups/week-01.json                 |  556 +++++++++
+ data/2026-27/matchups/week-02.json                 |  556 +++++++++
  data/2026-27/rosters/index.json                    |   29 +-
  .../rosters/snapshots/RS-2026-11-01-cd3eaa64.json  | 1217 ++++++++++++++++++++
  .../rosters/snapshots/RS-2026-11-02-8964cc4c.json  | 1212 +++++++++++++++++++
  .../rosters/snapshots/RS-2026-11-02-b17bd5ac.json  | 1206 +++++++++++++++++++
- docs/LIVE_DATA.md                                  |   32 +
+ docs/LIVE_DATA.md                                  |   66 ++
  docs/PROJECT_CONTEXT.md                            |   90 ++
  docs/WHAT_IF_MODE.md                               |    4 +
- index.html                                         |  160 ++-
+ index.html                                         |  367 +++++-
+ scripts/build_live_feed.py                         |  125 ++
+ scripts/live.css                                   |   50 +
+ scripts/live_app.js                                |  140 +++
+ scripts/live_page.py                               |  116 ++
+ scripts/live_standings.py                          |  145 +++
+ scripts/stress_roster_tests.py                     |    2 +-
+ scripts/update_yahoo_matchups.py                   |   99 ++
+ scripts/update_yahoo_rosters.py                    |    2 +-
+ scripts/update_yahoo_standings.py                  |    2 +-
  scripts/what_if.css                                |   43 +
  scripts/what_if_app.js                             |   75 +-
- scripts/yahoo_matchups.py                          |  317 +++++
+ scripts/yahoo_matchups.py                          |  406 +++++++
  .../yahoo/matchups/week1_mid11_header.html         |    4 +
  .../yahoo/matchups/week1_mid13_header.html         |    4 +
  .../fixtures/yahoo/matchups/week1_mid1_header.html |    4 +
@@ -51,15 +63,19 @@ Fingerprint: FRESH
  .../fixtures/yahoo/matchups/week1_mid8_header.html |    4 +
  .../week2_mid16_mid4_date2026-11-01_full.html      |    5 +
  .../matchups/week3_mid8_not_started_full.html      |    5 +
+ .../yahoo/standings_2026-11-02_after_week2.json    |  181 +++
  tests/test_export.py                               |   23 +
  tests/test_keeper_board.py                         |    8 +-
+ tests/test_live_feed.py                            |  132 +++
+ tests/test_live_standings.py                       |  192 +++
+ tests/test_live_tab.py                             |  127 ++
  tests/test_yahoo_matchups.py                       |  150 +++
- 27 files changed, 4569 insertions(+), 126 deletions(-)
+ 43 files changed, 7416 insertions(+), 135 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
-- tests: PASS (keeper freeze is LOCKED -- baseline not regenerated (immutable).)
+- tests: PASS (FAILED: HTTP_404: https://basketball.fantasysports.yahoo.com/nba/85092/matchup?week=3&mid1=13 answered 404 (the previous feed stays up))
 - Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
 - live HTTP: OK
 
@@ -69,8 +85,11 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
+- .github/workflows/update-live-data.yml
 - ai_exchange/REVIEW_PACKET.md
 - config/yahoo_league.json
+- data/2026-27/matchups/week-01.json
+- data/2026-27/matchups/week-02.json
 - data/2026-27/rosters/index.json
 - data/2026-27/rosters/snapshots/RS-2026-11-01-cd3eaa64.json
 - data/2026-27/rosters/snapshots/RS-2026-11-02-8964cc4c.json
@@ -79,6 +98,15 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - docs/PROJECT_CONTEXT.md
 - docs/WHAT_IF_MODE.md
 - index.html
+- scripts/build_live_feed.py
+- scripts/live.css
+- scripts/live_app.js
+- scripts/live_page.py
+- scripts/live_standings.py
+- scripts/stress_roster_tests.py
+- scripts/update_yahoo_matchups.py
+- scripts/update_yahoo_rosters.py
+- scripts/update_yahoo_standings.py
 - scripts/what_if.css
 - scripts/what_if_app.js
 - scripts/yahoo_matchups.py
@@ -93,8 +121,12 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - tests/fixtures/yahoo/matchups/week1_mid8_header.html
 - tests/fixtures/yahoo/matchups/week2_mid16_mid4_date2026-11-01_full.html
 - tests/fixtures/yahoo/matchups/week3_mid8_not_started_full.html
+- tests/fixtures/yahoo/standings_2026-11-02_after_week2.json
 - tests/test_export.py
 - tests/test_keeper_board.py
+- tests/test_live_feed.py
+- tests/test_live_standings.py
+- tests/test_live_tab.py
 - tests/test_yahoo_matchups.py
 
 ## Issues
@@ -108,4 +140,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/live-standings` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/live-tab` if not already done, then request human/ChatGPT review of this packet.

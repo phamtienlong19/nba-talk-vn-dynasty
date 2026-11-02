@@ -7,8 +7,8 @@ progress), with ties, the playoff picture and the projected reverse order. DISPL
     playoff_picture(rows, cfg)        -> 8 seeds: both division leaders plus the best remaining records; ties at the line are marked
     projected_snapshot(rows, order)   -> a standings-snapshot-shaped dict for scripts/lottery_order.py (ties broken by `order`, marked)
 
-Rules used (docs/LIVE_DATA.md): a tie counts half (7-1-1 = .833, as Yahoo prints it); games back = ((division leader W - W) + (L - division leader L)) / 2,
-ties ignored (Yahoo measures it from the division leader); teams with equal records share a rank and are marked tied: Yahoo prints no regular-season tiebreaker and its order
+Rules used (docs/LIVE_DATA.md): a tie counts half (7-1-1 = .833, as Yahoo prints it); games back = ((leader W - W) + (L - leader L)) / 2 from the OVERALL leader
+(playoffs are seeded overall; Yahoo's own division-leader figure is kept as `gbDivision`), and `gbLine` = games behind the last playoff team; teams with equal records share a rank and are marked tied: Yahoo prints no regular-season tiebreaker and its order
 within ties does not follow head-to-head or points, so none is invented. The live table counts only categories that are already
 decided in the week in progress (a category with no attempts yet is skipped), and is always labelled PROVISIONAL.
 """
@@ -86,13 +86,11 @@ def table(official: dict, live: dict | None = None, divisions: dict | None = Non
         merged[tid] = {k: rec[k] + add[k] for k in ("w", "l", "t")}
     rows = _ranked(merged)
     leader = {}
-    for r in rows:                                                                   # Yahoo's games back is measured from the DIVISION leader
-        leader.setdefault((divisions or {}).get(r["teamId"]), r)
     for r in rows:
-        d = (divisions or {}).get(r["teamId"])
-        top = leader.get(d) if d is not None else rows[0]
-        r["gbOverall"] = r["gb"]
-        r["gb"] = ((top["w"] - r["w"]) + (r["l"] - top["l"])) / 2
+        leader.setdefault((divisions or {}).get(r["teamId"]), r)
+    for r in rows:                                                                   # `gb` is from the OVERALL leader: playoffs are seeded overall
+        top = leader.get((divisions or {}).get(r["teamId"])) if divisions else rows[0]
+        r["gbDivision"] = ((top["w"] - r["w"]) + (r["l"] - top["l"])) / 2             # Yahoo's own printed games back (division leader), for reference
     for r in rows:
         o = pos[r["teamId"]]
         r.update({"division": (divisions or {}).get(r["teamId"]), "officialRank": o["rank"], "officialRecord": [o["w"], o["l"], o["t"]],
@@ -131,7 +129,10 @@ def playoff_picture(rows: list, cfg: dict | None = None) -> dict:
                 status[r["teamId"]] = "bubble"
     qualified = [r for r in rows if status.get(r["teamId"]) == "in"]
     seeds = {r["teamId"]: i + 1 for i, r in enumerate(sorted(qualified, key=lambda r: (r["rank"], r["teamId"])))}
-    return {"spots": spots, "status": status, "seeds": seeds, "divisionLeaders": leaders, "divisionTie": sorted(div_tie), "linePct": line}
+    ref = max((r for r in rows if status.get(r["teamId"]) == "in"), key=lambda r: (r["rank"], r["teamId"]), default=None)   # the last team in
+    gb_line = {r["teamId"]: (((ref["w"] - r["w"]) + (r["l"] - ref["l"])) / 2 if ref else None) for r in rows}                  # + = behind the line
+    return {"spots": spots, "status": status, "seeds": seeds, "divisionLeaders": leaders, "divisionTie": sorted(div_tie), "linePct": line,
+            "gbLine": gb_line, "lineTeam": ref["teamId"] if ref else None}
 
 
 def projected_snapshot(rows: list, official_order: list | None = None, source_updated_at: str = "") -> dict:

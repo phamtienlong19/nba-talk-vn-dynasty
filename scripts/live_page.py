@@ -45,7 +45,7 @@ def fallback(data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR) -> dict:
     pic = lst.playoff_picture(rows, cfg.get("playoffs"))
     proj = lst.projected_snapshot(rows, order)
     table = [{"team": fid(r["teamId"]), "yahooId": r["teamId"], "name": None, "w": r["w"], "l": r["l"], "t": r["t"], "pct": r["pct"],
-              "rank": r["rank"], "tied": r["tied"], "gb": r["gb"], "division": r["division"], "officialRank": r["rank"],
+              "rank": r["rank"], "tied": r["tied"], "gb": r["gb"], "gbDivision": r["gbDivision"], "gbLine": pic["gbLine"].get(r["teamId"]), "division": r["division"], "officialRank": r["rank"],
               "officialRecord": [r["w"], r["l"], r["t"]], "moved": 0, "playoff": pic["status"].get(r["teamId"]), "seed": pic["seeds"].get(r["teamId"])}
              for r in rows]
     matchups = []

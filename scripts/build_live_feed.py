@@ -84,7 +84,7 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
     table = []
     for r in rows:
         table.append({"team": fid(r["teamId"]), "yahooId": r["teamId"], "name": names.get(r["teamId"]), "w": r["w"], "l": r["l"], "t": r["t"],
-                      "pct": r["pct"], "rank": r["rank"], "tied": r["tied"], "gb": r["gb"], "division": r["division"],
+                      "pct": r["pct"], "rank": r["rank"], "tied": r["tied"], "gb": r["gb"], "gbDivision": r["gbDivision"], "gbLine": pic["gbLine"].get(r["teamId"]), "division": r["division"],
                       "officialRank": r["officialRank"], "officialRecord": r["officialRecord"], "moved": r["moved"],
                       "playoff": pic["status"].get(r["teamId"]), "seed": pic["seeds"].get(r["teamId"])})
     matchups = []

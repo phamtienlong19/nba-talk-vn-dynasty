@@ -41,7 +41,7 @@ function standings(){
   var f=FEED,rows=f.table,live=SRC==="live"&&f.weekStatus==="LIVE";
   var box=h("section",{class:"lv-card lv-stand"},[h("div",{class:"lv-ct",text:live?"STANDINGS IF THE WEEK ENDED NOW":"STANDINGS"}),
     h("div",{class:"lv-cs",text:live?"Provisional. Equal records share a rank.":"Finished weeks. Equal records share a rank."})]);
-  var tb=h("table",{class:"lv-t"}),hd=h("tr");["#","","Team","W-L-T","Pct","GB","Playoffs"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=3&&i<6?"num":""}));});
+  var tb=h("table",{class:"lv-t"}),hd=h("tr");["#","","Team","W-L-T","Pct","GB","Line","Playoffs"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=3&&i<7?"num":"",title:i===5?"Games behind the overall leader":i===6?"Games ahead of (+) or behind (−) the last playoff spot":""}));});
   tb.appendChild(h("thead",null,[hd]));var body=h("tbody"),prevIn=null;
   rows.forEach(function(r,i){
     var tr=h("tr",{class:"st-"+(r.playoff||"")+(r.tied?" tied":""),"data-team":r.team});
@@ -52,10 +52,12 @@ function standings(){
     tr.appendChild(h("td",{class:"num",text:r.w+"-"+r.l+(r.t?"-"+r.t:"")}));
     tr.appendChild(h("td",{class:"num",text:pct(r.pct)}));
     tr.appendChild(h("td",{class:"num",text:r.gb?String(r.gb):"–"}));
+    var gl=r.gbLine==null?null:-r.gbLine;
+    tr.appendChild(h("td",{class:"num line "+(gl>0?"ahead":gl<0?"behind":""),text:gl==null?"":gl>0?"+"+gl:gl<0?"−"+(-gl):"0"}));
     tr.appendChild(h("td",null,[r.playoff==="in"?h("span",{class:"lv-po in",text:"IN"+(r.seed?" #"+r.seed:"")}):r.playoff==="bubble"?h("span",{class:"lv-po bubble",text:"BUBBLE"}):h("span",{class:"lv-po out",text:"OUT"})]));
     body.appendChild(tr);});
   tb.appendChild(body);box.appendChild(h("div",{class:"lv-wrap"},[tb]));
-  box.appendChild(h("div",{class:"lv-foot",text:"8 playoff teams: each division's winner plus the best records; seeded by overall record. Games back is from the division leader."}));
+  box.appendChild(h("div",{class:"lv-foot",text:"8 playoff teams: each division's winner plus the best records; seeded by overall record. Games back is from the overall leader; Line is the margin over the last playoff spot."}));
   return box;}
 function reverse(){
   var f=FEED,box=h("section",{class:"lv-card lv-rev"},[h("div",{class:"lv-ct",text:"PROJECTED REVERSE ORDER"}),h("div",{class:"lv-cs",text:"Worst record first. Not the draft order: the lottery and penalties still apply."})]);
