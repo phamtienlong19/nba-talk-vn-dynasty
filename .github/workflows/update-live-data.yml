@@ -1,0 +1,55 @@
+name: Update Live Data
+
+# The provisional live feed: this week's matchups, the standings if the week ended now, the playoff picture. Read-only GETs of Yahoo's
+# public matchup pages (no sign-in, no cookies), about 9 requests. It writes ONE file, live.json, to the `live-data` branch as a single
+# orphan commit (force-pushed, so that branch never grows). It never pushes to main, never opens a PR and never touches data/.
+# The page fetches it from raw.githubusercontent.com and falls back to the embedded official weeks. Details: docs/LIVE_DATA.md
+#
+# GitHub cron is UTC and best-effort (runs can slip or be skipped), so the page shows the feed's age and flags a stale one.
+#   NBA games land about 22:00-07:00 UTC; weekend afternoons about 16:00-22:00 UTC; Yahoo's day and the waiver run roll over at
+#   12:00 am Pacific = 08:00 UTC (07:00 UTC during US daylight time), so both of those minutes get a run.
+
+on:
+  schedule:
+    - cron: "*/15 22-23,0-6 * * *"
+    - cron: "*/15 16-21 * * 0,6"
+    - cron: "0 7-21 * * *"
+    - cron: "10 7,8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# A newer run replaces an older one that is still going.
+concurrency:
+  group: update-live-data
+  cancel-in-progress: true
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build the feed
+        run: python3 scripts/build_live_feed.py --out live.json
+
+      - name: Publish to the live-data branch (one orphan commit; main is untouched)
+        run: |
+          set -euo pipefail
+          out="$(mktemp -d)"
+          cp live.json "$out/live.json"
+          cd "$out"
+          git init -q -b live-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add live.json
+          git commit -q -m "live feed $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live-data

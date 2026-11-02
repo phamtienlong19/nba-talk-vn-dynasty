@@ -53,3 +53,14 @@ Golden check (2026-11-02): summed weeks 1-2 equal Yahoo's published standings fo
   seeding is by overall record. `playoff_picture` reserves one spot per division leader, fills the rest by record, and marks teams level
   with the last spot "bubble" and tied division leaders "divisionTie".
 - `projected_snapshot` feeds `scripts/lottery_order.py` (ties ordered by the official order as a stand-in, listed in `tiedRanks`).
+
+## Live feed and LIVE tab (phase 3)
+
+- `scripts/build_live_feed.py` builds `live.json` (week in progress: scores, rosters, standings if the week ended now, playoff picture,
+  projected reverse order). `.github/workflows/update-live-data.yml` runs it on a UTC schedule (every 15 min in game hours, hourly
+  otherwise, plus the Yahoo day/waiver rollover at 08:00 and 07:00 UTC) and force-pushes it as one orphan commit to the `live-data`
+  branch. It never touches main or `data/`.
+- The page (`scripts/live_page.py embed` -> LIVE block in index.html) fetches
+  `raw.githubusercontent.com/<repo>/live-data/live.json` (5-minute cache), shows its age in Bangkok time, flags a feed older than 75 min and
+  falls back to the embedded official finished weeks. The Teams tab gets a `LIVE ↓` order option once a feed has loaded.
+- Not in this phase: the Draft tab's lottery on the projected order, and the lineup-integrity evidence panel.
