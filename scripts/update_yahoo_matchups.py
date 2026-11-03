@@ -49,8 +49,17 @@ def fetch_page(cfg, fetcher, url, retries=2, sleep=time.sleep):
             e, url, _final, len(body or ""), (title.group(1).strip()[:80] if title else None)))
 
 
-def current_week(cfg, fetcher) -> int:
-    return fetch_page(cfg, fetcher, url_for(cfg))["week"]
+def _now():
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
+def current_week(cfg, fetcher=None) -> int:
+    """The league week now, counted from the season's first Monday (Pacific). Yahoo's no-week matchup page needs a sign-in
+    (anonymous it serves a page without the stats table), so the week is derived, then read back from a real week page."""
+    from zoneinfo import ZoneInfo
+    start = datetime.date.fromisoformat(cfg["seasonStartMonday"])
+    today = _now().astimezone(ZoneInfo("America/Los_Angeles")).date()
+    return max(1, min(20, (today - start).days // 7 + 1))
 
 
 def walk_week(cfg, week, fetcher, delay=None, sleep=time.sleep) -> list:

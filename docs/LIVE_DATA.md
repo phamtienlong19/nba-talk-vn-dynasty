@@ -64,3 +64,9 @@ Golden check (2026-11-02): summed weeks 1-2 equal Yahoo's published standings fo
   `raw.githubusercontent.com/<repo>/live-data/live.json` (5-minute cache), shows its age in Bangkok time, flags a feed older than 75 min and
   falls back to the embedded official finished weeks. The Teams tab gets a `LIVE ↓` order option once a feed has loaded.
 - Not in this phase: the Draft tab's lottery on the projected order, and the lineup-integrity evidence panel.
+
+## Fetching notes (2026-11-03)
+- Yahoo's no-week matchup page (`/matchup`) and the in-progress week's default view (`Live`) do not contain the category table
+  for an anonymous client. The feed therefore reads `matchup?date=totals&week=N&mid1=T`, which has the same table for finished
+  and in-progress weeks, and derives the current week from `seasonStartMonday` (Pacific) in `config/yahoo_league.json`.
+- A failed parse names the URL, final URL, size and page title in the error.
