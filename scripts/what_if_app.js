@@ -319,7 +319,7 @@ function viewFa(){
    A simulation. Nothing is written to league data; the URL and this browser remember it.
    Salary = the salary at a player's rank in the stored table (config/keeper_salary_by_rank.json), so one small rank move
    re-prices every player between the two ranks, on every team. */
-var KB={team:null,keep:{},sets:null,active:"mine",auto:true,loaded:false,uni:null,names:null,yrank:null,rank:null,last:null,msg:null,imp:false,lg:true},KB_LS="nbaTalkVN.keeperBoard",KB_MINE="My ranking";
+var KB={team:null,keep:{},sets:null,active:"mine",auto:true,loaded:false,uni:null,names:null,yrank:null,rank:null,last:null,msg:null,imp:false,lg:true,undo:[],redo:[],err:null},KB_LS="nbaTalkVN.keeperBoard",KB_MINE="My ranking";
 var KB_NOT_CHECKED=["prospect and young-player keep exceptions","positional tag minimums","IL cap treatment","commissioner approval of any drop"];
 function kbNewSets(){return {mine:{label:KB_MINE,pins:[],base:null}};}
 function kbSet(){if(!KB.sets)KB.sets=kbNewSets();if(!KB.sets[KB.active])KB.active="mine";return KB.sets[KB.active];}
@@ -370,9 +370,16 @@ function kbRipple(before,after){
   var teams=[],ids={};W.keeperBoard.teams.forEach(function(t){var rows=[];t.players.forEach(function(p){var a=kbSalaryAt(before[p.k]),b=kbSalaryAt(after[p.k]);if(a!==b)rows.push({k:p.k,n:p.n,a:a,b:b});});
     if(rows.length){rows.sort(function(x,y){return Math.abs(y.b-y.a)-Math.abs(x.b-x.a);});teams.push({t:t,rows:rows,net:rows.reduce(function(n,r){return n+r.b-r.a;},0)});}});
   return {teams:teams,players:teams.reduce(function(n,x){return n+x.rows.length;},0)};}
+function kbHist(){var set=kbSet();KB.undo.push({id:KB.active,pins:set.pins.map(function(x){return x.slice();})});if(KB.undo.length>20)KB.undo.shift();KB.redo=[];}
+function kbSwap(from,to){var h=from.pop();if(!h)return false;var set=KB.sets[h.id];if(!set)return kbSwap(from,to);
+  to.push({id:h.id,pins:set.pins.map(function(x){return x.slice();})});KB.active=h.id;set.pins=h.pins;KB.last=null;kbSave();return true;}
+function kbUndo(){return kbSwap(KB.undo,KB.redo);}
+function kbRedo(){return kbSwap(KB.redo,KB.undo);}
 function kbEdit(k,q){
-  if(q===""||q==null||!isFinite(+q))return false;  /* a blank or non-numeric entry is not a move (it used to land on rank 1) */
-  var before=KB.rank||kbRanking(),set=kbSet(),n=kbUniverse().length;q=Math.max(1,Math.min(n,Math.round(+q)));
+  var n=kbUniverse().length;
+  if(q===""||q==null||!isFinite(+q)){KB.err={k:k,msg:"Enter a rank from 1 to "+n};return false;}  /* a blank or non-numeric entry is not a move (it used to land on rank 1) */
+  KB.err=null;kbHist();
+  var before=KB.rank||kbRanking(),set=kbSet();q=Math.max(1,Math.min(n,Math.round(+q)));
   set.pins=set.pins.filter(function(x){return x[0]!==k;});set.pins.push([k,q]);
   var after=kbRanking();if(after[k]===KB.yrank[k]&&set.pins.length===1)set.pins=[];
   KB.last={k:k,from:before[k],to:after[k],rip:kbRipple(before,after)};kbSave();return true;}
@@ -415,7 +422,17 @@ function kbParseImport(text,label){
 function kbNorm(s){return String(s==null?"":s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\u0111/g,"d").replace(/\u0110/g,"d").toLowerCase().replace(/[.']/g,"").trim();}
 function kbSure(txt,fn,id,cls){var b=kbBtn(txt,function(){if(b.dataset.arm){fn();return;}b.dataset.arm="1";b.textContent="Click again to confirm";setTimeout(function(){if(b.isConnected){delete b.dataset.arm;b.textContent=txt;}},3000);},id,cls);return b;}
 function kbBtn(txt,fn,id,cls){var b=h("button",{type:"button",class:"wi-reset"+(cls?" "+cls:""),text:txt});if(id)b.id=id;b.addEventListener("click",fn);return b;}
-function kbRender(){S.animate=false;render();syncUrl();}
+var FINE=!(window.matchMedia&&matchMedia("(pointer:coarse)").matches);   /* drag-and-drop needs a mouse: touch screens get arrows and the number field only */
+function kbUndoKey(e,after){var t=e.target,typing=t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)&&t.type!=="checkbox";
+  if(typing||!(e.ctrlKey||e.metaKey)||String(e.key).toLowerCase()!=="z")return false;e.preventDefault();if(e.shiftKey?kbRedo():kbUndo())after();return true;}
+document.addEventListener("keydown",function(e){if(!S.on||S.view!=="keepers"||document.getElementById("kb-board")||document.querySelector(".imgov"))return;kbUndoKey(e,kbRender);});
+/* a full re-render rebuilds every control: put focus and sideways scroll back where they were (controls are found by their unique aria-label) */
+function kbKeep(){var a=document.activeElement,k=null;
+  if(a&&root.contains(a))k=a.id?"#"+a.id:a.getAttribute("aria-label")?'[aria-label="'+a.getAttribute("aria-label").replace(/"/g,'\\"')+'"]':null;
+  return {k:k,sl:[].map.call(root.querySelectorAll(".wi-kb-wrap,.wi-kb-strip"),function(e){return [e.scrollLeft,e.scrollTop];})};}
+function kbBack(m){[].forEach.call(root.querySelectorAll(".wi-kb-wrap,.wi-kb-strip"),function(e,i){if(m.sl[i]){e.scrollLeft=m.sl[i][0];e.scrollTop=m.sl[i][1];}});
+  if(m.k){var el=root.querySelector(m.k);if(el&&!el.disabled)try{el.focus({preventScroll:true});}catch(x){el.focus();}}}
+function kbRender(){var m=kbKeep();S.animate=false;render();kbBack(m);syncUrl();}
 function viewKeepers(){
   if(!KB.loaded)kbLoad();
   var kb=W.keeperBoard,t=kbTeam(),rank=kbRanking(),set=kbSet(),frag=document.createDocumentFragment(),b=kb.band,max=kb.keeperMax;
@@ -426,6 +443,8 @@ function viewKeepers(){
     h("p",{text:"Re-rank players, pick up to "+max+" keepers a team. Salary follows rank."})]),
     h("span",{class:"wi-kb-pill",text:"YOUR ASSUMPTION · NOT OFFICIAL"})]));
   /* 2. ranking set: mine / imported, import, share */
+  var tools=h("details",{class:"wi-kb-tools"},[h("summary",null,[h("span",{text:"Ranking tools"}),h("small",{text:set.label+(set.pins.length?" · "+set.pins.length+" moved":" · Yahoo's order")})])]);
+  if(KB.tools===undefined?!(window.matchMedia&&matchMedia("(max-width:680px)").matches):KB.tools)tools.setAttribute("open","");tools.addEventListener("toggle",function(){KB.tools=tools.open;});
   var bar=h("div",{class:"wi-kb-bar"}),sel=h("select",{id:"kb-set","aria-label":"Ranking set"});
   Object.keys(KB.sets).forEach(function(id){var o=h("option",{value:id,text:KB.sets[id].label+(KB.sets[id].pins.length?" · "+KB.sets[id].pins.length+" moved":"")});if(id===KB.active)o.selected=true;sel.appendChild(o);});
   sel.addEventListener("change",function(){KB.active=sel.value;KB.last=null;kbSave();kbRender();});
@@ -436,16 +455,17 @@ function viewKeepers(){
     var long=u.length>1800?" · long link, use Copy code":"";try{navigator.clipboard.writeText(u).then(function(){done("Copied"+long);},function(){done("Copy blocked");});}catch(e){done("Copy blocked");}},"kb-copy"));
   bar.appendChild(kbBtn("Copy code",function(){var u=kbCode(set);function done(m){var e=document.getElementById("kb-code");if(e){e.textContent=m;setTimeout(function(){e.textContent="Copy code";},1800);}}
     try{navigator.clipboard.writeText(u).then(function(){done("Copied");},function(){done("Copy blocked");});}catch(e){done("Copy blocked");}},"kb-code"));
-  if(set.pins.length)bar.appendChild(kbSure(set.base?"Reset to imported":"Reset to Yahoo order",function(){set.pins=set.base?set.base.slice():[];KB.last=null;kbSave();kbRender();},"kb-reset"));
+  if(set.pins.length)bar.appendChild(kbSure(set.base?"Reset to imported":"Reset to Yahoo order",function(){kbHist();set.pins=set.base?set.base.slice():[];KB.last=null;kbSave();kbRender();},"kb-reset"));
   if(KB.active!=="mine")bar.appendChild(kbSure("Delete",function(){delete KB.sets[KB.active];KB.active="mine";KB.last=null;kbSave();kbRender();},"kb-del","danger"));
-  frag.appendChild(bar);
+  tools.appendChild(bar);
   var diff=set.base?set.pins.filter(function(x){return !set.base.some(function(y){return y[0]===x[0]&&y[1]===x[1];})}).length+set.base.filter(function(y){return !set.pins.some(function(x){return x[0]===y[0]})}).length:0;
-  frag.appendChild(h("div",{class:"wi-kb-sub",text:(set.base?"Imported":"Yours")+" · "+(set.pins.length?set.pins.length+" moved off Yahoo's order":"Yahoo's order")+(set.base?(diff?" · "+diff+" tweaked":""):"")}));
+  tools.appendChild(h("div",{class:"wi-kb-sub",text:(set.base?"Imported":"Yours")+" · "+(set.pins.length?set.pins.length+" moved off Yahoo's order":"Yahoo's order")+(set.base?(diff?" · "+diff+" tweaked":""):"")}));
   if(KB.imp){var box=h("div",{class:"wi-kb-imp"}),ta=h("textarea",{id:"kb-paste",rows:"4",placeholder:"Paste a link, a code (KR1:…), or one player per line, best first (e.g. 1. Nikola Jokić)"}),nm=h("input",{type:"text",id:"kb-label",placeholder:"Name it (optional)",maxlength:"40"}),both=h("input",{type:"checkbox",id:"kb-withkeep"});
     var go=kbBtn("Import ranking",function(){var r=kbParseImport(ta.value,nm.value.trim());if(r.err){KB.msg=r.err;kbRender();return;}
       kbAddSet(r.label,r.pins);if(both.checked&&r.keep){var uu={};kbUniverse().forEach(function(x){uu[x]=1;});KB.keep[r.team||KB.team]=r.keep.filter(function(x){return uu[x];}).slice(0,max);if(r.team)KB.team=r.team;}
       KB.msg="Imported "+r.pins.length+" ranked player"+(r.pins.length===1?"":"s")+" as “"+r.label+"”"+(r.miss&&r.miss.length?"; not found: "+r.miss.slice(0,4).join(", ")+(r.miss.length>4?"…":""):"")+(r.dropped?"; "+r.dropped+" entr"+(r.dropped>1?"ies":"y")+" not recognised (players Yahoo no longer ranks or a damaged code)":"")+". Tweak it below; yours stays untouched.";KB.imp=false;KB.last=null;kbSave();kbRender();},"kb-do");
-    box.appendChild(ta);box.appendChild(h("div",{class:"wi-kb-impr"},[nm,h("label",{class:"wi-kb-chk"},[both,"also take their keeper picks (links only)"]),go,kbBtn("Cancel",function(){KB.imp=false;kbRender();},"kb-cancel")]));frag.appendChild(box);}
+    box.appendChild(ta);box.appendChild(h("div",{class:"wi-kb-impr"},[nm,h("label",{class:"wi-kb-chk"},[both,"also take their keeper picks (links only)"]),go,kbBtn("Cancel",function(){KB.imp=false;kbRender();},"kb-cancel")]));tools.appendChild(box);tools.setAttribute("open","");}
+  frag.appendChild(tools);
   if(KB.msg){frag.appendChild(h("div",{class:"wi-kb-msg",role:"status",text:KB.msg}));KB.msg=null;}
   /* 3. league strip: every team's plan at a glance */
   var strip=h("div",{class:"wi-kb-strip",role:"group","aria-label":"Teams"});
@@ -465,9 +485,9 @@ function viewKeepers(){
     h("div",{class:"wi-stat"},[h("b",{text:b.floor+"–"+b.ceiling}),h("span",{text:"BAND"})]),
     h("div",{class:"wi-stat "+(stt==="over"?"bad":stt==="near"?"warn":"ok")},[h("b",{text:txt}),h("span",{text:fit.pay>b.ceiling?"OVER":"ROOM"})])]));
   mainc.appendChild(h("div",{class:"wi-kbx-meter"},[kbMeter(fit.pay,b,true),h("div",{class:"wi-kbx-scale"},[h("span",{text:"floor "+b.floor}),h("span",{text:"ceiling "+b.ceiling})])]));
-  mainc.appendChild(h("details",{class:"wi-kb-nc"},[h("summary",{text:"Not checked here"}),KB_NOT_CHECKED.join(", ")+". Under the ceiling is not an approved declaration."]));
+  var nc=h("details",{class:"wi-kb-nc"},[h("summary",{text:"Not checked here"}),KB_NOT_CHECKED.join(", ")+". Under the ceiling is not an approved declaration."]);if(fit.off.length||fit.pay>b.ceiling)nc.setAttribute("open","");mainc.appendChild(nc);
   var ctl=h("div",{class:"wi-kb-fit"}),au=h("input",{type:"checkbox",id:"kb-auto"});au.checked=KB.auto;au.addEventListener("change",function(){KB.auto=au.checked;kbSave();kbRender();});
-  ctl.appendChild(h("label",{class:"wi-kb-chk"},[au,"Auto-keep compliant"]));
+  ctl.appendChild(h("label",{class:"wi-kb-chk"},[au,"Leave out players to stay under the ceiling"]));
   ctl.appendChild(help("kb-fit","If a rank move pushes your picks over the ceiling, the fewest players are left out (never "+kb.neverDrop+"+, review-band last, then worst-ranked). They return if room reappears; your picks are never rewritten."));
   mainc.appendChild(ctl);
   if(fit.off.length)mainc.appendChild(h("div",{class:"wi-kb-flag warn",role:"status",text:"Auto-left out: "+fit.off.map(kbName).join(", ")+" (to stay ≤ "+b.ceiling+")"}));
@@ -477,13 +497,19 @@ function viewKeepers(){
     if(nd.length)flags.push(["bad","Not kept, commissioner needed ("+kb.neverDrop+"+): "+nd.join(", ")]);
     if(rv.length)flags.push(["warn","Not kept, needs review: "+rv.join(", ")]);}
   if(flags.length){var fl=h("div",{class:"wi-kb-flags"});flags.forEach(function(f){fl.appendChild(h("div",{class:"wi-kb-flag "+f[0],text:f[1]}));});mainc.appendChild(fl);}
-  var tb=h("table",{class:"wi-table wi-kb"}),hd=h("tr");["Keep","Rank","vs Yahoo","Player","Cap","Cap Δ"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=4?"num":""}));});tb.appendChild(h("thead",null,[hd]));
+  var ur=h("div",{class:"wi-kb-ur"});
+  var ub=kbBtn("↶ Undo",function(){if(kbUndo())kbRender();},"kb-undo"),rb=kbBtn("↷ Redo",function(){if(kbRedo())kbRender();},"kb-redo");
+  ub.disabled=!KB.undo.length;rb.disabled=!KB.redo.length;ub.title="Undo the last rank change (Ctrl+Z)";rb.title="Redo (Ctrl+Shift+Z)";ur.appendChild(ub);ur.appendChild(rb);
+  if(KB.last)ur.appendChild(h("span",{class:"wi-kb-lastl",role:"status",text:kbName(KB.last.k)+" #"+KB.last.from+" → #"+KB.last.to+(KB.last.rip.players?": "+KB.last.rip.players+" player"+(KB.last.rip.players>1?"s":"")+" re-priced on "+KB.last.rip.teams.length+" team"+(KB.last.rip.teams.length>1?"s":""):": no salary changed")}));
+  mainc.appendChild(ur);
+  if(intent.length>=max)mainc.appendChild(h("div",{class:"wi-kb-hint",text:max+" of "+max+" keepers chosen: untick one to pick another."}));
+  var tb=h("table",{class:"wi-table wi-kb"}),hd=h("tr");["Keep","Player","Rank","vs Yahoo","Cap","Cap Δ"].forEach(function(x,i){hd.appendChild(h("th",{scope:"col",text:x,class:i>=4?"num":""}));});tb.appendChild(h("thead",null,[hd]));
   var body=h("tbody");
   rows.forEach(function(x){var p=x.p,isPick=intent.indexOf(p.k)>=0,off=!!offSet[p.k],tr=h("tr",{class:(effSet[p.k]?"kept":"")+(off?" autooff":""),"data-k":p.k});
-    var cb=h("input",{type:"checkbox","aria-label":"Keep "+p.n});cb.checked=isPick;if(!cb.checked&&intent.length>=max)cb.disabled=true;
+    var cb=h("input",{type:"checkbox","aria-label":"Keep "+p.n});cb.checked=isPick;if(!cb.checked&&intent.length>=max){cb.disabled=true;cb.title=max+" of "+max+" keepers chosen: untick one to pick "+p.n;}
     cb.addEventListener("change",function(){var a=(KB.keep[t.id]||[]).filter(function(k){return k!==p.k;});if(cb.checked)a.push(p.k);KB.keep[t.id]=a.slice(0,max);kbSave();kbRender();});
     var inp=h("input",{type:"number",class:"wi-kb-rk",min:"1",max:String(kbUniverse().length),value:String(x.rank),"aria-label":"Rank of "+p.n});
-    inp.addEventListener("change",function(){kbEdit(p.k,inp.value);kbRender();});
+    inp.addEventListener("change",function(){kbEdit(p.k,inp.value);kbRender();});inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();inp.blur();}});
     var up=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+p.n+" up one rank",text:"▲"}),dn=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+p.n+" down one rank",text:"▼"});
     up.addEventListener("click",function(){kbEdit(p.k,x.rank-1);kbRender();});dn.addEventListener("click",function(){kbEdit(p.k,x.rank+1);kbRender();});
     var moved=set.pins.some(function(q){return q[0]===p.k;}),nmc=h("td",null,[h("b",{text:p.n}),h("small",{text:" "+p.pos+(p.nba?" · "+p.nba:"")})]);
@@ -492,7 +518,9 @@ function viewKeepers(){
     if(off)nmc.appendChild(h("span",{class:"wi-kb-tag auto",title:"Picked, but left out automatically to keep the team under the ceiling",text:"AUTO-OFF"}));
     var s0=kbSalaryAt(y0[p.k]),dr=y0[p.k]-x.rank,sc=h("td",{class:"num wi-kb-cap",style:"--w:"+Math.min(100,Math.round(x.sal/(kbSalaryAt(1)||50)*100))+"%"},[h("span",{text:String(x.sal)})]),cd=h("td",{class:"num"},[s0!==x.sal?h("small",{class:"wi-kb-dl "+(x.sal>s0?"up":"down"),title:"Salary under Yahoo's order: "+s0,text:sgn(x.sal-s0)}):null]),
       rd=h("td",null,[dr?h("span",{class:"kbb-rd"+(dr>0?" up":" dn"),title:"Yahoo's order: #"+y0[p.k],text:(dr>0?"▲ ":"▼ ")+Math.abs(dr)}):null]);
-    tr.appendChild(h("td",null,[cb]));tr.appendChild(h("td",{class:"wi-kb-rkc"+(moved?" moved":"")},[inp,up,dn]));tr.appendChild(rd);tr.appendChild(nmc);tr.appendChild(sc);tr.appendChild(cd);body.appendChild(tr);});
+    var rkc=h("td",{class:"wi-kb-rkc"+(moved?" moved":"")},[inp,up,dn]);
+    if(KB.err&&KB.err.k===p.k){rkc.appendChild(h("small",{class:"wi-kb-err",role:"alert",text:KB.err.msg}));inp.setAttribute("aria-invalid","true");}
+    tr.appendChild(h("td",{class:"wi-kb-kc"},[cb]));tr.appendChild(nmc);tr.appendChild(rkc);tr.appendChild(rd);tr.appendChild(sc);tr.appendChild(cd);body.appendChild(tr);});
   tb.appendChild(body);mainc.appendChild(h("div",{class:"wi-kb-wrap"},[tb]));
   var act=h("div",{class:"wi-kb-act"});act.appendChild(kbBtn("Clear keepers",function(){KB.keep[t.id]=[];kbSave();kbRender();},"kb-clear"));mainc.appendChild(act);
   /* 5. ripple of the last move */
@@ -520,8 +548,10 @@ function viewKeepers(){
 var BD={open:false,q:"",team:"",moved:false,pos:"",drag:null,flash:{}};
 function kbFitsAll(rank){var f={};W.keeperBoard.teams.forEach(function(x){f[x.id]=kbFit(x,kbIntent(x),rank,KB.auto);});return f;}
 function kbOwnerCache(){if(KB.owner)return KB.owner;var o={};W.keeperBoard.teams.forEach(function(t){t.players.forEach(function(p){o[p.k]={t:t,p:p};});});KB.owner=o;return o;}
-function bdEdit(k,q){if(!kbEdit(k,q)){bdRender();return;}BD.flash={};if(KB.last)KB.last.rip.teams.forEach(function(g){BD.flash[g.t.id]=g.net;});bdRender();syncUrl();
-  var row=document.querySelector("#kb-board .kbb-row[data-k=\""+k+"\"]");if(row){row.classList.add("just");try{row.scrollIntoView({block:"center"});}catch(e){}}}
+function bdEdit(k,q){BD.refocus=document.activeElement&&document.activeElement.classList&&document.activeElement.classList.contains("kbb-rk");if(!kbEdit(k,q)){bdRender();return;}BD.flash={};if(KB.last)KB.last.rip.teams.forEach(function(g){BD.flash[g.t.id]=g.net;});bdRender();syncUrl();
+  var row=document.querySelector("#kb-board .kbb-row[data-k=\""+k+"\"]");if(row){row.classList.add("just");var list=row.closest(".kbb-list"),r=row.getBoundingClientRect(),lr=list?list.getBoundingClientRect():null;
+    if(lr&&(r.top<lr.top+30||r.bottom>lr.bottom))try{row.scrollIntoView({block:"center"});}catch(e){}   /* only when the row left the view */
+    var f=row.querySelector(".kbb-rk");if(f&&BD.refocus)try{f.focus({preventScroll:true});}catch(e){}BD.refocus=false;}}
 function bdRender(){
   var ov=document.getElementById("kb-board");if(!ov)return;var kb=W.keeperBoard,rank=kbRanking(),y0=kbRankOf([]),set=kbSet(),own=kbOwnerCache(),max=kb.keeperMax;
   var list=ov.querySelector(".kbb-list"),side=ov.querySelector(".kbb-side"),top=list.scrollTop;
@@ -530,12 +560,13 @@ function bdRender(){
     if(BD.team&&(!o||o.t.id!==BD.team))return false;if(BD.moved&&!moved[k])return false;
     if(BD.pos&&!(o&&String(o.p.pos||"").split("/").indexOf(BD.pos)>=0))return false;
     if(BD.q&&kbNorm(kbName(k)).indexOf(kbNorm(BD.q))<0)return false;return true;});
+  var fk=document.activeElement&&ov.contains(document.activeElement)&&document.activeElement.getAttribute("aria-label");
   list.textContent="";var frag=document.createDocumentFragment(),paid=kb.salaryByRank.length,cutA=false,cutB=false,shown=0;
   frag.appendChild(h("div",{class:"kbb-head"},[h("span"),h("span",{text:"RANK"}),h("span"),h("span",{text:"VS YAHOO",title:"How far you moved him from Yahoo's order"}),h("span",{text:"PLAYER"}),h("span",{text:"TEAM"}),h("span",{class:"r",text:"CAP",title:"Salary at his rank"}),h("span",{class:"r",text:"CAP Δ",title:"Change in salary against Yahoo's order"})]));
   rows.forEach(function(k){var rk=rank[k],o=own[k],sal=kbSalaryAt(rk),s0=kbSalaryAt(y0[k]);
     if(!cutB&&rk>144&&!BD.team&&!BD.q){cutB=true;if(rk>paid||true){}}
     if(!cutA&&rk>paid&&!BD.q&&!BD.team&&!BD.moved){cutA=true;frag.appendChild(h("div",{class:"kbb-cut"},[h("span",{text:"Salaries end here: ranks "+(paid+1)+" and below carry 0"})]));}
-    var tr=h("div",{class:"kbb-row"+(moved[k]?" moved":"")+(o?"":" fa")+(BD.team&&o&&o.t.id===BD.team?" mine":""),"data-k":k,draggable:"true"});
+    var tr=h("div",{class:"kbb-row"+(moved[k]?" moved":"")+(o?"":" fa")+(BD.team&&o&&o.t.id===BD.team?" mine":""),"data-k":k,role:"listitem",draggable:FINE?"true":"false"});
     var inp=h("input",{type:"number",class:"kbb-rk",min:"1",max:String(kbUniverse().length),value:String(rk),"aria-label":"Rank of "+kbName(k)});
     inp.addEventListener("change",function(){bdEdit(k,inp.value);});
     var up=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+kbName(k)+" up one rank",text:"▲"}),dn=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+kbName(k)+" down one rank",text:"▼"});
@@ -544,7 +575,7 @@ function bdRender(){
     if(o&&o.p.rk)nm.appendChild(h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));
     var dr=y0[k]-rk,rkd=h("span",{class:"kbb-rd"+(dr>0?" up":dr<0?" dn":""),title:dr?("Yahoo's order: #"+y0[k]+(dr>0?" · you moved him up "+dr:" · you moved him down "+(-dr))):"Same rank as Yahoo's order"},[dr?(dr>0?"▲ ":"▼ ")+Math.abs(dr):""]);
     var capd=h("span",{class:"kbb-cd"+(sal>s0?" up":sal<s0?" dn":""),title:s0!==sal?"Salary under Yahoo's order: "+s0:"Same salary as Yahoo's order"},[s0!==sal?sgn(sal-s0):""]);
-    tr.appendChild(h("span",{class:"kbb-grip",title:"Drag onto another row to take that rank",text:"⋮⋮"}));tr.appendChild(inp);tr.appendChild(h("span",{class:"kbb-arrows"},[up,dn]));tr.appendChild(rkd);tr.appendChild(nm);
+    tr.appendChild(h("span",{class:"kbb-grip","aria-hidden":"true",title:FINE?"Drag onto another row to take that rank":"",text:FINE?"⋮⋮":""}));tr.appendChild(inp);tr.appendChild(h("span",{class:"kbb-arrows"},[up,dn]));tr.appendChild(rkd);tr.appendChild(nm);
     tr.appendChild(o?h("span",{class:"kbb-own"},[tchip(o.t)]):h("span"));tr.appendChild(h("span",{class:"kbb-sal",text:String(sal)}));tr.appendChild(capd);
     tr.addEventListener("dragstart",function(e){BD.drag=k;tr.classList.add("drag");try{e.dataTransfer.setData("text/plain",k);e.dataTransfer.effectAllowed="move";}catch(x){}});
     tr.addEventListener("dragend",function(){BD.drag=null;tr.classList.remove("drag");});
@@ -553,6 +584,7 @@ function bdRender(){
     frag.appendChild(tr);shown++;});
   if(!shown)frag.appendChild(h("div",{class:"kbb-empty",text:"No players match."}));
   list.appendChild(frag);list.scrollTop=top;
+  if(fk){var fe=ov.querySelector('[aria-label="'+fk.replace(/"/g,'\\"')+'"]');if(fe&&fe!==document.activeElement)try{fe.focus({preventScroll:true});}catch(x){}}
   /* the 16 caps, live */
   side.textContent="";var fits=kbFitsAll(rank),b=kb.band;
   side.appendChild(h("div",{class:"kbb-st",text:"TEAM CAPS · TOP "+max+" PAYROLL"}));
@@ -566,9 +598,10 @@ function bdRender(){
   side.appendChild(h("div",{class:"kbb-note",text:"Band "+b.floor+"–"+b.ceiling+". Payroll is each team's "+max+" highest salaries under this ranking; the arrow is the change against Yahoo's order. Tap a team to show only its players."}));
   var cnt=ov.querySelector(".kbb-count");if(cnt)cnt.textContent=rows.length+" of "+kbUniverse().length+" players · "+set.pins.length+" moved";
 }
-function bdClose(){var ov=document.getElementById("kb-board");if(ov)ov.remove();BD.open=false;document.removeEventListener("keydown",bdEsc);document.body.classList.remove("kbb-open");KB.last=KB.last;kbRender();}
+function bdClose(){var ov=document.getElementById("kb-board");if(ov)ov.remove();BD.open=false;document.removeEventListener("keydown",bdEsc);document.body.classList.remove("kbb-open");KB.last=KB.last;kbRender();var b=document.getElementById("kb-board-btn");if(b)b.focus();}
 function bdEsc(e){
   if(document.querySelector(".imgov"))return;   /* an export dialog is open on top of the board: Tab and Esc are its own */
+  if(kbUndoKey(e,function(){BD.flash={};bdRender();syncUrl();}))return;
   if(e.key==="Tab"){var ov=document.getElementById("kb-board");if(ov){var f=[].slice.call(ov.querySelectorAll("button,input,select,[tabindex]")).filter(function(x){return !x.disabled&&x.offsetParent!==null;});
     if(f.length){var first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}else if(!ov.contains(document.activeElement)){e.preventDefault();first.focus();}}}return;}
   if(e.key==="Escape"){var t=e.target;if(t&&/^(INPUT|SELECT)$/.test(t.tagName)&&t.type==="search"&&t.value){t.value="";BD.q="";bdRender();}else bdClose();}}
@@ -581,10 +614,13 @@ function bdOpen(){
   var mv=h("input",{type:"checkbox",id:"kbb-moved"});mv.checked=BD.moved;mv.addEventListener("change",function(){BD.moved=mv.checked;bdRender();});
   var setSel=h("select",{id:"kbb-set","aria-label":"Ranking set"});Object.keys(KB.sets).forEach(function(id){var o=h("option",{value:id,text:KB.sets[id].label});if(id===KB.active)o.selected=true;setSel.appendChild(o);});
   setSel.addEventListener("change",function(){KB.active=setSel.value;KB.last=null;BD.flash={};kbSave();bdRender();syncUrl();});
-  var rs=kbSure("Reset ranks",function(){var s=kbSet();s.pins=s.base?s.base.slice():[];KB.last=null;BD.flash={};kbSave();bdRender();syncUrl();},"kbb-reset");
+  var rs=kbSure("Reset ranks",function(){kbHist();var s=kbSet();s.pins=s.base?s.base.slice():[];KB.last=null;BD.flash={};kbSave();bdRender();syncUrl();},"kbb-reset");
   var ex=kbBtn("Export",function(){if(window.NBA_EXPORT)window.NBA_EXPORT.hub();},"kbb-export");
+  var bu=kbBtn("↶",function(){if(kbUndo()){BD.flash={};bdRender();syncUrl();}},"kbb-undo"),br=kbBtn("↷",function(){if(kbRedo()){BD.flash={};bdRender();syncUrl();}},"kbb-redo");bu.title="Undo (Ctrl+Z)";br.title="Redo (Ctrl+Shift+Z)";bu.setAttribute("aria-label","Undo");br.setAttribute("aria-label","Redo");
   var x=h("button",{type:"button",class:"kbb-x","aria-label":"Close the rankings board",text:"✕"});x.addEventListener("click",bdClose);
-  ov.appendChild(h("div",{class:"kbb-hd"},[h("div",{class:"kbb-ti"},[h("b",{text:"RANKINGS BOARD"}),h("span",{text:"YOUR ASSUMPTION · NOT OFFICIAL"})]),h("label",{class:"wi-kb-lab"},[h("span",{text:"RANKING"}),setSel]),q,ts,ps,h("label",{class:"wi-kb-chk"},[mv,"Moved only"]),h("span",{class:"kbb-count"}),rs,ex,x]));
+  var fl=h("details",{class:"kbb-fl"},[h("summary",{text:"Filters"}),h("div",{class:"kbb-flb"},[ts,ps,h("label",{class:"wi-kb-chk"},[mv,"Moved only"])])]);   /* phones: the filters fold away; wide screens show them inline */
+  if(!(window.matchMedia&&matchMedia("(max-width:820px)").matches)||BD.team||BD.pos||BD.moved)fl.setAttribute("open","");
+  ov.appendChild(h("div",{class:"kbb-hd"},[h("div",{class:"kbb-ti"},[h("b",{text:"RANKINGS BOARD"}),h("span",{text:"YOUR ASSUMPTION · NOT OFFICIAL"})]),h("label",{class:"wi-kb-lab"},[h("span",{text:"RANKING"}),setSel]),q,fl,h("span",{class:"kbb-count"}),bu,br,rs,ex,x]));
   ov.appendChild(h("div",{class:"kbb-body"},[h("div",{class:"kbb-list",role:"list"}),h("aside",{class:"kbb-side","aria-label":"Team caps"})]));
   document.body.appendChild(ov);document.addEventListener("keydown",bdEsc);bdRender();q.focus();}
 /* ---------- exports of the keepers simulator: image, link and text for each ---------- */
@@ -653,5 +689,7 @@ function query(){return S.on?"?mode=whatif&view="+S.view+(S.sort!=="team"?"&sort
 function restore(qs){var v=qs.get("view");if(v==="same"||v==="redo"||v==="fa"||v==="now"||(v==="keepers"&&W.keeperBoard)){S.view=v;if(v==="keepers")kbRestore(qs);}var so=qs.get("sort");if(so)S.sort=so;var sn=qs.get("snap");if(sn&&W.snapshots[sn])S.snap=sn;}
 var css=document.createElement("style");css.textContent="@keyframes wi-flash{from{background-color:#dfe3ff}to{background-color:transparent}}.wi-card .player-row.flash{animation:wi-flash .7s ease}@media (prefers-reduced-motion:reduce){.wi-card .player-row.flash{animation:none}}";
 document.head.appendChild(css);
+(function(){var tb=document.querySelector(".topbar"),set=function(){if(tb)document.documentElement.style.setProperty("--wi-nav",tb.offsetHeight+"px");};   /* sticky panels sit below the site bar */
+  set();if(window.ResizeObserver&&tb)new ResizeObserver(set).observe(tb);window.addEventListener("resize",set);})();
 window.NBA_WHATIF={exports:function(){return S.view==="keepers"&&W.keeperBoard?kbExports():[];},openBoard:function(){if(W.keeperBoard)bdOpen();},openKeepers:function(){if(W.keeperBoard)S.view="keepers";return !!W.keeperBoard;},viewName:function(){return S.view;},setActive:setActive,isActive:function(){return S.on;},query:query,restore:restore,classify:classify,compliance:compliance,state:S};
 })();
