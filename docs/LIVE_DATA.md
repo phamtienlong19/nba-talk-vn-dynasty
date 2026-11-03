@@ -70,3 +70,15 @@ Golden check (2026-11-02): summed weeks 1-2 equal Yahoo's published standings fo
   for an anonymous client. The feed therefore reads `matchup?date=totals&week=N&mid1=T`, which has the same table for finished
   and in-progress weeks, and derives the current week from `seasonStartMonday` (Pacific) in `config/yahoo_league.json`.
 - A failed parse names the URL, final URL, size and page title in the error.
+
+## Lineup-integrity evidence (design, not built yet)
+Counts what `docs/LEAGUE_RULES_MODEL.md` ("AFK / lineup-integrity") already counts as a misset, from the day-closed `date=` lineup of each
+finished Yahoo day. Neutral wording, evidence for review, never a verdict. A "misset" day for a team is any of:
+1. **A healthy bench or IL-eligible player with a game, and a star (top-50 O-Rank) left on the bench** (benching a star).
+2. **A starting slot held by a player who is Out (O/INJ/SUSP/NA) while a healthy bench player with a game that day is eligible for that
+   slot** (position eligibility from the player's positions; Util takes anyone). The slot is wasted although a replacement was on the bench.
+3. **An empty starting slot while an eligible, healthy bench player had a game.**
+4. A long-term-injured (IL-status) player started on purpose.
+Per week the panel shows the days and players affected against the rule's thresholds (2+ days or 3+ players; 2 players if stars) and, in the
+last three weeks, the bench-games share against the late-season allowance. Caveat shown with the evidence: a status is what Yahoo showed at
+capture time, so a late scratch after the lineup locked looks like an Out starter; the commissioner decides.

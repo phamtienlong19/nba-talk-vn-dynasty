@@ -17,7 +17,13 @@ function noStats(r,vals){return !!OUT[r.st]&&(!vals||vals.every(function(v){retu
 function cell(x,key){return x==null?"–":(key==="fgPct"||key==="ftPct"?pct(x):String(x));}
 function lineOf(arr){var keys=FEED.lineKeys||OLD_KEYS;return arr?LINE.map(function(c){var i=keys.indexOf(c[0]);return i<0?null:arr[i];}):null;}
 function tcolor(fid){return (TM[fid]||{}).color||"#8b95a7";}
-function share(key,va,vb){var a=Number(va),b=Number(vb);if(!(a>=0)||!(b>=0)||a+b===0)return 50;return Math.round(100*(key==="to"?b:a)/(a+b));}
+function num(key,stats){if(key==="fgPct"||key==="ftPct"){var p=stats[key==="fgPct"?"fg":"ft"];return p&&p[1]?p[0]/p[1]:null;}var v=stats[key];return v==null?null:Number(v);}
+function share(key,a,b){   /* the left side's share of the bar: a ratio for counting stats, the gap for percentages (a ratio makes .477 v .375 look level) */
+  if(a==null||b==null)return 50;
+  if(key==="fgPct"||key==="ftPct")return Math.round(50+50*Math.max(-1,Math.min(1,(a-b)/0.2)));
+  if(a+b===0)return 50;return Math.round(100*(key==="to"?b:a)/(a+b));}
+function margin(key,a,b){if(a==null||b==null||a===b)return "";var d=Math.abs(a-b);return (key==="fgPct"||key==="ftPct")?"+"+d.toFixed(3).replace(/^0/,""):"+"+d;}
+function volume(key,stats){var p=(key==="fgPct"||key==="ftPct")&&stats[key==="fgPct"?"fg":"ft"];return p&&p[1]?p[0]+"/"+p[1]:"";}
 
 function h(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==="class")e.className=attrs[k];else if(k==="text")e.textContent=attrs[k];else e.setAttribute(k,attrs[k]);}
   (kids||[]).forEach(function(c){if(c!=null)e.appendChild(typeof c==="string"?document.createTextNode(c):c);});return e;}
@@ -95,8 +101,9 @@ function matchup(m){
     h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(m.score[1])}),chip(b.team)])]);card.appendChild(mh);
   var grid=h("div",{class:"lv-cats"});
   CATS.forEach(function(c){var w=m.cats[c[0]],va=val(c[0],a.stats[c[0]],a.stats),vb=val(c[0],b.stats[c[0]],b.stats);
-    var row=h("div",{class:"lv-c "+(w==="a"?"wa":w==="b"?"wb":w==="t"?"wt":"")},[h("span",{class:"va",text:va}),h("span",{class:"cl",text:c[1]}),h("span",{class:"vb",text:vb})]);
-    var tug=h("i",{class:"tug"});tug.style.setProperty("--p",share(c[0],a.stats[c[0]],b.stats[c[0]])+"%");row.appendChild(tug);grid.appendChild(row);});
+    var na=num(c[0],a.stats),nb=num(c[0],b.stats),mg=margin(c[0],na,nb),vola=volume(c[0],a.stats),volb=volume(c[0],b.stats);
+    var row=h("div",{class:"lv-c "+(w==="a"?"wa":w==="b"?"wb":w==="t"?"wt":"")},[h("span",{class:"va"},[va,vola?h("small",{text:vola}):null]),h("span",{class:"cl"},[c[1],mg?h("small",{class:"mg",text:w==="a"?"◂ "+mg:w==="b"?mg+" ▸":mg,title:"Lead in "+c[1]+(c[0]==="to"?" (fewer is better)":"")}):null]),h("span",{class:"vb"},[vb,volb?h("small",{text:volb}):null])]);
+    var tug=h("i",{class:"tug"});tug.style.setProperty("--p",share(c[0],na,nb)+"%");row.appendChild(tug);grid.appendChild(row);});
   card.appendChild(grid);
   var tp=function(s){var n=s.toPlay||{upcoming:0,live:0};return n.upcoming+n.live;};
   card.appendChild(h("div",{class:"lv-tp"},[h("span",{text:tp(a)+" to play"}),h("span",{text:tp(b)+" to play"})]));

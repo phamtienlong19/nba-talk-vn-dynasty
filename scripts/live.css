@@ -103,3 +103,8 @@
 .lv-r tr.rk td.nm b{color:#5d2796}.lv-r tr.rk.off td.nm b{color:#7a52a8}
 .lv-rk{display:inline-block;margin-left:5px;padding:1px 4px;border-radius:4px;background:#efe6fb;color:#5d2796;font:800 9px/1.2 "Inter",Arial,sans-serif;letter-spacing:0;vertical-align:1px}
 @media(max-width:680px){.lv-det summary small{display:none}.lv-bar{margin:6px -8px 0;padding:7px 8px}.lv-det summary{margin:-8px -8px 0}}
+
+/* ---- category rows: made/attempted under a percentage, the lead under the label ---- */
+.lv-c .va small,.lv-c .vb small{display:block;font:500 10px "Roboto Mono",ui-monospace,Menlo,monospace;color:#9aa5b8;letter-spacing:0}
+.lv-c .cl small.mg{display:block;margin-top:1px;font:600 9.5px "Roboto Mono",ui-monospace,Menlo,monospace;color:#7b8799;letter-spacing:0}
+.lv-c{padding-bottom:9px}
