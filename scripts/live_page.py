@@ -25,6 +25,7 @@ import yahoo_standings as ys  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 APP_JS, APP_CSS = os.path.join(HERE, "live_app.js"), os.path.join(HERE, "live.css")
+ROTO_JS = os.path.join(HERE, "live_roto.js")
 INDEX_HTML = os.path.join(ls.REPO_ROOT, "index.html")
 BEGIN, END = "<!--LIVE-BEGIN-->", "<!--LIVE-END-->"
 LEAGUE_BEGIN = "<!--LEAGUE-DATA-BEGIN-->"
@@ -77,9 +78,11 @@ def render_block(data: dict) -> str:
         js = f.read()
     with open(APP_CSS, encoding="utf-8") as f:
         css = f.read()
+    with open(ROTO_JS, encoding="utf-8") as f:
+        roto_js = f.read()
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     return (BEGIN + SECTION_HTML + '<style id="live-css">' + css + "</style>" + '<script type="application/json" id="live-data">' + blob + "</script>"
-            + '<script id="live-app">' + js + "</script>" + END + "\n")
+            + '<script id="live-roto">' + roto_js + "</script>" + '<script id="live-app">' + js + "</script>" + END + "\n")
 
 
 def _end(html: str) -> int:

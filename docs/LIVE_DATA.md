@@ -105,3 +105,12 @@ the latest day with a started game fresh on every build. Feed fields: per player
 scores), `d`/`dm`/`dfg`/`dft`/`ds` (that day's line, minutes, made/attempted, slot); per matchup `day` (the starters' category inputs and
 winners for that day, our arithmetic, not Yahoo's score). The page's Week totals / Day switch changes the category rows, the score and the rosters
 together and labels the card WEEK TOTALS or DAY. The first build after a deploy fetches every closed day of the week (up to ~100 requests, once).
+
+## Roto, raw stats and all-play (built, week in progress)
+The LIVE tab has a view strip `Matchups | Roto | Raw stats | All-play`, shown once the week has numbers. They are descriptive only (the league is
+head-to-head; the standings are W-L-T) and are computed on the page from the feed's `matchups[].teams[].stats` of all 16 teams, so they refresh with the
+feed and add no Yahoo requests. Roto: each category ranks the 16 teams, 16 points for the best, 1 for the worst (fewer turnovers is better), level
+teams share the average (two at the bottom score 1.5); total = roto score, rank = competition rank. All-play: each team against every other,
+category by category. `scripts/roto.py` is the reference, `scripts/live_roto.js` the page's port, and `tests/test_roto.py` holds both to the
+owner's week-2 report package (`tests/fixtures/roto_week2_package.json`: stats and expected points, totals, ranks and every all-play cell).
+Yahoo corrects stats after a week closes (the stored week 2 differs from the package by five single-unit numbers), so roto points are as of the feed.

@@ -8,7 +8,7 @@ if(!dataEl||!root)return;
 var B=JSON.parse(dataEl.textContent),TM={},RK={};
 (B.rookies||[]).forEach(function(id){RK[id]=1;});
 B.teams.forEach(function(t){TM[t.id]=t;});
-var VIEW="week",FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
+var PANE="matchups",PICK=null,VIEW="week",FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
 var LINE=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","STL"],["blk","BLK"],["to","TO"]];   /* display order */
 var OLD_KEYS=["pts","reb","ast","st","blk","tpm","to","fgPct","ftPct"];   /* the order of a feed built before lineKeys existed */
@@ -158,6 +158,69 @@ function matchup(m){
   m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate,VIEW)])]);cols.appendChild(rc);});
   det.appendChild(bar);det.appendChild(cols);card.appendChild(det);return card;}
 
+/* ---------- roto / raw stats / all-play (descriptive, for the week in progress: the league is head-to-head) ---------- */
+var PANES=[["matchups","Matchups"],["roto","Roto"],["stats","Raw stats"],["allplay","All-play"]];
+function rotoData(){   /* {yahooId: stats} for all 16 teams from the matchups, once the week has numbers */
+  if(SRC!=="live"||FEED.weekStatus!=="LIVE"||!window.NBA_ROTO)return null;
+  var st={},side={},opp={},act={};
+  FEED.matchups.forEach(function(m){var a=m.teams[0],b=m.teams[1];
+    [a,b].forEach(function(t,i){st[t.yahooId]=t.stats;side[t.yahooId]={team:t.team,printed:t.printed,wins:m.score[i],stats:t.stats};});
+    opp[a.yahooId]=b.yahooId;opp[b.yahooId]=a.yahooId;});
+  var ids=Object.keys(st);if(ids.length!==16)return null;
+  return {stats:st,side:side,opp:opp,roto:NBA_ROTO.roto(st),ap:NBA_ROTO.allPlay(st)};}
+function heat(p){return "h"+Math.max(-3,Math.min(3,Math.round((p-8.5)/2.5)));}   /* points 1..16 -> colour step -3..3 */
+function pts(p){return p==null?"–":(Math.round(p*2)/2).toString();}
+function paneNote(R){return h("div",{class:"lv-note"},["Week "+FEED.week+", as of "+ict(FEED.asOf)+". Descriptive only: this league is head-to-head, so the standings are W-L-T. Yahoo stat corrections can change these numbers."]);}
+function nameOf(id){var t=TM[id];return t?t.short:id;}
+function rotoPane(R){
+  var ids=Object.keys(R.roto).map(Number).sort(function(a,b){return R.roto[a].rank-R.roto[b].rank||a-b;}),mt=me();
+  var t=h("table",{class:"lv-ro"}),hd=h("tr");["Team"].concat(CATS.map(function(c){return c[1];}),["Total","Rank"]).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i?"num":""}));});
+  t.appendChild(h("thead",null,[hd]));var tb=h("tbody");
+  ids.forEach(function(id){var r=R.roto[id],tr=h("tr",{class:R.side[id].team===mt?"me":""});
+    tr.appendChild(h("td",{class:"tm"},[chip(R.side[id].team)]));
+    CATS.forEach(function(c){var p=r.points[c[0]];tr.appendChild(h("td",{class:"num "+(p==null?"":heat(p)),text:pts(p)}));});
+    var tot=r.total;tr.appendChild(h("td",{class:"num tot "+heat(tot/9),text:pts(tot)}));
+    var tied=ids.filter(function(u){return R.roto[u].rank===r.rank;}).length>1;
+    tr.appendChild(h("td",{class:"num rk",text:(tied?"T-":"")+r.rank}));tb.appendChild(tr);});
+  t.appendChild(tb);return h("section",{class:"lv-card lv-pane"},[h("div",{class:"lv-ct",text:"ROTO · WEEK "+FEED.week,title:"Each category ranks the 16 teams: 16 points for the best, 1 for the worst (fewer turnovers is better). Level teams share the average."}),
+    h("div",{class:"lv-cs",text:"16 points for the best in each category, 1 for the worst."}),h("div",{class:"lv-wrap lv-sw"},[t])]);}
+function statsPane(R){
+  var ids=Object.keys(R.side).map(Number).sort(function(a,b){return R.roto[a].rank-R.roto[b].rank||a-b;}),mt=me();
+  var t=h("table",{class:"lv-ro lv-rs"}),hd=h("tr");["Team"].concat(CATS.map(function(c){return c[1];}),["Score"]).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i?"num":"",title:i===10?"Category wins in this week's matchup (Yahoo's score)":""}));});
+  t.appendChild(h("thead",null,[hd]));var tb=h("tbody");
+  ids.forEach(function(id){var s=R.side[id],tr=h("tr",{class:s.team===mt?"me":""});
+    tr.appendChild(h("td",{class:"tm"},[chip(s.team)]));
+    CATS.forEach(function(c){var p=R.roto[id].points[c[0]],v=val(c[0],s.stats[c[0]],s.stats),vo=volume(c[0],s.stats);
+      tr.appendChild(h("td",{class:"num "+(p==null?"":heat(p))},[v,vo?h("small",{text:vo}):null]));});
+    tr.appendChild(h("td",{class:"num sc",text:String(s.printed!=null?s.printed:s.wins)}));tb.appendChild(tr);});
+  t.appendChild(tb);return h("section",{class:"lv-card lv-pane"},[h("div",{class:"lv-ct",text:"RAW STATS · WEEK "+FEED.week}),h("div",{class:"lv-cs",text:"Colour = where the team ranks in that category. Score = category wins in its matchup."}),h("div",{class:"lv-wrap lv-sw"},[t])]);}
+function mstep(m){return m>=5?"g3":m>=3?"g2":m>=1?"g1":m===0?"g0":m>=-2?"r1":m>=-4?"r2":"r3";}
+function allPane(R){
+  var ids=Object.keys(R.stats).map(Number).sort(function(a,b){return a-b;}),mt=me();
+  var box=h("section",{class:"lv-card lv-pane"},[h("div",{class:"lv-ct",text:"ALL-PLAY · WEEK "+FEED.week,title:"Each team against every other, category by category, as if it had played them all this week."}),
+    h("div",{class:"lv-cs",text:"Row team's category wins–losses (–ties) against the column team. Outlined = the real matchup. Tap a cell for the nine categories."})]);
+  var legend=h("div",{class:"lv-lg"});[["g3","7–2+"],["g2","6–3"],["g1","5–4"],["g0","Draw"],["r1","4–5"],["r2","3–6"],["r3","2–7−"]].forEach(function(x){legend.appendChild(h("span",{class:"c "+x[0],text:x[1]}));});box.appendChild(legend);
+  var detail=h("div",{class:"lv-dt"});
+  var t=h("table",{class:"lv-ap"}),hd=h("tr",null,[h("th",{text:""})]);
+  ids.forEach(function(b){hd.appendChild(h("th",{class:"num",text:nameOf(R.side[b].team),title:nameOf(R.side[b].team)}));});hd.appendChild(h("th",{class:"num",text:"All-play",title:"Matchups won–lost–tied against all 15 other teams"}));
+  t.appendChild(h("thead",null,[hd]));var tb=h("tbody");
+  function show(a,b){PICK=[a,b];var c=R.ap.cells[a][b];detail.textContent="";
+    detail.appendChild(h("div",{class:"lv-dh"},[chip(R.side[a].team),h("b",{text:c.w+"–"+c.l+(c.t?"–"+c.t:"")}),chip(R.side[b].team),R.opp[a]===b?h("small",{text:"this week's matchup"}):null]));
+    var g=h("div",{class:"lv-dg"});CATS.forEach(function(cat){var d=c.detail[cat[0]],va=val(cat[0],R.stats[a][cat[0]],R.stats[a]),vb=val(cat[0],R.stats[b][cat[0]],R.stats[b]);
+      g.appendChild(h("div",{class:"r "+(d===1?"wa":d===-1?"wb":"wt")},[h("span",{class:"va",text:va}),h("span",{class:"cl",text:cat[1]}),h("span",{class:"vb",text:vb})]));});
+    detail.appendChild(g);if(window.NBA_MONO)window.NBA_MONO(detail);
+    [].forEach.call(t.querySelectorAll("td.cell.sel"),function(x){x.classList.remove("sel");});var cell=t.querySelector('td.cell[data-a="'+a+'"][data-b="'+b+'"]');if(cell)cell.classList.add("sel");}
+  ids.forEach(function(a){var tr=h("tr",{class:R.side[a].team===mt?"me":""});tr.appendChild(h("th",{class:"tm"},[chip(R.side[a].team)]));
+    ids.forEach(function(b){if(a===b){tr.appendChild(h("td",{class:"cell self",text:"—"}));return;}
+      var c=R.ap.cells[a][b],td=h("td",{class:"cell "+mstep(c.margin)+(R.opp[a]===b?" act":""),"data-a":String(a),"data-b":String(b),tabindex:"0",role:"button",
+        "aria-label":nameOf(R.side[a].team)+" against "+nameOf(R.side[b].team)+": "+c.w+" wins, "+c.l+" losses, "+c.t+" ties",text:c.w+"–"+c.l+(c.t?"–"+c.t:"")});
+      td.addEventListener("click",function(){show(a,b);});td.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();show(a,b);}});tr.appendChild(td);});
+    var r=R.ap.record[a];tr.appendChild(h("td",{class:"num ap",text:r[0]+"–"+r[1]+(r[2]?"–"+r[2]:"–0")}));tb.appendChild(tr);});
+  t.appendChild(tb);box.appendChild(h("div",{class:"lv-wrap lv-sw"},[t]));box.appendChild(detail);
+  var first=PICK&&R.ap.cells[PICK[0]]&&R.ap.cells[PICK[0]][PICK[1]]?PICK:(function(){var m=ids.filter(function(i){return R.side[i].team===mt;})[0];return m!=null?[m,R.opp[m]]:null;})();
+  if(first)show(first[0],first[1]);return box;}
+function paneBody(R){return PANE==="roto"?rotoPane(R):PANE==="stats"?statsPane(R):allPane(R);}
+
 /* ---------- render ---------- */
 function render(){
   root.textContent="";var tb=document.querySelector(".topbar");if(tb)root.style.setProperty("--lv-nav",tb.offsetHeight+"px");
@@ -175,7 +238,12 @@ function render(){
   if(dayOK()){seg=h("div",{class:"lv-seg",role:"group","aria-label":"Which stats to show"});
     [["week","Week totals"],["day","Day · "+dayWord()]].forEach(function(o){var b=h("button",{type:"button",class:VIEW===o[0]?"on":"","aria-pressed":VIEW===o[0]?"true":"false",text:o[1]});b.addEventListener("click",function(){if(VIEW!==o[0]){VIEW=o[0];render();}});seg.appendChild(b);});}
   else VIEW="week";
-  right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),seg,allBtn]));right.appendChild(ms);
+  var R=rotoData();if(!R)PANE="matchups";
+  if(R){var strip=h("div",{class:"lv-views",role:"tablist"});
+    PANES.forEach(function(o){var b=h("button",{type:"button",role:"tab",class:PANE===o[0]?"on":"","aria-selected":PANE===o[0]?"true":"false",text:o[1]});b.addEventListener("click",function(){if(PANE!==o[0]){PANE=o[0];render();}});strip.appendChild(b);});
+    right.appendChild(strip);}
+  if(R&&PANE!=="matchups"){right.appendChild(paneNote(R));right.appendChild(paneBody(R));}
+  else{right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),seg,allBtn]));right.appendChild(ms);}
   grid.appendChild(left);grid.appendChild(right);root.appendChild(grid);
   if(window.NBA_MONO)window.NBA_MONO(root);
   try{document.dispatchEvent(new Event("nba:live"));}catch(e){}}
