@@ -128,11 +128,13 @@ def _made_att(s):
 
 
 def _team_id(el, league_id):
+    tid, name = None, ""
     for a in el.find_all(lambda e: e.tag == "a" and e.attrs.get("href")):
         m = re.search(r"/nba/%s/(\d+)\b" % re.escape(str(league_id)), a.attrs["href"])
         if m:
-            return int(m.group(1)), a.text()
-    return None, None
+            tid = int(m.group(1))
+            name = name or a.text()                                                  # the logo link has no text; the name link does
+    return tid, name or None
 
 
 # ------------------------------------------------------------------ parsing
@@ -238,6 +240,18 @@ def _rosters(root, team_ids):
                         out[tid].append(p)
             return out
     return None
+
+
+def game_state(text) -> str | None:
+    """'final' for a result ("W, 124-112 vs LAC"), 'upcoming' for a start time ("10:00 pm vs TOR"), 'live' for any other game text
+    (a game in progress), None when the player has no game."""
+    t = (text or "").strip()
+    if not t:
+        return None
+    m = _GAME_RE.match(t)
+    if m:
+        return "final" if m.group("res") else "upcoming"
+    return "live"
 
 
 def parse_matchup_html(html: str, cfg: dict) -> dict:

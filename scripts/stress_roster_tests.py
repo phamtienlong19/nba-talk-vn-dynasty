@@ -69,7 +69,7 @@ def perturb(seed: int) -> str:
     snap["ownershipDigest"] = ls._digest({f: sorted(r["playerKey"] for r in rs) for f, rs in teams.items()})
     snap["snapshotId"] = f"RS-{when[:10]}-{snap['digest'][:8]}"
     ir.commit(si, snap, {"blocking": []}, {"transactions": []}, ss.DATA_DIR, reviewed=True)
-    for cmd in (["build_league_state.py", "sync-ledger"], ["build_league_state.py", "embed"], ["what_if.py", "embed"]):
+    for cmd in (["build_league_state.py", "sync-ledger"], ["build_league_state.py", "embed"], ["what_if.py", "embed"], ["live_page.py", "embed"]):
         subprocess.run([sys.executable, os.path.join(ROOT, "scripts", cmd[0])] + cmd[1:], check=True, cwd=ROOT, stdout=subprocess.DEVNULL)
     return snap["snapshotId"]
 
