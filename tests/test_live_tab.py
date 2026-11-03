@@ -165,6 +165,16 @@ class TestLiveTab(unittest.TestCase):
         self.assertEqual(r["afterAll"], 0)
         self.assertEqual(r["afterHeader"], 1)
 
+    def test_my_team_is_pinned_first_and_highlighted(self):
+        mine = self.feed["matchups"][-1]["teams"][1]["team"]
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);window.NBA_ME=function(){return %s;};document.dispatchEvent(new Event('nba:me'));
+          var ms=document.querySelectorAll('#live-root .lv-m');R.first=ms[0].classList.contains('me');R.ribbons=document.querySelectorAll('#live-root .lv-ribbon').length;
+          R.rows=Array.prototype.map.call(document.querySelectorAll('#live-root .lv-stand tbody tr.me'),function(t){return t.getAttribute('data-team');});""" % json.dumps(mine))
+        self.assertTrue(r["first"])
+        self.assertEqual(r["ribbons"], 1)
+        self.assertEqual(r["rows"], [mine])
+
 
 if __name__ == "__main__":
     unittest.main()

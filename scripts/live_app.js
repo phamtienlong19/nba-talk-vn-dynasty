@@ -16,6 +16,7 @@ var OUT={O:1,INJ:1,SUSP:1,NA:1,OFS:1};   /* statuses of a player who is not play
 function noStats(r,vals){return !!OUT[r.st]&&(!vals||vals.every(function(v){return !v;}));}   /* an out player with nothing recorded shows dashes, not zeros */
 function cell(x,key){return x==null?"–":(key==="fgPct"||key==="ftPct"?pct(x):String(x));}
 function lineOf(arr){var keys=FEED.lineKeys||OLD_KEYS;return arr?LINE.map(function(c){var i=keys.indexOf(c[0]);return i<0?null:arr[i];}):null;}
+function me(){try{return window.NBA_ME?window.NBA_ME():null;}catch(e){return null;}}
 function tcolor(fid){return (TM[fid]||{}).color||"#8b95a7";}
 function num(key,stats){if(key==="fgPct"||key==="ftPct"){var p=stats[key==="fgPct"?"fg":"ft"];return p&&p[1]?p[0]/p[1]:null;}var v=stats[key];return v==null?null:Number(v);}
 function share(key,a,b){   /* the left side's share of the bar: a ratio for counting stats, the gap for percentages (a ratio makes .477 v .375 look level) */
@@ -57,7 +58,7 @@ function standings(){
   var tb=h("table",{class:"lv-t"}),hd=h("tr");["#","Team","W-L-T","GB","Playoffs"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=2&&i<4?"num":"",title:i===3?"Games behind the overall leader":i===4?"Seed if in; the small number is the margin in games over (+) or behind (−) the last playoff spot":""}));});
   tb.appendChild(h("thead",null,[hd]));var body=h("tbody"),prevIn=null;
   rows.forEach(function(r,i){
-    var tr=h("tr",{class:"st-"+(r.playoff||"")+(r.tied?" tied":""),"data-team":r.team});
+    var tr=h("tr",{class:"st-"+(r.playoff||"")+(r.tied?" tied":"")+(r.team===me()?" me":""),"data-team":r.team});
     if(prevIn===true&&r.playoff!=="in")tr.classList.add("cut");prevIn=r.playoff==="in";
     tr.appendChild(h("td",{class:"num rk"},[(r.tied?"T-":"")+r.rank,live&&r.moved?h("i",{class:"mv "+(r.moved>0?"up":"down"),text:r.moved>0?"▲":"▼",title:"Official rank "+r.officialRank+" ("+(r.moved>0?"up ":"down ")+Math.abs(r.moved)+")"}):null]));
     tr.appendChild(h("td",null,[chip(r.team)]));
@@ -94,7 +95,9 @@ function rosterTable(side,dayDate){
   return t;}
 function matchup(m){
   var a=m.teams[0],b=m.teams[1],lead=m.score[0]>m.score[1]?0:m.score[1]>m.score[0]?1:-1;
-  var card=h("section",{class:"lv-card lv-m","data-m":String(a.yahooId)});
+  var mine=a.team===me()||b.team===me();
+  var card=h("section",{class:"lv-card lv-m"+(mine?" me":""),"data-m":String(a.yahooId)});
+  if(mine)card.appendChild(h("div",{class:"lv-ribbon",text:"YOUR MATCHUP"}));
   
   var mh=h("div",{class:"lv-mh",title:"Click to open or close the rosters"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(m.score[0])})]),
     h("div",{class:"lv-mid",text:m.score[2]?m.score[2]+" tied":"vs"}),
@@ -124,7 +127,8 @@ function render(){
   var grid=h("div",{class:"lv-grid"}),left=h("div",{class:"lv-left"}),right=h("div",{class:"lv-right"});
   left.appendChild(standings());left.appendChild(reverse());
   var title=SRC==="live"?"MATCHUPS":"LAST FINISHED WEEK";
-  var ms=h("div",{class:"lv-ms"});FEED.matchups.forEach(function(m){ms.appendChild(matchup(m));});
+  var ms=h("div",{class:"lv-ms"}),mt=me();
+  FEED.matchups.slice().sort(function(x,y){var f=function(m){return m.teams.some(function(t){return t.team===mt;})?0:1;};return f(x)-f(y);}).forEach(function(m){ms.appendChild(matchup(m));});
   var allBtn=h("button",{type:"button",class:"lv-all",id:"lv-all"});
   var anyOpen=function(){return FEED.matchups.some(function(m){return OPEN[m.teams[0].yahooId];});};
   var setAll=function(){var open=!anyOpen();FEED.matchups.forEach(function(m){OPEN[m.teams[0].yahooId]=open;});ms.querySelectorAll(".lv-det").forEach(function(d){d.open=open;});allBtn.textContent=open?"Collapse all":"Expand all";};
@@ -145,6 +149,7 @@ function load(manual){
     .then(function(){clearTimeout(timer);LOADING=false;render();});}
 function visible(){return !document.hidden&&root.closest&&!root.closest(".tab-off");}
 setInterval(function(){if(visible())load(false);},REFRESH_MS);
+document.addEventListener("nba:me",function(){render();});
 document.addEventListener("keydown",function(e){if(e.key!=="Escape"||!visible())return;
   var open=[].slice.call(root.querySelectorAll(".lv-det[open]"));if(!open.length)return;
   var pick=open.filter(function(d){var r=d.getBoundingClientRect();return r.bottom>80;})[0]||open[0];var x=pick.querySelector(".lv-x");if(x)x.click();});
