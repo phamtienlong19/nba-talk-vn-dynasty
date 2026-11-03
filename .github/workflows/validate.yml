@@ -1,14 +1,21 @@
 name: validate
 
+# Pull requests are checked on Linux only; main (after a merge) is also checked on macOS. A push to a PR branch is covered by the
+# pull_request trigger, so `push` is limited to main. A newer push cancels the run it supersedes.
 on:
   push:
+    branches: [main]
   pull_request:
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: ${{ github.event_name == 'pull_request' && fromJSON('["ubuntu-latest"]') || fromJSON('["ubuntu-latest","macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
