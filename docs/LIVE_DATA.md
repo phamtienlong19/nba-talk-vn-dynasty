@@ -82,3 +82,10 @@ finished Yahoo day. Neutral wording, evidence for review, never a verdict. A "mi
 Per week the panel shows the days and players affected against the rule's thresholds (2+ days or 3+ players; 2 players if stars) and, in the
 last three weeks, the bench-games share against the late-season allowance. Caveat shown with the evidence: a status is what Yahoo showed at
 capture time, so a late scratch after the lineup locked looks like an Out starter; the commissioner decides.
+
+## Games left (built)
+`scripts/live_schedule.py` reads the NBA teams playing on each remaining day of the week from Yahoo's own future-day roster pages (a game time
+and opponent appear for every player whose team plays), from as few pairings as it takes to see all 30 teams. A day is fetched once and kept in
+`schedule-cache.json` on the runner (reused for 12 h by the looping run; a fresh run fetches again, about 25 requests once). A player's `gl` is
+today's game if it has not finished plus every later day his NBA team plays; a side's `gamesLeft` sums its starting lineup, leaving out
+players whose status is out. A day Yahoo cannot serve is left out and the feed sets `gamesLeftComplete: false` (the page shows "~").

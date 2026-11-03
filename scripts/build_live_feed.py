@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import import_rosters as ir  # noqa: E402
 import live_standings as lst  # noqa: E402
 import season_state as ss  # noqa: E402
+import live_schedule as lsch  # noqa: E402
 import update_yahoo_matchups as um  # noqa: E402
 import yahoo_matchups as ym  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
@@ -35,7 +36,7 @@ def _utc(dt=None):
     return (dt or datetime.datetime.now(datetime.timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _roster(rows, day=None):
+def _roster(rows, day=None, sched=None):
     """`l` = the player's week line (starters only: Yahoo counts only starters); `d` = the line of the one day fetched, which is
     the only stat a benched or IL player has."""
     day = day or {}
@@ -48,7 +49,8 @@ def _roster(rows, day=None):
         out.append({"s": r["slot"], "n": r["name"], "p": r.get("playerId"), "t": r.get("nba"), "pos": r.get("positions"),
                     "st": r.get("status") or "", "g": r.get("game"), "gs": ym.game_state(r.get("game")),
                     "l": [r["line"].get(k) for k in LINE_KEYS],
-                    "d": [d["line"].get(k) for k in LINE_KEYS] if d else None, "ds": d["slot"] if d else None})
+                    "d": [d["line"].get(k) for k in LINE_KEYS] if d else None, "ds": d["slot"] if d else None,
+                    "gl": lsch.games_left(r.get("nba"), ym.game_state(r.get("game")), sched) if sched and r.get("nba") else None})
     return out
 
 
@@ -86,15 +88,27 @@ def _to_play(rows):
     return n
 
 
+def _games_left(rows, sched):
+    """Games the starting lineup still has this week (players who are out are not counted); None when the schedule is unknown."""
+    if not sched:
+        return None
+    return sum(lsch.games_left(r.get("nba"), ym.game_state(r.get("game")), sched) for r in rows
+               if r["name"] is not None and r["slot"] in STARTING and r.get("status") not in lsch.OUT and r.get("nba"))
+
+
 def _dt_of(iso):
     return datetime.datetime.strptime(iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
 
 
-def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=None, sleep=time.sleep) -> dict:
+def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=None, sleep=time.sleep, schedule_cache=None) -> dict:
     now = now or _utc()
     cur = um.current_week(cfg, fetcher)
     pages = um.walk_week(cfg, cur, fetcher, sleep=sleep)
     day_date, day = _day_pages(cfg, cur, pages, fetcher, _dt_of(now), sleep)
+    try:
+        sched = lsch.schedule(cfg, cur, pages, fetcher, _dt_of(now), schedule_cache, sleep)
+    except OSError:
+        sched = None                                                                # games left is a nicety: never fail the feed over it
     stored = ym.load_weeks(matchup_dir)
     finished, transient = {}, []
     for w in range(1, cur):
@@ -129,9 +143,9 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
         for i, t in enumerate(p["teams"]):
             rs = p["rosters"][t["teamId"]] if p.get("rosters") else []
             sides.append({"team": fid(t["teamId"]), "yahooId": t["teamId"], "name": t["name"], "stats": t["stats"], "printed": t["printedWins"],
-                          "toPlay": _to_play(rs), "roster": _roster(rs, day.get(t["teamId"]))})
+                          "toPlay": _to_play(rs), "gamesLeft": _games_left(rs, sched), "roster": _roster(rs, day.get(t["teamId"]), sched)})
         matchups.append({"teams": sides, "cats": res["cats"], "score": [res["a"], res["b"], res["t"]], "decided": res["decided"]})
-    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date, "lineKeys": list(LINE_KEYS),
+    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date, "gamesLeftComplete": bool(sched) and not sched["missing"], "lineKeys": list(LINE_KEYS),
             "weekStatus": "LIVE" if started else "NOT_STARTED", "finishedWeeks": sorted(finished), "notStoredYet": transient,
             "table": table, "playoff": {"spots": pic["spots"], "divisionTie": pic["divisionTie"], "linePct": pic["linePct"]},
             "projectedReverse": [{"team": fid(t["teamId"]), "tied": t["tied"]} for t in reversed(proj["teams"])],
@@ -141,10 +155,11 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
 def main(argv=None, fetcher=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--schedule-cache", help="JSON file that keeps the week's schedule between runs of a loop")
     args = ap.parse_args(argv)
     cfg = yr.load_config()
     try:
-        doc = build(cfg, fetcher or yr.HttpFetcher())
+        doc = build(cfg, fetcher or yr.HttpFetcher(), schedule_cache=args.schedule_cache)
     except (ym.MatchupError, yr.FetchError, OSError) as e:
         print("FAILED: %s (the previous feed stays up)" % e)
         return 1

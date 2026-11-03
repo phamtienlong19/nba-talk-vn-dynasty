@@ -14,7 +14,7 @@ pick() {  # seconds between builds now
 end=$(( $(date +%s) + total )); fails=0
 while [ "$(date +%s)" -lt "$end" ]; do
   start=$(date +%s)
-  if python3 scripts/build_live_feed.py --out live.json; then
+  if python3 scripts/build_live_feed.py --out live.json --schedule-cache schedule-cache.json; then
     fails=0
     out="$(mktemp -d)"; cp live.json "$out/live.json"
     ( cd "$out" && git init -q -b live-data && git config user.name "github-actions[bot]" \

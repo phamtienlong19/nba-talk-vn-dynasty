@@ -87,7 +87,7 @@ function rosterTable(side,dayDate){
       tr.appendChild(h("td",{class:"sl",text:r.s}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(rk)nm.appendChild(h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));
-      if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+r.g}));}
+      if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g||r.gl!=null)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+(r.g||"no game today")+(r.gl!=null?" · "+r.gl+" left":"")}));}
       tr.appendChild(nm);
       var dash=r.n!=null&&noStats(r,vals);
       LINE.forEach(function(c,i){var v=vals?vals[i]:null;tr.appendChild(h("td",{class:"num"+(!dash&&v===0?" z":""),text:r.n==null||!vals?"":dash?"–":cell(v,c[0])}));});
@@ -109,7 +109,8 @@ function matchup(m){
     var tug=h("i",{class:"tug"});tug.style.setProperty("--p",share(c[0],na,nb)+"%");row.appendChild(tug);grid.appendChild(row);});
   card.appendChild(grid);
   var tp=function(s){var n=s.toPlay||{upcoming:0,live:0};return n.upcoming+n.live;};
-  card.appendChild(h("div",{class:"lv-tp"},[h("span",{text:tp(a)+" to play"}),h("span",{text:tp(b)+" to play"})]));
+  var gl=function(x){return x.gamesLeft==null?"":" · "+(FEED.gamesLeftComplete===false?"~":"")+x.gamesLeft+" games left";};
+  card.appendChild(h("div",{class:"lv-tp",title:"Today's games still to start or finish, and every game left this week for the starting lineup (players who are out are not counted)"},[h("span",{text:tp(a)+" to play today"+gl(a)}),h("span",{text:tp(b)+" to play today"+gl(b)})]));
   var det=h("details",{class:"lv-det"},[h("summary",null,[h("span",{text:"Rosters"}),h("small",{text:"tap the scores or this bar to open and close"})])]);if(OPEN[a.yahooId])det.setAttribute("open","");
   var shut=function(){det.open=false;var r=card.getBoundingClientRect(),bar=document.querySelector(".topbar"),top=bar?bar.offsetHeight:0;if(r.top<top)window.scrollTo({top:window.pageYOffset+r.top-top-8});};
   det.addEventListener("toggle",function(){OPEN[a.yahooId]=det.open;card.classList.toggle("open",det.open);});card.classList.toggle("open",!!OPEN[a.yahooId]);
