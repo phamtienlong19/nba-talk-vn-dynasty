@@ -1843,19 +1843,21 @@ body{background:var(--canvas);color:var(--text)}
 .lv-tp{display:flex;justify-content:space-between;padding:4px 14px 10px;font:600 11px "Inter",Arial,sans-serif;color:#7b8799}
 .lv-det{border-top:1px solid #e6ebf4;padding:8px 14px 12px;background:#fbfcfe}.lv-det summary{cursor:pointer;font:800 10.5px "Inter",Arial,sans-serif;letter-spacing:.09em;color:var(--lv)}
 .lv-cols{display:grid;gap:14px;margin-top:10px}
-.lv-m.open{grid-column:1/-1}@media(min-width:900px){.lv-m.open .lv-cols{grid-template-columns:1fr 1fr}}
-.lv-rc{border:1px solid var(--lv-line);border-radius:12px;background:#fff;padding:8px 8px 6px;border-top:3px solid var(--ca,#8b95a7)}.lv-rc.cb{border-top-color:var(--cb,#8b95a7)}
+.lv-m.open{grid-column:1/-1}@media(min-width:1800px){.lv-m.open .lv-cols{grid-template-columns:1fr 1fr}}
+.lv-rc{border:1px solid var(--lv-line);border-radius:12px;background:#fff;padding:8px 10px 6px}
 .lv-rt{margin:0 0 6px 2px}
-.lv-r th{text-align:left;font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;color:#8b95a7;padding:5px 3px;border-bottom:2px solid #e3e9f3;white-space:nowrap}
-.lv-r td{padding:4px 3px;border-bottom:1px solid #f0f2f7;font:600 11.5px "Inter",Arial,sans-serif;color:var(--lv-ink);white-space:nowrap}
-.lv-r td.num,.lv-r th.num{text-align:right;font-family:"Roboto Mono",ui-monospace,Menlo,monospace}
-.lv-r td.sl{font:800 9.5px "Inter",Arial,sans-serif;color:#8b95a7;width:34px}
-.lv-r tr.gh td{padding:9px 3px 3px;border-bottom:0;font:800 9.5px "Inter",Arial,sans-serif;letter-spacing:.1em;color:var(--lv)}.lv-r tr.gh small{margin-left:8px;font:500 10px "Inter",Arial,sans-serif;letter-spacing:0;color:#8b95a7}
-.lv-r tr.off td{background:#f6f7fb;color:#7b8799;font-style:italic}.lv-r tr.off td.sl,.lv-r tr.off td.nm b{font-style:normal}
-.lv-r tr.off td.num{color:#66748d}
-.lv-r tr.il td{opacity:.8}.lv-r tr.empty td{color:#b6bfcd}
-.lv-r td.nm{min-width:140px;max-width:210px;overflow:hidden;text-overflow:ellipsis}.lv-r td.nm small{display:block;font:500 10px "Inter",Arial,sans-serif;font-style:normal;color:#8b95a7}.lv-r td.nm small.live{color:#0f8a47;font-weight:700}
-.lv-st.lv-st{display:block}.lv-r .lv-st{display:inline-block;margin:0 0 0 5px;padding:1px 4px;border-radius:4px;background:#fdecea;color:#a62f29;font:800 9px/1.2 "Inter",Arial,sans-serif;letter-spacing:0}
+.lv-r{table-layout:fixed}.lv-r col.c-sl{width:40px}.lv-r col.c-nm{width:auto}.lv-r col.c-n{width:54px}.lv-r col.c-nm{min-width:170px}
+.lv-r th{text-align:left;font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;color:#8b95a7;padding:6px 4px;border-bottom:2px solid #e3e9f3;white-space:nowrap}
+.lv-r td{padding:5px 4px;border-bottom:1px solid #eef1f6;font:600 12px "Inter",Arial,sans-serif;color:var(--lv-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lv-r td.num,.lv-r th.num{text-align:right;font-family:"Roboto Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.lv-r td.num{font-size:12px}
+.lv-r td.sl{font:800 9.5px "Inter",Arial,sans-serif;color:#8b95a7}
+.lv-r td.nm small{display:block;font:500 10px "Inter",Arial,sans-serif;color:#8b95a7;overflow:hidden;text-overflow:ellipsis}.lv-r td.nm small.live{color:#0f8a47;font-weight:700}
+.lv-r tr.gh td{padding:10px 4px 4px;border-bottom:0;font:800 9.5px "Inter",Arial,sans-serif;letter-spacing:.1em;color:var(--lv-ink);overflow:visible}.lv-r tr.gh small{margin-left:8px;font:500 10px "Inter",Arial,sans-serif;letter-spacing:0;color:#8b95a7}
+.lv-r tr.gh.off td{border-top:1px solid #dbe3ef;margin-top:4px}
+.lv-r tr.off td{background:#f5f6fa;color:#6b778c}.lv-r tr.off td.nm b{font-weight:600}.lv-r tr.off td.num{color:#6b778c}
+.lv-r tr.empty td{color:#b6bfcd}
+.lv-r .lv-st{display:inline-block;margin:0 0 0 5px;padding:1px 4px;border-radius:4px;background:#fdecea;color:#a62f29;font:800 9px/1.2 "Inter",Arial,sans-serif;letter-spacing:0}
 @media(min-width:1100px){.lv-grid{grid-template-columns:minmax(380px,460px) minmax(0,1fr)}.lv-left{position:sticky;top:10px}}
 @media(min-width:1500px){.lv-ms{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}}
 @media(max-width:680px){.lv-hd{padding:14px}.lv-hd h3{font-size:20px}.lv-ms{grid-template-columns:minmax(0,1fr)}}
@@ -1871,8 +1873,10 @@ var B=JSON.parse(dataEl.textContent),TM={};
 B.teams.forEach(function(t){TM[t.id]=t;});
 var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
-var LINE=["FG%","FT%","3PM","PTS","REB","AST","STL","BLK","TO"];   /* the order of the roster line in the feed = the usual 9-cat order */
-function cell(x,i){return x==null?"–":(i<2?pct(x):String(x));}
+var LINE=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","STL"],["blk","BLK"],["to","TO"]];   /* display order */
+var OLD_KEYS=["pts","reb","ast","st","blk","tpm","to","fgPct","ftPct"];   /* the order of a feed built before lineKeys existed */
+function cell(x,key){return x==null?"–":(key==="fgPct"||key==="ftPct"?pct(x):String(x));}
+function lineOf(arr){var keys=FEED.lineKeys||OLD_KEYS;return arr?LINE.map(function(c){var i=keys.indexOf(c[0]);return i<0?null:arr[i];}):null;}
 function tcolor(fid){return (TM[fid]||{}).color||"#8b95a7";}
 function share(key,va,vb){var a=Number(va),b=Number(vb);if(!(a>=0)||!(b>=0)||a+b===0)return 50;return Math.round(100*(key==="to"?b:a)/(a+b));}
 
@@ -1929,18 +1933,20 @@ function reverse(){
   var ol=h("ol",{class:"lv-ol"});f.projectedReverse.forEach(function(x){ol.appendChild(h("li",null,[chip(x.team),x.tied?h("small",{text:" tied",title:"Level with a neighbour; shown in the official order"}):null]));});
   box.appendChild(ol);return box;}
 function rosterTable(side,dayDate){
-  var t=h("table",{class:"lv-r"}),hd=h("tr");["","Player"].concat(LINE).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
+  var t=h("table",{class:"lv-r"}),cg=h("colgroup");cg.appendChild(h("col",{class:"c-sl"}));cg.appendChild(h("col",{class:"c-nm"}));LINE.forEach(function(){cg.appendChild(h("col",{class:"c-n"}));});t.appendChild(cg);
+  var hd=h("tr");["","Player"].concat(LINE.map(function(c){return c[1];})).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
   t.appendChild(h("thead",null,[hd]));var tb=h("tbody");t.appendChild(tb);
-  var groups=[["STARTERS","Week totals",function(r){return r.s!=="BN"&&r.s!=="IL";}],["BENCH","Stats from the latest day only"+(dayDate?" ("+dayDate+")":""),function(r){return r.s==="BN";}],["INJURED LIST","Stats from the latest day only",function(r){return r.s==="IL";}]];
-  groups.forEach(function(g){var rows=side.roster.filter(g[2]);if(!rows.length)return;
-    var gh=h("tr",{class:"gh"}),td=h("td",{colspan:String(LINE.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]})]);gh.appendChild(td);tb.appendChild(gh);
-    rows.forEach(function(r){var bench=g[0]!=="STARTERS",line=bench?r.d:r.l;
-      var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")+(g[0]==="INJURED LIST"?"il":"")});
+  var haveDay=side.roster.some(function(r){return r.d;});
+  var groups=[["STARTERS","week totals",function(r){return r.s!=="BN"&&r.s!=="IL";}],["BENCH","stats from "+(dayDate||"the latest day")+" only, not counted",function(r){return r.s==="BN";}],["INJURED LIST","stats from "+(dayDate||"the latest day")+" only, not counted",function(r){return r.s==="IL";}]];
+  groups.forEach(function(g){var rows=side.roster.filter(g[2]);if(!rows.length)return;var bench=g[0]!=="STARTERS";
+    var gh=h("tr",{class:"gh"+(bench?" off":"")}),td=h("td",{colspan:String(LINE.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]+(bench&&!haveDay?" (arrives with the next feed update)":"")})]);gh.appendChild(td);tb.appendChild(gh);
+    rows.forEach(function(r){var vals=lineOf(bench?r.d:r.l);
+      var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")});
       tr.appendChild(h("td",{class:"sl",text:r.s}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+r.g}));}
       tr.appendChild(nm);
-      LINE.forEach(function(x,i){tr.appendChild(h("td",{class:"num",text:r.n==null||!line?"":cell(line[i],i)}));});
+      LINE.forEach(function(c,i){tr.appendChild(h("td",{class:"num",text:r.n==null||!vals?"":cell(vals[i],c[0])}));});
       tb.appendChild(tr);});});
   return t;}
 function matchup(m){

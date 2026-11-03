@@ -131,7 +131,7 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
             sides.append({"team": fid(t["teamId"]), "yahooId": t["teamId"], "name": t["name"], "stats": t["stats"], "printed": t["printedWins"],
                           "toPlay": _to_play(rs), "roster": _roster(rs, day.get(t["teamId"]))})
         matchups.append({"teams": sides, "cats": res["cats"], "score": [res["a"], res["b"], res["t"]], "decided": res["decided"]})
-    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date,
+    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date, "lineKeys": list(LINE_KEYS),
             "weekStatus": "LIVE" if started else "NOT_STARTED", "finishedWeeks": sorted(finished), "notStoredYet": transient,
             "table": table, "playoff": {"spots": pic["spots"], "divisionTie": pic["divisionTie"], "linePct": pic["linePct"]},
             "projectedReverse": [{"team": fid(t["teamId"]), "tied": t["tied"]} for t in reversed(proj["teams"])],
