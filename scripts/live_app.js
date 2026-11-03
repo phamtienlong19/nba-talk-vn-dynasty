@@ -9,8 +9,10 @@ var B=JSON.parse(dataEl.textContent),TM={};
 B.teams.forEach(function(t){TM[t.id]=t;});
 var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
-var LINE=["FG%","FT%","3PM","PTS","REB","AST","STL","BLK","TO"];   /* the order of the roster line in the feed = the usual 9-cat order */
-function cell(x,i){return x==null?"–":(i<2?pct(x):String(x));}
+var LINE=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","STL"],["blk","BLK"],["to","TO"]];   /* display order */
+var OLD_KEYS=["pts","reb","ast","st","blk","tpm","to","fgPct","ftPct"];   /* the order of a feed built before lineKeys existed */
+function cell(x,key){return x==null?"–":(key==="fgPct"||key==="ftPct"?pct(x):String(x));}
+function lineOf(arr){var keys=FEED.lineKeys||OLD_KEYS;return arr?LINE.map(function(c){var i=keys.indexOf(c[0]);return i<0?null:arr[i];}):null;}
 function tcolor(fid){return (TM[fid]||{}).color||"#8b95a7";}
 function share(key,va,vb){var a=Number(va),b=Number(vb);if(!(a>=0)||!(b>=0)||a+b===0)return 50;return Math.round(100*(key==="to"?b:a)/(a+b));}
 
@@ -67,18 +69,20 @@ function reverse(){
   var ol=h("ol",{class:"lv-ol"});f.projectedReverse.forEach(function(x){ol.appendChild(h("li",null,[chip(x.team),x.tied?h("small",{text:" tied",title:"Level with a neighbour; shown in the official order"}):null]));});
   box.appendChild(ol);return box;}
 function rosterTable(side,dayDate){
-  var t=h("table",{class:"lv-r"}),hd=h("tr");["","Player"].concat(LINE).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
+  var t=h("table",{class:"lv-r"}),cg=h("colgroup");cg.appendChild(h("col",{class:"c-sl"}));cg.appendChild(h("col",{class:"c-nm"}));LINE.forEach(function(){cg.appendChild(h("col",{class:"c-n"}));});t.appendChild(cg);
+  var hd=h("tr");["","Player"].concat(LINE.map(function(c){return c[1];})).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
   t.appendChild(h("thead",null,[hd]));var tb=h("tbody");t.appendChild(tb);
-  var groups=[["STARTERS","Week totals",function(r){return r.s!=="BN"&&r.s!=="IL";}],["BENCH","Stats from the latest day only"+(dayDate?" ("+dayDate+")":""),function(r){return r.s==="BN";}],["INJURED LIST","Stats from the latest day only",function(r){return r.s==="IL";}]];
-  groups.forEach(function(g){var rows=side.roster.filter(g[2]);if(!rows.length)return;
-    var gh=h("tr",{class:"gh"}),td=h("td",{colspan:String(LINE.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]})]);gh.appendChild(td);tb.appendChild(gh);
-    rows.forEach(function(r){var bench=g[0]!=="STARTERS",line=bench?r.d:r.l;
-      var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")+(g[0]==="INJURED LIST"?"il":"")});
+  var haveDay=side.roster.some(function(r){return r.d;});
+  var groups=[["STARTERS","week totals",function(r){return r.s!=="BN"&&r.s!=="IL";}],["BENCH","stats from "+(dayDate||"the latest day")+" only, not counted",function(r){return r.s==="BN";}],["INJURED LIST","stats from "+(dayDate||"the latest day")+" only, not counted",function(r){return r.s==="IL";}]];
+  groups.forEach(function(g){var rows=side.roster.filter(g[2]);if(!rows.length)return;var bench=g[0]!=="STARTERS";
+    var gh=h("tr",{class:"gh"+(bench?" off":"")}),td=h("td",{colspan:String(LINE.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]+(bench&&!haveDay?" (arrives with the next feed update)":"")})]);gh.appendChild(td);tb.appendChild(gh);
+    rows.forEach(function(r){var vals=lineOf(bench?r.d:r.l);
+      var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")});
       tr.appendChild(h("td",{class:"sl",text:r.s}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+r.g}));}
       tr.appendChild(nm);
-      LINE.forEach(function(x,i){tr.appendChild(h("td",{class:"num",text:r.n==null||!line?"":cell(line[i],i)}));});
+      LINE.forEach(function(c,i){tr.appendChild(h("td",{class:"num",text:r.n==null||!vals?"":cell(vals[i],c[0])}));});
       tb.appendChild(tr);});});
   return t;}
 function matchup(m){
