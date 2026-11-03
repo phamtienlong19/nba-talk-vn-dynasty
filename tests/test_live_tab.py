@@ -25,7 +25,7 @@ class TestLiveTab(unittest.TestCase):
         cls.feed = tlf.feed()
         cls.feed["asOf"] = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    def drive(self, body_js, qs="", wait=2000, rookies=None):
+    def drive(self, body_js, qs="", wait=2000, rookies=None, extra_css=""):
         with open(INDEX, encoding="utf-8") as f:
             page = f.read()
         script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
@@ -33,6 +33,8 @@ class TestLiveTab(unittest.TestCase):
         if rookies is not None:
             page = re.sub(r'"rookies":\[[^\]]*\]', '"rookies":' + json.dumps(rookies), page, count=1)
         page = page.replace("https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/live-data/live.json", "http://127.0.0.1:9/live.json")   # never the real feed: the fetch fails fast
+        if extra_css:
+            page = page.replace("</head>", "<style>" + extra_css + "</style></head>", 1)
         page = page[:page.rindex("</body>")] + script + page[page.rindex("</body>"):]
         d = tempfile.mkdtemp()
         try:
@@ -174,6 +176,18 @@ class TestLiveTab(unittest.TestCase):
         self.assertTrue(r["first"])
         self.assertEqual(r["ribbons"], 1)
         self.assertEqual(r["rows"], [mine])
+
+    def test_on_a_phone_the_roster_scrolls_sideways_inside_its_card(self):
+        css = open(os.path.join(HERE, "..", "scripts", "live.css"), encoding="utf-8").read()
+        phone = css[css.index("@media(max-width:680px){"):].replace("@media(max-width:680px){", "", 1).rsplit("}", 1)[0]
+        narrow = "#live{width:390px!important;max-width:390px!important;margin:0!important;padding:0 12px!important;box-sizing:border-box}.lv-grid{grid-template-columns:minmax(0,1fr)!important}" + phone
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var d=document.querySelector('#live-root .lv-m .lv-det');d.setAttribute('open','');
+            var w=d.querySelector('.lv-wrap'),card=d.closest('.lv-m');
+            R.client=w.clientWidth;R.scroll=w.scrollWidth;R.card=card.clientWidth;R.panel=d.querySelector('.lv-rc').clientWidth;},600);""", wait=2500, extra_css=narrow)
+        self.assertGreater(r["scroll"], r["client"])               # there is more to the right than fits ...
+        self.assertLessEqual(r["panel"], r["card"])                # ... and the panel stays inside its card, so it scrolls instead of being clipped
 
 
 if __name__ == "__main__":
