@@ -11,6 +11,8 @@ var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},R
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
 var LINE=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","STL"],["blk","BLK"],["to","TO"]];   /* display order */
 var OLD_KEYS=["pts","reb","ast","st","blk","tpm","to","fgPct","ftPct"];   /* the order of a feed built before lineKeys existed */
+var OUT={O:1,INJ:1,SUSP:1,NA:1,OFS:1};   /* statuses of a player who is not playing */
+function noStats(r,vals){return !!OUT[r.st]&&(!vals||vals.every(function(v){return !v;}));}   /* an out player with nothing recorded shows dashes, not zeros */
 function cell(x,key){return x==null?"–":(key==="fgPct"||key==="ftPct"?pct(x):String(x));}
 function lineOf(arr){var keys=FEED.lineKeys||OLD_KEYS;return arr?LINE.map(function(c){var i=keys.indexOf(c[0]);return i<0?null:arr[i];}):null;}
 function tcolor(fid){return (TM[fid]||{}).color||"#8b95a7";}
@@ -46,20 +48,18 @@ function standings(){
   var f=FEED,rows=f.table,live=SRC==="live"&&f.weekStatus==="LIVE";
   var box=h("section",{class:"lv-card lv-stand"},[h("div",{class:"lv-ct",text:live?"STANDINGS IF THE WEEK ENDED NOW":"STANDINGS"}),
     h("div",{class:"lv-cs",text:live?"Provisional. Equal records share a rank.":"Finished weeks. Equal records share a rank."})]);
-  var tb=h("table",{class:"lv-t"}),hd=h("tr");["#","","Team","W-L-T","Pct","GB","Line","Playoffs"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=3&&i<7?"num":"",title:i===5?"Games behind the overall leader":i===6?"Games ahead of (+) or behind (−) the last playoff spot":""}));});
+  var tb=h("table",{class:"lv-t"}),hd=h("tr");["#","Team","W-L-T","Pct","GB","Playoffs"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=2&&i<5?"num":"",title:i===4?"Games behind the overall leader":i===5?"In or out of the playoffs; the number is the margin over (+) or behind (−) the last playoff spot, in games":""}));});
   tb.appendChild(h("thead",null,[hd]));var body=h("tbody"),prevIn=null;
   rows.forEach(function(r,i){
     var tr=h("tr",{class:"st-"+(r.playoff||"")+(r.tied?" tied":""),"data-team":r.team});
     if(prevIn===true&&r.playoff!=="in")tr.classList.add("cut");prevIn=r.playoff==="in";
-    tr.appendChild(h("td",{class:"num",text:(r.tied?"T-":"")+r.rank}));
-    tr.appendChild(h("td",{class:"mv "+(r.moved>0?"up":r.moved<0?"down":""),text:live&&r.moved?(r.moved>0?"▲"+r.moved:"▼"+(-r.moved)):"",title:live&&r.moved?"Official rank "+r.officialRank:""}));
+    tr.appendChild(h("td",{class:"num rk"},[(r.tied?"T-":"")+r.rank,live&&r.moved?h("i",{class:"mv "+(r.moved>0?"up":"down"),text:r.moved>0?"▲":"▼",title:"Official rank "+r.officialRank+" ("+(r.moved>0?"up ":"down ")+Math.abs(r.moved)+")"}):null]));
     tr.appendChild(h("td",null,[chip(r.team)]));
     tr.appendChild(h("td",{class:"num",text:r.w+"-"+r.l+(r.t?"-"+r.t:"")}));
     tr.appendChild(h("td",{class:"num",text:pct(r.pct)}));
     tr.appendChild(h("td",{class:"num",text:r.gb?String(r.gb):"–"}));
-    var gl=r.gbLine==null?null:-r.gbLine;
-    tr.appendChild(h("td",{class:"num line "+(gl>0?"ahead":gl<0?"behind":""),text:gl==null?"":gl>0?"+"+gl:gl<0?"−"+(-gl):"0"}));
-    tr.appendChild(h("td",null,[r.playoff==="in"?h("span",{class:"lv-po in",text:"IN"+(r.seed?" #"+r.seed:"")}):r.playoff==="bubble"?h("span",{class:"lv-po bubble",text:"BUBBLE"}):h("span",{class:"lv-po out",text:"OUT"})]));
+    var gl=r.gbLine==null?null:-r.gbLine,m=gl==null?"":gl>0?"+"+gl:gl<0?"−"+(-gl):"0";
+    tr.appendChild(h("td",{class:"po "+(r.playoff||"out")},[r.playoff==="in"?"In"+(r.seed?" #"+r.seed:""):r.playoff==="bubble"?"Bubble":"Out",m?h("small",{text:m}):null]));
     body.appendChild(tr);});
   tb.appendChild(body);box.appendChild(h("div",{class:"lv-wrap"},[tb]));
   box.appendChild(h("div",{class:"lv-foot",text:"8 playoff teams: each division's winner plus the best records; seeded by overall record. Games back is from the overall leader; Line is the margin over the last playoff spot."}));
@@ -82,13 +82,14 @@ function rosterTable(side,dayDate){
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+r.g}));}
       tr.appendChild(nm);
-      LINE.forEach(function(c,i){tr.appendChild(h("td",{class:"num",text:r.n==null||!vals?"":cell(vals[i],c[0])}));});
+      var dash=r.n!=null&&noStats(r,vals);
+      LINE.forEach(function(c,i){var v=vals?vals[i]:null;tr.appendChild(h("td",{class:"num"+(!dash&&v===0?" z":""),text:r.n==null||!vals?"":dash?"–":cell(v,c[0])}));});
       tb.appendChild(tr);});});
   return t;}
 function matchup(m){
   var a=m.teams[0],b=m.teams[1],lead=m.score[0]>m.score[1]?0:m.score[1]>m.score[0]?1:-1;
   var card=h("section",{class:"lv-card lv-m","data-m":String(a.yahooId)});
-  card.style.setProperty("--ca",tcolor(a.team));card.style.setProperty("--cb",tcolor(b.team));
+  
   card.appendChild(h("div",{class:"lv-mh"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(m.score[0])})]),
     h("div",{class:"lv-mid",text:m.score[2]?m.score[2]+" tied":"vs"}),
     h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(m.score[1])}),chip(b.team)])]));
