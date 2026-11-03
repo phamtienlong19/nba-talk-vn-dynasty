@@ -5,30 +5,29 @@ name: Update Live Data
 # orphan commit (force-pushed, so that branch never grows). It never pushes to main, never opens a PR and never touches data/.
 # The page fetches it from raw.githubusercontent.com and falls back to the embedded official weeks. Details: docs/LIVE_DATA.md
 #
-# GitHub cron is UTC and best-effort (5 minutes is its floor; runs can slip or be skipped), so the page shows the feed's age and flags a stale one.
+# GitHub cron is UTC and best-effort: scheduled runs often start 20-90 minutes late or not at all, so a 5-minute cron cannot keep a feed
+# fresh. Each run therefore loops for ~115 minutes (a build + publish every 4 minutes); an hourly cron starts the next run, which waits
+# in the queue until the previous one ends, so the feed has no gap. The page shows the feed's age and flags a stale one.
 #   NBA games land about 22:00-07:00 UTC; weekend afternoons about 16:00-22:00 UTC; Yahoo's day and the waiver run roll over at
 #   12:00 am Pacific = 08:00 UTC (07:00 UTC during US daylight time), so both of those minutes get a run.
 
 on:
   schedule:
-    - cron: "*/5 22-23,0-6 * * *"
-    - cron: "*/5 16-21 * * 0,6"
-    - cron: "0 7-21 * * *"
-    - cron: "10 7,8 * * *"
+    - cron: "5,35 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
-# A newer run replaces an older one that is still going.
+# Never cancel the loop that is running; one newer run waits its turn (GitHub keeps only the newest pending run).
 concurrency:
   group: update-live-data
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   feed:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 125
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,18 +37,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Build the feed
-        run: python3 scripts/build_live_feed.py --out live.json
-
-      - name: Publish to the live-data branch (one orphan commit; main is untouched)
-        run: |
-          set -euo pipefail
-          out="$(mktemp -d)"
-          cp live.json "$out/live.json"
-          cd "$out"
-          git init -q -b live-data
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add live.json
-          git commit -q -m "live feed $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" live-data
+      - name: Build and publish the feed every 4 minutes (live-data branch only; main is untouched)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash scripts/live_feed_loop.sh 6900 240

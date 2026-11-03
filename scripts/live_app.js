@@ -29,7 +29,7 @@ function head(){
   return h("div",{class:"lv-hd"},[
     h("div",null,[h("h3",{text:live?"Week "+f.week:"Standings from finished weeks"}),
       h("div",{class:"lv-sub"},[h("span",{class:"lv-pill "+(live&&f.weekStatus==="LIVE"?"on":"")+(stale?" stale":""),text:status}),
-        h("span",{id:"lv-asof",text:live?"as of "+ict(f.asOf)+" · "+ago(f.asOf)+(CHECKED?" · checked "+ago(new Date(CHECKED).toISOString())+" (feed updates about every 5 min in game hours)":""):"live feed not loaded"})])]),
+        h("span",{id:"lv-asof",text:live?"as of "+ict(f.asOf)+" · "+ago(f.asOf)+(CHECKED?" · checked "+ago(new Date(CHECKED).toISOString())+" (feed updates about every 4 min in game hours)":""):"live feed not loaded"})])]),
     h("div",{class:"lv-act"},[btn])]);}
 function note(){
   if(SRC==="live"){var f=FEED,msgs=[];
