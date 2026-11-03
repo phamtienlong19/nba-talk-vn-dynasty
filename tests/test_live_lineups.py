@@ -7,7 +7,7 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
 import live_lineups as ll  # noqa: E402
-import update_yahoo_matchups as um  # noqa: E402
+import live_days as ldy  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
 
 CFG = dict(yr.load_config(), requestDelaySeconds=0)
@@ -15,7 +15,8 @@ CFG = dict(yr.load_config(), requestDelaySeconds=0)
 
 def row(slot, name=None, pid=None, pos=("PG",), status="", game="W, 100-90 vs AAA", stats=True):
     line = {k: (5 if stats else None) for k in ("fgPct", "ftPct", "tpm", "pts", "reb", "ast", "st", "blk", "to")}
-    return {"slot": slot, "name": name, "playerId": pid, "positions": list(pos), "status": status, "game": game if name else None, "line": line if name else {}}
+    return {"slot": slot, "name": name, "playerId": pid, "positions": list(pos), "status": status, "game": game if name else None, "line": line if name else {},
+            "fg": [5, 5] if name and stats else None, "ft": [5, 5] if name and stats else None}
 
 
 class TestMisses(unittest.TestCase):
@@ -51,44 +52,53 @@ class TestMisses(unittest.TestCase):
         self.assertEqual([(i["k"], i["p"], i["rank"]) for i in got], [("star_benched", "Star", 12)])
 
 
-class TestChecks(unittest.TestCase):
-    NOW = datetime.datetime(2026, 11, 5, 12, tzinfo=datetime.timezone.utc)            # Thursday 04:00 Pacific: Mon and Tue... closed (Mon 11-02, Tue 11-03, Wed 11-04)
-    PAGES = [{"teams": [{"teamId": 1}, {"teamId": 2}]}]
+class FakeDays:
+    """Stands in for live_days.Days: counts the days asked for."""
 
-    def setUp(self):
-        self.calls = []
-        self._orig = um.fetch_page
+    def __init__(self, rows):
+        self.rows_by_team, self.asked = rows, []
 
-        def fake(cfg, fetcher, url, **kw):
-            self.calls.append(url)
-            return {"rosters": {1: [row("PG", "Out Guy", "1", status="O", stats=False), row("BN", "Bench Guy", "2")], 2: [row("PG", "Fine", "3")]}}
-        um.fetch_page = fake
+    def rows(self, date, closed):
+        self.asked.append(date.isoformat())
+        return self.rows_by_team
 
-    def tearDown(self):
-        um.fetch_page = self._orig
+
+class TestClosedDays(unittest.TestCase):
+    NOW = datetime.datetime(2026, 11, 5, 12, tzinfo=datetime.timezone.utc)            # Thursday 04:00 Pacific: Mon 11-02, Tue 11-03 and Wed 11-04 are closed
+    ROWS = {1: [row("PG", "Out Guy", "1", status="O", stats=False), row("BN", "Bench Guy", "2"), row("SG", "Plays", "9")], 2: [row("PG", "Fine", "3")]}
+
+    def run_it(self, previous=None, days=None, now=None):
+        days = days or FakeDays(self.ROWS)
+        return days, ldy.closed_days(CFG, 3, now or self.NOW, {}, days, previous)
 
     def test_closed_days_are_summarised_per_team_against_the_rule(self):
-        out = ll.checks(CFG, 3, self.PAGES, None, self.NOW, {}, None, lambda x: None)
-        self.assertEqual(sorted(out["byDate"]), ["2026-11-02", "2026-11-03", "2026-11-04"])
-        t = {x["yahooId"]: x for x in out["teams"]}
+        days, (lineup, week) = self.run_it()
+        self.assertEqual(sorted(lineup["byDate"]), ["2026-11-02", "2026-11-03", "2026-11-04"])
+        t = {x["yahooId"]: x for x in lineup["teams"]}
         self.assertEqual((t[1]["missetDays"], t[1]["players"], t[1]["meetsCount"]), (3, 1, True))      # 2+ days reaches the rule's count
         self.assertEqual((t[2]["missetDays"], t[2]["meetsCount"]), (0, False))
+        self.assertEqual(week["through"], ["2026-11-02", "2026-11-03", "2026-11-04"])
+
+    def test_week_made_attempted_adds_the_starters_of_every_closed_day(self):
+        days, (lineup, week) = self.run_it()
+        self.assertEqual(week["p"]["9"], [15, 15, 15, 15])                             # 5/5 and 5/5 a day (see row()), three days
+        self.assertNotIn("2", week["p"])                                               # the bench does not count
 
     def test_days_already_in_the_previous_feed_are_not_captured_again(self):
-        first = ll.checks(CFG, 3, self.PAGES, None, self.NOW, {}, None, lambda x: None)
-        n = len(self.calls)
-        ll.checks(CFG, 3, self.PAGES, None, self.NOW + datetime.timedelta(hours=1), {}, {"lineupChecks": first}, lambda x: None)
-        self.assertEqual(len(self.calls), n)
-        ll.checks(CFG, 3, self.PAGES, None, self.NOW + datetime.timedelta(days=1), {}, {"lineupChecks": first}, lambda x: None)
-        self.assertEqual(len(self.calls), n + 1)                                   # only the newly closed day
+        days, (lineup, week) = self.run_it()
+        days2, (lineup2, week2) = self.run_it({"lineupChecks": lineup, "playerWeek": week}, now=self.NOW + datetime.timedelta(hours=1))
+        self.assertEqual(days2.asked, [])
+        days3, (lineup3, week3) = self.run_it({"lineupChecks": lineup, "playerWeek": week}, now=self.NOW + datetime.timedelta(days=1))
+        self.assertEqual(days3.asked, ["2026-11-05"])                                  # only the newly closed day
+        self.assertEqual(week3["p"]["9"], [20, 20, 20, 20])
 
     def test_a_day_yahoo_cannot_serve_is_reported_missing(self):
-        def boom(cfg, fetcher, url, **kw):
-            raise ll.ym.MatchupError("HTTP_404", url)
-        um.fetch_page = boom
-        out = ll.checks(CFG, 3, self.PAGES, None, self.NOW, {}, None, lambda x: None)
-        self.assertEqual(len(out["missing"]), 3)
-        self.assertEqual(out["byDate"], {})
+        class Boom:
+            def rows(self, date, closed):
+                raise ldy.ym.MatchupError("HTTP_404", "x")
+        lineup, week = ldy.closed_days(CFG, 3, self.NOW, {}, Boom(), None)
+        self.assertEqual(len(lineup["missing"]), 3)
+        self.assertEqual(lineup["byDate"], {})
 
 
 if __name__ == "__main__":

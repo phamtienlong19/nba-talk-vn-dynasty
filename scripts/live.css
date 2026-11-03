@@ -130,3 +130,13 @@
  .lv-r tr.gh td{position:static;box-shadow:none;max-width:none;white-space:normal}.lv-r tr.gh small{display:block;margin:2px 0 0}
  .lv-r td{padding:5px 3px;font-size:11.5px}.lv-r td.nm small{font-size:9.5px}
 }
+
+/* week totals vs one day */
+.lv-seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--lv-soft)}.lv-seg button{border:0;background:transparent;border-radius:999px;padding:6px 14px;font:700 11.5px "Inter",Arial,sans-serif;color:var(--lv-mute);cursor:pointer}
+.lv-seg button.on{background:#fff;color:var(--lv);box-shadow:0 1px 3px rgba(14,26,51,.18)}
+.lv-tb{gap:10px;flex-wrap:wrap}.lv-tb .lv-st{margin-right:auto}
+.lv-cap{display:flex;align-items:baseline;gap:8px;padding:2px 18px 4px;font:500 10.5px "Inter",Arial,sans-serif;color:var(--lv-faint)}.lv-cap b{font:800 9.5px "Inter",Arial,sans-serif;letter-spacing:.1em;color:var(--lv-mute)}
+.lv-cap.day b{color:var(--lv)}.lv-m:has(.lv-cap.day){box-shadow:0 0 0 1px #c9d6ff,var(--lv-sh)}
+.lv-r td.num small{display:block;margin-top:1px;font:500 9.5px "Roboto Mono",ui-monospace,Menlo,monospace;color:var(--lv-faint)}
+.lv-r.dayview col.c-n{width:50px}
+@media(max-width:680px){.lv-cap{padding:2px 12px 4px}.lv-cap span{display:none}.lv-r.dayview{min-width:520px}}

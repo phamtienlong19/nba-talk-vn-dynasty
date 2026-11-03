@@ -208,6 +208,38 @@ class TestLiveTab(unittest.TestCase):
         self.assertNotIn("tank", r["text"].lower())                                # evidence, never a verdict
         self.assertIn("1 team: nothing found", r["text"])
 
+    def test_week_totals_and_one_day_are_told_apart_and_players_show_made_over_attempted(self):
+        feed = json.loads(json.dumps(self.feed))
+        feed["dayDate"] = "2026-11-02"
+        for m in feed["matchups"]:
+            m["day"] = {"date": "2026-11-02", "stats": [{"fg": [1, 2], "ft": [1, 1], "tpm": 1, "pts": 9, "reb": 1, "ast": 1, "st": 1, "blk": 0, "to": 1},
+                                                          {"fg": [2, 4], "ft": [0, 0], "tpm": 0, "pts": 7, "reb": 2, "ast": 0, "st": 0, "blk": 1, "to": 3}],
+                        "cats": {"fgPct": "t", "ftPct": "a", "tpm": "a", "pts": "a", "reb": "b", "ast": "a", "st": "a", "blk": "b", "to": "a"}, "score": [6, 2, 1]}
+            for t in m["teams"]:
+                for r in t["roster"]:
+                    if r.get("n"):
+                        r.update({"wfg": [7, 15], "wft": [3, 4], "dfg": [5, 9], "dft": [2, 2], "dm": "30:01", "d": [0.556, 1.0, 1, 12, 4, 3, 1, 0, 2], "ds": r["s"]})
+        r = self.drive("var FEED=%s;" % json.dumps(feed).replace("</", "<\\/") + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var q=function(s){return document.querySelector(s);};
+            q('#live-root .lv-det').setAttribute('open','');
+            R.cap1=q('#live-root .lv-m .lv-cap b').textContent;R.score1=q('#live-root .lv-m .lv-w').textContent;
+            R.ratio1=q('#live-root .lv-r tbody tr:not(.gh) td.num small').textContent;R.cols1=q('#live-root .lv-r thead tr').children.length;
+            q('#live-root .lv-seg button:nth-child(2)').click();
+            setTimeout(function(){q('#live-root .lv-det').setAttribute('open','');
+              R.cap2=q('#live-root .lv-m .lv-cap b').textContent;R.score2=q('#live-root .lv-m .lv-w').textContent;
+              R.cols2=q('#live-root .lv-r thead tr').children.length;R.min=q('#live-root .lv-r tbody tr:not(.gh) td.num').textContent;
+              R.ratio2=q('#live-root .lv-r tbody tr:not(.gh) td.num:nth-child(4) small').textContent;
+              R.on=q('#live-root .lv-seg button.on').textContent;},300);},600);""", wait=3500)
+        self.assertEqual(r["cap1"], "WEEK TOTALS")
+        self.assertEqual(r["ratio1"], "7/15")
+        self.assertEqual(r["cap2"], "DAY · 2 Nov")
+        self.assertEqual(r["score2"], "6")                                         # the day's own category score, not the week's
+        self.assertEqual(r["cols2"], r["cols1"] + 1)                               # the day view adds minutes
+        self.assertEqual(r["min"], "30:01")
+        self.assertEqual(r["ratio2"], "5/9")
+        self.assertTrue(r["on"].startswith("Day"))
+
 
 if __name__ == "__main__":
     unittest.main()

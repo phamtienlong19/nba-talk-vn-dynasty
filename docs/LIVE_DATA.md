@@ -95,3 +95,13 @@ Built as designed with these details: a closed day is captured once (8 requests)
 again. An out starter counts only when his status is out, his team had a game and he recorded nothing. A star is top 50 by Yahoo's
 preseason O-Rank (`data/yahoo/player_registry.json`), the stand-in for the rule's XRank. The card lists only teams with something found,
 flags the ones at the rule's count (2+ days, 3+ players or 2 stars in the week) and says nothing more: the commissioner decides.
+
+## Day view, minutes and made/attempted (built)
+The matchup page has only percentages per player, so day-level data comes from Yahoo's team page for one day
+(`/nba/<league>/<team>?date=YYYY-MM-DD&stat1=S&stat2=D`, `scripts/yahoo_teamday.py`): slot that day, minutes, FGM/A, FTM/A and the counting
+stats, 16 requests per day. `scripts/live_days.py` captures each closed day once (lineup evidence and the starters' week made/attempted, carried
+in the feed as `lineupChecks.byDate` and `playerWeek` and reused through `--previous`; a runner-local `--day-cache` serves the day shown) and
+the latest day with a started game fresh on every build. Feed fields: per player `wfg`/`wft` (week made/attempted, starting days only, as Yahoo
+scores), `d`/`dm`/`dfg`/`dft`/`ds` (that day's line, minutes, made/attempted, slot); per matchup `day` (the starters' category inputs and
+winners for that day, our arithmetic, not Yahoo's score). The page's Week totals / Day switch changes the category rows, the score and the rosters
+together and labels the card WEEK TOTALS or DAY. The first build after a deploy fetches every closed day of the week (up to ~100 requests, once).

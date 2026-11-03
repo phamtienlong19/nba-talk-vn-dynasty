@@ -16,7 +16,7 @@ end=$(( $(date +%s) + total )); fails=0
 curl -sf --max-time 20 "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/live-data/live.json" -o live.json || rm -f live.json
 while [ "$(date +%s)" -lt "$end" ]; do
   start=$(date +%s)
-  if python3 scripts/build_live_feed.py --out live.json --schedule-cache schedule-cache.json --previous live.json; then
+  if python3 scripts/build_live_feed.py --out live.json --schedule-cache schedule-cache.json --day-cache day-cache.json --previous live.json; then
     fails=0
     out="$(mktemp -d)"; cp live.json "$out/live.json"
     ( cd "$out" && git init -q -b live-data && git config user.name "github-actions[bot]" \

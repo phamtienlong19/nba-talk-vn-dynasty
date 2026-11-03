@@ -8,7 +8,7 @@ if(!dataEl||!root)return;
 var B=JSON.parse(dataEl.textContent),TM={},RK={};
 (B.rookies||[]).forEach(function(id){RK[id]=1;});
 B.teams.forEach(function(t){TM[t.id]=t;});
-var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
+var VIEW="week",FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
 var LINE=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","STL"],["blk","BLK"],["to","TO"]];   /* display order */
 var OLD_KEYS=["pts","reb","ast","st","blk","tpm","to","fgPct","ftPct"];   /* the order of a feed built before lineKeys existed */
@@ -94,38 +94,54 @@ function reverse(){
   var f=FEED,box=h("section",{class:"lv-card lv-rev"},[h("div",{class:"lv-ct",text:"PROJECTED REVERSE ORDER"}),h("div",{class:"lv-cs",text:"Worst record first. Not the draft order."})]);
   var ol=h("ol",{class:"lv-ol"});f.projectedReverse.forEach(function(x){ol.appendChild(h("li",null,[chip(x.team),x.tied?h("small",{text:" tied",title:"Level with a neighbour; shown in the official order"}):null]));});
   box.appendChild(ol);return box;}
-function rosterTable(side,dayDate){
-  var t=h("table",{class:"lv-r"}),cg=h("colgroup");cg.appendChild(h("col",{class:"c-sl"}));cg.appendChild(h("col",{class:"c-nm"}));LINE.forEach(function(){cg.appendChild(h("col",{class:"c-n"}));});t.appendChild(cg);
-  var hd=h("tr");["","Player"].concat(LINE.map(function(c){return c[1];})).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
+function dayOK(){return !!FEED.dayDate&&FEED.matchups.some(function(m){return m.day;});}
+function dayWord(){return FEED.dayDate?shortDate(FEED.dayDate):"";}
+function ratio(pair){return pair&&pair[1]?pair[0]+"/"+pair[1]:"";}
+function rosterTable(side,dayDate,mode){
+  mode=mode==="day"&&dayOK()?"day":"week";
+  var COLS=(mode==="day"?[["min","MIN"]]:[]).concat(LINE),day=mode==="day",when=dayWord()||"the latest day";
+  var t=h("table",{class:"lv-r"+(day?" dayview":"")}),cg=h("colgroup");cg.appendChild(h("col",{class:"c-sl"}));cg.appendChild(h("col",{class:"c-nm"}));COLS.forEach(function(){cg.appendChild(h("col",{class:"c-n"}));});t.appendChild(cg);
+  var hd=h("tr");["","Player"].concat(COLS.map(function(c){return c[1];})).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
   t.appendChild(h("thead",null,[hd]));var tb=h("tbody");t.appendChild(tb);
   var haveDay=side.roster.some(function(r){return r.d;});
-  var groups=[["STARTERS","week totals",function(r){return r.s!=="BN"&&r.s!=="IL";}],["BENCH","stats from "+(dayDate||"the latest day")+" only, not counted",function(r){return r.s==="BN";}],["INJURED LIST","stats from "+(dayDate||"the latest day")+" only, not counted",function(r){return r.s==="IL";}]];
-  groups.forEach(function(g){var rows=side.roster.filter(g[2]);if(!rows.length)return;var bench=g[0]!=="STARTERS";
-    var gh=h("tr",{class:"gh"+(bench?" off":"")}),td=h("td",{colspan:String(LINE.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]+(bench&&!haveDay?" (arrives with the next feed update)":"")})]);gh.appendChild(td);tb.appendChild(gh);
-    rows.forEach(function(r){var vals=lineOf(bench?r.d:r.l);
+  var slotOf=function(r){return day?(r.ds||r.s):r.s;};
+  var groups=[["STARTERS",day?"day: "+when:"week totals, starting days only",function(r){var x=slotOf(r);return x!=="BN"&&x!=="IL";}],
+    ["BENCH",day?"day: "+when:"stats from "+when+" only, not counted",function(r){return slotOf(r)==="BN";}],
+    ["INJURED LIST",day?"day: "+when:"stats from "+when+" only, not counted",function(r){return slotOf(r)==="IL";}]];
+  groups.forEach(function(g){var rows=side.roster.filter(function(r){return r.n==null?!day&&g[2](r):g[2](r);});if(!rows.length)return;var bench=g[0]!=="STARTERS";
+    var gh=h("tr",{class:"gh"+(bench?" off":"")}),td=h("td",{colspan:String(COLS.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]+((bench||day)&&!haveDay?" (arrives with the next feed update)":"")})]);gh.appendChild(td);tb.appendChild(gh);
+    rows.forEach(function(r){var useDay=day||bench,vals=lineOf(useDay?r.d:r.l),fg=useDay?r.dfg:r.wfg,ft=useDay?r.dft:r.wft;
       var rk=r.n!=null&&r.p&&RK[r.p];
       var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")+(rk?"rk":"")});
-      tr.appendChild(h("td",{class:"sl",text:r.s}));
+      tr.appendChild(h("td",{class:"sl",text:slotOf(r)}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(rk)nm.appendChild(h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g||r.gl!=null)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+(r.g||"no game today")+(r.gl!=null?" · "+r.gl+" left":"")}));}
       tr.appendChild(nm);
       var dash=r.n!=null&&noStats(r,vals);
-      LINE.forEach(function(c,i){var v=vals?vals[i]:null;tr.appendChild(h("td",{class:"num"+(!dash&&v===0?" z":""),text:r.n==null||!vals?"":dash?"–":cell(v,c[0])}));});
+      COLS.forEach(function(c,ci){
+        if(c[0]==="min"){tr.appendChild(h("td",{class:"num",text:r.n==null||dash||!r.dm?(r.n==null?"":"–"):r.dm}));return;}
+        var i=LINE.indexOf(c),v=vals?vals[i]:null,ra=c[0]==="fgPct"?ratio(fg):c[0]==="ftPct"?ratio(ft):"";
+        var td=h("td",{class:"num"+(!dash&&v===0?" z":"")},[r.n==null||!vals?"":dash?"–":cell(v,c[0])]);
+        if(ra&&!dash)td.appendChild(h("small",{text:ra,title:(c[0]==="fgPct"?"Field goals":"Free throws")+" made/attempted"}));
+        tr.appendChild(td);});
       tb.appendChild(tr);});});
   return t;}
 function matchup(m){
-  var a=m.teams[0],b=m.teams[1],lead=m.score[0]>m.score[1]?0:m.score[1]>m.score[0]?1:-1;
+  var a=m.teams[0],b=m.teams[1],dm=VIEW==="day"&&m.day?m.day:null;
+  var sc=dm?dm.score:m.score,cats=dm?dm.cats:m.cats,sa=dm?dm.stats[0]:a.stats,sb=dm?dm.stats[1]:b.stats;
+  var lead=sc[0]>sc[1]?0:sc[1]>sc[0]?1:-1;
   var mine=a.team===me()||b.team===me();
   var card=h("section",{class:"lv-card lv-m"+(mine?" me":""),"data-m":String(a.yahooId)});
   if(mine)card.appendChild(h("div",{class:"lv-ribbon",text:"YOUR MATCHUP"}));
   
-  var mh=h("div",{class:"lv-mh",title:"Click to open or close the rosters"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(m.score[0])})]),
-    h("div",{class:"lv-mid",text:m.score[2]?m.score[2]+" tied":"vs"}),
-    h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(m.score[1])}),chip(b.team)])]);card.appendChild(mh);
+  var mh=h("div",{class:"lv-mh",title:"Click to open or close the rosters"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(sc[0])})]),
+    h("div",{class:"lv-mid",text:sc[2]?sc[2]+" tied":"vs"}),
+    h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(sc[1])}),chip(b.team)])]);card.appendChild(mh);
+  card.appendChild(h("div",{class:"lv-cap"+(dm?" day":"")},[h("b",{text:dm?"DAY · "+shortDate(dm.date):"WEEK TOTALS"}),h("span",{text:dm?"the starters' stats that day; the week decides the matchup":"Yahoo's scoring for the matchup"})]));
   var grid=h("div",{class:"lv-cats"});
-  CATS.forEach(function(c){var w=m.cats[c[0]],va=val(c[0],a.stats[c[0]],a.stats),vb=val(c[0],b.stats[c[0]],b.stats);
-    var na=num(c[0],a.stats),nb=num(c[0],b.stats),mg=margin(c[0],na,nb),vola=volume(c[0],a.stats),volb=volume(c[0],b.stats);
+  CATS.forEach(function(c){var w=cats[c[0]],va=val(c[0],sa[c[0]],sa),vb=val(c[0],sb[c[0]],sb);
+    var na=num(c[0],sa),nb=num(c[0],sb),mg=margin(c[0],na,nb),vola=volume(c[0],sa),volb=volume(c[0],sb);
     var row=h("div",{class:"lv-c "+(w==="a"?"wa":w==="b"?"wb":w==="t"?"wt":"")},[h("span",{class:"va"},[va,vola?h("small",{text:vola}):null]),h("span",{class:"cl"},[c[1],mg?h("small",{class:"mg",text:w==="a"?"◂ "+mg:w==="b"?mg+" ▸":mg,title:"Lead in "+c[1]+(c[0]==="to"?" (fewer is better)":"")}):null]),h("span",{class:"vb"},[vb,volb?h("small",{text:volb}):null])]);
     var tug=h("i",{class:"tug"});tug.style.setProperty("--p",share(c[0],na,nb)+"%");row.appendChild(tug);grid.appendChild(row);});
   card.appendChild(grid);
@@ -139,7 +155,7 @@ function matchup(m){
   var bar=h("div",{class:"lv-bar"},[chip(a.team),h("span",{class:"vs",text:"vs"}),chip(b.team),h("button",{type:"button",class:"lv-x",text:"Close ✕",title:"Close the rosters (Esc)"})]);
   bar.querySelector(".lv-x").addEventListener("click",shut);
   var cols=h("div",{class:"lv-cols"});
-  m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate)])]);cols.appendChild(rc);});
+  m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate,VIEW)])]);cols.appendChild(rc);});
   det.appendChild(bar);det.appendChild(cols);card.appendChild(det);return card;}
 
 /* ---------- render ---------- */
@@ -155,7 +171,11 @@ function render(){
   var anyOpen=function(){return FEED.matchups.some(function(m){return OPEN[m.teams[0].yahooId];});};
   var setAll=function(){var open=!anyOpen();FEED.matchups.forEach(function(m){OPEN[m.teams[0].yahooId]=open;});ms.querySelectorAll(".lv-det").forEach(function(d){d.open=open;});allBtn.textContent=open?"Collapse all":"Expand all";};
   allBtn.textContent=anyOpen()?"Collapse all":"Expand all";allBtn.addEventListener("click",setAll);
-  right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),allBtn]));right.appendChild(ms);
+  var seg=null;
+  if(dayOK()){seg=h("div",{class:"lv-seg",role:"group","aria-label":"Which stats to show"});
+    [["week","Week totals"],["day","Day · "+dayWord()]].forEach(function(o){var b=h("button",{type:"button",class:VIEW===o[0]?"on":"","aria-pressed":VIEW===o[0]?"true":"false",text:o[1]});b.addEventListener("click",function(){if(VIEW!==o[0]){VIEW=o[0];render();}});seg.appendChild(b);});}
+  else VIEW="week";
+  right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),seg,allBtn]));right.appendChild(ms);
   grid.appendChild(left);grid.appendChild(right);root.appendChild(grid);
   if(window.NBA_MONO)window.NBA_MONO(root);
   try{document.dispatchEvent(new Event("nba:live"));}catch(e){}}

@@ -1924,6 +1924,16 @@ body{background:var(--canvas);color:var(--text)}
  .lv-r tr.gh td{position:static;box-shadow:none;max-width:none;white-space:normal}.lv-r tr.gh small{display:block;margin:2px 0 0}
  .lv-r td{padding:5px 3px;font-size:11.5px}.lv-r td.nm small{font-size:9.5px}
 }
+
+/* week totals vs one day */
+.lv-seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--lv-soft)}.lv-seg button{border:0;background:transparent;border-radius:999px;padding:6px 14px;font:700 11.5px "Inter",Arial,sans-serif;color:var(--lv-mute);cursor:pointer}
+.lv-seg button.on{background:#fff;color:var(--lv);box-shadow:0 1px 3px rgba(14,26,51,.18)}
+.lv-tb{gap:10px;flex-wrap:wrap}.lv-tb .lv-st{margin-right:auto}
+.lv-cap{display:flex;align-items:baseline;gap:8px;padding:2px 18px 4px;font:500 10.5px "Inter",Arial,sans-serif;color:var(--lv-faint)}.lv-cap b{font:800 9.5px "Inter",Arial,sans-serif;letter-spacing:.1em;color:var(--lv-mute)}
+.lv-cap.day b{color:var(--lv)}.lv-m:has(.lv-cap.day){box-shadow:0 0 0 1px #c9d6ff,var(--lv-sh)}
+.lv-r td.num small{display:block;margin-top:1px;font:500 9.5px "Roboto Mono",ui-monospace,Menlo,monospace;color:var(--lv-faint)}
+.lv-r.dayview col.c-n{width:50px}
+@media(max-width:680px){.lv-cap{padding:2px 12px 4px}.lv-cap span{display:none}.lv-r.dayview{min-width:520px}}
 </style><script type="application/json" id="live-data">{"liveUrl":"https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/live-data/live.json","teams":[{"id":"franchise-01","short":"Bsy","color":"#313844","text":"#ffffff","crown":false},{"id":"franchise-02","short":"CrazyCat","color":"#be0f22","text":"#ffffff","crown":false},{"id":"franchise-03","short":"Melo","color":"#c36b18","text":"#ffffff","crown":false},{"id":"franchise-04","short":"LC","color":"#e6d326","text":"#111111","crown":false},{"id":"franchise-05","short":"HCMC","color":"#71d244","text":"#111111","crown":false},{"id":"franchise-06","short":"Dũng","color":"#178b1e","text":"#ffffff","crown":false},{"id":"franchise-07","short":"Maxfixe","color":"#9ae8b6","text":"#111111","crown":false},{"id":"franchise-08","short":"DHA","color":"#17779b","text":"#ffffff","crown":false},{"id":"franchise-09","short":"Đạt","color":"#67c4eb","text":"#111111","crown":true},{"id":"franchise-10","short":"DonTrick","color":"#2f5fd0","text":"#ffffff","crown":false},{"id":"franchise-11","short":"Thịnh","color":"#22257d","text":"#ffffff","crown":false},{"id":"franchise-12","short":"sup fam","color":"#aa8de6","text":"#111111","crown":false},{"id":"franchise-13","short":"Quân","color":"#8e2ab8","text":"#ffffff","crown":false},{"id":"franchise-14","short":"TuLy","color":"#c925b1","text":"#ffffff","crown":false},{"id":"franchise-15","short":"Bz","color":"#e47fbe","text":"#111111","crown":false},{"id":"franchise-16","short":"TT","color":"#925733","text":"#ffffff","crown":false}],"rookies":["10570","10571","10572","10574","10575","10576","10579","10582","10585","10588","10590","10592","10594","10595","10599","10607","10617"],"fallback":{"schema":"live-feed/1","label":"official finished weeks","asOf":null,"week":2,"weekStatus":"OFFICIAL","table":[{"team":"franchise-01","yahooId":8,"name":null,"w":14,"l":3,"t":1,"pct":0.8055555555555556,"rank":1,"tied":false,"gb":0.0,"gbDivision":0.0,"gbLine":-5.0,"division":"West","officialRank":1,"officialRecord":[14,3,1],"moved":0,"playoff":"in","seed":1},{"team":"franchise-14","yahooId":17,"name":null,"w":13,"l":4,"t":1,"pct":0.75,"rank":2,"tied":false,"gb":1.0,"gbDivision":0.0,"gbLine":-4.0,"division":"East","officialRank":2,"officialRecord":[13,4,1],"moved":0,"playoff":"in","seed":2},{"team":"franchise-09","yahooId":11,"name":null,"w":11,"l":7,"t":0,"pct":0.6111111111111112,"rank":3,"tied":false,"gb":3.5,"gbDivision":2.5,"gbLine":-1.5,"division":"East","officialRank":3,"officialRecord":[11,7,0],"moved":0,"playoff":"in","seed":3},{"team":"franchise-04","yahooId":1,"name":null,"w":10,"l":8,"t":0,"pct":0.5555555555555556,"rank":4,"tied":true,"gb":4.5,"gbDivision":4.5,"gbLine":-0.5,"division":"West","officialRank":4,"officialRecord":[10,8,0],"moved":0,"playoff":"in","seed":4},{"team":"franchise-02","yahooId":4,"name":null,"w":10,"l":8,"t":0,"pct":0.5555555555555556,"rank":4,"tied":true,"gb":4.5,"gbDivision":4.5,"gbLine":-0.5,"division":"West","officialRank":4,"officialRecord":[10,8,0],"moved":0,"playoff":"in","seed":5},{"team":"franchise-08","yahooId":5,"name":null,"w":10,"l":8,"t":0,"pct":0.5555555555555556,"rank":4,"tied":true,"gb":4.5,"gbDivision":3.5,"gbLine":-0.5,"division":"East","officialRank":4,"officialRecord":[10,8,0],"moved":0,"playoff":"in","seed":6},{"team":"franchise-06","yahooId":7,"name":null,"w":9,"l":8,"t":1,"pct":0.5277777777777778,"rank":7,"tied":true,"gb":5.0,"gbDivision":4.0,"gbLine":0.0,"division":"East","officialRank":7,"officialRecord":[9,8,1],"moved":0,"playoff":"in","seed":7},{"team":"franchise-12","yahooId":16,"name":null,"w":9,"l":8,"t":1,"pct":0.5277777777777778,"rank":7,"tied":true,"gb":5.0,"gbDivision":5.0,"gbLine":0.0,"division":"West","officialRank":7,"officialRecord":[9,8,1],"moved":0,"playoff":"in","seed":8},{"team":"franchise-11","yahooId":2,"name":null,"w":9,"l":9,"t":0,"pct":0.5,"rank":9,"tied":false,"gb":5.5,"gbDivision":5.5,"gbLine":0.5,"division":"West","officialRank":9,"officialRecord":[9,9,0],"moved":0,"playoff":"out","seed":null},{"team":"franchise-10","yahooId":6,"name":null,"w":8,"l":10,"t":0,"pct":0.4444444444444444,"rank":10,"tied":false,"gb":6.5,"gbDivision":6.5,"gbLine":1.5,"division":"West","officialRank":10,"officialRecord":[8,10,0],"moved":0,"playoff":"out","seed":null},{"team":"franchise-03","yahooId":13,"name":null,"w":7,"l":10,"t":1,"pct":0.4166666666666667,"rank":11,"tied":false,"gb":7.0,"gbDivision":6.0,"gbLine":2.0,"division":"East","officialRank":11,"officialRecord":[7,10,1],"moved":0,"playoff":"out","seed":null},{"team":"franchise-13","yahooId":14,"name":null,"w":7,"l":11,"t":0,"pct":0.3888888888888889,"rank":12,"tied":true,"gb":7.5,"gbDivision":7.5,"gbLine":2.5,"division":"West","officialRank":12,"officialRecord":[7,11,0],"moved":0,"playoff":"out","seed":null},{"team":"franchise-16","yahooId":15,"name":null,"w":7,"l":11,"t":0,"pct":0.3888888888888889,"rank":12,"tied":true,"gb":7.5,"gbDivision":6.5,"gbLine":2.5,"division":"East","officialRank":12,"officialRecord":[7,11,0],"moved":0,"playoff":"out","seed":null},{"team":"franchise-07","yahooId":12,"name":null,"w":6,"l":11,"t":1,"pct":0.3611111111111111,"rank":14,"tied":false,"gb":8.0,"gbDivision":8.0,"gbLine":3.0,"division":"West","officialRank":14,"officialRecord":[6,11,1],"moved":0,"playoff":"out","seed":null},{"team":"franchise-15","yahooId":3,"name":null,"w":6,"l":12,"t":0,"pct":0.3333333333333333,"rank":15,"tied":false,"gb":8.5,"gbDivision":7.5,"gbLine":3.5,"division":"East","officialRank":15,"officialRecord":[6,12,0],"moved":0,"playoff":"out","seed":null},{"team":"franchise-05","yahooId":9,"name":null,"w":5,"l":13,"t":0,"pct":0.2777777777777778,"rank":16,"tied":false,"gb":9.5,"gbDivision":8.5,"gbLine":4.5,"division":"East","officialRank":16,"officialRecord":[5,13,0],"moved":0,"playoff":"out","seed":null}],"playoff":{"spots":8,"divisionTie":[],"linePct":0.5277777777777778},"projectedReverse":[{"team":"franchise-05","tied":false},{"team":"franchise-15","tied":false},{"team":"franchise-07","tied":false},{"team":"franchise-13","tied":true},{"team":"franchise-16","tied":true},{"team":"franchise-03","tied":false},{"team":"franchise-10","tied":false},{"team":"franchise-11","tied":false},{"team":"franchise-12","tied":true},{"team":"franchise-06","tied":true},{"team":"franchise-08","tied":true},{"team":"franchise-04","tied":true},{"team":"franchise-02","tied":true},{"team":"franchise-09","tied":false},{"team":"franchise-14","tied":false},{"team":"franchise-01","tied":false}],"tiedRanks":[4,7,12],"matchups":[{"teams":[{"team":"franchise-04","yahooId":1,"name":"","stats":{"fg":[188,431],"fgPct":0.436,"ft":[115,135],"ftPct":0.852,"tpm":61,"pts":552,"reb":192,"ast":143,"st":26,"blk":13,"to":89},"printed":4,"toPlay":{"upcoming":0,"live":0},"roster":[]},{"team":"franchise-09","yahooId":11,"name":"","stats":{"fg":[168,346],"fgPct":0.486,"ft":[97,120],"ftPct":0.808,"tpm":59,"pts":492,"reb":171,"ast":144,"st":50,"blk":19,"to":79},"printed":5,"toPlay":{"upcoming":0,"live":0},"roster":[]}],"cats":{"fgPct":"b","ftPct":"a","tpm":"a","pts":"a","reb":"a","ast":"b","st":"b","blk":"b","to":"b"},"score":[4,5,0],"decided":true},{"teams":[{"team":"franchise-11","yahooId":2,"name":"","stats":{"fg":[182,396],"fgPct":0.46,"ft":[80,99],"ftPct":0.808,"tpm":48,"pts":492,"reb":223,"ast":116,"st":30,"blk":37,"to":58},"printed":5,"toPlay":{"upcoming":0,"live":0},"roster":[]},{"team":"franchise-16","yahooId":15,"name":"","stats":{"fg":[189,402],"fgPct":0.47,"ft":[74,91],"ftPct":0.813,"tpm":56,"pts":508,"reb":214,"ast":94,"st":27,"blk":15,"to":64},"printed":4,"toPlay":{"upcoming":0,"live":0},"roster":[]}],"cats":{"fgPct":"b","ftPct":"b","tpm":"b","pts":"b","reb":"a","ast":"a","st":"a","blk":"a","to":"a"},"score":[5,4,0],"decided":true},{"teams":[{"team":"franchise-15","yahooId":3,"name":"","stats":{"fg":[152,320],"fgPct":0.475,"ft":[58,80],"ftPct":0.725,"tpm":41,"pts":403,"reb":174,"ast":90,"st":56,"blk":29,"to":56},"printed":3,"toPlay":{"upcoming":0,"live":0},"roster":[]},{"team":"franchise-14","yahooId":17,"name":"","stats":{"fg":[196,403],"fgPct":0.486,"ft":[93,113],"ftPct":0.823,"tpm":74,"pts":559,"reb":164,"ast":128,"st":35,"blk":22,"to":54},"printed":6,"toPlay":{"upcoming":0,"live":0},"roster":[]}],"cats":{"fgPct":"b","ftPct":"b","tpm":"b","pts":"b","reb":"a","ast":"b","st":"a","blk":"a","to":"b"},"score":[3,6,0],"decided":true},{"teams":[{"team":"franchise-02","yahooId":4,"name":"","stats":{"fg":[211,469],"fgPct":0.45,"ft":[125,157],"ftPct":0.796,"tpm":74,"pts":621,"reb":173,"ast":163,"st":46,"blk":16,"to":71},"printed":5,"toPlay":{"upcoming":0,"live":0},"roster":[]},{"team":"franchise-12","yahooId":16,"name":"","stats":{"fg":[202,420],"fgPct":0.481,"ft":[88,109],"ftPct":0.807,"tpm":41,"pts":533,"reb":164,"ast":119,"st":36,"blk":18,"to":67},"printed":4,"toPlay":{"upcoming":0,"live":0},"roster":[]}],"cats":{"fgPct":"b","ftPct":"b","tpm":"a","pts":"a","reb":"a","ast":"a","st":"a","blk":"b","to":"b"},"score":[5,4,0],"decided":true},{"teams":[{"team":"franchise-08","yahooId":5,"name":"","stats":{"fg":[168,358],"fgPct":0.469,"ft":[86,114],"ftPct":0.754,"tpm":66,"pts":488,"reb":172,"ast":91,"st":24,"blk":22,"to":45},"printed":3,"toPlay":{"upcoming":0,"live":0},"roster":[]},{"team":"franchise-06","yahooId":7,"name":"","stats":{"fg":[180,429],"fgPct":0.42,"ft":[120,147],"ftPct":0.816,"tpm":71,"pts":551,"reb":204,"ast":119,"st":33,"blk":19,"to":83},"printed":6,"toPlay":{"upcoming":0,"live":0},"roster":[]}],"cats":{"fgPct":"a","ftPct":"b","tpm":"b","pts":"b","reb":"b","ast":"b","st":"b","blk":"a","to":"a"},"score":[3,6,0],"decided":true},{"teams":[{"team":"franchise-10","yahooId":6,"name":"","stats":{"fg":[173,366],"fgPct":0.473,"ft":[58,72],"ftPct":0.806,"tpm":42,"pts":446,"reb":165,"ast":110,"st":38,"blk":18,"to":64},"printed":4,"toPlay":{"upcoming":0,"live":0},"roster":[]},{"team":"franchise-07","yahooId":12,"name":"","stats":{"fg":[183,408],"fgPct":0.449,"ft":[96,127],"ftPct":0.756,"tpm":64,"pts":526,"reb":217,"ast":134,"st":30,"blk":19,"to":74},"printed":5,"toPlay":{"upcoming":0,"live":0},"roster":[]}],"cats":{"fgPct":"a","ftPct":"a","tpm":"b","pts":"b","reb":"b","ast":"b","st":"a","blk":"b","to":"a"},"score":[4,5,0],"decided":true},{"teams":[{"team":"franchise-01","yahooId":8,"name":"","stats":{"fg":[235,479],"fgPct":0.491,"ft":[123,145],"ftPct":0.848,"tpm":74,"pts":667,"reb":239,"ast":163,"st":41,"blk":22,"to":90},"printed":7,"toPlay":{"upcoming":0,"live":0},"roster":[]},{"team":"franchise-13","yahooId":14,"name":"","stats":{"fg":[210,455],"fgPct":0.462,"ft":[82,103],"ftPct":0.796,"tpm":75,"pts":577,"reb":179,"ast":88,"st":35,"blk":14,"to":58},"printed":2,"toPlay":{"upcoming":0,"live":0},"roster":[]}],"cats":{"fgPct":"a","ftPct":"a","tpm":"b","pts":"a","reb":"a","ast":"a","st":"a","blk":"a","to":"b"},"score":[7,2,0],"decided":true},{"teams":[{"team":"franchise-05","yahooId":9,"name":"","stats":{"fg":[140,326],"fgPct":0.429,"ft":[78,95],"ftPct":0.821,"tpm":46,"pts":404,"reb":177,"ast":117,"st":23,"blk":23,"to":76},"printed":3,"toPlay":{"upcoming":0,"live":0},"roster":[]},{"team":"franchise-03","yahooId":13,"name":"","stats":{"fg":[195,399],"fgPct":0.489,"ft":[92,138],"ftPct":0.667,"tpm":36,"pts":518,"reb":245,"ast":153,"st":37,"blk":33,"to":79},"printed":6,"toPlay":{"upcoming":0,"live":0},"roster":[]}],"cats":{"fgPct":"b","ftPct":"a","tpm":"a","pts":"b","reb":"b","ast":"b","st":"b","blk":"b","to":"a"},"score":[3,6,0],"decided":true}]}}</script><script id="live-app">(function(){
 "use strict";
 /* LIVE tab: this week's matchups, the standings if the week ended now, the playoff picture and the projected reverse order.
@@ -1934,7 +1944,7 @@ if(!dataEl||!root)return;
 var B=JSON.parse(dataEl.textContent),TM={},RK={};
 (B.rookies||[]).forEach(function(id){RK[id]=1;});
 B.teams.forEach(function(t){TM[t.id]=t;});
-var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
+var VIEW="week",FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
 var LINE=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","STL"],["blk","BLK"],["to","TO"]];   /* display order */
 var OLD_KEYS=["pts","reb","ast","st","blk","tpm","to","fgPct","ftPct"];   /* the order of a feed built before lineKeys existed */
@@ -2020,38 +2030,54 @@ function reverse(){
   var f=FEED,box=h("section",{class:"lv-card lv-rev"},[h("div",{class:"lv-ct",text:"PROJECTED REVERSE ORDER"}),h("div",{class:"lv-cs",text:"Worst record first. Not the draft order."})]);
   var ol=h("ol",{class:"lv-ol"});f.projectedReverse.forEach(function(x){ol.appendChild(h("li",null,[chip(x.team),x.tied?h("small",{text:" tied",title:"Level with a neighbour; shown in the official order"}):null]));});
   box.appendChild(ol);return box;}
-function rosterTable(side,dayDate){
-  var t=h("table",{class:"lv-r"}),cg=h("colgroup");cg.appendChild(h("col",{class:"c-sl"}));cg.appendChild(h("col",{class:"c-nm"}));LINE.forEach(function(){cg.appendChild(h("col",{class:"c-n"}));});t.appendChild(cg);
-  var hd=h("tr");["","Player"].concat(LINE.map(function(c){return c[1];})).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
+function dayOK(){return !!FEED.dayDate&&FEED.matchups.some(function(m){return m.day;});}
+function dayWord(){return FEED.dayDate?shortDate(FEED.dayDate):"";}
+function ratio(pair){return pair&&pair[1]?pair[0]+"/"+pair[1]:"";}
+function rosterTable(side,dayDate,mode){
+  mode=mode==="day"&&dayOK()?"day":"week";
+  var COLS=(mode==="day"?[["min","MIN"]]:[]).concat(LINE),day=mode==="day",when=dayWord()||"the latest day";
+  var t=h("table",{class:"lv-r"+(day?" dayview":"")}),cg=h("colgroup");cg.appendChild(h("col",{class:"c-sl"}));cg.appendChild(h("col",{class:"c-nm"}));COLS.forEach(function(){cg.appendChild(h("col",{class:"c-n"}));});t.appendChild(cg);
+  var hd=h("tr");["","Player"].concat(COLS.map(function(c){return c[1];})).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
   t.appendChild(h("thead",null,[hd]));var tb=h("tbody");t.appendChild(tb);
   var haveDay=side.roster.some(function(r){return r.d;});
-  var groups=[["STARTERS","week totals",function(r){return r.s!=="BN"&&r.s!=="IL";}],["BENCH","stats from "+(dayDate||"the latest day")+" only, not counted",function(r){return r.s==="BN";}],["INJURED LIST","stats from "+(dayDate||"the latest day")+" only, not counted",function(r){return r.s==="IL";}]];
-  groups.forEach(function(g){var rows=side.roster.filter(g[2]);if(!rows.length)return;var bench=g[0]!=="STARTERS";
-    var gh=h("tr",{class:"gh"+(bench?" off":"")}),td=h("td",{colspan:String(LINE.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]+(bench&&!haveDay?" (arrives with the next feed update)":"")})]);gh.appendChild(td);tb.appendChild(gh);
-    rows.forEach(function(r){var vals=lineOf(bench?r.d:r.l);
+  var slotOf=function(r){return day?(r.ds||r.s):r.s;};
+  var groups=[["STARTERS",day?"day: "+when:"week totals, starting days only",function(r){var x=slotOf(r);return x!=="BN"&&x!=="IL";}],
+    ["BENCH",day?"day: "+when:"stats from "+when+" only, not counted",function(r){return slotOf(r)==="BN";}],
+    ["INJURED LIST",day?"day: "+when:"stats from "+when+" only, not counted",function(r){return slotOf(r)==="IL";}]];
+  groups.forEach(function(g){var rows=side.roster.filter(function(r){return r.n==null?!day&&g[2](r):g[2](r);});if(!rows.length)return;var bench=g[0]!=="STARTERS";
+    var gh=h("tr",{class:"gh"+(bench?" off":"")}),td=h("td",{colspan:String(COLS.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]+((bench||day)&&!haveDay?" (arrives with the next feed update)":"")})]);gh.appendChild(td);tb.appendChild(gh);
+    rows.forEach(function(r){var useDay=day||bench,vals=lineOf(useDay?r.d:r.l),fg=useDay?r.dfg:r.wfg,ft=useDay?r.dft:r.wft;
       var rk=r.n!=null&&r.p&&RK[r.p];
       var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")+(rk?"rk":"")});
-      tr.appendChild(h("td",{class:"sl",text:r.s}));
+      tr.appendChild(h("td",{class:"sl",text:slotOf(r)}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(rk)nm.appendChild(h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g||r.gl!=null)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+(r.g||"no game today")+(r.gl!=null?" · "+r.gl+" left":"")}));}
       tr.appendChild(nm);
       var dash=r.n!=null&&noStats(r,vals);
-      LINE.forEach(function(c,i){var v=vals?vals[i]:null;tr.appendChild(h("td",{class:"num"+(!dash&&v===0?" z":""),text:r.n==null||!vals?"":dash?"–":cell(v,c[0])}));});
+      COLS.forEach(function(c,ci){
+        if(c[0]==="min"){tr.appendChild(h("td",{class:"num",text:r.n==null||dash||!r.dm?(r.n==null?"":"–"):r.dm}));return;}
+        var i=LINE.indexOf(c),v=vals?vals[i]:null,ra=c[0]==="fgPct"?ratio(fg):c[0]==="ftPct"?ratio(ft):"";
+        var td=h("td",{class:"num"+(!dash&&v===0?" z":"")},[r.n==null||!vals?"":dash?"–":cell(v,c[0])]);
+        if(ra&&!dash)td.appendChild(h("small",{text:ra,title:(c[0]==="fgPct"?"Field goals":"Free throws")+" made/attempted"}));
+        tr.appendChild(td);});
       tb.appendChild(tr);});});
   return t;}
 function matchup(m){
-  var a=m.teams[0],b=m.teams[1],lead=m.score[0]>m.score[1]?0:m.score[1]>m.score[0]?1:-1;
+  var a=m.teams[0],b=m.teams[1],dm=VIEW==="day"&&m.day?m.day:null;
+  var sc=dm?dm.score:m.score,cats=dm?dm.cats:m.cats,sa=dm?dm.stats[0]:a.stats,sb=dm?dm.stats[1]:b.stats;
+  var lead=sc[0]>sc[1]?0:sc[1]>sc[0]?1:-1;
   var mine=a.team===me()||b.team===me();
   var card=h("section",{class:"lv-card lv-m"+(mine?" me":""),"data-m":String(a.yahooId)});
   if(mine)card.appendChild(h("div",{class:"lv-ribbon",text:"YOUR MATCHUP"}));
   
-  var mh=h("div",{class:"lv-mh",title:"Click to open or close the rosters"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(m.score[0])})]),
-    h("div",{class:"lv-mid",text:m.score[2]?m.score[2]+" tied":"vs"}),
-    h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(m.score[1])}),chip(b.team)])]);card.appendChild(mh);
+  var mh=h("div",{class:"lv-mh",title:"Click to open or close the rosters"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(sc[0])})]),
+    h("div",{class:"lv-mid",text:sc[2]?sc[2]+" tied":"vs"}),
+    h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(sc[1])}),chip(b.team)])]);card.appendChild(mh);
+  card.appendChild(h("div",{class:"lv-cap"+(dm?" day":"")},[h("b",{text:dm?"DAY · "+shortDate(dm.date):"WEEK TOTALS"}),h("span",{text:dm?"the starters' stats that day; the week decides the matchup":"Yahoo's scoring for the matchup"})]));
   var grid=h("div",{class:"lv-cats"});
-  CATS.forEach(function(c){var w=m.cats[c[0]],va=val(c[0],a.stats[c[0]],a.stats),vb=val(c[0],b.stats[c[0]],b.stats);
-    var na=num(c[0],a.stats),nb=num(c[0],b.stats),mg=margin(c[0],na,nb),vola=volume(c[0],a.stats),volb=volume(c[0],b.stats);
+  CATS.forEach(function(c){var w=cats[c[0]],va=val(c[0],sa[c[0]],sa),vb=val(c[0],sb[c[0]],sb);
+    var na=num(c[0],sa),nb=num(c[0],sb),mg=margin(c[0],na,nb),vola=volume(c[0],sa),volb=volume(c[0],sb);
     var row=h("div",{class:"lv-c "+(w==="a"?"wa":w==="b"?"wb":w==="t"?"wt":"")},[h("span",{class:"va"},[va,vola?h("small",{text:vola}):null]),h("span",{class:"cl"},[c[1],mg?h("small",{class:"mg",text:w==="a"?"◂ "+mg:w==="b"?mg+" ▸":mg,title:"Lead in "+c[1]+(c[0]==="to"?" (fewer is better)":"")}):null]),h("span",{class:"vb"},[vb,volb?h("small",{text:volb}):null])]);
     var tug=h("i",{class:"tug"});tug.style.setProperty("--p",share(c[0],na,nb)+"%");row.appendChild(tug);grid.appendChild(row);});
   card.appendChild(grid);
@@ -2065,7 +2091,7 @@ function matchup(m){
   var bar=h("div",{class:"lv-bar"},[chip(a.team),h("span",{class:"vs",text:"vs"}),chip(b.team),h("button",{type:"button",class:"lv-x",text:"Close ✕",title:"Close the rosters (Esc)"})]);
   bar.querySelector(".lv-x").addEventListener("click",shut);
   var cols=h("div",{class:"lv-cols"});
-  m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate)])]);cols.appendChild(rc);});
+  m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate,VIEW)])]);cols.appendChild(rc);});
   det.appendChild(bar);det.appendChild(cols);card.appendChild(det);return card;}
 
 /* ---------- render ---------- */
@@ -2081,7 +2107,11 @@ function render(){
   var anyOpen=function(){return FEED.matchups.some(function(m){return OPEN[m.teams[0].yahooId];});};
   var setAll=function(){var open=!anyOpen();FEED.matchups.forEach(function(m){OPEN[m.teams[0].yahooId]=open;});ms.querySelectorAll(".lv-det").forEach(function(d){d.open=open;});allBtn.textContent=open?"Collapse all":"Expand all";};
   allBtn.textContent=anyOpen()?"Collapse all":"Expand all";allBtn.addEventListener("click",setAll);
-  right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),allBtn]));right.appendChild(ms);
+  var seg=null;
+  if(dayOK()){seg=h("div",{class:"lv-seg",role:"group","aria-label":"Which stats to show"});
+    [["week","Week totals"],["day","Day · "+dayWord()]].forEach(function(o){var b=h("button",{type:"button",class:VIEW===o[0]?"on":"","aria-pressed":VIEW===o[0]?"true":"false",text:o[1]});b.addEventListener("click",function(){if(VIEW!==o[0]){VIEW=o[0];render();}});seg.appendChild(b);});}
+  else VIEW="week";
+  right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),seg,allBtn]));right.appendChild(ms);
   grid.appendChild(left);grid.appendChild(right);root.appendChild(grid);
   if(window.NBA_MONO)window.NBA_MONO(root);
   try{document.dispatchEvent(new Event("nba:live"));}catch(e){}}

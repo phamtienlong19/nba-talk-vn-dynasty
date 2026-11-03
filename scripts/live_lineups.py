@@ -21,7 +21,6 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import live_schedule as lsch  # noqa: E402
-import update_yahoo_matchups as um  # noqa: E402
 import yahoo_matchups as ym  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
 
@@ -74,18 +73,6 @@ def closed_dates(cfg, cur, now_dt) -> list:
     return [d for d in (start + datetime.timedelta(days=i) for i in range(7)) if d < today]
 
 
-def capture_day(cfg, cur, date, pages, fetcher, ranks, sleep=time.sleep) -> dict:
-    """{teamId: [issues]} for one closed day (one request per pairing)."""
-    out = {}
-    for p in pages:
-        sleep(cfg.get("requestDelaySeconds", 1.5))
-        tid = min(t["teamId"] for t in p["teams"])
-        dp = um.fetch_page(cfg, fetcher, um.url_for(cfg, cur, tid).replace("date=totals", "date=" + date.isoformat()))
-        for team, rows in (dp.get("rosters") or {}).items():
-            out[str(team)] = misses(rows, ranks)
-    return out
-
-
 def summarize(by_date, week) -> list:
     """Per team: the days with issues and the counts the league rule looks at."""
     teams = {}
@@ -106,22 +93,6 @@ def summarize(by_date, week) -> list:
                   "meetsCount": len(t["days"]) >= RULE["days"] or players >= RULE["players"] or stars >= RULE["stars"]})
         rows.append(t)
     return rows
-
-
-def checks(cfg, cur, pages, fetcher, now_dt, ranks, previous=None, sleep=time.sleep) -> dict:
-    """The feed's `lineupChecks`. Days already in `previous` (the last published feed, same week) are reused, not fetched again."""
-    prev = (previous or {}).get("lineupChecks") or {}
-    by_date = dict(prev.get("byDate") or {}) if prev.get("week") == cur else {}
-    missing = []
-    for d in closed_dates(cfg, cur, now_dt):
-        key = d.isoformat()
-        if key in by_date:
-            continue
-        try:
-            by_date[key] = capture_day(cfg, cur, d, pages, fetcher, ranks, sleep)
-        except (ym.MatchupError, yr.FetchError):
-            missing.append(key)
-    return {"week": cur, "rule": RULE, "byDate": by_date, "missing": missing, "teams": summarize(by_date, cur)}
 
 
 def load_ranks(path=None) -> dict:
