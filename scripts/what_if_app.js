@@ -568,6 +568,7 @@ function bdRender(){
 }
 function bdClose(){var ov=document.getElementById("kb-board");if(ov)ov.remove();BD.open=false;document.removeEventListener("keydown",bdEsc);document.body.classList.remove("kbb-open");KB.last=KB.last;kbRender();}
 function bdEsc(e){
+  if(document.querySelector(".imgov"))return;   /* an export dialog is open on top of the board: Tab and Esc are its own */
   if(e.key==="Tab"){var ov=document.getElementById("kb-board");if(ov){var f=[].slice.call(ov.querySelectorAll("button,input,select,[tabindex]")).filter(function(x){return !x.disabled&&x.offsetParent!==null;});
     if(f.length){var first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}else if(!ov.contains(document.activeElement)){e.preventDefault();first.focus();}}}return;}
   if(e.key==="Escape"){var t=e.target;if(t&&/^(INPUT|SELECT)$/.test(t.tagName)&&t.type==="search"&&t.value){t.value="";BD.q="";bdRender();}else bdClose();}}

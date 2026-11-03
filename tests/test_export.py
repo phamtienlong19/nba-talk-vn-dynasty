@@ -10,6 +10,7 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import test_live_feed as tlf  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
 
 INDEX = os.path.join(HERE, "..", "index.html")
@@ -55,7 +56,7 @@ class TestExportHub(unittest.TestCase):
             R.tabs=ov.querySelectorAll('.imgov-t').length;var im=ov.querySelector('img.imgov-img');R.w=im.naturalWidth;R.h=im.naturalHeight;
             R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});},1800);""", wait=4000)
         self.assertTrue(r["ov"])
-        self.assertEqual(r["tabs"], 2)                                                     # teams 1-8 and 9-16
+        self.assertEqual(r["tabs"], 4)                                                     # four teams an image, readable on a phone
         self.assertGreaterEqual(r["w"], 1080)
         self.assertGreater(r["h"], 1000)
         for label in ("Copy link", "Copy text", "Save"):
@@ -94,3 +95,75 @@ class TestExportHub(unittest.TestCase):
         self.assertEqual(r["text"].count("\n") >= 18, True)                                # title + header + 16 rows
         self.assertTrue(r["link"].endswith("#cap"))
         self.assertNotIn("$", r["text"])                                                   # house rule: no dollar signs, here too
+
+    SMOKE = """
+      var out=[];NBA_EXPORT.catalog().forEach(function(it){var r={id:it.id,pages:0,bad:[]};
+        try{var ps=it.pages();r.pages=ps.length;ps.forEach(function(p){
+          if(p.doc){var cv=NBA_EXPORT.canvas(p.doc);if(!(cv.width>=1000&&cv.height>200))r.bad.push('canvas '+cv.width+'x'+cv.height);
+            [NBA_EXPORT.text(p.doc),NBA_EXPORT.list(p.doc)].forEach(function(t){if(/undefined|NaN|\\[object/.test(t))r.bad.push('text: '+t.slice(0,80));});}
+          else if(!p.cv)r.bad.push('no doc and no canvas');});}catch(e){r.bad.push(String(e));}
+        if(!r.pages)r.bad.push('no pages');out.push(r);});R.items=out;"""
+
+    def _smoke(self, r):
+        self.assertGreater(len(r["items"]), 5)
+        for it in r["items"]:
+            self.assertEqual(it["bad"], [], it["id"])
+
+    def test_every_export_draws_and_reads_cleanly_in_the_official_view(self):
+        self._smoke(self.drive(self.SMOKE))
+
+    def test_every_export_draws_and_reads_cleanly_in_a_scenario(self):
+        self._smoke(self.drive(self.SMOKE, qs="?mode=scenario"))
+
+    def test_every_export_draws_and_reads_cleanly_in_keepers_mode(self):
+        r = self.drive(self.SMOKE + "R.ids=R.items.map(function(i){return i.id;});", qs="?mode=whatif&view=keepers")
+        self._smoke(r)
+        self.assertTrue(any(i.startswith("kb-") for i in r["ids"]), r["ids"])
+
+    def test_every_export_draws_and_reads_cleanly_with_a_live_feed(self):
+        feed = json.dumps(tlf.feed()).replace("</", "<\\/")
+        r = self.drive("NBA_LIVE.set(" + feed + ");" + self.SMOKE + "R.ids=R.items.map(function(i){return i.id;});")
+        self._smoke(r)
+        for want in ("live-standings", "live-matchups"):
+            self.assertIn(want, r["ids"])
+
+    def test_the_hub_groups_exports_puts_this_page_first_and_traps_focus(self):
+        r = self.drive("""
+          var b=document.getElementById('tb-export');b.focus();b.click();var hub=document.getElementById('ex-hub');
+          R.heads=Array.prototype.map.call(hub.querySelectorAll('.ex-h'),function(x){return x.textContent;});
+          var f=Array.prototype.filter.call(hub.querySelectorAll('button'),function(x){return x.offsetParent!==null;});
+          f[f.length-1].focus();document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true}));R.wrapped=hub.contains(document.activeElement);
+          document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));R.closed=!document.getElementById('ex-hub');R.back=document.activeElement&&document.activeElement.id;""")
+        self.assertTrue(r["heads"][0].endswith("this page"), r["heads"])
+        self.assertIn("One team", r["heads"])
+        self.assertTrue(r["wrapped"] and r["closed"])
+        self.assertEqual(r["back"], "tb-export")                                     # focus returns to what opened it
+
+    def test_from_the_rankings_board_the_hub_owns_tab_and_esc(self):
+        r = self.drive("""
+          NBA_WHATIF.openBoard();setTimeout(function(){document.getElementById('kbb-export').click();var hub=document.getElementById('ex-hub');R.hub=!!hub;
+            var it=hub.querySelector('.ex-item');it.focus();document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true}));R.stays=hub.contains(document.activeElement);
+            document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));R.hubGone=!document.getElementById('ex-hub');R.boardStays=!!document.getElementById('kb-board');},300);""",
+            qs="?mode=whatif&view=keepers", wait=2500)
+        self.assertTrue(r["hub"] and r["stays"])
+        self.assertTrue(r["hubGone"] and r["boardStays"])                            # Esc closed the export, not the board under it
+
+    def test_saved_files_carry_the_date_links_keep_the_mode_and_there_is_a_list_text(self):
+        r = self.drive("""
+          document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=cap]').click();
+          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.name=ov.querySelector('a[download]').getAttribute('download');
+            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});R.full=!!ov.querySelector('.imgov-full');
+            R.alt=ov.querySelector('img').getAttribute('alt');},1800);
+          R.link=NBA_EXPORT.catalog().filter(function(i){return i.id==='cap';})[0].link();""", qs="?mode=scenario", wait=4000)
+        self.assertRegex(r["name"], r"^cap-table-\d{4}-\d{2}-\d{2}\.png$")
+        self.assertIn("Copy as list", r["btns"])
+        self.assertTrue(r["full"])
+        self.assertGreater(len(r["alt"]), 40)                                         # the alt text carries the content, not just "Cap table"
+        self.assertIn("mode=scenario", r["link"])                                     # the link opens the scenario the image shows
+
+    def test_image_text_is_large_enough_to_read_when_a_phone_shrinks_it(self):
+        with open(INDEX, encoding="utf-8") as f:
+            src = f.read()
+        body = src[src.index("function exRun(c,doc,draw,W){"):src.index("function exCanvas(doc){")]
+        sizes = [int(x) for x in re.findall(r'"\d{3} (\d+)px "', body)]
+        self.assertGreaterEqual(min(sizes), 20, sorted(set(sizes)))                   # 20px of 1080 is about 7px on a phone: the floor

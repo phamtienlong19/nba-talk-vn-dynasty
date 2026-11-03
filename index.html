@@ -816,7 +816,7 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .chk-btn:hover{background:#f3f6fa}
 .chk-btn.pri{background:#12264d;border-color:#12264d;color:#fff}.chk-btn.pri:hover{background:#1b3668}
 /* share image: preview, then Share / Copy / Save */
-.imgov{position:fixed;inset:0;z-index:300;background:rgba(10,18,36,.62);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.imgov{position:fixed;inset:0;z-index:300;padding-bottom:max(16px,env(safe-area-inset-bottom))!important;background:rgba(10,18,36,.62);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
 .imgov-box{position:relative;display:flex;flex-direction:column;width:min(620px,100%);max-height:calc(100vh - 32px);background:#fff;border-radius:20px;box-shadow:0 24px 70px rgba(5,12,30,.45);overflow:hidden}
 .imgov-scroll{overflow:auto;padding:54px 16px 8px;background:#f4f6fa}
 .imgov-img{display:block;width:100%;height:auto;border-radius:12px;box-shadow:0 1px 3px rgba(15,27,52,.12)}
@@ -833,6 +833,19 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .ex-list{display:grid;gap:8px}.ex-item{display:block;width:100%;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid #dfe5ef;background:#fff;cursor:pointer;font:inherit}
 .ex-item b{display:block;font:800 14px/1.3 "Inter",Arial,sans-serif;color:#12264d}.ex-item span{display:block;margin-top:3px;font:500 12.5px/1.4 "Inter",Arial,sans-serif;color:#66748d}.ex-item:hover,.ex-item:focus-visible{border-color:#12264d;outline:none;background:#f6f8fc}
 .imgov-x{position:absolute;top:10px;right:10px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:#ffffffd9;color:#12264d;font:800 14px/1 "Inter",Arial,sans-serif;cursor:pointer;box-shadow:0 1px 4px rgba(15,27,52,.2)}
+
+/* export dialogs: phone-safe height, larger targets, a wider preview on desktop, list groups, toast */
+.imgov-box{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom))}
+@media(min-width:1000px){.imgov-box:not(.ex-box){width:min(920px,100%)}}
+.imgov-full{display:inline-block;margin:8px 2px 4px;font:600 12.5px "Inter",Arial,sans-serif;color:#2c3796}
+.ex-h.here{color:#2c3796}.ex-warn{margin:14px 0 0;padding:9px 12px;border-radius:10px;background:#fff6e0;color:#7a4f00;font:600 12.5px/1.45 "Inter",Arial,sans-serif}
+.ex-toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:320;display:flex;align-items:center;gap:10px;max-width:calc(100% - 24px);padding:11px 16px;border-radius:999px;background:#12264d;color:#fff;font:600 13px "Inter",Arial,sans-serif;box-shadow:0 10px 30px rgba(5,12,30,.35)}
+.ex-toast-b{border:0;border-radius:999px;padding:8px 12px;background:#fff;color:#12264d;font:700 12.5px "Inter",Arial,sans-serif;cursor:pointer}
+@media(hover:none) and (pointer:coarse){
+ input,select,textarea{font-size:16px!important}   /* iOS zooms the page into any field under 16px */
+ .imgov-x,.kbb-x{width:44px;height:44px}.imgov-b{min-height:44px}.imgov-t{min-height:40px}
+}
+@media(max-width:680px){#tb-export .tb-lbl{display:inline}}
 
 .chk-tm{margin-top:16px;border:1px solid #e8edf4;border-radius:14px;background:#fbfcfe}
 .chk-tm summary{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;list-style:none}
@@ -3236,6 +3249,7 @@ function bdRender(){
 }
 function bdClose(){var ov=document.getElementById("kb-board");if(ov)ov.remove();BD.open=false;document.removeEventListener("keydown",bdEsc);document.body.classList.remove("kbb-open");KB.last=KB.last;kbRender();}
 function bdEsc(e){
+  if(document.querySelector(".imgov"))return;   /* an export dialog is open on top of the board: Tab and Esc are its own */
   if(e.key==="Tab"){var ov=document.getElementById("kb-board");if(ov){var f=[].slice.call(ov.querySelectorAll("button,input,select,[tabindex]")).filter(function(x){return !x.disabled&&x.offsetParent!==null;});
     if(f.length){var first=f[0],last=f[f.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}else if(!ov.contains(document.activeElement)){e.preventDefault();first.focus();}}}return;}
   if(e.key==="Escape"){var t=e.target;if(t&&/^(INPUT|SELECT)$/.test(t.tagName)&&t.type==="search"&&t.value){t.value="";BD.q="";bdRender();}else bdClose();}}
@@ -4354,9 +4368,9 @@ function chkShareImage(btn){var mv=chkMoves(),dr=chkDrops(),il=chkIls();if(!mv.l
 function chkImagePreview(pages,res,opts){
  opts=opts||{};var ttl=opts.title||"Trade proposal";
  var old=document.getElementById("chk-imgov");if(old)old.remove();var cur=0,urls=pages.map(function(p){p.url=URL.createObjectURL(p.blob);try{p.file=new File([p.blob],p.name,{type:"image/png"});}catch(e){}return p.url;});
- var ov=h("div",{class:"imgov",id:"chk-imgov",role:"dialog","aria-modal":"true","aria-label":opts.title?opts.title+" images":"Trade images"}),close=function(){urls.forEach(function(u){URL.revokeObjectURL(u);});ov.remove();document.removeEventListener("keydown",esc);};
- function esc(e){if(e.key==="Escape")close();}
+ var ov=h("div",{class:"imgov",id:"chk-imgov",role:"dialog","aria-modal":"true","aria-label":opts.title?opts.title+" images":"Trade images"}),close=exModal(ov,function(){urls.forEach(function(u){URL.revokeObjectURL(u);});ov.remove();});
  var img=h("img",{class:"imgov-img",src:pages[0].url,alt:pages[0].alt}),save=h("a",{class:"imgov-b",href:pages[0].url,download:pages[0].name,text:"Save"}),tabs=[];
+ var full=h("a",{class:"imgov-full",href:pages[0].url,target:"_blank",rel:"noopener",text:"Open full size"});
  var canShare=function(){var f=pages[cur].file;return !!(f&&navigator.share&&navigator.canShare&&navigator.canShare({files:[f]}));};
  var share=canShare()?h("button",{type:"button",class:"imgov-b pri",text:"Share"}):null,copy=h("button",{type:"button",class:"imgov-b"+(share?"":" pri"),text:"Copy image"});
  var two=pages.length>2?[pages[0],pages[1]]:null,can2=!!(two&&two[0].file&&two[1].file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[two[0].file,two[1].file]}));
@@ -4365,14 +4379,31 @@ function chkImagePreview(pages,res,opts){
  save2.addEventListener("click",function(){two.forEach(function(p,k){setTimeout(function(){var a=document.createElement("a");a.href=p.url;a.download=p.name;document.body.appendChild(a);a.click();a.remove();},k*450);});flash(save2,"Saving…","Save 2 images");});
  function flash(b,t,orig){b.textContent=t;setTimeout(function(){b.textContent=orig;},1800);}
  function cpTxt(btn,label,val){var b=h("button",{type:"button",class:"imgov-b sm",text:label});b.addEventListener("click",function(){try{navigator.clipboard.writeText(val).then(function(){flash(b,"Copied",label);},function(){flash(b,"Copy blocked",label);});}catch(e){flash(b,"Copy blocked",label);}});return b;}
- var cpl=opts.link?cpTxt(null,"Copy link",opts.link):null,cpt=opts.text?cpTxt(null,"Copy text",opts.text):null;
- function show(i){cur=i;img.src=pages[i].url;img.alt=pages[i].alt;save.href=pages[i].url;save.setAttribute("download",pages[i].name);tabs.forEach(function(t,k){t.setAttribute("aria-pressed",k===i?"true":"false");t.classList.toggle("on",k===i);});}
+ var cpl=opts.link?cpTxt(null,"Copy link",opts.link):null,cpt=opts.text?cpTxt(null,"Copy text",opts.text):null,cpli=opts.list?cpTxt(null,"Copy as list",opts.list):null;
+ if(cpt)cpt.title="Aligned columns: best in apps with a fixed-width font";if(cpli)cpli.title="One line per row: reads well in any chat app";
+ function show(i){cur=i;img.src=pages[i].url;img.alt=pages[i].alt;save.href=pages[i].url;full.href=pages[i].url;save.setAttribute("download",pages[i].name);tabs.forEach(function(t,k){t.setAttribute("aria-pressed",k===i?"true":"false");t.classList.toggle("on",k===i);});}
  pages.forEach(function(p,i){var t=h("button",{type:"button",class:"imgov-t"+(i?"":" on"),"aria-pressed":i?"false":"true",text:p.label});t.addEventListener("click",function(){show(i);});tabs.push(t);});
  if(share)share.addEventListener("click",function(){navigator.share({files:[pages[cur].file],title:ttl,text:res.status}).catch(function(){});});
  copy.addEventListener("click",function(){try{navigator.clipboard.write([new ClipboardItem({"image/png":pages[cur].blob})]).then(function(){flash(copy,"Copied","Copy image");},function(){flash(copy,"Not allowed here: use Save","Copy image");});}catch(e){flash(copy,"Not supported: use Save","Copy image");}});
- var x=h("button",{type:"button",class:"imgov-x","aria-label":"Close",text:"✕"});x.addEventListener("click",close);ov.addEventListener("click",function(e){if(e.target===ov)close();});document.addEventListener("keydown",esc);
- ov.appendChild(h("div",{class:"imgov-box"},[h("div",{class:"imgov-tabs",role:"group","aria-label":"Which image"},tabs),x,h("div",{class:"imgov-scroll"},[img]),h("div",{class:"imgov-bar"},[share2,save2,cpl,cpt,share,copy,save])]));document.body.appendChild(ov);
+ var x=h("button",{type:"button",class:"imgov-x","aria-label":"Close",text:"✕"});x.addEventListener("click",close);
+ ov.appendChild(h("div",{class:"imgov-box"},[h("div",{class:"imgov-tabs",role:"group","aria-label":"Which image"},tabs),x,h("div",{class:"imgov-scroll"},[img,full]),h("div",{class:"imgov-bar"},[share2,save2,cpl,cpt,cpli,share,copy,save])]));document.body.appendChild(ov);
  var first=ov.querySelector(".imgov-b");if(first)first.focus();}
+/* a modal dialog: Tab stays inside, Esc closes, focus goes back to what opened it. Other overlays (the rankings board) leave Tab and Esc to
+   the topmost dialog: they check document.querySelector(".imgov") first. */
+function exModal(ov,close){
+ var opener=document.activeElement;
+ function key(e){if(ov!==[].slice.call(document.querySelectorAll(".imgov")).pop())return;   /* only the topmost dialog answers */
+  if(e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();done();return;}
+  if(e.key!=="Tab")return;var f=[].slice.call(ov.querySelectorAll("button,a[href],input,select,textarea,[tabindex]:not([tabindex='-1'])")).filter(function(x){return !x.disabled&&x.offsetParent!==null;});
+  if(!f.length)return;var a=f[0],z=f[f.length-1];
+  if(!ov.contains(document.activeElement)){e.preventDefault();a.focus();}else if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}
+ function done(){document.removeEventListener("keydown",key,true);close();if(opener&&opener.focus&&document.contains(opener))try{opener.focus({preventScroll:true});}catch(x){opener.focus();}}
+ document.addEventListener("keydown",key,true);ov.addEventListener("click",function(e){if(e.target===ov)done();});return done;}
+/* a short message at the bottom of the screen (busy, or what went wrong and what to do instead) */
+function exToast(msg,actions,ms){var old=document.getElementById("ex-toast");if(old)old.remove();if(!msg)return;
+ var t=h("div",{class:"ex-toast",id:"ex-toast",role:"status","aria-live":"polite"},[h("span",{text:msg})].concat(actions||[]));document.body.appendChild(t);
+ if(ms)setTimeout(function(){if(t.parentNode)t.remove();},ms);return t;}
+function exDate(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 /* ---------- export hub: any view as an image, a link and a chat-ready text ----------
    A document is a title plus blocks (stats, table, cards, note, heading). One drawing routine paints it on a canvas (the same look
    as the trade images) and one routine turns it into plain text, so every export has the same three forms: image, link, text.
@@ -4390,14 +4421,16 @@ function exSoft(c,on){if(on){c.shadowColor="rgba(18,38,77,.16)";c.shadowBlur=18;
 function exRun(c,doc,draw,W){
  var M=44,CW=W-2*M,y,i;
  /* header band: dark gradient, a gold stripe, soft circles, the title in white */
- c.font="500 24px "+IMG_F;var subLines=doc.sub?imgWrap(c,doc.sub,CW):[],hy=46+(doc.tag?64:0),bannerH=hy+56+subLines.length*32+(subLines.length?4:0)+34;
+ /* a table-only export gets a shorter band, so the numbers keep the space in a chat thumbnail */
+ var compact=(doc.blocks||[]).length>0&&(doc.blocks||[]).every(function(b){return b.t==="table";});
+ c.font="500 24px "+IMG_F;var subLines=doc.sub?imgWrap(c,doc.sub,CW):[],hy=(compact?30:46)+(doc.tag?(compact?58:64):0),bannerH=hy+(compact?50:56)+subLines.length*32+(subLines.length?4:0)+(compact?22:34);
  if(draw){c.save();c.fillStyle=exGrad(c,0,0,W,bannerH,["#0d1f4a","#27399b","#5b46c9"]);c.fillRect(0,0,W,bannerH);
   c.beginPath();c.rect(0,0,W,bannerH);c.clip();c.fillStyle="rgba(255,255,255,.07)";c.beginPath();c.arc(W-70,40,170,0,6.2832);c.fill();c.beginPath();c.arc(W-250,bannerH+30,120,0,6.2832);c.fill();
   c.fillStyle="rgba(255,255,255,.05)";c.beginPath();c.arc(120,bannerH+10,90,0,6.2832);c.fill();c.restore();
   c.fillStyle=exGrad(c,0,0,W,0,["#ffcf5a","#ff8a4c","#ff5d8f"]);c.fillRect(0,bannerH-8,W,8);
   if(doc.tag){c.font="800 20px "+IMG_F;var tw=c.measureText(doc.tag).width+36;imgRR(c,M,44,tw,40,20);c.fillStyle="#ffcf5a";c.fill();imgT(c,doc.tag,M+18,71,"800 20px "+IMG_F,"#4a2f00");}
-  imgT(c,imgFit(c,doc.title,CW),M,hy+44,"800 48px "+IMG_F,"#ffffff");
-  subLines.forEach(function(ln,k){imgT(c,ln,M,hy+82+k*32,"500 24px "+IMG_F,"rgba(255,255,255,.82)");});}
+  imgT(c,imgFit(c,doc.title,CW),M,hy+(compact?38:44),(compact?"800 42px ":"800 48px ")+IMG_F,"#ffffff");
+  subLines.forEach(function(ln,k){imgT(c,ln,M,hy+(compact?74:82)+k*32,"500 24px "+IMG_F,"rgba(255,255,255,.82)");});}
  y=bannerH+34;
  (doc.blocks||[]).forEach(function(b){
   if(b.t==="h"){y+=8;if(draw){c.fillStyle=exGrad(c,M,y,M,y+30,["#4a56c8","#8a4fd6"]);imgRR(c,M,y+2,8,30,4);c.fill();imgT(c,b.text.toUpperCase(),M+22,y+27,"800 22px "+IMG_F,"#2c3796");}y+=52;}
@@ -4406,38 +4439,38 @@ function exRun(c,doc,draw,W){
   else if(b.t==="stats"){var n=b.items.length,sw=CW/n;if(draw)b.items.forEach(function(it,k){var x=M+k*sw,tn=EX_TONE[it.tone||""]||EX_TONE[""];
     c.save();exSoft(c,true);imgRR(c,x+5,y,sw-10,126,18);c.fillStyle=exGrad(c,x,y,x,y+126,["#ffffff",tn[0]]);c.fill();c.restore();
     c.save();imgRR(c,x+5,y,sw-10,126,18);c.clip();c.fillStyle=exGrad(c,x,0,x+sw,0,[tn[2],exShade(tn[2],.35)]);c.fillRect(x,y,sw,9);c.restore();
-    c.font="800 44px "+IMG_M;imgT(c,imgFit(c,String(it.v),sw-30),x+sw/2,y+68,"800 44px "+IMG_M,tn[1],"center");imgT(c,imgFit(c,it.l,sw-24),x+sw/2,y+104,"800 17px "+IMG_F,IMG_C.muted,"center");});y+=152;}
-  else if(b.t==="table"){var RH=b.rh||46,cols=b.cols,tot=cols.reduce(function(a,k){return a+k.w;},0),xs=[],x0=M;cols.forEach(function(k){xs.push(x0);x0+=CW*k.w/tot;});
+    c.font="800 44px "+IMG_M;imgT(c,imgFit(c,String(it.v),sw-30),x+sw/2,y+68,"800 44px "+IMG_M,tn[1],"center");imgT(c,imgFit(c,it.l,sw-24),x+sw/2,y+104,"800 20px "+IMG_F,IMG_C.muted,"center");});y+=152;}
+  else if(b.t==="table"){var RH=Math.max(b.rh||48,48),cols=b.cols,tot=cols.reduce(function(a,k){return a+k.w;},0),xs=[],x0=M;cols.forEach(function(k){xs.push(x0);x0+=CW*k.w/tot;});
     var th=b.rows.length*RH+46;
     if(draw){c.save();exSoft(c,true);imgRR(c,M,y,CW,th,18);c.fillStyle="#fff";c.fill();c.restore();
      c.save();imgRR(c,M,y,CW,th,18);c.clip();c.fillStyle=exGrad(c,M,0,M+CW,0,["#12264d","#2c3796"]);c.fillRect(M,y,CW,46);c.restore();
-     cols.forEach(function(k,j){var w=CW*k.w/tot;imgT(c,k.h,k.a==="r"?xs[j]+w-14:xs[j]+16,y+30,"800 17px "+IMG_F,"#ffffff",k.a==="r"?"right":"left");});}
+     cols.forEach(function(k,j){var w=CW*k.w/tot;imgT(c,imgFit(c,k.h,w-16),k.a==="r"?xs[j]+w-14:xs[j]+16,y+31,"800 20px "+IMG_F,"#ffffff",k.a==="r"?"right":"left");});}
     y+=46;
     b.rows.forEach(function(r,ri){if(draw){c.save();
       var tn=r.tone&&r.tone!=="mute"?EX_TONE[r.tone]:null;
       if(tn){c.fillStyle=tn[0];c.fillRect(M+2,y,CW-4,RH);c.fillStyle=tn[2];c.fillRect(M+2,y,6,RH);}
       else if(ri%2){c.fillStyle="#f3f6ff";c.fillRect(M+2,y,CW-4,RH);}
       c.restore();
-      cols.forEach(function(k,j){var w=CW*k.w/tot,cell=exCell(r.c[j]),ax=k.a==="r"?xs[j]+w-14:xs[j]+16+(j===0&&tn?4:0),font=(k.m?"700 24px "+IMG_M:(r.b||cell.b?"800 25px ":"500 25px ")+IMG_F);
+      cols.forEach(function(k,j){var w=CW*k.w/tot,cell=exCell(r.c[j]),ax=k.a==="r"?xs[j]+w-14:xs[j]+16+(j===0&&tn?4:0),font=(k.m?"700 26px "+IMG_M:(r.b||cell.b?"800 27px ":"500 27px ")+IMG_F);
         if(cell.team&&T[cell.team]){imgPill(c,xs[j]+16,y+RH/2+9,T[cell.team],20,cell.t||null);return;}
         c.font=font;imgT(c,imgFit(c,cell.t,w-24),ax,y+RH/2+8,font,exTone(cell.tone||(r.tone&&r.tone!=="mute"?r.tone:"")),k.a==="r"?"right":"left");});}
       y+=RH;});y+=30;}
   else if(b.t==="cards"){var cn=b.cols||2,gap=22,cw=(CW-gap*(cn-1))/cn,rows=[];for(i=0;i<b.cards.length;i+=cn)rows.push(b.cards.slice(i,i+cn));
-    rows.forEach(function(row){var hh=0;row.forEach(function(cd){hh=Math.max(hh,92+cd.lines.length*36+20);});
+    rows.forEach(function(row){var hh=0;row.forEach(function(cd){hh=Math.max(hh,92+cd.lines.length*40+20);});
       row.forEach(function(cd,ci){var x=M+ci*(cw+gap),t=T[cd.team];if(!draw)return;var col=t?t.color:"#4a56c8",txt=t?t.text:"#ffffff";
         c.save();exSoft(c,true);imgRR(c,x,y,cw,hh,22);c.fillStyle="#fff";c.fill();c.restore();
         c.save();imgRR(c,x,y,cw,hh,22);c.clip();c.fillStyle=exGrad(c,x,y,x+cw,y+84,[col,exShade(col,-.38)]);c.fillRect(x,y,cw,84);
          c.fillStyle="rgba(255,255,255,.12)";c.beginPath();c.arc(x+cw-24,y+6,70,0,6.2832);c.fill();
-         for(var k=0;k<cd.lines.length;k++)if(k%2){c.fillStyle="#f3f6ff";c.fillRect(x,y+92+k*36,cw,36);}c.restore();
+         for(var k=0;k<cd.lines.length;k++)if(k%2){c.fillStyle="#f3f6ff";c.fillRect(x,y+92+k*40,cw,40);}c.restore();
         imgT(c,imgFit(c,t?t.short:"",cw*0.5),x+22,y+54,"800 36px "+IMG_F,txt);imgT(c,cd.head||"",x+cw-22,y+56,"800 38px "+IMG_M,txt,"right");
-        if(cd.sub){c.font="600 18px "+IMG_F;imgT(c,imgFit(c,cd.sub,cw-44),x+22,y+78,"600 18px "+IMG_F,txt,"left");}
-        cd.lines.forEach(function(ln,li){var ly=y+92+li*36+25,tn=ln.tone?EX_TONE[ln.tone]:null;c.font="500 22px "+IMG_F;imgT(c,imgFit(c,ln.l,cw-130),x+22,ly,(ln.b?"800 22px ":"500 22px ")+IMG_F,tn?tn[1]:IMG_C.ink);imgT(c,ln.r==null?"":String(ln.r),x+cw-22,ly,"700 22px "+IMG_M,tn?tn[1]:IMG_C.ink,"right");});});
+        if(cd.sub){c.font="600 20px "+IMG_F;imgT(c,imgFit(c,cd.sub,cw-44),x+22,y+78,"600 20px "+IMG_F,txt,"left");}
+        cd.lines.forEach(function(ln,li){var ly=y+92+li*40+28,tn=ln.tone?EX_TONE[ln.tone]:null;c.font=(ln.b?"800 25px ":"500 25px ")+IMG_F;imgT(c,imgFit(c,ln.l,cw-130),x+22,ly,(ln.b?"800 25px ":"500 25px ")+IMG_F,tn?tn[1]:IMG_C.ink);imgT(c,ln.r==null?"":String(ln.r),x+cw-22,ly,"700 25px "+IMG_M,tn?tn[1]:IMG_C.ink,"right");});});
       y+=hh+gap;});y+=6;}
  });
  /* footer band */
  y+=12;if(draw){c.fillStyle=exGrad(c,0,y,W,y+76,["#0d1f4a","#27399b"]);c.fillRect(0,y,W,76);c.fillStyle=exGrad(c,0,0,W,0,["#ffcf5a","#ff8a4c","#ff5d8f"]);c.fillRect(0,y,W,5);
   imgT(c,doc.foot||"NBA Talk VN Dynasty",M,y+46,"700 21px "+IMG_F,"rgba(255,255,255,.92)");
-  if(doc.link)imgT(c,imgFit(c,doc.link.replace(/^https?:\/\//,""),CW*0.58),W-M,y+46,"500 18px "+IMG_F,"rgba(255,255,255,.62)","right");}
+  if(doc.link)imgT(c,imgFit(c,doc.link.replace(/^https?:\/\//,""),CW*0.58),W-M,y+46,"500 20px "+IMG_F,"rgba(255,255,255,.7)","right");}
  return y+76;}
 function exCanvas(doc){
  var W=1080,probe=document.createElement("canvas").getContext("2d"),H=exRun(probe,doc,false,W),S=Math.min(2,Math.sqrt(12000000/(W*H)));
@@ -4451,10 +4484,10 @@ function exText(doc){
   else if(b.t==="stats")L.push(b.items.map(function(i){return i.l+": "+i.v;}).join("  |  "));
   else if(b.t==="table"){var w=b.cols.map(function(k,i){return Math.min(26,Math.max(k.h.length,b.rows.reduce(function(a,r){return Math.max(a,exCell(r.c[i]).t.length);},0)));});
     L.push(b.cols.map(function(k,i){return exPad(k.h,w[i],k.a==="r");}).join("  "));
-    b.rows.forEach(function(r){L.push(b.cols.map(function(k,i){return exPad(exCell(r.c[i]).t.slice(0,26),w[i],k.a==="r");}).join("  ").replace(/\s+$/,""));});}
+    b.rows.forEach(function(r){L.push(b.cols.map(function(k,i){return exPad(exCell(r.c[i]).t,w[i],k.a==="r");}).join("  ").replace(/\s+$/,""));});}
   else if(b.t==="cards")b.cards.forEach(function(cd){L.push("",(T[cd.team]?T[cd.team].short:"")+(cd.head?"  "+cd.head:"")+(cd.sub?"  ("+cd.sub+")":""));cd.lines.forEach(function(ln){L.push("  "+ln.l+(ln.r!=null&&ln.r!==""?"  "+ln.r:""));});});});
  if(doc.link)L.push("",doc.link);return L.join("\n");}
-function exLinkHere(extra){return location.origin+location.pathname+(extra||location.hash||"");}
+function exLinkHere(extra){return location.origin+location.pathname+location.search+(extra||location.hash||"");}   /* the query holds the mode (scenario trades, What If view): keep it */
 function exFoot(){return "NBA Talk VN Dynasty · rosters "+shortDate((D.season.snapshot.verifiedAt||"").slice(0,10));}
 /* the exports every page offers; other scripts add theirs through register() */
 function exCatalog(){
@@ -4462,7 +4495,7 @@ function exCatalog(){
  function rosterLines(t){var tm=v.teams[t.id];return tm.roster.slice().sort(function(a,b){return b.c-a.c;}).map(function(r){return {l:r.n+(r.s==="IL"||r.s==="IL+"?" · "+r.s:r.st?" · "+r.st:""),r:r.c,tone:(r.s==="IL"||r.s==="IL+")?"mute":r.x?"mute":""};});}
  function rosterCard(t){var tm=v.teams[t.id];return {team:t.id,head:String(tm.cap),sub:stText(tm)+" · "+tm.count+" players",tone:tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR"?"bad":"",lines:rosterLines(t)};}
  function rostersDoc(list,title,part){return {title:title,sub:mode+" · cap band "+D.cap.floor+"–"+D.cap.ceiling+" · top "+D.season.counting.n+" salaries count"+(part?" · "+part:""),tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"cards",cols:2,cards:list.map(rosterCard)}],foot:exFoot(),link:exLinkHere("#teams")};}
- items.push({id:"rosters",label:"All 16 rosters",desc:"Every team's players and salaries, two images",pages:function(){var a=D.teams.slice(0,8),b=D.teams.slice(8);return [{label:"Teams 1–8",name:"rosters-1-8.png",alt:"Rosters of teams 1 to 8",doc:rostersDoc(a,"League rosters","teams 1–8")},{label:"Teams 9–16",name:"rosters-9-16.png",alt:"Rosters of teams 9 to 16",doc:rostersDoc(b,"League rosters","teams 9–16")}];},link:function(){return exLinkHere("#teams");}});
+ items.push({id:"rosters",label:"All 16 rosters",desc:"Every team's players and salaries, four images (four teams each)",pages:function(){return [0,4,8,12].map(function(i){var a=D.teams.slice(i,i+4),r=(i+1)+"–"+(i+4);return {label:"Teams "+r,name:"rosters-"+(i+1)+"-"+(i+4)+".png",alt:"Rosters of teams "+(i+1)+" to "+(i+4),doc:rostersDoc(a,"League rosters","teams "+r)};});},link:function(){return exLinkHere("#teams");}});
  if(me&&T[me])items.push({id:"myroster",label:"My roster ("+T[me].short+")",desc:"Your team on one image",pages:function(){return [{label:T[me].short,name:"roster-"+T[me].short+".png",alt:"Roster of "+T[me].short,doc:rostersDoc([T[me]],T[me].name||T[me].short)}];},link:function(){return exLinkHere("#teams");}});
  items.push({id:"cap",label:"Cap table",desc:"Payroll, room and roster size for all 16 teams",pages:function(){var rows=D.teams.map(function(t){var tm=v.teams[t.id];return {tone:tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR"?"bad":tm.status==="NEAR_CEILING"?"warn":"",c:[{team:t.id},String(tm.cap),stText(tm),String(tm.count),String(tm.il||0)]};}).sort(function(a,b){return +b.c[1]-+a.c[1];});
    return [{label:"Cap",name:"cap-table.png",alt:"Cap table",doc:{title:"Cap table",sub:mode+" · band "+D.cap.floor+"–"+D.cap.ceiling+" · highest payroll first",tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"table",cols:[{h:"TEAM",w:3},{h:"PAYROLL",w:2,a:"r",m:1},{h:"STATUS",w:3,a:"r"},{h:"PLAYERS",w:2,a:"r",m:1},{h:"IL",w:1,a:"r",m:1}],rows:rows}],foot:exFoot(),link:exLinkHere("#cap")}}];},link:function(){return exLinkHere("#cap");}});
@@ -4496,15 +4529,38 @@ function exCatalog(){
  items.push({id:"picks",label:"Draft picks by team",desc:"Which round 1–3 picks each team holds",pages:function(){
    var rows=D.teams.map(function(t){var pk=v.teams[t.id].picks||[];return {c:[{team:t.id},String(pk.length),pk.join("  ")||"none"]};});
    return [{label:"Picks",name:"draft-picks.png",alt:"Draft picks by team",doc:{title:"Draft picks by team",sub:mode,blocks:[{t:"table",cols:[{h:"TEAM",w:2.6},{h:"#",w:.8,a:"r",m:1},{h:"PICKS (ROUND.PICK)",w:7}],rh:50,rows:rows}],foot:exFoot(),link:exLinkHere("#draft")}}];}});
- if(window.NBA_LIVE&&window.NBA_LIVE.exports){try{window.NBA_LIVE.exports().forEach(function(it){items.push(it);});}catch(e){}}
- if(S.mode==="WHATIF"&&window.NBA_WHATIF&&window.NBA_WHATIF.exports){try{window.NBA_WHATIF.exports().forEach(function(it){items.unshift(it);});}catch(e){}}
+ EX.failed=[];
+ if(window.NBA_LIVE&&window.NBA_LIVE.exports){try{window.NBA_LIVE.exports().forEach(function(it){items.push(it);});}catch(e){EX.failed.push("live");}}
+ if(S.mode==="WHATIF"&&window.NBA_WHATIF&&window.NBA_WHATIF.exports){try{window.NBA_WHATIF.exports().forEach(function(it){items.unshift(it);});}catch(e){EX.failed.push("keepers");}}
  return items;}
+/* which part of the site an export belongs to; the hub lists the part you are looking at first */
+var EX_GROUPS=[["teams","Teams and cap"],["trade","Trades"],["draft","Draft"],["live","Live"],["keepers","Keepers"]];
+function exGroup(id){return /^kb-/.test(id)?"keepers":/^live-/.test(id)?"live":/^(trade|trades)$/.test(id)?"trade":/^(standings|lottery|picks)$/.test(id)?"draft":"teams";}
+function exHere(){var a=document.querySelector(".navlink.on"),t=a&&a.dataset.tab||"";if(S.mode==="WHATIF")return "keepers";return t==="cap"?"teams":t==="lab"?"trade":t||"teams";}
 function exOpen(item){
- var pages=item.pages();chkImageReady(function(){
-  var jobs=pages.map(function(p){var cv=p.cv||exCanvas(p.doc);return new Promise(function(ok){cv.toBlob(function(b){ok({label:p.label,name:p.name,alt:p.alt,blob:b,doc:p.doc,text:p.text});},"image/png");});});
-  Promise.all(jobs).then(function(out){if(!out.every(function(p){return p.blob;}))return;
-   var text=out.some(function(p){return p.text;})?out[0].text:out.map(function(p){return exText(p.doc);}).join("\n\n"),link=item.link?item.link():exLinkHere();
-   chkImagePreview(out,{status:item.label},{title:item.label,text:text,link:link});});});}
+ var pages;try{pages=item.pages();}catch(e){exToast("Could not build “"+item.label+"”. Please report it.",null,5000);return;}
+ var busy=exToast("Making "+(pages.length>1?pages.length+" images":"the image")+"…");
+ chkImageReady(function(){
+  var jobs=pages.map(function(p){var cv;try{cv=p.cv||exCanvas(p.doc);}catch(e){cv=null;}
+    return new Promise(function(ok){if(!cv){ok({label:p.label,blob:null,doc:p.doc,text:p.text});return;}cv.toBlob(function(b){ok({label:p.label,name:String(p.name||"export.png").replace(/\.png$/,"-"+exDate()+".png"),alt:exAlt(p),blob:b,doc:p.doc,text:p.text});},"image/png");});});
+  Promise.all(jobs).then(function(out){
+   var text=out.some(function(p){return p.text;})?out[0].text:out.map(function(p){return p.doc?exText(p.doc):"";}).join("\n\n"),list=out.every(function(p){return p.doc;})?out.map(function(p){return exList(p.doc);}).join("\n\n"):null,link=item.link?item.link():exLinkHere();
+   if(!out.every(function(p){return p.blob;})){   /* big canvases can fail on phones: say so, and still offer the text */
+    var b=h("button",{type:"button",class:"ex-toast-b",text:"Copy text instead"});b.addEventListener("click",function(){try{navigator.clipboard.writeText((list||text)+"\n"+link).then(function(){exToast("Text copied",null,1800);},function(){exToast("Copy blocked by the browser",null,2500);});}catch(e){exToast("Copy blocked by the browser",null,2500);}});
+    exToast("This device could not make the image.",[b],9000);return;}
+   exToast(null);
+   chkImagePreview(out,{status:item.label},{title:item.label,text:text,list:list,link:link});});});}
+function exAlt(p){var t=p.doc?exList(p.doc):"";return (p.alt||p.label||"Export")+(t?": "+t.replace(/\s+/g," ").slice(0,280):"");}
+/* the text export as one line per row: survives chat apps with proportional fonts */
+function exList(doc){
+ var L=[];if(doc.tag)L.push("["+doc.tag+"]");L.push(doc.title);if(doc.sub)L.push(doc.sub);
+ (doc.blocks||[]).forEach(function(b){
+  if(b.t==="h")L.push("",b.text);
+  else if(b.t==="note")L.push((b.tone==="bad"?"✕ ":b.tone==="warn"?"! ":"· ")+b.text);
+  else if(b.t==="stats")L.push(b.items.map(function(i){return i.l+": "+i.v;}).join(" · "));
+  else if(b.t==="table"){L.push("");b.rows.forEach(function(r){var cells=b.cols.map(function(k,i){var v=exCell(r.c[i]).t;return v?(i>1&&k.h?k.h+" "+v:v):"";}).filter(Boolean);L.push(cells.join(" · "));});}
+  else if(b.t==="cards")b.cards.forEach(function(cd){L.push("",(T[cd.team]?T[cd.team].short:"")+(cd.head?" "+cd.head:"")+(cd.sub?" ("+cd.sub+")":""));cd.lines.forEach(function(ln){L.push("- "+ln.l+(ln.r!=null&&ln.r!==""?": "+ln.r:""));});});});
+ if(doc.link)L.push("",doc.link);return L.join("\n");}
 function exTeamItem(t){return {id:"team-"+t.short,label:t.short,desc:"",link:function(){return exLinkHere("#teams");},pages:function(){
  var v=view(),tm=v.teams[t.id],mode=S.mode==="SCENARIO"?"SCENARIO (NOT OFFICIAL)":"OFFICIAL",ck=tm.checks||{},notes=[];
  if(ck.injured&&ck.injured.level!=="ok")notes.push({t:"note",tone:"warn",text:"Injured: "+ck.injured.count+" of max "+ck.injured.max});
@@ -4515,17 +4571,20 @@ function exTeamItem(t){return {id:"team-"+t.short,label:t.short,desc:"",link:fun
    blocks:[{t:"stats",items:[{v:tm.cap,l:"PAYROLL (TOP "+D.season.counting.n+")",tone:tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR"?"bad":""},{v:D.cap.floor+"–"+D.cap.ceiling,l:"BAND"},{v:tm.count,l:"PLAYERS"},{v:tm.il,l:"ON IL"}]}].concat(notes,[{t:"table",cols:[{h:"#",w:.8,m:1},{h:"PLAYER",w:5},{h:"POS",w:1.8},{h:"SLOT",w:1.2},{h:"CAP",w:1.2,a:"r",m:1}],rh:42,rows:rows}]),foot:exFoot(),link:exLinkHere("#teams")}}];}};}
 function exHub(){
  var old=document.getElementById("ex-hub");if(old){old.remove();return;}
- var ov=h("div",{class:"imgov",id:"ex-hub",role:"dialog","aria-modal":"true","aria-label":"Export"}),close=function(){ov.remove();document.removeEventListener("keydown",esc);};
- function esc(e){if(e.key==="Escape")close();}
- var list=h("div",{class:"ex-list"});
- exCatalog().forEach(function(it){var b=h("button",{type:"button",class:"ex-item","data-ex":it.id},[h("b",{text:it.label}),h("span",{text:it.desc})]);
-  b.addEventListener("click",function(){close();exOpen(it);});list.appendChild(b);});
+ var ov=h("div",{class:"imgov",id:"ex-hub",role:"dialog","aria-modal":"true","aria-labelledby":"ex-hub-t"}),close=exModal(ov,function(){ov.remove();});
+ var items=exCatalog(),here=exHere(),groups=EX_GROUPS.slice().sort(function(a,b){return (a[0]===here?0:1)-(b[0]===here?0:1);}),body=[];
  var one=h("div",{class:"ex-teams"},D.teams.map(function(t){var b=h("button",{type:"button",class:"tpill tp-btn",style:"background:"+t.color+";color:"+t.text,title:"Export "+t.name,text:t.short});
   b.addEventListener("click",function(){close();exOpen(exTeamItem(t));});return b;}));
- var x=h("button",{type:"button",class:"imgov-x","aria-label":"Close",text:"✕"});x.addEventListener("click",close);ov.addEventListener("click",function(e){if(e.target===ov)close();});document.addEventListener("keydown",esc);
- ov.appendChild(h("div",{class:"imgov-box"},[x,h("div",{class:"imgov-scroll ex-scroll"},[h("div",{class:"ex-t",text:"Export"}),h("div",{class:"ex-s",text:"Image, link and chat text for each."}),list,h("div",{class:"ex-h",text:"ONE TEAM"}),one])]));document.body.appendChild(ov);
+ groups.forEach(function(g){var mine=items.filter(function(it){return exGroup(it.id)===g[0];});if(!mine.length)return;
+  var list=h("div",{class:"ex-list"});mine.forEach(function(it){var b=h("button",{type:"button",class:"ex-item","data-ex":it.id},[h("b",{text:it.label}),h("span",{text:it.desc})]);
+   b.addEventListener("click",function(){close();exOpen(it);});list.appendChild(b);});
+  body.push(h("div",{class:"ex-h"+(g[0]===here?" here":""),text:g[1]+(g[0]===here?" · this page":"")}));body.push(list);
+  if(g[0]==="teams"){body.push(h("div",{class:"ex-h",text:"One team"}));body.push(one);}});
+ if(EX.failed&&EX.failed.length)body.push(h("div",{class:"ex-warn",role:"status",text:"Some "+EX.failed.join(" and ")+" exports are unavailable right now; reload the page to try again."}));
+ var x=h("button",{type:"button",class:"imgov-x","aria-label":"Close",text:"✕"});x.addEventListener("click",close);
+ ov.appendChild(h("div",{class:"imgov-box ex-box"},[x,h("div",{class:"imgov-scroll ex-scroll"},[h("div",{class:"ex-t",id:"ex-hub-t",text:"Export"}),h("div",{class:"ex-s",text:"Each export gives an image, a link and text for chat."})].concat(body))]));document.body.appendChild(ov);
  var f=ov.querySelector(".ex-item");if(f)f.focus();}
-window.NBA_EXPORT={open:exOpen,hub:exHub,text:exText,catalog:exCatalog};
+window.NBA_EXPORT={open:exOpen,hub:exHub,text:exText,list:exList,canvas:exCanvas,catalog:exCatalog,group:exGroup};
 function renderCheck(){
  var box=document.getElementById("chk");if(!box)return;box.textContent="";
  var me=getMe();if(CHK.teams.length<2){CHK.teams=[];if(me&&T[me])CHK.teams.push(me);D.teams.forEach(function(t){if(CHK.teams.length<2&&CHK.teams.indexOf(t.id)<0)CHK.teams.push(t.id);});}
