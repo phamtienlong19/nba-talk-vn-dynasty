@@ -26,5 +26,21 @@
   "season": "2026-27",
   "standingsUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}?lhst=stand",
   "matchupUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/matchup?week={week}&mid1={teamId}",
-  "matchupDateParam": "date=YYYY-MM-DD shows each player's slot and stat line for that day; the totals table is always the whole week"
+  "matchupDateParam": "date=YYYY-MM-DD shows each player's slot and stat line for that day; the totals table is always the whole week",
+  "playoffs": {
+    "teams": 8,
+    "weeks": [
+      18,
+      19,
+      20
+    ],
+    "endsOn": "2027-03-21",
+    "divisionWinnersAdvance": true,
+    "seeding": "Division winners advance but seeded by overall standings",
+    "reseeding": false,
+    "tieBreaker": "Higher seed wins",
+    "regularSeasonWeeks": 17,
+    "source": "Yahoo league settings page, read 2026-11-02"
+  },
+  "regularSeasonTieBreaker": "not published by Yahoo; its order within equal records follows neither head-to-head nor points (observed 2026-11-02)"
 }

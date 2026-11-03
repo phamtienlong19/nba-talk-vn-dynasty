@@ -1,6 +1,6 @@
 # Live league data (matchups, live standings, race impact)
 
-Status: **phase 1 only** (parser + category math, tests). Nothing is fetched on a schedule yet and nothing is shown on the site. The
+Status: **phases 1-2** (parser, category math, official weekly results, standings math; tests). Nothing is fetched on a schedule yet and nothing is shown on the site. The
 full plan (live JSON off `main`, LIVE tab, lineup-integrity evidence) is phased as: parser → official weekly results → live feed and
 tab → evidence panel. Display-only; never touches rosters, salaries, the Trade Lab, the draft or the ledger.
 
@@ -30,3 +30,26 @@ use trimmed copies of real pages: all eight week-1 matchups reproduce Yahoo's sc
 ## Not yet verified
 Mid-week behaviour during live games, how often Yahoo tolerates requests, week start/end dates, and Yahoo's tie-break order for
 equal records (live standings will show ties as ties rather than guess).
+
+## Official weekly results (phase 2)
+
+`data/2026-27/matchups/week-NN.json` holds each **finished** week: the 8 pairings, both teams' totals, Yahoo's printed category wins and
+our computed result. `python3 scripts/update_yahoo_matchups.py [--apply]` walks the pairings of every finished week not yet stored (8
+requests a week, 1.5 s apart) and stores only weeks before the current one whose categories are all decided and equal Yahoo's printed
+scores. A stored week is never overwritten: a different capture is a CONFLICT (Yahoo stat corrections need a human).
+
+Golden check (2026-11-02): summed weeks 1-2 equal Yahoo's published standings for all 16 teams
+(`tests/fixtures/yahoo/standings_2026-11-02_after_week2.json`). Official standings are weekly: Yahoo's page updates after a week closes.
+
+## Standings math (`scripts/live_standings.py`)
+
+- Record from weekly results; a tie counts half (7-1-1 = .833). Games back is measured from the **division leader** (Yahoo prints "-" for
+  both division leaders).
+- Live table = official records + the week in progress (only categories already decided), always labelled PROVISIONAL, with rank movement.
+- **Ties:** equal records share a rank and are marked tied. Yahoo's regular-season tiebreaker is not in its settings, and its order inside
+  ties (3-way at 10-8, two 9-8-1, two 7-11) matches neither head-to-head nor total points, so none is invented. Re-check at each official
+  update.
+- **Playoffs** (Yahoo settings, 2026-11-02): 8 teams, weeks 18-20, regular season weeks 1-17, no reseeding, division winners advance but
+  seeding is by overall record. `playoff_picture` reserves one spot per division leader, fills the rest by record, and marks teams level
+  with the last spot "bubble" and tied division leaders "divisionTie".
+- `projected_snapshot` feeds `scripts/lottery_order.py` (ties ordered by the official order as a stand-in, listed in `tiedRanks`).

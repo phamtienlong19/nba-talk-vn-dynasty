@@ -315,3 +315,78 @@ def validate(parsed: dict, cfg: dict | None = None) -> tuple:
     if parsed.get("rosters") is None:
         warn.append("no roster table on the page")
     return bad, warn
+
+
+# ------------------------------------------------------------------ official weekly results (data/2026-27/matchups/)
+import hashlib  # noqa: E402
+
+SCHEMA = "yahoo-matchups/1"
+MATCHUP_DIR = os.path.join(ROOT, "data", "2026-27", "matchups")
+
+
+def _digest(doc: dict) -> str:
+    """Identity of a finished week: the pairings, totals and results. Capture time and source text are not part of it."""
+    core = [[[{k: t[k] for k in ("teamId", "stats", "printedWins")} for t in m["teams"]], m["result"]] for m in doc["matchups"]]
+    return hashlib.sha256(json.dumps(core, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+def build_week(pages: list, week: int, cfg: dict, captured_at: str, source: str, current_week: int) -> dict:
+    """One week's matchups from the pages that cover it (one per matchup). A week is FINAL only when it is before the current week
+    and every category of every matchup is decided and agrees with Yahoo's printed scores; anything else raises."""
+    ids = []
+    for p in pages:
+        if p["week"] != week:
+            raise MatchupError("WEEK_MISMATCH", "a page shows week %s, expected %s" % (p["week"], week))
+        bad, _warn = validate(p, cfg)
+        if bad:
+            raise MatchupError("INVALID", "week %s: %s" % (week, "; ".join(bad)))
+        ids += [t["teamId"] for t in p["teams"]]
+    want = sorted(cfg["teamIds"])
+    if sorted(ids) != want:
+        raise MatchupError("TEAMS", "the matchups must cover every team exactly once: got %s" % sorted(ids))
+    matchups = []
+    for p in sorted(pages, key=lambda p: min(t["teamId"] for t in p["teams"])):
+        res = matchup_result(p)
+        if not res["decided"]:
+            raise MatchupError("NOT_DECIDED", "week %s has categories with no result yet (still being played or not started)" % week)
+        matchups.append({"teams": [{k: t[k] for k in ("teamId", "name", "stats", "printedWins")} for t in p["teams"]],
+                         "result": {"cats": res["cats"], "a": res["a"], "b": res["b"], "t": res["t"]}})
+    if week >= current_week:
+        raise MatchupError("NOT_FINAL", "week %s is not finished (the current week is %s)" % (week, current_week))
+    doc = {"schema": SCHEMA, "season": cfg.get("season"), "leagueId": str(cfg["leagueId"]), "week": week, "status": "FINAL",
+           "capturedAt": captured_at, "source": source, "matchups": matchups}
+    doc["digest"] = _digest(doc)
+    return doc
+
+
+def week_path(week: int, matchup_dir=MATCHUP_DIR) -> str:
+    return os.path.join(matchup_dir, "week-%02d.json" % week)
+
+
+def load_weeks(matchup_dir=MATCHUP_DIR) -> dict:
+    out = {}
+    if os.path.isdir(matchup_dir):
+        for f in sorted(os.listdir(matchup_dir)):
+            m = re.fullmatch(r"week-(\d\d)\.json", f)
+            if m:
+                with open(os.path.join(matchup_dir, f), encoding="utf-8") as fh:
+                    out[int(m.group(1))] = json.load(fh)
+    return out
+
+
+def classify(candidate: dict, existing) -> str:
+    """NO_CHANGE (same finished week already stored), CONFLICT (a stored week differs: a stat correction needs a human) or READY."""
+    if existing is None:
+        return "READY"
+    return "NO_CHANGE" if existing.get("digest") == candidate["digest"] else "CONFLICT"
+
+
+def commit_week(doc: dict, matchup_dir=MATCHUP_DIR) -> str:
+    os.makedirs(matchup_dir, exist_ok=True)
+    path = week_path(doc["week"], matchup_dir)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(doc, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(tmp, path)
+    return path
