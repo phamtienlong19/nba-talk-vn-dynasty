@@ -838,6 +838,11 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .imgov-box{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom))}
 @media(min-width:1000px){.imgov-box:not(.ex-box){width:min(920px,100%)}}
 .imgov-full{display:inline-block;margin:8px 2px 4px;font:600 12.5px "Inter",Arial,sans-serif;color:#2c3796}
+.imgov-head{display:flex;align-items:center;gap:8px;padding:10px 10px 8px 12px;background:#fff;border-bottom:1px solid #e8edf5}
+.imgov-head .imgov-tabs{position:static;box-shadow:none;background:#f1f4fa;overflow-x:auto;max-width:calc(100% - 56px)}
+.imgov-ttl{font:800 15px "Inter",Arial,sans-serif;color:#12264d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.imgov-x.st{position:static;margin-left:auto;flex:0 0 auto;background:#f1f4fa}
+.imgov-scroll.pv{padding-top:12px}
 .ex-h.here{color:#2c3796}.ex-warn{margin:14px 0 0;padding:9px 12px;border-radius:10px;background:#fff6e0;color:#7a4f00;font:600 12.5px/1.45 "Inter",Arial,sans-serif}
 .ex-toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:320;display:flex;align-items:center;gap:10px;max-width:calc(100% - 24px);padding:11px 16px;border-radius:999px;background:#12264d;color:#fff;font:600 13px "Inter",Arial,sans-serif;box-shadow:0 10px 30px rgba(5,12,30,.35)}
 .ex-toast-b{border:0;border-radius:999px;padding:8px 12px;background:#fff;color:#12264d;font:700 12.5px "Inter",Arial,sans-serif;cursor:pointer}
@@ -2393,7 +2398,7 @@ function exportsFor(){
   var f=FEED,live=SRC==="live";
   return [
    {id:"live-standings",label:live?"Live standings":"Standings (finished weeks)",desc:"Records, playoff line and movement"+(live?" if the week ended now":""),pages:function(){
-     var rows=f.table.map(function(r){return {tone:r.playoff==="in"?"":"mute",c:[(r.tied?"T-":"")+r.rank,{team:r.team},r.w+"-"+r.l+(r.t?"-"+r.t:""),pct(r.pct),r.moved&&live?(r.moved>0?"▲"+r.moved:"▼"+(-r.moved)):"",r.playoff==="in"?"IN #"+r.seed:r.playoff==="bubble"?"BUBBLE":"OUT"]};});
+     var rows=f.table.map(function(r){return {c:[(r.tied?"T-":"")+r.rank,{team:r.team},r.w+"-"+r.l+(r.t?"-"+r.t:""),pct(r.pct),r.moved&&live?{t:r.moved>0?"▲"+r.moved:"▼"+(-r.moved),fg:r.moved>0?"#0f7a40":"#b42318"}:"",{t:r.playoff==="in"?"IN #"+r.seed:r.playoff==="bubble"?"BUBBLE":"OUT",pill:r.playoff==="in"?"ok":r.playoff==="bubble"?"warn":"mute"}]};});
      return [{label:"Standings",name:"live-standings.png",alt:"Standings",doc:{title:live?"Standings if the week ended now":"Standings",tag:live?"PROVISIONAL":"",sub:(live?"Week "+f.week+" · as of "+ict(f.asOf)+" · ":"")+"equal records share a rank",
        blocks:[{t:"table",cols:[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"W-L-T",w:2,a:"r",m:1},{h:"PCT",w:1.6,a:"r",m:1},{h:"MOVE",w:1.4,a:"r"},{h:"PLAYOFFS",w:2,a:"r"}],rh:44,rows:rows}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}},
    {id:"live-matchups",label:live?"This week's matchups":"Last finished week",desc:"Category score of every matchup",pages:function(){
@@ -2404,19 +2409,21 @@ function exportsFor(){
 function rotoExports(){   /* roto, raw stats and all-play as images/text, once the week has numbers */
   var R=rotoData();if(!R)return [];
   var ids=Object.keys(R.roto).map(Number).sort(function(a,b){return R.roto[a].rank-R.roto[b].rank||a-b;}),sub="Week "+FEED.week+" · as of "+ict(FEED.asOf)+" · descriptive only, the league is head-to-head";
+  var HEAT={"h3":["#a4e4b9","#17492b"],"h2":["#d0f1dd","#17492b"],"h1":["#ebf8f0","#1d3b2a"],"h0":["#ffffff","#12264d"],"h-1":["#fdecee","#5c1f2a"],"h-2":["#f6cbd1","#6a1f2c"],"h-3":["#efadb8","#6a1f2c"]};
+  function hc(t,p){if(p==null)return t;var x=HEAT[heat(p)];return {t:t,bg:x[0],fg:x[1]};}   /* the page's heat colours, in the image too */
   function page(name,label,title,cols,rows){return [{label:label,name:name+".png",alt:label,doc:{title:title,tag:"PROVISIONAL",sub:sub,blocks:[{t:"table",cols:cols,rh:40,rows:rows}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}
-  var catCols=CATS.map(function(c){return {h:c[1],w:1.25,a:"r",m:1};});
+  var catCols=CATS.map(function(c){return {h:c[1],w:1.25,a:"c",m:1};});
   return [
    {id:"live-roto",label:"Roto rankings",desc:"Roto points for the week in progress",pages:function(){
-     return page("live-roto","Roto","Week "+FEED.week+" roto rankings",[{h:"#",w:1,m:1},{h:"TEAM",w:3.2}].concat(catCols,[{h:"TOTAL",w:1.6,a:"r",m:1}]),
-       ids.map(function(i){var r=R.roto[i];return {c:[String(r.rank),{team:R.side[i].team}].concat(CATS.map(function(c){return pts(r.points[c[0]]);}),[pts(r.total)])};}));}},
+     return page("live-roto","Roto","Week "+FEED.week+" roto rankings",[{h:"#",w:1,m:1},{h:"TEAM",w:3.2}].concat(catCols,[{h:"TOTAL",w:1.5,a:"c",m:1}]),
+       ids.map(function(i){var r=R.roto[i];return {c:[String(r.rank),{team:R.side[i].team}].concat(CATS.map(function(c){return hc(pts(r.points[c[0]]),r.points[c[0]]);}),[hc(pts(r.total),r.total/9)])};}));}},
    {id:"live-rawstats",label:"Raw stats",desc:"Category totals of all 16 teams",pages:function(){
      return page("live-rawstats","Raw stats","Week "+FEED.week+" raw stats",[{h:"#",w:1,m:1},{h:"TEAM",w:3.2}].concat(catCols,[{h:"SCORE",w:1.4,a:"r",m:1}]),
-       ids.map(function(i){var sd=R.side[i];return {c:[String(R.roto[i].rank),{team:sd.team}].concat(CATS.map(function(c){return val(c[0],sd.stats[c[0]],sd.stats);}),[String(sd.printed!=null?sd.printed:sd.wins)])};}));}},
+       ids.map(function(i){var sd=R.side[i];return {c:[String(R.roto[i].rank),{team:sd.team}].concat(CATS.map(function(c){return hc(val(c[0],sd.stats[c[0]],sd.stats),R.roto[i].points[c[0]]);}),[String(sd.printed!=null?sd.printed:sd.wins)])};}));}},
    {id:"live-allplay",label:"All-play records",desc:"Each team against all 15 others, category by category",pages:function(){
      var order=ids.slice().sort(function(a,b){var x=R.ap.record[a],y=R.ap.record[b];return (y[0]-x[0])||(x[1]-y[1])||(R.roto[a].rank-R.roto[b].rank);});
-     return page("live-allplay","All-play","Week "+FEED.week+" all-play",[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"ALL-PLAY W-L-T",w:2.6,a:"r",m:1},{h:"ROTO",w:1.6,a:"r",m:1},{h:"MATCHUP",w:1.8,a:"r",m:1}],
-       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},r[0]+"-"+r[1]+"-"+r[2],pts(R.roto[i].total),wlt(c)+" v "+nameOf(R.side[o].team)]};}));}}];}
+     return page("live-allplay","All-play","Week "+FEED.week+" all-play",[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"ALL-PLAY W-L-T",w:2.2,a:"c",m:1},{h:"ROTO",w:1.4,a:"c",m:1},{h:"MATCHUP",w:2.8,a:"r"}],
+       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}));}}];}
 
 window.NBA_LIVE={standings:standingsFor,exports:exportsFor,source:function(){return SRC;},feed:function(){return FEED;},reload:function(){return load(true);},
   /* tests and tools hand a feed in directly */ set:function(d){accept(d,"live");render();}};
@@ -3348,7 +3355,7 @@ function kbExports(){
    {id:"kb-team",label:"Keeper plan: "+kbTeam().short,desc:"This team's keepers, salaries and payroll against the band",link:function(){return kbLink(label());},pages:function(){
      var t=kbTeam(),rank=kbRanking(),fit=kbFit(t,kbIntent(t),rank,KB.auto),b=kb.band,intent=kbIntent(t),eff={},off={};fit.eff.forEach(function(k){eff[k]=1;});fit.off.forEach(function(k){off[k]=1;});
      var rows=t.players.map(function(p){return {p:p,rk:rank[p.k],s:kbSalaryAt(rank[p.k])};}).sort(function(a,c){return a.rk-c.rk;}).map(function(x){var st=eff[x.p.k]?"KEEP":off[x.p.k]?"AUTO-OFF":"";
-       return {tone:off[x.p.k]?"warn":"",b:!!eff[x.p.k],c:[st,String(x.rk),x.p.n+(x.p.rk?" · R":""),String(x.s)]};});
+       return {tone:off[x.p.k]?"warn":"",b:!!eff[x.p.k],c:[st?{t:st,pill:st==="KEEP"?"ok":"warn"}:"",String(x.rk),x.p.n+(x.p.rk?" · R":""),{t:String(x.s),bar:x.s/(kbSalaryAt(1)||1)}]};});
      var blocks=[{t:"stats",items:[{v:fit.eff.length+"/"+kb.keeperMax,l:"KEEPING"},{v:fit.pay,l:"KEEPER PAYROLL",tone:fit.pay>b.ceiling?"bad":""},{v:b.floor+"–"+b.ceiling,l:"OFFICIAL BAND"},{v:fit.pay>b.ceiling?fit.pay-b.ceiling:b.ceiling-fit.pay,l:fit.pay>b.ceiling?"OVER CEILING":"ROOM TO CEILING",tone:fit.pay>b.ceiling?"bad":"ok"}]},
        {t:"table",cols:[{h:"",w:2},{h:"RANK",w:1.2,a:"r",m:1},{h:"PLAYER",w:5},{h:"SALARY",w:1.5,a:"r",m:1}],rows:rows}];
      if(fit.off.length)blocks.splice(1,0,{t:"note",tone:"warn",text:"Auto-adjusted: "+fit.off.map(kbName).join(", ")+" left out to stay at or under "+b.ceiling+"."});
@@ -3362,18 +3369,18 @@ function kbExports(){
    {id:"kb-league",label:"League impact of this ranking",desc:"Every team's payroll under this ranking against Yahoo's order",link:function(){return kbLink(label());},pages:function(){
      var rank=kbRanking(),y0=kbRankOf([]),fits=kbFitsAll(rank),max=kb.keeperMax;
      var rows=kb.teams.map(function(t){var top=kbTop9(t,rank),top0=kbTop9(t,y0),f=fits[t.id],it=kbIntent(t),st=kbBandStatus(top);
-       return {tone:st==="over"?"bad":st==="near"?"warn":"",c:[{team:t.id},String(top),top===top0?"0":sgn(top-top0),it.length?f.eff.length+"/"+max+(f.off.length?" (−"+f.off.length+" auto)":""):"no plan",it.length?String(f.pay):"–"]};}).sort(function(a,c){return +c.c[1]-+a.c[1];});
+       return {c:[{team:t.id},{t:String(top),pill:st==="over"?"bad":st==="near"?"warn":st==="under"?"mute":"ok"},top===top0?"0":{t:sgn(top-top0),fg:top>top0?"#a14b00":"#0f7a40"},it.length?f.eff.length+"/"+max+(f.off.length?" (−"+f.off.length+" auto)":""):"no plan",it.length?{t:String(f.pay),fg:f.pay>kb.band.ceiling?"#b42318":"#12264d"}:"–"]};}).sort(function(a,c){return +c.c[1]-+a.c[1];});
      return [{label:"League",name:"keepers-league-impact.png",alt:"League impact of this ranking",doc:kbDocBase("League impact","Top "+max+" payroll under this ranking vs Yahoo's order · band "+kb.band.floor+"–"+kb.band.ceiling,[{t:"table",cols:[{h:"TEAM",w:3},{h:"TOP "+max,w:1.6,a:"r",m:1},{h:"VS YAHOO",w:1.6,a:"r",m:1},{h:"PLAN",w:2.4,a:"r"},{h:"PLAN PAY",w:1.6,a:"r",m:1}],rows:rows}],kbLink(label()))}];}},
    {id:"kb-movers",label:"Biggest salary swings",desc:"Rostered players whose cap moves most under this ranking",link:function(){return kbLink(label());},pages:function(){
      var rank=kbRanking(),y0=kbRankOf([]),own=kbOwnerCache(),rows=[];
      Object.keys(own).forEach(function(k){var a=kbSalaryAt(y0[k]),b=kbSalaryAt(rank[k]);if(a!==b)rows.push({k:k,a:a,b:b,d:b-a,o:own[k]});});
      rows.sort(function(x,y){return Math.abs(y.d)-Math.abs(x.d)||x.k.localeCompare(y.k);});
-     var r=rows.slice(0,40).map(function(x){return {tone:x.d>0?"warn":"",c:[{team:x.o.t.id},kbName(x.k),"#"+y0[x.k]+" → #"+rank[x.k],String(x.b),sgn(x.d)]};});
+     var r=rows.slice(0,40).map(function(x){return {c:[{team:x.o.t.id},kbName(x.k),"#"+y0[x.k]+" → #"+rank[x.k],{t:String(x.b),bar:x.b/(kbSalaryAt(1)||1)},{t:sgn(x.d),pill:x.d>0?"warn":"ok"}]};});
      if(!r.length)r=[{c:["","Nothing moves: this is Yahoo's order","","",""]}];
      return [{label:"Swings",name:"keepers-salary-swings.png",alt:"Biggest salary swings",doc:kbDocBase(label(),"Cap under this ranking vs Yahoo's order · "+rows.length+" rostered players change",[{t:"table",cols:[{h:"TEAM",w:2.2},{h:"PLAYER",w:4},{h:"RANK",w:2.4,a:"r",m:1},{h:"CAP",w:1,a:"r",m:1},{h:"Δ",w:1,a:"r",m:1}],rh:42,rows:r}],kbLink(label()))}];}},
    {id:"kb-rank",label:"My ranking",desc:"The top of your ranking and every player you moved",link:function(){return kbLink(label());},pages:function(){
      var rank=kbRanking(),y0=kbRankOf([]),own=kbOwnerCache(),s=set(),movedSet={};s.pins.forEach(function(x){movedSet[x[0]]=1;});
-     var order=kbUniverse().slice().sort(function(a,b){return rank[a]-rank[b];}),mk=function(k){var o=own[k],rk=rank[k],d=y0[k]-rk;return {tone:movedSet[k]?"warn":"",c:[String(rk),kbName(k),o?{team:o.t.id}:"free agent",String(kbSalaryAt(rk)),d?(d>0?"↑":"↓")+Math.abs(d):""]};};
+     var order=kbUniverse().slice().sort(function(a,b){return rank[a]-rank[b];}),mk=function(k){var o=own[k],rk=rank[k],d=y0[k]-rk;return {tone:movedSet[k]?"warn":"",c:[String(rk),kbName(k),o?{team:o.t.id}:"free agent",{t:String(kbSalaryAt(rk)),bar:kbSalaryAt(rk)/(kbSalaryAt(1)||1)},d?{t:(d>0?"↑":"↓")+Math.abs(d),fg:d>0?"#1b4fb8":"#6b3fa0"}:""]};};
      var cols=[{h:"RANK",w:1.2,a:"r",m:1},{h:"PLAYER",w:4.4},{h:"TEAM",w:2.2},{h:"SALARY",w:1.5,a:"r",m:1},{h:"VS YAHOO",w:1.6,a:"r"}];
      var pages=[{label:"Top 60",name:"ranking-top-60.png",alt:"Top 60 of the ranking",doc:kbDocBase(s.label,"Top 60 · highlighted rows are players you moved off Yahoo's order",[{t:"table",cols:cols,rh:42,rows:order.slice(0,60).map(mk)}],kbLink(label()))}];
      var mv=order.filter(function(k){return movedSet[k];});
@@ -4447,9 +4454,9 @@ function chkImagePreview(pages,res,opts){
  var canShare=function(){var f=pages[cur].file;return !!(f&&navigator.share&&navigator.canShare&&navigator.canShare({files:[f]}));};
  var share=canShare()?h("button",{type:"button",class:"imgov-b pri",text:"Share"}):null,copy=h("button",{type:"button",class:"imgov-b"+(share?"":" pri"),text:"Copy image"});
  var two=pages.length>2?[pages[0],pages[1]]:null,can2=!!(two&&two[0].file&&two[1].file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[two[0].file,two[1].file]}));
- var share2=can2?h("button",{type:"button",class:"imgov-b sm",text:"Share as 2 images"}):null,save2=h("button",{type:"button",class:"imgov-b sm",text:"Save 2 images"});
+ var share2=can2?h("button",{type:"button",class:"imgov-b sm",text:"Share as 2 images"}):null,save2=two?h("button",{type:"button",class:"imgov-b sm",text:"Save 2 images"}):null;
  if(share2)share2.addEventListener("click",function(){navigator.share({files:[two[0].file,two[1].file],title:ttl,text:res.status}).catch(function(){});});
- save2.addEventListener("click",function(){two.forEach(function(p,k){setTimeout(function(){var a=document.createElement("a");a.href=p.url;a.download=p.name;document.body.appendChild(a);a.click();a.remove();},k*450);});flash(save2,"Saving…","Save 2 images");});
+ if(save2)save2.addEventListener("click",function(){two.forEach(function(p,k){setTimeout(function(){var a=document.createElement("a");a.href=p.url;a.download=p.name;document.body.appendChild(a);a.click();a.remove();},k*450);});flash(save2,"Saving…","Save 2 images");});
  function flash(b,t,orig){b.textContent=t;setTimeout(function(){b.textContent=orig;},1800);}
  function cpTxt(btn,label,val){var b=h("button",{type:"button",class:"imgov-b sm",text:label});b.addEventListener("click",function(){try{navigator.clipboard.writeText(val).then(function(){flash(b,"Copied",label);},function(){flash(b,"Copy blocked",label);});}catch(e){flash(b,"Copy blocked",label);}});return b;}
  var cpl=opts.link?cpTxt(null,"Copy link",opts.link):null,cpt=opts.text?cpTxt(null,"Copy text",opts.text):null,cpli=opts.list?cpTxt(null,"Copy as list",opts.list):null;
@@ -4459,7 +4466,7 @@ function chkImagePreview(pages,res,opts){
  if(share)share.addEventListener("click",function(){navigator.share({files:[pages[cur].file],title:ttl,text:res.status}).catch(function(){});});
  copy.addEventListener("click",function(){try{navigator.clipboard.write([new ClipboardItem({"image/png":pages[cur].blob})]).then(function(){flash(copy,"Copied","Copy image");},function(){flash(copy,"Not allowed here: use Save","Copy image");});}catch(e){flash(copy,"Not supported: use Save","Copy image");}});
  var x=h("button",{type:"button",class:"imgov-x","aria-label":"Close",text:"✕"});x.addEventListener("click",close);
- ov.appendChild(h("div",{class:"imgov-box"},[h("div",{class:"imgov-tabs",role:"group","aria-label":"Which image"},tabs),x,h("div",{class:"imgov-scroll"},[img,full]),h("div",{class:"imgov-bar"},[share2,save2,cpl,cpt,cpli,share,copy,save])]));document.body.appendChild(ov);
+ x.classList.add("st");ov.appendChild(h("div",{class:"imgov-box"},[h("div",{class:"imgov-head"},[pages.length>1?h("div",{class:"imgov-tabs",role:"group","aria-label":"Which image"},tabs):h("b",{class:"imgov-ttl",text:ttl}),x]),h("div",{class:"imgov-scroll pv"},[img,full]),h("div",{class:"imgov-bar"},[share2,save2,cpl,cpt,cpli,share,copy,save])]));document.body.appendChild(ov);
  var first=ov.querySelector(".imgov-b");if(first)first.focus();}
 /* a modal dialog: Tab stays inside, Esc closes, focus goes back to what opened it. Other overlays (the rankings board) leave Tab and Esc to
    the topmost dialog: they check document.querySelector(".imgov") first. */
@@ -4489,6 +4496,12 @@ function exShade(hex,f){var n=parseInt(String(hex||"#4a56c8").replace("#",""),16
  return "rgb("+Math.round((t-r)*p+r)+","+Math.round((t-g)*p+g)+","+Math.round((t-b)*p+b)+")";}
 function exGrad(c,x0,y0,x1,y1,stops){var g=c.createLinearGradient(x0,y0,x1,y1);stops.forEach(function(s,i){g.addColorStop(i/(stops.length-1),s);});return g;}
 var EX_TONE={ok:["#e3f5ea","#17623a","#2fa564"],bad:["#fde8e6","#a11a1a","#d8453d"],warn:["#fff2d9","#8a5a00","#e8a21d"],mute:["#f1f3f8","#6b7a93","#b6bfcd"],"":["#eef2ff","#12264d","#4a56c8"]};
+var EX_PILL={ok:["#dcf7e8","#0f6b3a"],warn:["#fff0d6","#8a4b00"],bad:["#fde4e2","#a11a1a"],mute:["#eef1f6","#5a6a8c"],info:["#e6ecff","#2c3796"],gold:["#fff3c4","#6b4a00"]};
+/* the colour helpers every export uses: a pill (status), a bar (share of a maximum) and a coloured number */
+function exP(t,k){return {t:String(t),pill:k};}
+function exB(t,f,c){return {t:String(t),bar:f,barc:c};}
+function exF(t,col){return {t:String(t),fg:col};}
+var EX_GOOD="#0f7a40",EX_BAD="#b42318",EX_WARN="#a14b00";
 function exSoft(c,on){if(on){c.shadowColor="rgba(18,38,77,.16)";c.shadowBlur=18;c.shadowOffsetY=6;}else{c.shadowColor="transparent";c.shadowBlur=0;c.shadowOffsetY=0;}}
 /* layout and draw in one pass: with draw=false it only measures */
 function exRun(c,doc,draw,W){
@@ -4515,18 +4528,26 @@ function exRun(c,doc,draw,W){
     c.font="800 44px "+IMG_M;imgT(c,imgFit(c,String(it.v),sw-30),x+sw/2,y+68,"800 44px "+IMG_M,tn[1],"center");imgT(c,imgFit(c,it.l,sw-24),x+sw/2,y+104,"800 20px "+IMG_F,IMG_C.muted,"center");});y+=152;}
   else if(b.t==="table"){var RH=Math.max(b.rh||48,48),cols=b.cols,tot=cols.reduce(function(a,k){return a+k.w;},0),xs=[],x0=M;cols.forEach(function(k){xs.push(x0);x0+=CW*k.w/tot;});
     var th=b.rows.length*RH+46;
+    /* numbers never get cut: if a column is too narrow for its widest number, the whole table's type steps down (not below 20px) */
+    var fs=27,hs=20;cols.forEach(function(k,j){var w=CW*k.w/tot;if(k.m){c.font="700 26px "+IMG_M;var mx=b.rows.reduce(function(a,rw){return Math.max(a,c.measureText(exCell(rw.c[j]).t).width);},0);if(mx>w-20)fs=Math.min(fs,Math.max(20,Math.floor(26*(w-20)/mx)));}
+      c.font="800 20px "+IMG_F;var hw=c.measureText(k.h).width;if(hw>w-14)hs=Math.min(hs,Math.max(15,Math.floor(20*(w-14)/hw)));});
+    var ms=Math.min(26,fs);
     if(draw){c.save();exSoft(c,true);imgRR(c,M,y,CW,th,18);c.fillStyle="#fff";c.fill();c.restore();
      c.save();imgRR(c,M,y,CW,th,18);c.clip();c.fillStyle=exGrad(c,M,0,M+CW,0,["#12264d","#2c3796"]);c.fillRect(M,y,CW,46);c.restore();
-     cols.forEach(function(k,j){var w=CW*k.w/tot;imgT(c,imgFit(c,k.h,w-16),k.a==="r"?xs[j]+w-14:xs[j]+16,y+31,"800 20px "+IMG_F,"#ffffff",k.a==="r"?"right":"left");});}
+     cols.forEach(function(k,j){var w=CW*k.w/tot,al=k.a==="r"?"right":k.a==="c"?"center":"left";imgT(c,k.h,al==="right"?xs[j]+w-10:al==="center"?xs[j]+w/2:xs[j]+16,y+31,"800 "+hs+"px "+IMG_F,"#ffffff",al);});}
     y+=46;
     b.rows.forEach(function(r,ri){if(draw){c.save();
       var tn=r.tone&&r.tone!=="mute"?EX_TONE[r.tone]:null;
       if(tn){c.fillStyle=tn[0];c.fillRect(M+2,y,CW-4,RH);c.fillStyle=tn[2];c.fillRect(M+2,y,6,RH);}
       else if(ri%2){c.fillStyle="#f3f6ff";c.fillRect(M+2,y,CW-4,RH);}
       c.restore();
-      cols.forEach(function(k,j){var w=CW*k.w/tot,cell=exCell(r.c[j]),ax=k.a==="r"?xs[j]+w-14:xs[j]+16+(j===0&&tn?4:0),font=(k.m?"700 26px "+IMG_M:(r.b||cell.b?"800 27px ":"500 27px ")+IMG_F);
+      cols.forEach(function(k,j){var w=CW*k.w/tot,cell=exCell(r.c[j]),al=k.a==="r"?"right":k.a==="c"?"center":"left",ax=al==="right"?xs[j]+w-10:al==="center"?xs[j]+w/2:xs[j]+16+(j===0&&tn?4:0),font=(k.m?"700 "+ms+"px "+IMG_M:(r.b||cell.b?"800 ":"500 ")+fs+"px "+IMG_F);
         if(cell.team&&T[cell.team]){imgPill(c,xs[j]+16,y+RH/2+9,T[cell.team],20,cell.t||null);return;}
-        c.font=font;imgT(c,imgFit(c,cell.t,w-24),ax,y+RH/2+8,font,exTone(cell.tone||(r.tone&&r.tone!=="mute"?r.tone:"")),k.a==="r"?"right":"left");});}
+        if(cell.bg){c.fillStyle=cell.bg;imgRR(c,xs[j]+3,y+4,w-6,RH-8,8);c.fill();}   /* a heat cell, as on the page */
+        if(cell.bar!=null){var bf=Math.max(0,Math.min(1,cell.bar));c.fillStyle=exGrad(c,xs[j]+6,0,xs[j]+w-6,0,cell.barc||["rgba(74,86,200,.10)","rgba(74,86,200,.30)"]);imgRR(c,xs[j]+6,y+7,Math.max(6,(w-12)*bf),RH-14,8);c.fill();}
+        if(cell.pill){var pf=Math.min(fs,23),pc=EX_PILL[cell.pill]||EX_PILL.mute;c.font="800 "+pf+"px "+IMG_F;var lbl=imgFit(c,cell.t,w-34),tw=c.measureText(lbl).width+26,px=al==="right"?xs[j]+w-10-tw:al==="center"?xs[j]+(w-tw)/2:xs[j]+12;
+          imgRR(c,px,y+RH/2-17,tw,34,17);c.fillStyle=pc[0];c.fill();imgT(c,lbl,px+tw/2,y+RH/2+8,"800 "+pf+"px "+IMG_F,pc[1],"center");return;}
+        c.font=font;imgT(c,k.m?cell.t:imgFit(c,cell.t,w-20),ax,y+RH/2+9,font,cell.fg||exTone(cell.tone||(r.tone&&r.tone!=="mute"?r.tone:"")),al);});}
       y+=RH;});y+=30;}
   else if(b.t==="cards"){var cn=b.cols||2,gap=22,cw=(CW-gap*(cn-1))/cn,rows=[];for(i=0;i<b.cards.length;i+=cn)rows.push(b.cards.slice(i,i+cn));
     rows.forEach(function(row){var hh=0;row.forEach(function(cd){hh=Math.max(hh,92+cd.lines.length*40+20);});
@@ -4570,16 +4591,16 @@ function exCatalog(){
  function rostersDoc(list,title,part){return {title:title,sub:mode+" · cap band "+D.cap.floor+"–"+D.cap.ceiling+" · top "+D.season.counting.n+" salaries count"+(part?" · "+part:""),tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"cards",cols:2,cards:list.map(rosterCard)}],foot:exFoot(),link:exLinkHere("#teams")};}
  items.push({id:"rosters",label:"All 16 rosters",desc:"Every team's players and salaries, four images (four teams each)",pages:function(){return [0,4,8,12].map(function(i){var a=D.teams.slice(i,i+4),r=(i+1)+"–"+(i+4);return {label:"Teams "+r,name:"rosters-"+(i+1)+"-"+(i+4)+".png",alt:"Rosters of teams "+(i+1)+" to "+(i+4),doc:rostersDoc(a,"League rosters","teams "+r)};});},link:function(){return exLinkHere("#teams");}});
  if(me&&T[me])items.push({id:"myroster",label:"My roster ("+T[me].short+")",desc:"Your team on one image",pages:function(){return [{label:T[me].short,name:"roster-"+T[me].short+".png",alt:"Roster of "+T[me].short,doc:rostersDoc([T[me]],T[me].name||T[me].short)}];},link:function(){return exLinkHere("#teams");}});
- items.push({id:"cap",label:"Cap table",desc:"Payroll, room and roster size for all 16 teams",pages:function(){var rows=D.teams.map(function(t){var tm=v.teams[t.id];return {tone:tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR"?"bad":tm.status==="NEAR_CEILING"?"warn":"",c:[{team:t.id},String(tm.cap),stText(tm),String(tm.count),String(tm.il||0)]};}).sort(function(a,b){return +b.c[1]-+a.c[1];});
+ items.push({id:"cap",label:"Cap table",desc:"Payroll, room and roster size for all 16 teams",pages:function(){var rows=D.teams.map(function(t){var tm=v.teams[t.id],bad=tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR",near=tm.status==="NEAR_CEILING",k=bad?"bad":near?"warn":"ok";return {c:[{team:t.id},exB(tm.cap,tm.cap/(D.cap.ceiling*1.08),bad?["rgba(216,69,61,.10)","rgba(216,69,61,.34)"]:near?["rgba(232,162,29,.12)","rgba(232,162,29,.38)"]:["rgba(47,165,100,.10)","rgba(47,165,100,.32)"]),exP(stText(tm),k),String(tm.count),tm.il?exP(tm.il,"mute"):"0"]};}).sort(function(a,b){return +exCell(b.c[1]).t-+exCell(a.c[1]).t;});
    return [{label:"Cap",name:"cap-table.png",alt:"Cap table",doc:{title:"Cap table",sub:mode+" · band "+D.cap.floor+"–"+D.cap.ceiling+" · highest payroll first",tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"table",cols:[{h:"TEAM",w:3},{h:"PAYROLL",w:2,a:"r",m:1},{h:"STATUS",w:3,a:"r"},{h:"PLAYERS",w:2,a:"r",m:1},{h:"IL",w:1,a:"r",m:1}],rows:rows}],foot:exFoot(),link:exLinkHere("#cap")}}];},link:function(){return exLinkHere("#cap");}});
  var ST_=D.standings;
  if(ST_&&ST_.started&&ST_.teams)items.push({id:"standings",label:"Standings and draft order",desc:"Yahoo standings, with the provisional reverse order",pages:function(){var ids=Object.keys(ST_.teams).sort(function(a,b){return ST_.teams[a].rank-ST_.teams[b].rank;});
-   var rows=ids.map(function(f){var s=ST_.teams[f];return {c:[String(s.rank),{team:f},s.w+"-"+s.l+(s.t?"-"+s.t:""),String((s.pct||0).toFixed(3)),s.gb==null?"–":String(s.gb)]};});
-   var worst=ST_.worstFirst||[];var wrows=worst.map(function(f,i){return {c:[String(i+1),{team:f},ST_.teams[f].w+"-"+ST_.teams[f].l+(ST_.teams[f].t?"-"+ST_.teams[f].t:"")]};});
+   var rows=ids.map(function(f){var s=ST_.teams[f];return {c:[exP(s.rank,s.rank<=8?"ok":"mute"),{team:f},s.w+"-"+s.l+(s.t?"-"+s.t:""),exB((s.pct||0).toFixed(3).replace(/^0/,""),s.pct||0),s.gb==null?"–":String(s.gb)]};});
+   var worst=ST_.worstFirst||[];var wrows=worst.map(function(f,i){return {c:[exP(i+1,i<4?"gold":"mute"),{team:f},ST_.teams[f].w+"-"+ST_.teams[f].l+(ST_.teams[f].t?"-"+ST_.teams[f].t:"")]};});
    return [{label:"Standings",name:"standings.png",alt:"Standings",doc:{title:"Standings",sub:"Yahoo, "+(ST_.sourceUpdatedText||"")+" · official order",blocks:[{t:"table",cols:[{h:"#",w:1,m:1},{h:"TEAM",w:4},{h:"W-L-T",w:2,a:"r",m:1},{h:"PCT",w:2,a:"r",m:1},{h:"GB",w:1,a:"r",m:1}],rows:rows}],foot:exFoot(),link:exLinkHere("#teams")}},
            {label:"Reverse order",name:"reverse-order.png",alt:"Provisional reverse order",doc:{title:"Reverse standings",tag:"PROVISIONAL · NOT THE DRAFT ORDER",sub:"Worst record first. Penalties, the lottery and the rank 3/4 bonus are not applied.",blocks:[{t:"table",cols:[{h:"PICK",w:1,m:1},{h:"TEAM",w:4},{h:"RECORD",w:2,a:"r",m:1}],rows:wrows}],foot:exFoot(),link:exLinkHere("#draft")}}];},link:function(){return exLinkHere("#teams");}});
  if(LOT.res)items.push({id:"lottery",label:"Lottery draw",desc:"The draw you just simulated (not the real order)",pages:function(){var L=D.lottery,by={};L.teams.forEach(function(t){by[t.franchiseId]=t;});
-   var rows=LOT.res.map(function(f,i){var t=by[f],mv=(t.naturalPick||i+1)-(i+1);return {tone:i<2?"warn":"",c:[lotPickLabel(i+1),{team:f},mv>0?"▲ "+mv:mv<0?"▼ "+(-mv):""]};});
+   var rows=LOT.res.map(function(f,i){var t=by[f],mv=(t.naturalPick||i+1)-(i+1);return {c:[exP(lotPickLabel(i+1),i<2?"gold":"mute"),{team:f},mv>0?exF("▲ "+mv,EX_GOOD):mv<0?exF("▼ "+(-mv),EX_BAD):""]};});
    return [{label:"Draw",name:"lottery-draw.png",alt:"Simulated lottery draw",doc:{title:"Lottery simulation",tag:"SIMULATION · NOT OFFICIAL",sub:"One simulated round-1 draw on the live standings.",blocks:[{t:"table",cols:[{h:"PICK",w:1,m:1},{h:"TEAM",w:4},{h:"VS REVERSE ORDER",w:2,a:"r"}],rows:rows}],foot:exFoot(),link:exLinkHere("#draft")}}];},link:function(){return exLinkHere("#draft");}});
  /* the trade being built in the Trade Machine: the three images and the summary the machine itself shares */
  if(typeof CHK!=="undefined"&&CHK.teams&&chkMoves().length)items.push({id:"trade",label:"Trade in the Trade Machine",desc:"The proposal, each team after it, and the verdict",link:function(){return location.href;},pages:function(){
@@ -4592,15 +4613,15 @@ function exCatalog(){
    if(!cards.length)cards=[{team:D.teams[0].id,head:"",sub:"",lines:[{l:"No in-season trades yet",r:""}]}];
    return [{label:"Trades",name:"trades.png",alt:"Trades this season",doc:{title:"Trades this season",sub:"What each team received · latest "+done.length,blocks:[{t:"cards",cols:2,cards:cards}],foot:exFoot(),link:exLinkHere("#trade")}}];}});
  items.push({id:"il",label:"Injured list",desc:"Everyone on IL, and whether Yahoo shows them as out",pages:function(){
-   var rows=[];D.teams.forEach(function(t){v.teams[t.id].roster.forEach(function(r){if(r.s==="IL"||r.s==="IL+"){var k=ilKind(r);rows.push({tone:k==="out"?"":"warn",c:[{team:t.id},r.n,r.st||"no status",k==="out"?"Out":k==="inel"?"Not IL-eligible":"Other",String(r.c)]});}});});
+   var rows=[];D.teams.forEach(function(t){v.teams[t.id].roster.forEach(function(r){if(r.s==="IL"||r.s==="IL+"){var k=ilKind(r);rows.push({tone:k==="out"?"":"warn",c:[{team:t.id},r.n,r.st?exP(r.st,"mute"):"no status",k==="out"?exP("Out","ok"):k==="inel"?exP("Not IL-eligible","bad"):exP("Other","warn"),String(r.c)]});}});});
    rows.sort(function(a,b){return (a.tone?1:0)-(b.tone?1:0);});
    return [{label:"IL",name:"injured-list.png",alt:"Injured list",doc:{title:"Injured list",sub:"Out = no status or O/OFS. Highlighted: IL slot but Yahoo says the player is not IL-eligible.",blocks:[{t:"table",cols:[{h:"TEAM",w:2.4},{h:"PLAYER",w:4},{h:"STATUS",w:2},{h:"READ",w:2.4},{h:"CAP",w:1,a:"r",m:1}],rh:42,rows:rows.slice(0,40)}],foot:exFoot(),link:exLinkHere("#teams")}}];}});
  items.push({id:"salaries",label:"Top salaries",desc:"The 40 highest-paid players and who owns them",pages:function(){
    var all=[];D.teams.forEach(function(t){v.teams[t.id].roster.forEach(function(r){all.push({t:t.id,r:r});});});all.sort(function(a,b){return b.r.c-a.r.c;});
-   var rows=all.slice(0,40).map(function(x,i){return {c:[String(i+1),x.r.n,{team:x.t},x.r.pos||"",String(x.r.c)]};});
+   var top=all.length?all[0].r.c||1:1,rows=all.slice(0,40).map(function(x,i){return {c:[String(i+1),x.r.n,{team:x.t},x.r.pos||"",exB(x.r.c,x.r.c/top)]};});
    return [{label:"Salaries",name:"top-salaries.png",alt:"Top salaries",doc:{title:"Top salaries",sub:mode+" · cap per player",tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"table",cols:[{h:"#",w:1,m:1},{h:"PLAYER",w:4.4},{h:"TEAM",w:2.4},{h:"POS",w:1.6},{h:"CAP",w:1.2,a:"r",m:1}],rh:42,rows:rows}],foot:exFoot(),link:exLinkHere("#cap")}}];}});
  items.push({id:"picks",label:"Draft picks by team",desc:"Which round 1–3 picks each team holds",pages:function(){
-   var rows=D.teams.map(function(t){var pk=v.teams[t.id].picks||[];return {c:[{team:t.id},String(pk.length),pk.join("  ")||"none"]};});
+   var rows=D.teams.map(function(t){var pk=v.teams[t.id].picks||[];return {c:[{team:t.id},exP(pk.length,pk.length>3?"ok":pk.length?"info":"bad"),pk.join("  ")||"none"]};});
    return [{label:"Picks",name:"draft-picks.png",alt:"Draft picks by team",doc:{title:"Draft picks by team",sub:mode,blocks:[{t:"table",cols:[{h:"TEAM",w:2.6},{h:"#",w:.8,a:"r",m:1},{h:"PICKS (ROUND.PICK)",w:7}],rh:50,rows:rows}],foot:exFoot(),link:exLinkHere("#draft")}}];}});
  EX.failed=[];
  if(window.NBA_LIVE&&window.NBA_LIVE.exports){try{window.NBA_LIVE.exports().forEach(function(it){items.push(it);});}catch(e){EX.failed.push("live");}}
@@ -4639,7 +4660,7 @@ function exTeamItem(t){return {id:"team-"+t.short,label:t.short,desc:"",link:fun
  if(ck.injured&&ck.injured.level!=="ok")notes.push({t:"note",tone:"warn",text:"Injured: "+ck.injured.count+" of max "+ck.injured.max});
  if(ck.coverage&&ck.coverage.short&&ck.coverage.short.length)notes.push({t:"note",tone:"warn",text:"Short at "+ck.coverage.short.join(", ")});
  if(tm.fold&&tm.fold.tradeIds&&tm.fold.tradeIds.length)notes.push({t:"note",tone:"mute",text:"In: "+tm.fold.in.map(function(a){return a.n;}).join(", ")+" · Out: "+tm.fold.out.map(function(a){return a.n;}).join(", ")});
- var rows=tm.roster.slice().sort(function(a,b){return b.c-a.c;}).map(function(r,i){var il=r.s==="IL"||r.s==="IL+";return {tone:il?"mute":"",b:i<D.season.counting.n&&!r.x,c:[String(i+1),r.n+(r.st?" · "+r.st:""),r.pos||"",il?r.s:"",String(r.c)]};});
+ var rows=tm.roster.slice().sort(function(a,b){return b.c-a.c;}).map(function(r,i){var il=r.s==="IL"||r.s==="IL+";return {tone:il?"mute":"",b:i<D.season.counting.n&&!r.x,c:[String(i+1),r.n+(r.st?" · "+r.st:""),r.pos||"",il?exP(r.s,"mute"):"",exB(r.c,r.c/((tm.roster.reduce(function(a,q){return Math.max(a,q.c);},0))||1),i<D.season.counting.n&&!r.x?null:["rgba(107,122,147,.08)","rgba(107,122,147,.22)"])]};});
  return [{label:t.short,name:"team-"+t.short+".png",alt:"Roster of "+t.short,doc:{title:t.name||t.short,sub:mode+" · payroll "+tm.cap+" · "+stText(tm)+" · "+tm.count+" players · picks "+((tm.picks||[]).join(", ")||"none"),tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",
    blocks:[{t:"stats",items:[{v:tm.cap,l:"PAYROLL (TOP "+D.season.counting.n+")",tone:tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR"?"bad":""},{v:D.cap.floor+"–"+D.cap.ceiling,l:"BAND"},{v:tm.count,l:"PLAYERS"},{v:tm.il,l:"ON IL"}]}].concat(notes,[{t:"table",cols:[{h:"#",w:.8,m:1},{h:"PLAYER",w:5},{h:"POS",w:1.8},{h:"SLOT",w:1.2},{h:"CAP",w:1.2,a:"r",m:1}],rh:42,rows:rows}]),foot:exFoot(),link:exLinkHere("#teams")}}];}};}
 function exHub(){
