@@ -2423,7 +2423,7 @@ function rotoExports(){   /* roto, raw stats and all-play as images/text, once t
    {id:"live-allplay",label:"All-play records",desc:"Each team against all 15 others, category by category",pages:function(){
      var order=ids.slice().sort(function(a,b){var x=R.ap.record[a],y=R.ap.record[b];return (y[0]-x[0])||(x[1]-y[1])||(R.roto[a].rank-R.roto[b].rank);});
      return page("live-allplay","All-play","Week "+FEED.week+" all-play",[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"ALL-PLAY W-L-T",w:2.2,a:"c",m:1},{h:"ROTO",w:1.4,a:"c",m:1},{h:"MATCHUP",w:2.8,a:"r"}],
-       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}),"allplay",1180);}}];}
+       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}),"allplay",1000);}}];}
 
 function snapFor(kind,width){   /* a detached copy of one LIVE view, for the export hub's snapshot images */
   var R=rotoData(),node=null;
@@ -4458,10 +4458,13 @@ function exSnap(spec){   /* spec: {node, wrap:[{tag,id,cls,style}], width, foot}
    var ready=d.fonts&&d.fonts.ready?Promise.all(["400 14px Inter","600 14px Inter","800 14px Inter","700 14px 'Roboto Mono'"].map(function(x){return d.fonts.load(x).catch(function(){});})).then(function(){return d.fonts.ready;}):Promise.resolve();
    ready.then(function(){setTimeout(function(){try{exFreezeDraw(fr,W,fonts,finish);}catch(e){finish(null);}},60);},function(){finish(null);});
   }catch(e){finish(null);}};
-  document.body.appendChild(fr);setTimeout(function(){finish(null);},15000);});});}
-function exFreezeDraw(fr,W,fonts,finish){
- var d=fr.contentDocument,win=fr.contentWindow,root=d.getElementById("__x"),def={},dbox=d.getElementById("__d");
- function base(tag,pseudo){var k=tag+(pseudo||"");if(!def[k]){var e=d.createElement(pseudo?"span":tag);dbox.appendChild(e);var cs=win.getComputedStyle(e),o={};for(var i=0;i<cs.length;i++)o[cs[i]]=cs.getPropertyValue(cs[i]);def[k]=o;}return def[k];}
+  var bare=document.createElement("iframe");bare.setAttribute("aria-hidden","true");bare.style.cssText="position:fixed;left:-30000px;top:0;width:"+W+"px;height:100px;border:0;opacity:0;pointer-events:none";bare.srcdoc="<!doctype html><html><head><meta charset='utf-8'></head><body></"+"body></"+"html>";
+  var _finish=finish;finish=function(cv){if(bare.parentNode)bare.remove();_finish(cv);};fr.__bare=bare;
+  document.body.appendChild(bare);document.body.appendChild(fr);setTimeout(function(){finish(null);},15000);});});}
+function exFreezeDraw(fr,W,fonts,finish,tries){
+ if(!(fr.__bare&&fr.__bare.contentDocument&&fr.__bare.contentDocument.body)){if((tries||0)<40){setTimeout(function(){exFreezeDraw(fr,W,fonts,finish,(tries||0)+1);},50);}else finish(null);return;}
+ var d=fr.contentDocument,win=fr.contentWindow,root=d.getElementById("__x"),def={},bd=fr.__bare.contentDocument,bw=fr.__bare.contentWindow;
+ function base(tag,pseudo){var k=tag+(pseudo||"");if(!def[k]){var e=bd.createElement(pseudo?"span":tag);bd.body.appendChild(e);var cs=bw.getComputedStyle(e),o={};for(var i=0;i<cs.length;i++)o[cs[i]]=cs.getPropertyValue(cs[i]);def[k]=o;}return def[k];}
  function decl(cs,b,parent,full,box){var out=[];for(var i=0;i<cs.length;i++){var n=cs[i];if(/^(transition|animation)/.test(n)||(box&&(n==="height"||n==="block-size"||n==="grid-template-rows")))continue;   /* heights follow the content, so nothing is clipped if a font measures a hair differently */var v=cs.getPropertyValue(n);
    if(full){out.push(n+":"+v);continue;}if(EX_INH[n]?(parent&&parent[n]===v):b[n]===v)continue;out.push(n+":"+v);}return out.join(";");}
  var els=[root].concat([].slice.call(root.querySelectorAll("*"))),jobs=[],vals=new Map();
@@ -4475,12 +4478,18 @@ function exFreezeDraw(fr,W,fonts,finish){
    j[2].forEach(function(p){var sp=d.createElement("span");sp.setAttribute("style",p[1]);sp.textContent=p[2];if(p[0]==="::before")el.insertBefore(sp,el.firstChild);else el.appendChild(sp);});});
  var content=root.firstElementChild&&root.firstElementChild.getBoundingClientRect();
  if(!content||content.height<40||content.width<40){finish(null);return;}   /* nothing visible was laid out: let the caller draw the image instead */
- var H=Math.ceil(Math.max(root.getBoundingClientRect().height,root.scrollHeight))+4,S=Math.max(1080/W,2);   /* measured after freezing: the frozen layout is the one the image shows */if(W*S*H*S>15000000)S=Math.sqrt(15000000/(W*H));
+ var H0=Math.ceil(Math.max(root.getBoundingClientRect().height,root.scrollHeight))+4,H=H0+Math.max(160,Math.round(H0*.25)),S=Math.max(1080/W,2);   /* a taller canvas than measured: text can wrap a little differently in the image; the empty bottom is trimmed afterwards */   /* measured after freezing: the frozen layout is the one the image shows */if(W*S*H*S>15000000)S=Math.sqrt(15000000/(W*H));
+ var H0px=Math.round(H0*S);
  var xml=new XMLSerializer().serializeToString(root);
  var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+Math.round(W*S)+'" height="'+Math.round(H*S)+'" viewBox="0 0 '+W+" "+H+'"><style>'+fonts.replace(/</g,"")+'</style><foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+xml+"</foreignObject></svg>";
  var img=new Image();img.onload=function(){try{var cv=document.createElement("canvas");cv.width=Math.round(W*S);cv.height=Math.round(H*S);var c=cv.getContext("2d");
    c.fillStyle="#f4f6fa";c.fillRect(0,0,cv.width,cv.height);c.drawImage(img,0,0,cv.width,cv.height);
-   setTimeout(function(){try{c.drawImage(img,0,0,cv.width,cv.height);cv.toDataURL("image/png",0.1);finish(cv);}catch(e){finish(null);}},120);   /* drawn twice: Safari fills fonts on the second pass; toDataURL proves the canvas is not tainted */
+   setTimeout(function(){try{c.drawImage(img,0,0,cv.width,cv.height);cv.toDataURL("image/png",0.1);
+     /* trim the empty bottom: the last row that differs from the background, plus a margin */
+     var px=c.getImageData(0,0,cv.width,cv.height).data,w4=cv.width*4,last=0;
+     for(var y=cv.height-1;y>=0&&!last;y--){for(var x=0;x<w4;x+=4){var o=y*w4+x;if(Math.abs(px[o]-244)>3||Math.abs(px[o+1]-246)>3||Math.abs(px[o+2]-250)>3){last=y;break;}}}
+     var h2=Math.min(cv.height,Math.max(last+Math.round(18*S),Math.min(H0px,cv.height)>last?last+Math.round(18*S):last+Math.round(18*S)));
+     var out=document.createElement("canvas");out.width=cv.width;out.height=h2;var oc=out.getContext("2d");oc.fillStyle="#f4f6fa";oc.fillRect(0,0,out.width,out.height);oc.drawImage(cv,0,0);finish(out);}catch(e){finish(null);}},120);   /* drawn twice: Safari fills fonts on the second pass; toDataURL proves the canvas is not tainted */
   }catch(e){finish(null);}};img.onerror=function(){finish(null);};img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);}
 function exCardOf(short){return [].filter.call(document.querySelectorAll("section.team-card"),function(c){var t=c.querySelector(".identity-tag");return t&&t.textContent.trim()===short;})[0]||null;}
 function exSnapFoot(){return "NBA Talk VN Dynasty · "+shortDate(exDate())+" · "+location.host;}
@@ -4597,7 +4606,7 @@ function exCatalog(){
  items.push({id:"rosters",label:"All 16 rosters",desc:"Every team's players and salaries, four images (four teams each)",pages:function(){return [0,4,8,12].map(function(i){var a=D.teams.slice(i,i+4),r=(i+1)+"–"+(i+4);return {label:"Teams "+r,name:"rosters-"+(i+1)+"-"+(i+4)+".png",alt:"Rosters of teams "+(i+1)+" to "+(i+4),snap:function(){var cards=a.map(function(t){return exCardOf(t.short);}),host=cards[0]&&cards[0].parentElement;return host?exSnapGroup(cards,host,860):null;},doc:rostersDoc(a,"League rosters","teams "+r)};});},link:function(){return exLinkHere("#teams");}});
  if(me&&T[me])items.push({id:"myroster",label:"My roster ("+T[me].short+")",desc:"Your team on one image",pages:function(){return [{label:T[me].short,name:"roster-"+T[me].short+".png",alt:"Roster of "+T[me].short,snap:function(){return exSnapEl(exCardOf(T[me].short),430,exSnapFoot());},doc:rostersDoc([T[me]],T[me].name||T[me].short)}];},link:function(){return exLinkHere("#teams");}});
  items.push({id:"cap",label:"Cap table",desc:"Payroll, room and roster size for all 16 teams",pages:function(){var rows=D.teams.map(function(t){var tm=v.teams[t.id],bad=tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR",near=tm.status==="NEAR_CEILING",k=bad?"bad":near?"warn":"ok";return {c:[{team:t.id},exB(tm.cap,tm.cap/(D.cap.ceiling*1.08),bad?["rgba(216,69,61,.10)","rgba(216,69,61,.34)"]:near?["rgba(232,162,29,.12)","rgba(232,162,29,.38)"]:["rgba(47,165,100,.10)","rgba(47,165,100,.32)"]),exP(stText(tm),k),String(tm.count),tm.il?exP(tm.il,"mute"):"0"]};}).sort(function(a,b){return +exCell(b.c[1]).t-+exCell(a.c[1]).t;});
-   return [{label:"Cap",name:"cap-table.png",alt:"Cap table",snap:function(){var g=document.querySelector("#cap .cap-grid");return g?exSnapEl(g,560,exSnapFoot()):null;},doc:{title:"Cap table",sub:mode+" · band "+D.cap.floor+"–"+D.cap.ceiling+" · highest payroll first",tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"table",cols:[{h:"TEAM",w:3},{h:"PAYROLL",w:2,a:"r",m:1},{h:"STATUS",w:3,a:"r"},{h:"PLAYERS",w:2,a:"r",m:1},{h:"IL",w:1,a:"r",m:1}],rows:rows}],foot:exFoot(),link:exLinkHere("#cap")}}];},link:function(){return exLinkHere("#cap");}});
+   return [{label:"Cap",name:"cap-table.png",alt:"Cap table",snap:function(){var g=document.querySelector("#cap .cap-grid");return g?exSnapEl(g,860,exSnapFoot()):null;},doc:{title:"Cap table",sub:mode+" · band "+D.cap.floor+"–"+D.cap.ceiling+" · highest payroll first",tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"table",cols:[{h:"TEAM",w:3},{h:"PAYROLL",w:2,a:"r",m:1},{h:"STATUS",w:3,a:"r"},{h:"PLAYERS",w:2,a:"r",m:1},{h:"IL",w:1,a:"r",m:1}],rows:rows}],foot:exFoot(),link:exLinkHere("#cap")}}];},link:function(){return exLinkHere("#cap");}});
  var ST_=D.standings;
  if(ST_&&ST_.started&&ST_.teams)items.push({id:"standings",label:"Standings and draft order",desc:"Yahoo standings, with the provisional reverse order",pages:function(){var ids=Object.keys(ST_.teams).sort(function(a,b){return ST_.teams[a].rank-ST_.teams[b].rank;});
    var rows=ids.map(function(f){var s=ST_.teams[f];return {c:[exP(s.rank,s.rank<=8?"ok":"mute"),{team:f},s.w+"-"+s.l+(s.t?"-"+s.t:""),exB((s.pct||0).toFixed(3).replace(/^0/,""),s.pct||0),s.gb==null?"–":String(s.gb)]};});

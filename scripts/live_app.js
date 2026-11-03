@@ -359,7 +359,7 @@ function rotoExports(){   /* roto, raw stats and all-play as images/text, once t
    {id:"live-allplay",label:"All-play records",desc:"Each team against all 15 others, category by category",pages:function(){
      var order=ids.slice().sort(function(a,b){var x=R.ap.record[a],y=R.ap.record[b];return (y[0]-x[0])||(x[1]-y[1])||(R.roto[a].rank-R.roto[b].rank);});
      return page("live-allplay","All-play","Week "+FEED.week+" all-play",[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"ALL-PLAY W-L-T",w:2.2,a:"c",m:1},{h:"ROTO",w:1.4,a:"c",m:1},{h:"MATCHUP",w:2.8,a:"r"}],
-       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}),"allplay",1180);}}];}
+       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}),"allplay",1000);}}];}
 
 function snapFor(kind,width){   /* a detached copy of one LIVE view, for the export hub's snapshot images */
   var R=rotoData(),node=null;
