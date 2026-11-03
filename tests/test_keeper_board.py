@@ -390,3 +390,55 @@ class TestKeeperBoardPage(unittest.TestCase):
         self.assertNotEqual(r["rdCls"].split()[0], r["cdCls"].split()[0])
         self.assertTrue(r["same"])
         self.assertEqual(r["headRows"], 0)
+
+    def test_focus_stays_on_the_control_after_a_rank_edit_and_a_keeper_tick(self):
+        r = self.drive(self.SETUP + """
+          var inp=document.querySelector('#wi-root .wi-kb tbody tr .wi-kb-rk'),lab=inp.getAttribute('aria-label');inp.focus();inp.value='40';ev(inp,'change');
+          R.rankFocus=document.activeElement&&document.activeElement.getAttribute('aria-label')===lab;
+          var cb=document.querySelector('#wi-root .wi-kb tbody input[type=checkbox]:not([disabled])'),cl=cb.getAttribute('aria-label');cb.focus();cb.click();
+          R.boxFocus=document.activeElement&&document.activeElement.getAttribute('aria-label')===cl;
+          R.heads=Array.prototype.map.call(document.querySelectorAll('#wi-root .wi-kb thead th'),function(t){return t.textContent;});""")
+        self.assertTrue(r["rankFocus"])
+        self.assertTrue(r["boxFocus"])
+        self.assertEqual(r["heads"][:2], ["Keep", "Player"])                              # the name sits next to its box (and both stay put on phones)
+
+    def test_a_bad_rank_says_why_and_undo_redo_step_through_moves(self):
+        r = self.drive(self.SETUP + """
+          var first=function(){return document.querySelector('#wi-root .wi-kb tbody tr .wi-kb-rk');};var k=first().closest('tr').getAttribute('data-k');
+          var rk=function(){return +document.querySelector('#wi-root .wi-kb tbody tr[data-k="'+k+'"] .wi-kb-rk').value;};var start=rk();
+          var inp=first();inp.value='';ev(inp,'change');R.err=(document.querySelector('#wi-root .wi-kb-err')||{}).textContent||'';
+          inp=document.querySelector('#wi-root .wi-kb tbody tr[data-k="'+k+'"] .wi-kb-rk');inp.value='60';ev(inp,'change');R.moved=rk();R.errGone=!document.querySelector('#wi-root .wi-kb-err');
+          document.getElementById('kb-undo').click();R.undone=rk()===start;
+          document.getElementById('kb-redo').click();R.redone=rk();
+          document.dispatchEvent(new KeyboardEvent('keydown',{key:'z',ctrlKey:true,bubbles:true}));R.ctrlZ=rk()===start;
+          R.last=(document.querySelector('#wi-root .wi-kb-lastl')||{}).textContent||'';""")
+        self.assertIn("Enter a rank from 1 to", r["err"])
+        self.assertEqual((r["moved"], r["redone"]), (60, 60))
+        self.assertTrue(r["errGone"] and r["undone"] and r["ctrlZ"])
+
+    def test_the_keeper_limit_and_the_tools_explain_themselves(self):
+        r = self.drive(self.SETUP + """
+          var boxes=function(){return Array.prototype.slice.call(document.querySelectorAll('#wi-root .wi-kb tbody input[type=checkbox]'));};
+          for(var i=0;i<W.keeperMax;i++){boxes()[i].click();}
+          var off=boxes().filter(function(b){return b.disabled;})[0];R.title=off?off.title:'';R.hint=(document.querySelector('#wi-root .wi-kb-hint')||{}).textContent||'';
+          var t=document.querySelector('#wi-root .wi-kb-tools');R.tools=!!t&&!!t.querySelector('#kb-set');R.auto=document.getElementById('kb-auto').parentNode.textContent;""")
+        self.assertIn("untick one", r["title"])
+        self.assertIn("keepers chosen", r["hint"])
+        self.assertTrue(r["tools"])
+        self.assertIn("stay under the ceiling", r["auto"])                                 # says what it does, not "compliant"
+
+    def test_the_board_gives_focus_back_rows_are_list_items_and_it_has_undo(self):
+        r = self.drive(self.SETUP + """
+          var b=document.getElementById('kb-board-btn');b.focus();b.click();
+          R.items=document.querySelectorAll('#kb-board .kbb-row[role=listitem]').length>100;R.undo=!!document.getElementById('kbb-undo');R.filters=!!document.querySelector('#kb-board .kbb-fl');
+          document.querySelector('#kb-board .kbb-x').click();R.back=document.activeElement&&document.activeElement.id;""")
+        self.assertTrue(r["items"] and r["undo"] and r["filters"])
+        self.assertEqual(r["back"], "kb-board-btn")
+
+    def test_what_if_css_is_readable_and_scoped(self):
+        css = open(os.path.join(HERE, "..", "scripts", "what_if.css"), encoding="utf-8").read()
+        self.assertNotRegex(css, r"(^|[},])\s*\.up\s*\{|(^|[},])\s*\.down\s*\{|,\.up\{|,\.down\{")    # no bare .up/.down: they mean "good" elsewhere
+        sizes = [float(x) for x in re.findall(r"font:\d+ ([0-9.]+)px", css)]
+        self.assertGreaterEqual(min(sizes), 10)
+        self.assertNotIn("#8b95a7", css)                                                    # 2.9:1 on white: too faint for small text
+        self.assertIn("var(--wi-nav", css)                                                  # sticky panels sit below the site bar
