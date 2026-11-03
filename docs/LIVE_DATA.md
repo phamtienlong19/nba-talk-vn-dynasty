@@ -114,3 +114,12 @@ teams share the average (two at the bottom score 1.5); total = roto score, rank 
 category by category. `scripts/roto.py` is the reference, `scripts/live_roto.js` the page's port, and `tests/test_roto.py` holds both to the
 owner's week-2 report package (`tests/fixtures/roto_week2_package.json`: stats and expected points, totals, ranks and every all-play cell).
 Yahoo corrects stats after a week closes (the stored week 2 differs from the package by five single-unit numbers), so roto points are as of the feed.
+
+## Quality-of-life pass on the LIVE tab (2026-11-03)
+Found by an adversarial review and fixed together: the tall sticky left column now scrolls inside itself (its lower cards were unreachable); a
+refresh keeps each table's sideways scroll and the focused cell; the all-play detail sits above the matrix and scrolls into view; one tab stop in
+the matrix with arrow keys; sortable roto / raw-stats columns that also reorder the matrix; closest matchups first after mine; "Day N of 7" and a
+fewer-turnovers note on the roto views; a phone list (team picker, 48px rows) instead of the 16 x 16 matrix; Standings as a pane on narrow screens
+(they used to sit above the matchups); roto, raw stats and all-play records in the export hub; text no smaller than 10.5px except the ribbon, and the
+faint grey darkened to 4.6:1 on white (test-enforced). The last pane chosen is remembered in `localStorage` (per device; no shareable URL, because
+the site's own router owns the hash and query). Not done: a roto-rank trend since yesterday (needs a daily history in the feed).
