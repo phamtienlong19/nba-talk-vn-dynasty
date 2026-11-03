@@ -212,3 +212,16 @@ class TestExportHub(unittest.TestCase):
             self.assertIsNotNone(r["size"], qs)
             self.assertGreater(r["size"][1], 800, qs)                                 # a roster card is tall; a blank frame was ~150px
             self.assertGreater(r["colours"], 12, qs)                                  # and it has content, not one flat colour
+
+    def test_a_snapshot_keeps_the_sizes_the_page_has(self):
+        """The page sets * {box-sizing:border-box}; the image has no stylesheet. A 100px box with 10px padding must stay 100px wide, and an
+        element that the page hides by default must not push anything out (the pills that overlapped names were this bug)."""
+        r = self.drive("""
+          var n=document.createElement('div');n.innerHTML='<div id="b" style="width:100px;min-width:100px;height:30px;padding:10px;background:#f00"></div><div style="height:12px"></div><div id="c" style="display:inline-block;min-width:22px;padding:3px;font:800 8px/1 Inter;background:#00f;color:#fff">IL</div>';
+          var nb=n;NBA_EXPORT.snap({node:nb,wrap:[],width:300,foot:null}).then(function(cv){
+            var c=cv.getContext('2d'),S=cv.width/300,y=Math.round((14+15)*S),row=c.getImageData(0,y,cv.width,1).data,red=0,blue=0;
+            for(var i=0;i<row.length;i+=4){if(row[i]>200&&row[i+1]<60&&row[i+2]<60)red++;}
+            var yb=Math.round((14+30+12+8)*S),rb=c.getImageData(0,yb,cv.width,1).data;for(var j=0;j<rb.length;j+=4){if(rb[j]<60&&rb[j+1]<60&&rb[j+2]>200)blue++;}
+            R.S=S;R.red=red/S;R.blue=blue/S;R.h=cv.height/S;});""", wait=8000)
+        self.assertAlmostEqual(r["red"], 100, delta=3)                                    # border-box held: 100, not 120
+        self.assertAlmostEqual(r["blue"], 22, delta=3)                                    # a 22px chip, not 28
