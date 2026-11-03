@@ -201,3 +201,14 @@ class TestExportHub(unittest.TestCase):
             self.assertIsNotNone(size, k)
             self.assertGreaterEqual(size[0], 1000, k)                                   # 430 css px drawn at 2.5x: a 1080px phone-shaped image
             self.assertGreater(size[1], 400, k)
+
+    def test_a_snapshot_made_from_what_if_or_scenario_mode_is_not_blank(self):
+        for qs in ("?mode=whatif&view=keepers", "?mode=scenario"):
+            r = self.drive("""
+              var T0=NBA_NAV.D.teams[2];var el=[].filter.call(document.querySelectorAll('section.team-card'),function(c){var t=c.querySelector('.identity-tag');return t&&t.textContent.trim()===T0.short;})[0];
+              R.found=!!el;NBA_EXPORT.snap(NBA_EXPORT.snapEl(el,430,'x')).then(function(cv){R.size=cv?[cv.width,cv.height]:null;
+                if(cv){var c=cv.getContext('2d'),d=c.getImageData(0,0,cv.width,Math.min(cv.height,600)).data,seen={};for(var i=0;i<d.length;i+=40){seen[d[i]+','+d[i+1]+','+d[i+2]]=1;}R.colours=Object.keys(seen).length;}});""", qs=qs, wait=9000)
+            self.assertTrue(r["found"], qs)
+            self.assertIsNotNone(r["size"], qs)
+            self.assertGreater(r["size"][1], 800, qs)                                 # a roster card is tall; a blank frame was ~150px
+            self.assertGreater(r["colours"], 12, qs)                                  # and it has content, not one flat colour

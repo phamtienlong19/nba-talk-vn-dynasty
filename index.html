@@ -4447,7 +4447,7 @@ function exSnap(spec){   /* spec: {node, wrap:[{tag,id,cls,style}], width, foot}
  return exFontCss().then(function(fonts){return new Promise(function(done){
   var W=spec.width||430,fr=document.createElement("iframe"),css=[].map.call(document.querySelectorAll("style"),function(x){return x.textContent;}).join("\n");
   fr.setAttribute("aria-hidden","true");fr.style.cssText="position:fixed;left:-30000px;top:0;width:"+W+"px;height:200px;border:0;opacity:0;pointer-events:none";
-  var bodyCls=document.body.className.replace(/\b(kbb-open|modal-open)\b/g,"");
+  var bodyCls="";   /* none of the site's mode classes: e.g. body.whatif-mode hides every .page, which blanked an export made from What If */
   var open=(spec.wrap||[]).map(function(w){return "<"+w.tag+(w.id?' id="'+w.id+'"':"")+(w.cls?' class="'+w.cls+'"':"")+(w.style?' style="'+w.style.replace(/"/g,"&quot;")+'"':"")+">";}).join(""),
       close=(spec.wrap||[]).slice().reverse().map(function(w){return "</"+w.tag+">";}).join("");
   fr.srcdoc="<!doctype html><html lang='en'><head><meta charset='utf-8'><style>"+fonts+"\n"+css+"\n*,*::before,*::after{animation:none!important;transition:none!important}html,body{margin:0!important;padding:0!important;overflow:hidden}#__x{padding:14px;background:#f4f6fa}#__d{position:absolute;left:-9999px;top:0}</style></head><body class='"+bodyCls+"'><div id='__x'>"+open+"<i id='__slot'></i>"+close+"</div><div id='__d'></div></"+"body></"+"html>";   /* split so nothing scanning this page for the closing body tag finds one inside a string */
@@ -4473,6 +4473,8 @@ function exFreezeDraw(fr,W,fonts,finish){
    jobs.push([el,st,ps]);});
  jobs.forEach(function(j){var el=j[0];el.setAttribute("style",j[1]);el.removeAttribute("class");
    j[2].forEach(function(p){var sp=d.createElement("span");sp.setAttribute("style",p[1]);sp.textContent=p[2];if(p[0]==="::before")el.insertBefore(sp,el.firstChild);else el.appendChild(sp);});});
+ var content=root.firstElementChild&&root.firstElementChild.getBoundingClientRect();
+ if(!content||content.height<40||content.width<40){finish(null);return;}   /* nothing visible was laid out: let the caller draw the image instead */
  var H=Math.ceil(Math.max(root.getBoundingClientRect().height,root.scrollHeight))+4,S=Math.max(1080/W,2);   /* measured after freezing: the frozen layout is the one the image shows */if(W*S*H*S>15000000)S=Math.sqrt(15000000/(W*H));
  var xml=new XMLSerializer().serializeToString(root);
  var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+Math.round(W*S)+'" height="'+Math.round(H*S)+'" viewBox="0 0 '+W+" "+H+'"><style>'+fonts.replace(/</g,"")+'</style><foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+xml+"</foreignObject></svg>";
