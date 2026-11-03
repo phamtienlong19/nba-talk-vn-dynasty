@@ -3340,6 +3340,7 @@ function renderStandings(){
  order.forEach(function(c,i){secs[i<8?0:1].querySelector(".cards").appendChild(c);});
  secs[0].querySelector(".title").textContent=byStand?"STANDINGS 16–9":"TEAMS 1–8";
  secs[1].querySelector(".title").textContent=byStand?"STANDINGS 8–1":"TEAMS 9–16";
+ monoDigits(secs[0].querySelector(".title"));monoDigits(secs[1].querySelector(".title"));
  cards.forEach(function(c){var old=c.querySelector(".stand-tag");if(old)old.remove();});
  if(live)D.teams.forEach(function(t){var c=byShort[t.short],s=ST_.teams[t.id];if(!c||!s)return;var row=c.querySelector(".team-meta");if(!row)return;   /* the record stays visible in the header, not inside the collapsed detail */
   row.insertBefore(h("span",{class:"stand-tag"+(s.place>8?" low":""),title:(s.division?s.division+" division · ":"")+"Pct "+(s.pct!=null?s.pct.toFixed(3).replace(/^0/,""):"–")+" · GB "+gbOverall(ST_,s)+(s.divRecord?" · Div "+s.divRecord:"")+(s.lastWeek?" · Last week "+s.lastWeek:"")+" · as of "+shortDate((ST_.sourceUpdatedAt||ST_.capturedAt||"").slice(0,10))},

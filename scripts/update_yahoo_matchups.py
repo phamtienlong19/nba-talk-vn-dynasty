@@ -30,8 +30,14 @@ def url_for(cfg, week=None, team_id=None):
     return base.format(week=week, teamId=team_id)
 
 
-def fetch_page(cfg, fetcher, url):
+def fetch_page(cfg, fetcher, url, retries=2, sleep=time.sleep):
+    """One GET; a non-200 is retried (Yahoo answers an occasional stray 404/5xx that is fine a moment later)."""
     status, _final, body = fetcher.get(url)
+    for n in range(retries):
+        if status == 200:
+            break
+        sleep(2 * (n + 1))
+        status, _final, body = fetcher.get(url)
     if status != 200:
         raise ym.MatchupError("HTTP_%s" % status, "%s answered %s" % (url, status))
     return ym.parse_matchup_html(body, cfg)
