@@ -20,7 +20,7 @@ function share(key,va,vb){var a=Number(va),b=Number(vb);if(!(a>=0)||!(b>=0)||a+b
 
 function h(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==="class")e.className=attrs[k];else if(k==="text")e.textContent=attrs[k];else e.setAttribute(k,attrs[k]);}
   (kids||[]).forEach(function(c){if(c!=null)e.appendChild(typeof c==="string"?document.createTextNode(c):c);});return e;}
-function chip(fid,label){var t=TM[fid]||{short:label||"?",color:"#dfe4ee",text:"#12264d"},c=h("span",{class:"tchip",text:label||t.short});
+function chip(fid,label){var t=TM[fid]||{short:label||"?",color:"#dfe4ee",text:"#12264d"},c=h("span",{class:"tchip",text:(t.crown?"\uD83D\uDC51 ":"")+(label||t.short),title:t.crown?"Defending champion":""});
   c.style.setProperty("--team-color",t.color);c.style.setProperty("--team-text",t.text);return c;}
 function pct(p){return p==null?"–":p.toFixed(3).replace(/^0/,"");}
 function val(key,v,stats){if(key==="fgPct"||key==="ftPct"){var pair=stats[key==="fgPct"?"fg":"ft"];return pair&&pair[1]?pct(pair[0]/pair[1]):"–";}return v==null?"–":String(v);}
@@ -46,9 +46,8 @@ function note(){
   return h("div",{class:"lv-note",role:"status",text:ERR?"Live feed unavailable ("+ERR+"). Showing the official finished weeks.":"Loading the live feed…"});}
 function standings(){
   var f=FEED,rows=f.table,live=SRC==="live"&&f.weekStatus==="LIVE";
-  var box=h("section",{class:"lv-card lv-stand"},[h("div",{class:"lv-ct",text:live?"STANDINGS IF THE WEEK ENDED NOW":"STANDINGS"}),
-    h("div",{class:"lv-cs",text:live?"Provisional. Equal records share a rank.":"Finished weeks. Equal records share a rank."})]);
-  var tb=h("table",{class:"lv-t"}),hd=h("tr");["#","Team","W-L-T","Pct","GB","Playoffs"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=2&&i<5?"num":"",title:i===4?"Games behind the overall leader":i===5?"In or out of the playoffs; the number is the margin over (+) or behind (−) the last playoff spot, in games":""}));});
+  var box=h("section",{class:"lv-card lv-stand"},[h("div",{class:"lv-ct",text:live?"IF THE WEEK ENDED NOW":"FINISHED WEEKS",title:"Provisional. Equal records share a rank. 8 playoff teams: each division's winner plus the best records, seeded by overall record. GB is from the overall leader; the small number is the margin in games over (+) or behind (−) the last playoff spot."})]);
+  var tb=h("table",{class:"lv-t"}),hd=h("tr");["#","Team","W-L-T","GB","Playoffs"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=2&&i<4?"num":"",title:i===3?"Games behind the overall leader":i===4?"Seed if in; the small number is the margin in games over (+) or behind (−) the last playoff spot":""}));});
   tb.appendChild(h("thead",null,[hd]));var body=h("tbody"),prevIn=null;
   rows.forEach(function(r,i){
     var tr=h("tr",{class:"st-"+(r.playoff||"")+(r.tied?" tied":""),"data-team":r.team});
@@ -56,16 +55,14 @@ function standings(){
     tr.appendChild(h("td",{class:"num rk"},[(r.tied?"T-":"")+r.rank,live&&r.moved?h("i",{class:"mv "+(r.moved>0?"up":"down"),text:r.moved>0?"▲":"▼",title:"Official rank "+r.officialRank+" ("+(r.moved>0?"up ":"down ")+Math.abs(r.moved)+")"}):null]));
     tr.appendChild(h("td",null,[chip(r.team)]));
     tr.appendChild(h("td",{class:"num",text:r.w+"-"+r.l+(r.t?"-"+r.t:"")}));
-    tr.appendChild(h("td",{class:"num",text:pct(r.pct)}));
     tr.appendChild(h("td",{class:"num",text:r.gb?String(r.gb):"–"}));
     var gl=r.gbLine==null?null:-r.gbLine,m=gl==null?"":gl>0?"+"+gl:gl<0?"−"+(-gl):"0";
-    tr.appendChild(h("td",{class:"po "+(r.playoff||"out")},[r.playoff==="in"?"In"+(r.seed?" #"+r.seed:""):r.playoff==="bubble"?"Bubble":"Out",m?h("small",{text:m}):null]));
+    tr.appendChild(h("td",{class:"po "+(r.playoff||"out")},[r.playoff==="in"?(r.seed?"#"+r.seed:"In"):r.playoff==="bubble"?"Bubble":"Out",m?h("small",{text:m}):null]));
     body.appendChild(tr);});
   tb.appendChild(body);box.appendChild(h("div",{class:"lv-wrap"},[tb]));
-  box.appendChild(h("div",{class:"lv-foot",text:"8 playoff teams: each division's winner plus the best records; seeded by overall record. Games back is from the overall leader; Line is the margin over the last playoff spot."}));
   return box;}
 function reverse(){
-  var f=FEED,box=h("section",{class:"lv-card lv-rev"},[h("div",{class:"lv-ct",text:"PROJECTED REVERSE ORDER"}),h("div",{class:"lv-cs",text:"Worst record first. Not the draft order: the lottery and penalties still apply."})]);
+  var f=FEED,box=h("section",{class:"lv-card lv-rev"},[h("div",{class:"lv-ct",text:"PROJECTED REVERSE ORDER"}),h("div",{class:"lv-cs",text:"Worst record first. Not the draft order."})]);
   var ol=h("ol",{class:"lv-ol"});f.projectedReverse.forEach(function(x){ol.appendChild(h("li",null,[chip(x.team),x.tied?h("small",{text:" tied",title:"Level with a neighbour; shown in the official order"}):null]));});
   box.appendChild(ol);return box;}
 function rosterTable(side,dayDate){
