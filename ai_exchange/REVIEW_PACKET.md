@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-02T15:01:21Z
+Generated: 2026-11-02T15:36:19Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/live-matchups
-Commit: 2d8de13
+Branch: feat/live-standings
+Commit: eddce54
 Base: main
 Working tree: dirty
 
@@ -27,19 +27,34 @@ Fingerprint: FRESH
 
 ## Changes
 ```
- ai_exchange/REVIEW_PACKET.md                       |   66 +-
+ ai_exchange/REVIEW_PACKET.md                       |   78 +-
+ config/yahoo_league.json                           |    4 +-
  data/2026-27/rosters/index.json                    |   29 +-
  .../rosters/snapshots/RS-2026-11-01-cd3eaa64.json  | 1217 ++++++++++++++++++++
  .../rosters/snapshots/RS-2026-11-02-8964cc4c.json  | 1212 +++++++++++++++++++
  .../rosters/snapshots/RS-2026-11-02-b17bd5ac.json  | 1206 +++++++++++++++++++
+ docs/LIVE_DATA.md                                  |   32 +
  docs/PROJECT_CONTEXT.md                            |   90 ++
  docs/WHAT_IF_MODE.md                               |    4 +
  index.html                                         |  160 ++-
  scripts/what_if.css                                |   43 +
  scripts/what_if_app.js                             |   75 +-
+ scripts/yahoo_matchups.py                          |  317 +++++
+ .../yahoo/matchups/week1_mid11_header.html         |    4 +
+ .../yahoo/matchups/week1_mid13_header.html         |    4 +
+ .../fixtures/yahoo/matchups/week1_mid1_header.html |    4 +
+ .../fixtures/yahoo/matchups/week1_mid2_header.html |    4 +
+ .../fixtures/yahoo/matchups/week1_mid4_header.html |    4 +
+ .../fixtures/yahoo/matchups/week1_mid5_header.html |    4 +
+ .../fixtures/yahoo/matchups/week1_mid7_header.html |    4 +
+ tests/fixtures/yahoo/matchups/week1_mid8_full.html |    5 +
+ .../fixtures/yahoo/matchups/week1_mid8_header.html |    4 +
+ .../week2_mid16_mid4_date2026-11-01_full.html      |    5 +
+ .../matchups/week3_mid8_not_started_full.html      |    5 +
  tests/test_export.py                               |   23 +
  tests/test_keeper_board.py                         |    8 +-
- 12 files changed, 4007 insertions(+), 126 deletions(-)
+ tests/test_yahoo_matchups.py                       |  150 +++
+ 27 files changed, 4569 insertions(+), 126 deletions(-)
 ```
 
 ## Validation
@@ -55,17 +70,32 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
 - ai_exchange/REVIEW_PACKET.md
+- config/yahoo_league.json
 - data/2026-27/rosters/index.json
 - data/2026-27/rosters/snapshots/RS-2026-11-01-cd3eaa64.json
 - data/2026-27/rosters/snapshots/RS-2026-11-02-8964cc4c.json
 - data/2026-27/rosters/snapshots/RS-2026-11-02-b17bd5ac.json
+- docs/LIVE_DATA.md
 - docs/PROJECT_CONTEXT.md
 - docs/WHAT_IF_MODE.md
 - index.html
 - scripts/what_if.css
 - scripts/what_if_app.js
+- scripts/yahoo_matchups.py
+- tests/fixtures/yahoo/matchups/week1_mid11_header.html
+- tests/fixtures/yahoo/matchups/week1_mid13_header.html
+- tests/fixtures/yahoo/matchups/week1_mid1_header.html
+- tests/fixtures/yahoo/matchups/week1_mid2_header.html
+- tests/fixtures/yahoo/matchups/week1_mid4_header.html
+- tests/fixtures/yahoo/matchups/week1_mid5_header.html
+- tests/fixtures/yahoo/matchups/week1_mid7_header.html
+- tests/fixtures/yahoo/matchups/week1_mid8_full.html
+- tests/fixtures/yahoo/matchups/week1_mid8_header.html
+- tests/fixtures/yahoo/matchups/week2_mid16_mid4_date2026-11-01_full.html
+- tests/fixtures/yahoo/matchups/week3_mid8_not_started_full.html
 - tests/test_export.py
 - tests/test_keeper_board.py
+- tests/test_yahoo_matchups.py
 
 ## Issues
 - New manual workflow `Update Yahoo Rosters` (`.github/workflows/update-yahoo-rosters.yml`), authorised by the owner on 2026-10-20 (this replaces the earlier "no Yahoo credentials in Actions" rule for this one workflow). Setup, run and failure guide: `docs/YAHOO_ROSTER_WORKFLOW.md`.
@@ -78,4 +108,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/live-matchups` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/live-standings` if not already done, then request human/ChatGPT review of this packet.

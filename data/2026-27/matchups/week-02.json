@@ -1,0 +1,556 @@
+{
+  "schema": "yahoo-matchups/1",
+  "season": "2026-27",
+  "leagueId": "85092",
+  "week": 2,
+  "status": "FINAL",
+  "capturedAt": "2026-11-02T15:26:50Z",
+  "source": "Yahoo public matchup pages, league 85092",
+  "matchups": [
+    {
+      "teams": [
+        {
+          "teamId": 1,
+          "name": "",
+          "stats": {
+            "fg": [
+              188,
+              431
+            ],
+            "fgPct": 0.436,
+            "ft": [
+              115,
+              135
+            ],
+            "ftPct": 0.852,
+            "tpm": 61,
+            "pts": 552,
+            "reb": 192,
+            "ast": 143,
+            "st": 26,
+            "blk": 13,
+            "to": 89
+          },
+          "printedWins": 4
+        },
+        {
+          "teamId": 11,
+          "name": "",
+          "stats": {
+            "fg": [
+              168,
+              346
+            ],
+            "fgPct": 0.486,
+            "ft": [
+              97,
+              120
+            ],
+            "ftPct": 0.808,
+            "tpm": 59,
+            "pts": 492,
+            "reb": 171,
+            "ast": 144,
+            "st": 50,
+            "blk": 19,
+            "to": 79
+          },
+          "printedWins": 5
+        }
+      ],
+      "result": {
+        "cats": {
+          "fgPct": "b",
+          "ftPct": "a",
+          "tpm": "a",
+          "pts": "a",
+          "reb": "a",
+          "ast": "b",
+          "st": "b",
+          "blk": "b",
+          "to": "b"
+        },
+        "a": 4,
+        "b": 5,
+        "t": 0
+      }
+    },
+    {
+      "teams": [
+        {
+          "teamId": 2,
+          "name": "",
+          "stats": {
+            "fg": [
+              182,
+              396
+            ],
+            "fgPct": 0.46,
+            "ft": [
+              80,
+              99
+            ],
+            "ftPct": 0.808,
+            "tpm": 48,
+            "pts": 492,
+            "reb": 223,
+            "ast": 116,
+            "st": 30,
+            "blk": 37,
+            "to": 58
+          },
+          "printedWins": 5
+        },
+        {
+          "teamId": 15,
+          "name": "",
+          "stats": {
+            "fg": [
+              189,
+              402
+            ],
+            "fgPct": 0.47,
+            "ft": [
+              74,
+              91
+            ],
+            "ftPct": 0.813,
+            "tpm": 56,
+            "pts": 508,
+            "reb": 214,
+            "ast": 94,
+            "st": 27,
+            "blk": 15,
+            "to": 64
+          },
+          "printedWins": 4
+        }
+      ],
+      "result": {
+        "cats": {
+          "fgPct": "b",
+          "ftPct": "b",
+          "tpm": "b",
+          "pts": "b",
+          "reb": "a",
+          "ast": "a",
+          "st": "a",
+          "blk": "a",
+          "to": "a"
+        },
+        "a": 5,
+        "b": 4,
+        "t": 0
+      }
+    },
+    {
+      "teams": [
+        {
+          "teamId": 3,
+          "name": "",
+          "stats": {
+            "fg": [
+              152,
+              320
+            ],
+            "fgPct": 0.475,
+            "ft": [
+              58,
+              80
+            ],
+            "ftPct": 0.725,
+            "tpm": 41,
+            "pts": 403,
+            "reb": 174,
+            "ast": 90,
+            "st": 56,
+            "blk": 29,
+            "to": 56
+          },
+          "printedWins": 3
+        },
+        {
+          "teamId": 17,
+          "name": "",
+          "stats": {
+            "fg": [
+              196,
+              403
+            ],
+            "fgPct": 0.486,
+            "ft": [
+              93,
+              113
+            ],
+            "ftPct": 0.823,
+            "tpm": 74,
+            "pts": 559,
+            "reb": 164,
+            "ast": 128,
+            "st": 35,
+            "blk": 22,
+            "to": 54
+          },
+          "printedWins": 6
+        }
+      ],
+      "result": {
+        "cats": {
+          "fgPct": "b",
+          "ftPct": "b",
+          "tpm": "b",
+          "pts": "b",
+          "reb": "a",
+          "ast": "b",
+          "st": "a",
+          "blk": "a",
+          "to": "b"
+        },
+        "a": 3,
+        "b": 6,
+        "t": 0
+      }
+    },
+    {
+      "teams": [
+        {
+          "teamId": 4,
+          "name": "",
+          "stats": {
+            "fg": [
+              211,
+              469
+            ],
+            "fgPct": 0.45,
+            "ft": [
+              125,
+              157
+            ],
+            "ftPct": 0.796,
+            "tpm": 74,
+            "pts": 621,
+            "reb": 173,
+            "ast": 163,
+            "st": 46,
+            "blk": 16,
+            "to": 71
+          },
+          "printedWins": 5
+        },
+        {
+          "teamId": 16,
+          "name": "",
+          "stats": {
+            "fg": [
+              202,
+              420
+            ],
+            "fgPct": 0.481,
+            "ft": [
+              88,
+              109
+            ],
+            "ftPct": 0.807,
+            "tpm": 41,
+            "pts": 533,
+            "reb": 164,
+            "ast": 119,
+            "st": 36,
+            "blk": 18,
+            "to": 67
+          },
+          "printedWins": 4
+        }
+      ],
+      "result": {
+        "cats": {
+          "fgPct": "b",
+          "ftPct": "b",
+          "tpm": "a",
+          "pts": "a",
+          "reb": "a",
+          "ast": "a",
+          "st": "a",
+          "blk": "b",
+          "to": "b"
+        },
+        "a": 5,
+        "b": 4,
+        "t": 0
+      }
+    },
+    {
+      "teams": [
+        {
+          "teamId": 5,
+          "name": "",
+          "stats": {
+            "fg": [
+              168,
+              358
+            ],
+            "fgPct": 0.469,
+            "ft": [
+              86,
+              114
+            ],
+            "ftPct": 0.754,
+            "tpm": 66,
+            "pts": 488,
+            "reb": 172,
+            "ast": 91,
+            "st": 24,
+            "blk": 22,
+            "to": 45
+          },
+          "printedWins": 3
+        },
+        {
+          "teamId": 7,
+          "name": "",
+          "stats": {
+            "fg": [
+              180,
+              429
+            ],
+            "fgPct": 0.42,
+            "ft": [
+              120,
+              147
+            ],
+            "ftPct": 0.816,
+            "tpm": 71,
+            "pts": 551,
+            "reb": 204,
+            "ast": 119,
+            "st": 33,
+            "blk": 19,
+            "to": 83
+          },
+          "printedWins": 6
+        }
+      ],
+      "result": {
+        "cats": {
+          "fgPct": "a",
+          "ftPct": "b",
+          "tpm": "b",
+          "pts": "b",
+          "reb": "b",
+          "ast": "b",
+          "st": "b",
+          "blk": "a",
+          "to": "a"
+        },
+        "a": 3,
+        "b": 6,
+        "t": 0
+      }
+    },
+    {
+      "teams": [
+        {
+          "teamId": 6,
+          "name": "",
+          "stats": {
+            "fg": [
+              173,
+              366
+            ],
+            "fgPct": 0.473,
+            "ft": [
+              58,
+              72
+            ],
+            "ftPct": 0.806,
+            "tpm": 42,
+            "pts": 446,
+            "reb": 165,
+            "ast": 110,
+            "st": 38,
+            "blk": 18,
+            "to": 64
+          },
+          "printedWins": 4
+        },
+        {
+          "teamId": 12,
+          "name": "",
+          "stats": {
+            "fg": [
+              183,
+              408
+            ],
+            "fgPct": 0.449,
+            "ft": [
+              96,
+              127
+            ],
+            "ftPct": 0.756,
+            "tpm": 64,
+            "pts": 526,
+            "reb": 217,
+            "ast": 134,
+            "st": 30,
+            "blk": 19,
+            "to": 74
+          },
+          "printedWins": 5
+        }
+      ],
+      "result": {
+        "cats": {
+          "fgPct": "a",
+          "ftPct": "a",
+          "tpm": "b",
+          "pts": "b",
+          "reb": "b",
+          "ast": "b",
+          "st": "a",
+          "blk": "b",
+          "to": "a"
+        },
+        "a": 4,
+        "b": 5,
+        "t": 0
+      }
+    },
+    {
+      "teams": [
+        {
+          "teamId": 8,
+          "name": "",
+          "stats": {
+            "fg": [
+              235,
+              479
+            ],
+            "fgPct": 0.491,
+            "ft": [
+              123,
+              145
+            ],
+            "ftPct": 0.848,
+            "tpm": 74,
+            "pts": 667,
+            "reb": 239,
+            "ast": 163,
+            "st": 41,
+            "blk": 22,
+            "to": 90
+          },
+          "printedWins": 7
+        },
+        {
+          "teamId": 14,
+          "name": "",
+          "stats": {
+            "fg": [
+              210,
+              455
+            ],
+            "fgPct": 0.462,
+            "ft": [
+              82,
+              103
+            ],
+            "ftPct": 0.796,
+            "tpm": 75,
+            "pts": 577,
+            "reb": 179,
+            "ast": 88,
+            "st": 35,
+            "blk": 14,
+            "to": 58
+          },
+          "printedWins": 2
+        }
+      ],
+      "result": {
+        "cats": {
+          "fgPct": "a",
+          "ftPct": "a",
+          "tpm": "b",
+          "pts": "a",
+          "reb": "a",
+          "ast": "a",
+          "st": "a",
+          "blk": "a",
+          "to": "b"
+        },
+        "a": 7,
+        "b": 2,
+        "t": 0
+      }
+    },
+    {
+      "teams": [
+        {
+          "teamId": 9,
+          "name": "",
+          "stats": {
+            "fg": [
+              140,
+              326
+            ],
+            "fgPct": 0.429,
+            "ft": [
+              78,
+              95
+            ],
+            "ftPct": 0.821,
+            "tpm": 46,
+            "pts": 404,
+            "reb": 177,
+            "ast": 117,
+            "st": 23,
+            "blk": 23,
+            "to": 76
+          },
+          "printedWins": 3
+        },
+        {
+          "teamId": 13,
+          "name": "",
+          "stats": {
+            "fg": [
+              195,
+              399
+            ],
+            "fgPct": 0.489,
+            "ft": [
+              92,
+              138
+            ],
+            "ftPct": 0.667,
+            "tpm": 36,
+            "pts": 518,
+            "reb": 245,
+            "ast": 153,
+            "st": 37,
+            "blk": 33,
+            "to": 79
+          },
+          "printedWins": 6
+        }
+      ],
+      "result": {
+        "cats": {
+          "fgPct": "b",
+          "ftPct": "a",
+          "tpm": "a",
+          "pts": "b",
+          "reb": "b",
+          "ast": "b",
+          "st": "b",
+          "blk": "b",
+          "to": "a"
+        },
+        "a": 3,
+        "b": 6,
+        "t": 0
+      }
+    }
+  ],
+  "digest": "e93e08515c77d830f9cf9df1b71dbfbe5376f108af3d21345e7c526f9546313b"
+}
