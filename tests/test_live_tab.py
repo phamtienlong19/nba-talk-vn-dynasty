@@ -189,6 +189,25 @@ class TestLiveTab(unittest.TestCase):
         self.assertGreater(r["scroll"], r["client"])               # there is more to the right than fits ...
         self.assertLessEqual(r["panel"], r["card"])                # ... and the panel stays inside its card, so it scrolls instead of being clipped
 
+    def test_lineup_checks_are_listed_for_everyone_with_neutral_wording(self):
+        t1, t2 = self.feed["table"][0]["team"], self.feed["table"][1]["team"]
+        lc = {"week": 3, "rule": {"days": 2, "players": 3, "stars": 2}, "missing": [], "byDate": {"2026-11-02": {}, "2026-11-03": {}},
+              "teams": [{"team": t1, "yahooId": 1, "missetDays": 2, "players": 2, "stars": 1, "meetsCount": True,
+                         "days": [{"date": "2026-11-02", "issues": [{"k": "out_starter", "p": "Out Guy", "id": "1", "s": "PG", "r": "Bench Guy"}]},
+                                  {"date": "2026-11-03", "issues": [{"k": "star_benched", "p": "Star", "id": "2", "s": "BN", "r": None, "rank": 9}]}]},
+                        {"team": t2, "yahooId": 2, "missetDays": 0, "players": 0, "stars": 0, "meetsCount": False, "days": []}]}
+        r = self.drive(self.feed_js(lineupChecks=lc) + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var b=document.querySelector('#live-root .lv-lc');R.has=!!b;R.title=b?b.querySelector('.lv-ct').textContent:'';
+            R.teams=b?b.querySelectorAll('details.lv-lc-t').length:0;R.flag=b?(b.querySelector('.flag')||{}).textContent:'';
+            R.items=b?b.querySelectorAll('li').length:0;R.text=b?b.textContent:'';},600);""", wait=2500)
+        self.assertTrue(r["has"])
+        self.assertEqual((r["title"], r["teams"], r["items"]), ("LINEUP CHECKS", 1, 2))
+        self.assertEqual(r["flag"], "at the rule's count")
+        self.assertIn("Out player held a starting slot", r["text"])
+        self.assertNotIn("tank", r["text"].lower())                                # evidence, never a verdict
+        self.assertIn("1 team: nothing found", r["text"])
+
 
 if __name__ == "__main__":
     unittest.main()

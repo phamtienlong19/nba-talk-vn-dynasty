@@ -71,7 +71,7 @@ Golden check (2026-11-02): summed weeks 1-2 equal Yahoo's published standings fo
   and in-progress weeks, and derives the current week from `seasonStartMonday` (Pacific) in `config/yahoo_league.json`.
 - A failed parse names the URL, final URL, size and page title in the error.
 
-## Lineup-integrity evidence (design, not built yet)
+## Lineup-integrity evidence (built: `scripts/live_lineups.py`, the LINEUP CHECKS card, visible to everyone)
 Counts what `docs/LEAGUE_RULES_MODEL.md` ("AFK / lineup-integrity") already counts as a misset, from the day-closed `date=` lineup of each
 finished Yahoo day. Neutral wording, evidence for review, never a verdict. A "misset" day for a team is any of:
 1. **A healthy bench or IL-eligible player with a game, and a star (top-50 O-Rank) left on the bench** (benching a star).
@@ -89,3 +89,9 @@ and opponent appear for every player whose team plays), from as few pairings as 
 `schedule-cache.json` on the runner (reused for 12 h by the looping run; a fresh run fetches again, about 25 requests once). A player's `gl` is
 today's game if it has not finished plus every later day his NBA team plays; a side's `gamesLeft` sums its starting lineup, leaving out
 players whose status is out. A day Yahoo cannot serve is left out and the feed sets `gamesLeftComplete: false` (the page shows "~").
+
+Built as designed with these details: a closed day is captured once (8 requests) from the `date=` pages and carried in the feed's
+`lineupChecks.byDate`; the looping run reads the last published feed (`--previous live.json`) so a new run does not capture those days
+again. An out starter counts only when his status is out, his team had a game and he recorded nothing. A star is top 50 by Yahoo's
+preseason O-Rank (`data/yahoo/player_registry.json`), the stand-in for the rule's XRank. The card lists only teams with something found,
+flags the ones at the rule's count (2+ days, 3+ players or 2 stars in the week) and says nothing more: the commissioner decides.

@@ -69,6 +69,27 @@ function standings(){
     body.appendChild(tr);});
   tb.appendChild(body);box.appendChild(h("div",{class:"lv-wrap"},[tb]));
   return box;}
+var KIND={out_starter:"Out player held a starting slot while an eligible bench player had a game",empty_slot:"Starting slot left empty while an eligible bench player had a game",star_benched:"Star (top 50) on the bench with a game"};
+function shortDate(iso){try{return new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"short",timeZone:"UTC"}).format(new Date(iso+"T12:00:00Z"));}catch(e){return iso;}}
+function lineups(){
+  var L=FEED.lineupChecks;if(!L||SRC!=="live")return null;
+  var days=Object.keys(L.byDate||{}).sort(),rule=L.rule||{days:2,players:3,stars:2};
+  var box=h("section",{class:"lv-card lv-lc"},[h("div",{class:"lv-ct",text:"LINEUP CHECKS",title:"What the league rules count as a misset lineup, from closed days. Evidence for review, not a verdict. A status is what Yahoo showed when the day was captured, so a late scratch can look like an out starter."}),
+    h("div",{class:"lv-cs",text:days.length?"Closed days of week "+L.week+": "+days.map(shortDate).join(", ")+". Rule count: "+rule.days+"+ days or "+rule.players+"+ players in a week.":"No day of week "+L.week+" has closed yet."})]);
+  if(!days.length)return box;
+  var rows=(L.teams||[]).filter(function(t){return t.missetDays>0;}).sort(function(a,b){return b.missetDays-a.missetDays||b.players-a.players;});
+  var clean=(L.teams||[]).length-rows.length;
+  if(!rows.length){box.appendChild(h("div",{class:"lv-lc-none",text:"Nothing found: every checked lineup used its starting slots."}));return box;}
+  var mt=me();
+  rows.forEach(function(t){
+    var det=h("details",{class:"lv-lc-t"+(t.team===mt?" me":"")+(t.meetsCount?" over":"")});
+    det.appendChild(h("summary",null,[chip(t.team),h("span",{class:"n",text:t.missetDays+(t.missetDays===1?" day":" days")+" · "+t.players+(t.players===1?" player":" players")}),t.meetsCount?h("span",{class:"flag",text:"at the rule's count",title:"Meets the league's AFK count; the commissioner decides"}):null]));
+    var ul=h("ul");t.days.forEach(function(d){d.issues.forEach(function(i){
+      var who=i.k==="empty_slot"?"empty "+i.s+" slot":(i.p||"?")+(i.k==="out_starter"?" ("+i.s+")":" (bench"+(i.rank?", rank "+i.rank:"")+")");
+      ul.appendChild(h("li",null,[h("b",{text:shortDate(d.date)}),h("span",{text:" "+KIND[i.k]+": "+who+(i.r?"; eligible bench player: "+i.r:"")})]));});});
+    det.appendChild(ul);box.appendChild(det);});
+  if(clean>0)box.appendChild(h("div",{class:"lv-foot",text:clean+(clean===1?" team":" teams")+": nothing found."}));
+  return box;}
 function reverse(){
   var f=FEED,box=h("section",{class:"lv-card lv-rev"},[h("div",{class:"lv-ct",text:"PROJECTED REVERSE ORDER"}),h("div",{class:"lv-cs",text:"Worst record first. Not the draft order."})]);
   var ol=h("ol",{class:"lv-ol"});f.projectedReverse.forEach(function(x){ol.appendChild(h("li",null,[chip(x.team),x.tied?h("small",{text:" tied",title:"Level with a neighbour; shown in the official order"}):null]));});
@@ -126,7 +147,7 @@ function render(){
   root.textContent="";var tb=document.querySelector(".topbar");if(tb)root.style.setProperty("--lv-nav",tb.offsetHeight+"px");
   root.appendChild(head());var n=note();if(n)root.appendChild(n);
   var grid=h("div",{class:"lv-grid"}),left=h("div",{class:"lv-left"}),right=h("div",{class:"lv-right"});
-  left.appendChild(standings());left.appendChild(reverse());
+  left.appendChild(standings());var lc=lineups();if(lc)left.appendChild(lc);left.appendChild(reverse());
   var title=SRC==="live"?"MATCHUPS":"LAST FINISHED WEEK";
   var ms=h("div",{class:"lv-ms"}),mt=me();
   FEED.matchups.slice().sort(function(x,y){var f=function(m){return m.teams.some(function(t){return t.team===mt;})?0:1;};return f(x)-f(y);}).forEach(function(m){ms.appendChild(matchup(m));});
