@@ -7,7 +7,7 @@ var dataEl=document.getElementById("live-data"),root=document.getElementById("li
 if(!dataEl||!root)return;
 var B=JSON.parse(dataEl.textContent),TM={};
 B.teams.forEach(function(t){TM[t.id]=t;});
-var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=5*60*1000,STALE_MIN=75;
+var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
 var LINE=["PTS","REB","AST","ST","BLK","3PM","TO"],LINE_IX=[0,1,2,3,4,5,6];
 
@@ -29,7 +29,7 @@ function head(){
   return h("div",{class:"lv-hd"},[
     h("div",null,[h("h3",{text:live?"Week "+f.week:"Standings from finished weeks"}),
       h("div",{class:"lv-sub"},[h("span",{class:"lv-pill "+(live&&f.weekStatus==="LIVE"?"on":"")+(stale?" stale":""),text:status}),
-        h("span",{id:"lv-asof",text:live?"as of "+ict(f.asOf)+" · "+ago(f.asOf)+(CHECKED?" · checked "+ago(new Date(CHECKED).toISOString())+" (feed updates about every 15 min)":""):"live feed not loaded"})])]),
+        h("span",{id:"lv-asof",text:live?"as of "+ict(f.asOf)+" · "+ago(f.asOf)+(CHECKED?" · checked "+ago(new Date(CHECKED).toISOString())+" (feed updates about every 5 min in game hours)":""):"live feed not loaded"})])]),
     h("div",{class:"lv-act"},[btn])]);}
 function note(){
   if(SRC==="live"){var f=FEED,msgs=[];
@@ -109,7 +109,7 @@ function accept(d,src){if(!valid(d))throw new Error("unreadable feed");FEED=d;SR
 function load(manual){
   if(LOADING||!B.liveUrl)return;LOADING=true;if(manual)render();
   var ctl=window.AbortController?new AbortController():null,timer=setTimeout(function(){if(ctl)ctl.abort();},12000);
-  fetch(B.liveUrl+"?t="+(manual?Date.now():Math.floor(Date.now()/300000)),{cache:"no-store",signal:ctl?ctl.signal:undefined}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+  fetch(B.liveUrl+"?t="+(manual?Date.now():Math.floor(Date.now()/60000)),{cache:"no-store",signal:ctl?ctl.signal:undefined}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
     .then(function(d){accept(d,"live");CHECKED=Date.now();}).catch(function(e){ERR=String(e&&e.message||e);if(SRC!=="live")SRC="fallback";})
     .then(function(){clearTimeout(timer);LOADING=false;render();});}
 function visible(){return !document.hidden&&root.closest&&!root.closest(".tab-off");}
