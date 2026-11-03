@@ -9,7 +9,10 @@ var B=JSON.parse(dataEl.textContent),TM={};
 B.teams.forEach(function(t){TM[t.id]=t;});
 var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=5*60*1000,STALE_MIN=75;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
-var LINE=["PTS","REB","AST","ST","BLK","3PM","TO"],LINE_IX=[0,1,2,3,4,5,6];
+var LINE=["FG%","FT%","3PM","PTS","REB","AST","STL","BLK","TO"];   /* the order of the roster line in the feed = the usual 9-cat order */
+function cell(x,i){return x==null?"–":(i<2?pct(x):String(x));}
+function tcolor(fid){return (TM[fid]||{}).color||"#8b95a7";}
+function share(key,va,vb){var a=Number(va),b=Number(vb);if(!(a>=0)||!(b>=0)||a+b===0)return 50;return Math.round(100*(key==="to"?b:a)/(a+b));}
 
 function h(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){if(k==="class")e.className=attrs[k];else if(k==="text")e.textContent=attrs[k];else e.setAttribute(k,attrs[k]);}
   (kids||[]).forEach(function(c){if(c!=null)e.appendChild(typeof c==="string"?document.createTextNode(c):c);});return e;}
@@ -63,31 +66,39 @@ function reverse(){
   var f=FEED,box=h("section",{class:"lv-card lv-rev"},[h("div",{class:"lv-ct",text:"PROJECTED REVERSE ORDER"}),h("div",{class:"lv-cs",text:"Worst record first. Not the draft order: the lottery and penalties still apply."})]);
   var ol=h("ol",{class:"lv-ol"});f.projectedReverse.forEach(function(x){ol.appendChild(h("li",null,[chip(x.team),x.tied?h("small",{text:" tied",title:"Level with a neighbour; shown in the official order"}):null]));});
   box.appendChild(ol);return box;}
+function rosterTable(side,dayDate){
+  var t=h("table",{class:"lv-r"}),hd=h("tr");["","Player"].concat(LINE).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
+  t.appendChild(h("thead",null,[hd]));var tb=h("tbody");t.appendChild(tb);
+  var groups=[["STARTERS","Week totals",function(r){return r.s!=="BN"&&r.s!=="IL";}],["BENCH","Stats from the latest day only"+(dayDate?" ("+dayDate+")":""),function(r){return r.s==="BN";}],["INJURED LIST","Stats from the latest day only",function(r){return r.s==="IL";}]];
+  groups.forEach(function(g){var rows=side.roster.filter(g[2]);if(!rows.length)return;
+    var gh=h("tr",{class:"gh"}),td=h("td",{colspan:String(LINE.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]})]);gh.appendChild(td);tb.appendChild(gh);
+    rows.forEach(function(r){var bench=g[0]!=="STARTERS",line=bench?r.d:r.l;
+      var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")+(g[0]==="INJURED LIST"?"il":"")});
+      tr.appendChild(h("td",{class:"sl",text:r.s}));
+      var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
+      if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+r.g}));}
+      tr.appendChild(nm);
+      LINE.forEach(function(x,i){tr.appendChild(h("td",{class:"num",text:r.n==null||!line?"":cell(line[i],i)}));});
+      tb.appendChild(tr);});});
+  return t;}
 function matchup(m){
   var a=m.teams[0],b=m.teams[1],lead=m.score[0]>m.score[1]?0:m.score[1]>m.score[0]?1:-1;
   var card=h("section",{class:"lv-card lv-m","data-m":String(a.yahooId)});
+  card.style.setProperty("--ca",tcolor(a.team));card.style.setProperty("--cb",tcolor(b.team));
   card.appendChild(h("div",{class:"lv-mh"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(m.score[0])})]),
-    h("div",{class:"lv-mid",text:m.score[2]?"– "+m.score[2]+" tied –":"–"}),
+    h("div",{class:"lv-mid",text:m.score[2]?m.score[2]+" tied":"vs"}),
     h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(m.score[1])}),chip(b.team)])]));
   var grid=h("div",{class:"lv-cats"});
   CATS.forEach(function(c){var w=m.cats[c[0]],va=val(c[0],a.stats[c[0]],a.stats),vb=val(c[0],b.stats[c[0]],b.stats);
-    grid.appendChild(h("div",{class:"lv-c "+(w==="a"?"wa":w==="b"?"wb":w==="t"?"wt":"")},[h("span",{class:"va",text:va}),h("span",{class:"cl",text:c[1]}),h("span",{class:"vb",text:vb})]));});
+    var row=h("div",{class:"lv-c "+(w==="a"?"wa":w==="b"?"wb":w==="t"?"wt":"")},[h("span",{class:"va",text:va}),h("span",{class:"cl",text:c[1]}),h("span",{class:"vb",text:vb})]);
+    var tug=h("i",{class:"tug"});tug.style.setProperty("--p",share(c[0],a.stats[c[0]],b.stats[c[0]])+"%");row.appendChild(tug);grid.appendChild(row);});
   card.appendChild(grid);
   var tp=function(s){var n=s.toPlay||{upcoming:0,live:0};return n.upcoming+n.live;};
   card.appendChild(h("div",{class:"lv-tp"},[h("span",{text:tp(a)+" to play"}),h("span",{text:tp(b)+" to play"})]));
   var det=h("details",{class:"lv-det"},[h("summary",{text:"Rosters"})]);if(OPEN[a.yahooId])det.setAttribute("open","");
-  det.addEventListener("toggle",function(){OPEN[a.yahooId]=det.open;});
+  det.addEventListener("toggle",function(){OPEN[a.yahooId]=det.open;card.classList.toggle("open",det.open);});card.classList.toggle("open",!!OPEN[a.yahooId]);
   var cols=h("div",{class:"lv-cols"});
-  m.teams.forEach(function(s){var t=h("table",{class:"lv-r"}),hd=h("tr");["","Player"].concat(LINE).forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>1?"num":""}));});
-    t.appendChild(h("thead",null,[hd]));var tbd=h("tbody");
-    s.roster.forEach(function(r){var tr=h("tr",{class:r.n==null?"empty":(r.s==="BN"?"bench":r.s==="IL"?"il":"")});
-      tr.appendChild(h("td",{class:"sl",text:r.s}));
-      var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
-      if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g)nm.appendChild(h("small",{class:r.gs||"",text:r.g}));}
-      tr.appendChild(nm);
-      LINE_IX.forEach(function(ix){tr.appendChild(h("td",{class:"num",text:r.n==null||r.l[ix]==null?"":String(r.l[ix])}));});
-      tbd.appendChild(tr);});
-    t.appendChild(tbd);cols.appendChild(h("div",{class:"lv-rc"},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[t])]));});
+  m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate)])]);cols.appendChild(rc);});
   det.appendChild(cols);card.appendChild(det);return card;}
 
 /* ---------- render ---------- */

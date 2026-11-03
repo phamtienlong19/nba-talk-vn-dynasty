@@ -28,23 +28,53 @@ import yahoo_standings as ys  # noqa: E402
 
 SCHEMA = "live-feed/1"
 STARTING = ("PG", "SG", "G", "SF", "PF", "F", "C", "FC", "Util")
-LINE_KEYS = ("pts", "reb", "ast", "st", "blk", "tpm", "to", "fgPct", "ftPct")
+LINE_KEYS = ("fgPct", "ftPct", "tpm", "pts", "reb", "ast", "st", "blk", "to")         # the order managers know
 
 
 def _utc(dt=None):
     return (dt or datetime.datetime.now(datetime.timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _roster(rows):
+def _roster(rows, day=None):
+    """`l` = the player's week line (starters only: Yahoo counts only starters); `d` = the line of the one day fetched, which is
+    the only stat a benched or IL player has."""
+    day = day or {}
     out = []
     for r in rows:
         if r["name"] is None:
             out.append({"s": r["slot"], "n": None})
             continue
+        d = day.get(r.get("playerId") or r["name"])
         out.append({"s": r["slot"], "n": r["name"], "p": r.get("playerId"), "t": r.get("nba"), "pos": r.get("positions"),
                     "st": r.get("status") or "", "g": r.get("game"), "gs": ym.game_state(r.get("game")),
-                    "l": [r["line"].get(k) for k in LINE_KEYS]})
+                    "l": [r["line"].get(k) for k in LINE_KEYS],
+                    "d": [d["line"].get(k) for k in LINE_KEYS] if d else None, "ds": d["slot"] if d else None})
     return out
+
+
+def _day_pages(cfg, cur, pages, fetcher, now_dt, sleep):
+    """The roster view of one Yahoo day (US Pacific), for the bench and IL lines that the week totals leave out. The latest day with a
+    game started: today, else yesterday if today has none yet. -> (date or None, {teamId: {key: row}}). Never fatal."""
+    import zoneinfo
+    start = datetime.date.fromisoformat(cfg["seasonStartMonday"]) + datetime.timedelta(days=7 * (cur - 1))
+    today = now_dt.astimezone(zoneinfo.ZoneInfo("America/Los_Angeles")).date()
+    for day in (today, today - datetime.timedelta(days=1)):
+        if not start <= day <= start + datetime.timedelta(days=6):
+            continue
+        got, any_game = {}, False
+        try:
+            for p in pages:
+                sleep(cfg.get("requestDelaySeconds", 1.5))
+                tid = min(t["teamId"] for t in p["teams"])
+                dp = um.fetch_page(cfg, fetcher, um.url_for(cfg, cur, tid).replace("date=totals", "date=" + day.isoformat()))
+                for tm, rows in (dp.get("rosters") or {}).items():
+                    got[tm] = {(r.get("playerId") or r["name"]): r for r in rows if r["name"] is not None}
+                    any_game = any_game or any(ym.game_state(r.get("game")) in ("live", "final") for r in rows if r["name"] is not None)
+        except (ym.MatchupError, yr.FetchError):
+            return None, {}
+        if any_game:
+            return day.isoformat(), got
+    return None, {}
 
 
 def _to_play(rows):
@@ -56,10 +86,15 @@ def _to_play(rows):
     return n
 
 
+def _dt_of(iso):
+    return datetime.datetime.strptime(iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
+
+
 def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=None, sleep=time.sleep) -> dict:
     now = now or _utc()
     cur = um.current_week(cfg, fetcher)
     pages = um.walk_week(cfg, cur, fetcher, sleep=sleep)
+    day_date, day = _day_pages(cfg, cur, pages, fetcher, _dt_of(now), sleep)
     stored = ym.load_weeks(matchup_dir)
     finished, transient = {}, []
     for w in range(1, cur):
@@ -94,9 +129,9 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
         for i, t in enumerate(p["teams"]):
             rs = p["rosters"][t["teamId"]] if p.get("rosters") else []
             sides.append({"team": fid(t["teamId"]), "yahooId": t["teamId"], "name": t["name"], "stats": t["stats"], "printed": t["printedWins"],
-                          "toPlay": _to_play(rs), "roster": _roster(rs)})
+                          "toPlay": _to_play(rs), "roster": _roster(rs, day.get(t["teamId"]))})
         matchups.append({"teams": sides, "cats": res["cats"], "score": [res["a"], res["b"], res["t"]], "decided": res["decided"]})
-    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur,
+    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date,
             "weekStatus": "LIVE" if started else "NOT_STARTED", "finishedWeeks": sorted(finished), "notStoredYet": transient,
             "table": table, "playoff": {"spots": pic["spots"], "divisionTie": pic["divisionTie"], "linePct": pic["linePct"]},
             "projectedReverse": [{"team": fid(t["teamId"]), "tied": t["tied"]} for t in reversed(proj["teams"])],
