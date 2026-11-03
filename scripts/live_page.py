@@ -14,6 +14,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_fa_draft_pool as pool  # noqa: E402
+import build_league_state as bls  # noqa: E402
 import import_rosters as ir  # noqa: E402
 import league_state as ls  # noqa: E402
 import live_standings as lst  # noqa: E402
@@ -66,7 +67,9 @@ def payload() -> dict:
     inputs = ls.load_inputs()
     teams = [{"id": t["franchiseId"], "short": t["short"], "color": t["color"], "text": t["text"],
               "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME} for t in inputs["freeze"]["teams"]]
-    return {"liveUrl": LIVE_URL, "teams": teams, "fallback": fallback()}
+    prefix = ir.GAME_KEY + ".p."                                     # Yahoo player ids of the 2026 rookies (same set as the rest of the site)
+    rookies = sorted(k[len(prefix):] for k in bls.rookie_keys(ss.load_season(inputs)) if k.startswith(prefix))
+    return {"liveUrl": LIVE_URL, "teams": teams, "rookies": rookies, "fallback": fallback()}
 
 
 def render_block(data: dict) -> str:

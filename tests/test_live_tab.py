@@ -25,11 +25,13 @@ class TestLiveTab(unittest.TestCase):
         cls.feed = tlf.feed()
         cls.feed["asOf"] = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    def drive(self, body_js, qs="", wait=2000):
+    def drive(self, body_js, qs="", wait=2000, rookies=None):
         with open(INDEX, encoding="utf-8") as f:
             page = f.read()
         script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
                   "setTimeout(function(){var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},%d);},500);})();</script>" % wait)
+        if rookies is not None:
+            page = re.sub(r'"rookies":\[[^\]]*\]', '"rookies":' + json.dumps(rookies), page, count=1)
         page = page.replace("https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/live-data/live.json", "http://127.0.0.1:9/live.json")   # never the real feed: the fetch fails fast
         page = page[:page.rindex("</body>")] + script + page[page.rindex("</body>"):]
         d = tempfile.mkdtemp()
@@ -134,6 +136,34 @@ class TestLiveTab(unittest.TestCase):
         self.assertEqual(set(r["out"]), {"–"})
         self.assertEqual(r["sg"][2], "0")
         self.assertEqual((r["zeros"], r["outZeros"]), (3, 0))
+
+    def test_rookies_get_the_purple_name_and_an_r_tag(self):
+        pid = next(p["p"] for m in self.feed["matchups"] for t in m["teams"] for p in t["roster"] if p.get("n") and p.get("p"))
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelectorAll('#live-root .lv-det').forEach(function(d){d.open=true;});
+          R.rk=document.querySelectorAll('#live-root .lv-r tr.rk').length;R.tags=document.querySelectorAll('#live-root .lv-rk').length;
+          R.color=getComputedStyle(document.querySelector('#live-root .lv-r tr.rk td.nm b')).color;""", rookies=[pid])
+        self.assertGreaterEqual(r["rk"], 1)
+        self.assertEqual(r["rk"], r["tags"])
+        self.assertEqual(r["color"], "rgb(93, 39, 150)")
+
+    def test_the_payload_lists_2026_rookies_by_yahoo_id(self):
+        import live_page as lp
+        ids = lp.payload()["rookies"]
+        self.assertTrue(ids and all(i.isdigit() for i in ids))
+
+    def test_rosters_close_from_the_sticky_bar_and_collapse_all(self):
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);var ds=function(){return document.querySelectorAll('#live-root .lv-det[open]').length;};
+          document.getElementById('lv-all').click();R.afterExpand=ds();R.label=document.getElementById('lv-all').textContent;
+          document.querySelector('#live-root .lv-det[open] .lv-x').click();R.afterClose=ds();
+          document.getElementById('lv-all').click();R.afterAll=ds();
+          document.querySelector('#live-root .lv-m .lv-mh').click();R.afterHeader=ds();""")
+        self.assertEqual(r["afterExpand"], 8)
+        self.assertEqual(r["label"], "Collapse all")
+        self.assertEqual(r["afterClose"], 7)
+        self.assertEqual(r["afterAll"], 0)
+        self.assertEqual(r["afterHeader"], 1)
 
 
 if __name__ == "__main__":

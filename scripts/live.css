@@ -86,3 +86,20 @@
  .lv-r tr.gh td{position:static;box-shadow:none;max-width:none;white-space:normal}.lv-r tr.gh small{display:block;margin:2px 0 0}
  .lv-r td{padding:5px 3px;font-size:11.5px}.lv-r td.nm small{font-size:9.5px}
 }
+
+/* ---- rosters: open/close ---- */
+.lv-tb{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}.lv-tb .lv-st{margin:0}
+.lv-all{border:1px solid var(--lv-line);background:#fff;border-radius:999px;padding:6px 13px;font:700 11.5px "Inter",Arial,sans-serif;color:var(--lv);cursor:pointer}.lv-all:hover{border-color:var(--lv)}
+.lv-mh{cursor:pointer}.lv-mh:hover{background:linear-gradient(180deg,#eef3fd,#fff)}
+.lv-det summary{display:flex;align-items:center;gap:10px;margin:-8px -14px 0;padding:11px 14px;cursor:pointer;list-style:none}
+.lv-det summary::-webkit-details-marker{display:none}
+.lv-det summary::before{content:"▸";font-size:13px;color:var(--lv);transition:transform .15s}.lv-det[open] summary::before{transform:rotate(90deg)}
+.lv-det summary span{font:800 11px "Inter",Arial,sans-serif;letter-spacing:.09em;color:var(--lv);text-transform:uppercase}.lv-det summary small{font:500 11px "Inter",Arial,sans-serif;color:#9aa5b8}
+.lv-det summary:hover{background:#f3f6fc}
+.lv-bar{position:sticky;top:var(--lv-nav,56px);z-index:5;display:flex;align-items:center;gap:8px;margin:6px -14px 0;padding:8px 14px;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--lv-line);box-shadow:0 4px 10px -8px rgba(15,31,61,.4)}
+.lv-bar .vs{font:700 10px "Inter",Arial,sans-serif;color:#9aa5b8;text-transform:uppercase}
+.lv-x{margin-left:auto;border:1px solid var(--lv-line);background:#fff;border-radius:999px;padding:6px 13px;font:700 12px "Inter",Arial,sans-serif;color:var(--lv-ink);cursor:pointer}.lv-x:hover{border-color:#e11d48;color:#e11d48}
+/* ---- rookies: the site's purple name and an R tag ---- */
+.lv-r tr.rk td.nm b{color:#5d2796}.lv-r tr.rk.off td.nm b{color:#7a52a8}
+.lv-rk{display:inline-block;margin-left:5px;padding:1px 4px;border-radius:4px;background:#efe6fb;color:#5d2796;font:800 9px/1.2 "Inter",Arial,sans-serif;letter-spacing:0;vertical-align:1px}
+@media(max-width:680px){.lv-det summary small{display:none}.lv-bar{margin:6px -8px 0;padding:7px 8px}.lv-det summary{margin:-8px -8px 0}}

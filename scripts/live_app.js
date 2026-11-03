@@ -5,7 +5,8 @@
    reads or writes official state. The feed is fetched from the live-data branch; the embedded copy (official weeks only) is the fallback. */
 var dataEl=document.getElementById("live-data"),root=document.getElementById("live-root");
 if(!dataEl||!root)return;
-var B=JSON.parse(dataEl.textContent),TM={};
+var B=JSON.parse(dataEl.textContent),TM={},RK={};
+(B.rookies||[]).forEach(function(id){RK[id]=1;});
 B.teams.forEach(function(t){TM[t.id]=t;});
 var FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
@@ -74,9 +75,11 @@ function rosterTable(side,dayDate){
   groups.forEach(function(g){var rows=side.roster.filter(g[2]);if(!rows.length)return;var bench=g[0]!=="STARTERS";
     var gh=h("tr",{class:"gh"+(bench?" off":"")}),td=h("td",{colspan:String(LINE.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]+(bench&&!haveDay?" (arrives with the next feed update)":"")})]);gh.appendChild(td);tb.appendChild(gh);
     rows.forEach(function(r){var vals=lineOf(bench?r.d:r.l);
-      var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")});
+      var rk=r.n!=null&&r.p&&RK[r.p];
+      var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")+(rk?"rk":"")});
       tr.appendChild(h("td",{class:"sl",text:r.s}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
+      if(rk)nm.appendChild(h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+r.g}));}
       tr.appendChild(nm);
       var dash=r.n!=null&&noStats(r,vals);
@@ -87,9 +90,9 @@ function matchup(m){
   var a=m.teams[0],b=m.teams[1],lead=m.score[0]>m.score[1]?0:m.score[1]>m.score[0]?1:-1;
   var card=h("section",{class:"lv-card lv-m","data-m":String(a.yahooId)});
   
-  card.appendChild(h("div",{class:"lv-mh"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(m.score[0])})]),
+  var mh=h("div",{class:"lv-mh",title:"Click to open or close the rosters"},[h("div",{class:"lv-side"+(lead===0?" lead":"")},[chip(a.team),h("b",{class:"lv-w",text:String(m.score[0])})]),
     h("div",{class:"lv-mid",text:m.score[2]?m.score[2]+" tied":"vs"}),
-    h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(m.score[1])}),chip(b.team)])]));
+    h("div",{class:"lv-side flip"+(lead===1?" lead":"")},[h("b",{class:"lv-w",text:String(m.score[1])}),chip(b.team)])]);card.appendChild(mh);
   var grid=h("div",{class:"lv-cats"});
   CATS.forEach(function(c){var w=m.cats[c[0]],va=val(c[0],a.stats[c[0]],a.stats),vb=val(c[0],b.stats[c[0]],b.stats);
     var row=h("div",{class:"lv-c "+(w==="a"?"wa":w==="b"?"wb":w==="t"?"wt":"")},[h("span",{class:"va",text:va}),h("span",{class:"cl",text:c[1]}),h("span",{class:"vb",text:vb})]);
@@ -97,21 +100,29 @@ function matchup(m){
   card.appendChild(grid);
   var tp=function(s){var n=s.toPlay||{upcoming:0,live:0};return n.upcoming+n.live;};
   card.appendChild(h("div",{class:"lv-tp"},[h("span",{text:tp(a)+" to play"}),h("span",{text:tp(b)+" to play"})]));
-  var det=h("details",{class:"lv-det"},[h("summary",{text:"Rosters"})]);if(OPEN[a.yahooId])det.setAttribute("open","");
+  var det=h("details",{class:"lv-det"},[h("summary",null,[h("span",{text:"Rosters"}),h("small",{text:"tap the scores or this bar to open and close"})])]);if(OPEN[a.yahooId])det.setAttribute("open","");
+  var shut=function(){det.open=false;var r=card.getBoundingClientRect(),bar=document.querySelector(".topbar"),top=bar?bar.offsetHeight:0;if(r.top<top)window.scrollTo({top:window.pageYOffset+r.top-top-8});};
   det.addEventListener("toggle",function(){OPEN[a.yahooId]=det.open;card.classList.toggle("open",det.open);});card.classList.toggle("open",!!OPEN[a.yahooId]);
+  mh.addEventListener("click",function(e){if(e.target.closest("a,button"))return;if(det.open)shut();else det.open=true;});
+  var bar=h("div",{class:"lv-bar"},[chip(a.team),h("span",{class:"vs",text:"vs"}),chip(b.team),h("button",{type:"button",class:"lv-x",text:"Close ✕",title:"Close the rosters (Esc)"})]);
+  bar.querySelector(".lv-x").addEventListener("click",shut);
   var cols=h("div",{class:"lv-cols"});
   m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate)])]);cols.appendChild(rc);});
-  det.appendChild(cols);card.appendChild(det);return card;}
+  det.appendChild(bar);det.appendChild(cols);card.appendChild(det);return card;}
 
 /* ---------- render ---------- */
 function render(){
-  root.textContent="";
+  root.textContent="";var tb=document.querySelector(".topbar");if(tb)root.style.setProperty("--lv-nav",tb.offsetHeight+"px");
   root.appendChild(head());var n=note();if(n)root.appendChild(n);
   var grid=h("div",{class:"lv-grid"}),left=h("div",{class:"lv-left"}),right=h("div",{class:"lv-right"});
   left.appendChild(standings());left.appendChild(reverse());
   var title=SRC==="live"?"MATCHUPS":"LAST FINISHED WEEK";
-  right.appendChild(h("div",{class:"lv-st",text:title}));
-  var ms=h("div",{class:"lv-ms"});FEED.matchups.forEach(function(m){ms.appendChild(matchup(m));});right.appendChild(ms);
+  var ms=h("div",{class:"lv-ms"});FEED.matchups.forEach(function(m){ms.appendChild(matchup(m));});
+  var allBtn=h("button",{type:"button",class:"lv-all",id:"lv-all"});
+  var anyOpen=function(){return FEED.matchups.some(function(m){return OPEN[m.teams[0].yahooId];});};
+  var setAll=function(){var open=!anyOpen();FEED.matchups.forEach(function(m){OPEN[m.teams[0].yahooId]=open;});ms.querySelectorAll(".lv-det").forEach(function(d){d.open=open;});allBtn.textContent=open?"Collapse all":"Expand all";};
+  allBtn.textContent=anyOpen()?"Collapse all":"Expand all";allBtn.addEventListener("click",setAll);
+  right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),allBtn]));right.appendChild(ms);
   grid.appendChild(left);grid.appendChild(right);root.appendChild(grid);
   if(window.NBA_MONO)window.NBA_MONO(root);
   try{document.dispatchEvent(new Event("nba:live"));}catch(e){}}
@@ -127,6 +138,9 @@ function load(manual){
     .then(function(){clearTimeout(timer);LOADING=false;render();});}
 function visible(){return !document.hidden&&root.closest&&!root.closest(".tab-off");}
 setInterval(function(){if(visible())load(false);},REFRESH_MS);
+document.addEventListener("keydown",function(e){if(e.key!=="Escape"||!visible())return;
+  var open=[].slice.call(root.querySelectorAll(".lv-det[open]"));if(!open.length)return;
+  var pick=open.filter(function(d){var r=d.getBoundingClientRect();return r.bottom>80;})[0]||open[0];var x=pick.querySelector(".lv-x");if(x)x.click();});
 document.addEventListener("visibilitychange",function(){if(visible()&&(SRC!=="live"||ageMin(FEED.asOf)>REFRESH_MS/60000))load(false);});
 
 /* ---------- what the rest of the page uses ---------- */
