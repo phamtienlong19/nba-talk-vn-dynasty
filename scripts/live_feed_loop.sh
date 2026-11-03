@@ -28,5 +28,7 @@ while [ "$(date +%s)" -lt "$end" ]; do
     wait_for=$(( $(pick) * 2 ))
   fi
   rest=$(( wait_for - ($(date +%s) - start) ))
-  [ "$rest" -gt 0 ] && [ $(( $(date +%s) + rest )) -lt "$end" ] && sleep "$rest" || true
+  [ "$rest" -gt 0 ] || continue
+  [ $(( $(date +%s) + rest )) -lt "$end" ] || break      # the next build would fall past the end: stop, the next run takes over
+  sleep "$rest"
 done
