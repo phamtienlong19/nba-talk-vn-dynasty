@@ -67,7 +67,7 @@ class TestLiveTab(unittest.TestCase):
         r = self.drive(self.feed_js() + """
           NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
           setTimeout(function(){R.pill=document.querySelector('#live-root .lv-pill').textContent;R.live=document.querySelector('#live-root .lv-pill').classList.contains('on');
-            R.rows=Array.prototype.map.call(document.querySelectorAll('#live-root .lv-stand tbody tr'),function(t){return {team:t.getAttribute('data-team'),rank:t.children[0].textContent,mv:t.children[1].textContent,po:t.lastChild.textContent,cut:t.classList.contains('cut')};});
+            R.rows=Array.prototype.map.call(document.querySelectorAll('#live-root .lv-stand tbody tr'),function(t){return {team:t.getAttribute('data-team'),rank:t.children[0].firstChild.textContent,mv:t.children[0].children.length?t.children[0].children[0].textContent:'',po:t.lastChild.textContent,cut:t.classList.contains('cut')};});
             R.cards=document.querySelectorAll('#live-root .lv-m').length;R.cats=document.querySelectorAll('#live-root .lv-m')[0].querySelectorAll('.lv-c').length;
             R.rev=document.querySelectorAll('#live-root .lv-rev li').length;R.asof=document.getElementById('lv-asof').textContent;},600);""", wait=2500)
         self.assertTrue(r["live"])
@@ -122,6 +122,18 @@ class TestLiveTab(unittest.TestCase):
           R.names=d.querySelectorAll('.lv-r td.nm b').length;""")
         self.assertTrue({"BN", "IL"} <= set(r["slots"]), r["slots"])
         self.assertGreater(r["names"], 10)
+
+    def test_an_out_starter_with_nothing_recorded_shows_dashes_and_real_zeros_are_dimmed(self):
+        r = self.drive(self.feed_js() + """
+          var M=FEED.matchups.filter(function(x){return x.teams.some(function(t){return t.roster.length;});})[0],T=M.teams.filter(function(t){return t.roster.length;})[0],m=T.roster;var st=m.filter(function(x){return x.n&&x.s!=='BN'&&x.s!=='IL';});var s=st[0];s.st='O';s.l=[null,null,0,0,0,0,0,0,0];
+          var q=st[1];q.st='';q.l=[0.4,1,0,5,1,1,0,0,2];
+          NBA_LIVE.set(FEED);var d=document.querySelector('#live-root .lv-m[data-m="'+M.teams[0].yahooId+'"] .lv-det');d.setAttribute('open','');
+          var rows=d.querySelectorAll('.lv-rc'+(M.teams[0]===T?'.ca':'.cb')+' .lv-r tbody tr');var pick=function(slot){return Array.prototype.filter.call(rows,function(t){var c=t.querySelector('td.sl');return c&&c.textContent===slot;})[0];};
+          var txt=function(t){return Array.prototype.map.call(t.querySelectorAll('td.num'),function(x){return x.textContent;});};
+          R.out=txt(pick(s.s));R.sg=txt(pick(q.s));R.zeros=pick(q.s).querySelectorAll('td.num.z').length;R.outZeros=pick(s.s).querySelectorAll('td.num.z').length;""")
+        self.assertEqual(set(r["out"]), {"–"})
+        self.assertEqual(r["sg"][2], "0")
+        self.assertEqual((r["zeros"], r["outZeros"]), (3, 0))
 
 
 if __name__ == "__main__":
