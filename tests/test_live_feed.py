@@ -12,6 +12,10 @@ import build_live_feed as blf  # noqa: E402
 import live_standings as lst  # noqa: E402
 import yahoo_matchups as ym  # noqa: E402
 
+import datetime as _dt  # noqa: E402
+import update_yahoo_matchups as _um  # noqa: E402
+_um._now = lambda: _dt.datetime(2026, 11, 3, 12, tzinfo=_dt.timezone.utc)   # week 3 has just begun (Pacific Mon 2026-11-02)
+
 FIX = os.path.join(HERE, "fixtures", "yahoo", "matchups")
 CFG = ym.load_config()
 

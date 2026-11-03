@@ -12,6 +12,10 @@ import live_standings as lst  # noqa: E402
 import update_yahoo_matchups as um  # noqa: E402
 import yahoo_matchups as ym  # noqa: E402
 
+import datetime as _dt  # noqa: E402
+import update_yahoo_matchups as _um  # noqa: E402
+_um._now = lambda: _dt.datetime(2026, 11, 3, 12, tzinfo=_dt.timezone.utc)   # week 3 has just begun (Pacific Mon 2026-11-02)
+
 FIX = os.path.join(HERE, "fixtures", "yahoo")
 CFG = ym.load_config()
 
@@ -202,3 +206,15 @@ class TestCapture(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestCurrentWeek(unittest.TestCase):
+    def test_weeks_are_counted_from_the_first_monday_in_pacific_time(self):
+        cfg = {"seasonStartMonday": "2026-10-19"}
+        orig = um._now
+        try:
+            for utc, week in [((2026, 10, 19, 8), 1), ((2026, 11, 2, 7), 2), ((2026, 11, 2, 8), 3), ((2026, 11, 9, 7), 3), ((2027, 6, 1, 0), 20)]:
+                um._now = lambda utc=utc: _dt.datetime(*utc, tzinfo=_dt.timezone.utc)
+                self.assertEqual(um.current_week(cfg), week, utc)
+        finally:
+            um._now = orig

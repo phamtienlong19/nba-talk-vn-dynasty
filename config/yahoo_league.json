@@ -25,7 +25,9 @@
   "leagueUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/",
   "season": "2026-27",
   "standingsUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}?lhst=stand",
-  "matchupUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/matchup?week={week}&mid1={teamId}",
+  "matchupUrl": "https://basketball.fantasysports.yahoo.com/nba/{leagueId}/matchup?date=totals&week={week}&mid1={teamId}",
+  "seasonStartMonday": "2026-10-19",
+  "weekRolloverNote": "Week 1 began Monday 2026-10-19 (US Pacific); each week is Mon-Sun Pacific. Yahoo's own default matchup page needs a sign-in, so the current week is counted from this date.",
   "matchupDateParam": "date=YYYY-MM-DD shows each player's slot and stat line for that day; the totals table is always the whole week",
   "playoffs": {
     "teams": 8,
