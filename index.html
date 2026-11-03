@@ -4523,7 +4523,7 @@ function exSnap(spec){   /* spec: {node, wrap:[{tag,id,cls,style}], width, foot}
   var bodyCls=document.body.className.replace(/\b(kbb-open|modal-open)\b/g,"");
   var open=(spec.wrap||[]).map(function(w){return "<"+w.tag+(w.id?' id="'+w.id+'"':"")+(w.cls?' class="'+w.cls+'"':"")+(w.style?' style="'+w.style.replace(/"/g,"&quot;")+'"':"")+">";}).join(""),
       close=(spec.wrap||[]).slice().reverse().map(function(w){return "</"+w.tag+">";}).join("");
-  fr.srcdoc="<!doctype html><html lang='en'><head><meta charset='utf-8'><style>"+fonts+"\n"+css+"\n*,*::before,*::after{animation:none!important;transition:none!important}html,body{margin:0!important;padding:0!important;overflow:hidden}#__x{padding:14px;background:#f4f6fa}#__d{position:absolute;left:-9999px;top:0}</style></head><body class='"+bodyCls+"'><div id='__x'>"+open+"<i id='__slot'></i>"+close+"</div><div id='__d'></div></body></html>";
+  fr.srcdoc="<!doctype html><html lang='en'><head><meta charset='utf-8'><style>"+fonts+"\n"+css+"\n*,*::before,*::after{animation:none!important;transition:none!important}html,body{margin:0!important;padding:0!important;overflow:hidden}#__x{padding:14px;background:#f4f6fa}#__d{position:absolute;left:-9999px;top:0}</style></head><body class='"+bodyCls+"'><div id='__x'>"+open+"<i id='__slot'></i>"+close+"</div><div id='__d'></div></"+"body></"+"html>";   /* split so nothing scanning this page for the closing body tag finds one inside a string */
   var finish=function(cv){if(fr.parentNode)fr.remove();done(cv);};
   fr.onload=function(){try{
    var d=fr.contentDocument,slot=d.getElementById("__slot");slot.parentNode.replaceChild(d.importNode(spec.node,true),slot);

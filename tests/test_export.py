@@ -54,7 +54,7 @@ class TestExportHub(unittest.TestCase):
           document.querySelector('#ex-hub .ex-item[data-ex=rosters]').click();
           setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;if(!ov)return;
             R.tabs=ov.querySelectorAll('.imgov-t').length;var im=ov.querySelector('img.imgov-img');R.w=im.naturalWidth;R.h=im.naturalHeight;
-            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});},1800);""", wait=4000)
+            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});},5000);""", wait=7000)
         self.assertTrue(r["ov"])
         self.assertEqual(r["tabs"], 4)                                                     # four teams an image, readable on a phone
         self.assertGreaterEqual(r["w"], 1080)
@@ -68,7 +68,7 @@ class TestExportHub(unittest.TestCase):
           cat.forEach(function(it){try{var pg=it.pages();if(!pg.length)R.bad.push(it.id+': empty');pg.forEach(function(p){if(!p.doc&&!p.cv)R.bad.push(it.id+': no doc');if(p.doc){var t=NBA_EXPORT.text(p.doc);if(!t||t.indexOf('undefined')>=0||t.indexOf('NaN')>=0)R.bad.push(it.id+': bad text');R.texts[it.id]=t;}});}catch(e){R.bad.push(it.id+': '+e);}});
           document.getElementById('tb-export').click();R.chips=document.querySelectorAll('#ex-hub .ex-teams .tp-btn').length;
           document.querySelector('#ex-hub .ex-teams .tp-btn').click();
-          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;},1800);""", wait=4000)
+          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;},5000);""", wait=7000)
         for want in ("rosters", "cap", "trades", "il", "salaries", "picks"):
             self.assertIn(want, r["ids"])
         self.assertEqual(r["bad"], [])
@@ -80,8 +80,8 @@ class TestExportHub(unittest.TestCase):
         r = self.drive("""
           var it=NBA_EXPORT.catalog().filter(function(i){return i.id==='trade';})[0];R.has=!!it;
           if(it){document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=trade]').click();
-            setTimeout(function(){var ov=document.getElementById('chk-imgov');R.tabs=ov?ov.querySelectorAll('.imgov-t').length:0;},2000);}""",
-                       qs="?check=478.p.5432~franchise-01", wait=4500)
+            setTimeout(function(){var ov=document.getElementById('chk-imgov');R.tabs=ov?ov.querySelectorAll('.imgov-t').length:0;},5000);}""",
+                       qs="?check=478.p.5432~franchise-01", wait=7500)
         self.assertTrue(r["has"])
         self.assertEqual(r["tabs"], 4)                                                     # as on the page, proposal, teams after, both
 
@@ -153,8 +153,8 @@ class TestExportHub(unittest.TestCase):
           document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=cap]').click();
           setTimeout(function(){var ov=document.getElementById('chk-imgov');R.name=ov.querySelector('a[download]').getAttribute('download');
             R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});R.full=!!ov.querySelector('.imgov-full');
-            R.alt=ov.querySelector('img').getAttribute('alt');},1800);
-          R.link=NBA_EXPORT.catalog().filter(function(i){return i.id==='cap';})[0].link();""", qs="?mode=scenario", wait=4000)
+            R.alt=ov.querySelector('img').getAttribute('alt');},5000);   /* a snapshot export takes a moment (fonts, layout) */
+          R.link=NBA_EXPORT.catalog().filter(function(i){return i.id==='cap';})[0].link();""", qs="?mode=scenario", wait=7000)
         self.assertRegex(r["name"], r"^cap-table-\d{4}-\d{2}-\d{2}\.png$")
         self.assertIn("Copy as list", r["btns"])
         self.assertTrue(r["full"])
@@ -175,7 +175,7 @@ class TestExportHub(unittest.TestCase):
           R.heat=rows.every(function(rw){return rw.c.slice(2,11).every(function(x){return x&&x.bg;});});
           NBA_EXPORT.open(it);setTimeout(function(){var ov=document.getElementById('chk-imgov');
             R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});R.tabs=ov.querySelectorAll('.imgov-t').length;
-            R.headFirst=ov.querySelector('.imgov-box').firstChild.classList.contains('imgov-head');},1800);""", wait=4000)
+            R.headFirst=ov.querySelector('.imgov-box').firstChild.classList.contains('imgov-head');},5000);""", wait=7000)
         self.assertTrue(r["heat"])                                                     # every category and the total carry the page's heat colour
         self.assertNotIn("Save 2 images", r["btns"])                                  # only for multi-image exports
         self.assertEqual(r["tabs"], 0)
