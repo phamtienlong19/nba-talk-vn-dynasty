@@ -30,6 +30,7 @@ class TestLiveTab(unittest.TestCase):
             page = f.read()
         script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
                   "setTimeout(function(){var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},%d);},500);})();</script>" % wait)
+        page = page.replace("https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/live-data/live.json", "http://127.0.0.1:9/live.json")   # never the real feed: the fetch fails fast
         page = page[:page.rindex("</body>")] + script + page[page.rindex("</body>"):]
         d = tempfile.mkdtemp()
         try:
