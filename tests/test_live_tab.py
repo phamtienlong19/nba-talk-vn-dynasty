@@ -240,6 +240,52 @@ class TestLiveTab(unittest.TestCase):
         self.assertEqual(r["ratio2"], "5/9")
         self.assertTrue(r["on"].startswith("Day"))
 
+    def test_roto_stats_and_all_play_views_follow_the_week(self):
+        mine = self.feed["matchups"][0]["teams"][0]["team"]
+        r = self.drive(self.feed_js() + """
+          window.NBA_ME=function(){return %s;};NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var q=function(s){return document.querySelector(s)},qa=function(s){return document.querySelectorAll(s)};
+            R.tabs=Array.prototype.map.call(qa('#live-root .lv-views button'),function(b){return b.textContent;});
+            q('#live-root .lv-views button:nth-child(2)').click();
+            R.roto=qa('#live-root .lv-ro tbody tr').length;R.ranks=Array.prototype.map.call(qa('#live-root .lv-ro td.rk'),function(x){return x.textContent;});
+            R.totals=Array.prototype.map.call(qa('#live-root .lv-ro td.tot'),function(x){return Number(x.textContent);});R.mineRow=qa('#live-root .lv-ro tr.me').length;R.note=q('#live-root .lv-note').textContent;
+            q('#live-root .lv-views button:nth-child(3)').click();R.stats=qa('#live-root .lv-ro tbody tr').length;R.cols=qa('#live-root .lv-ro thead th').length;
+            q('#live-root .lv-views button:nth-child(4)').click();R.cells=qa('#live-root .lv-ap td.cell:not(.self)').length;R.act=qa('#live-root .lv-ap td.cell.act').length;
+            R.detailAuto=qa('#live-root .lv-dg .r').length;
+            var c=qa('#live-root .lv-ap td.cell:not(.self)')[5];c.click();R.sel=qa('#live-root .lv-ap td.cell.sel').length;R.detail=qa('#live-root .lv-dg .r').length;
+            q('#live-root .lv-views button:nth-child(1)').click();R.back=qa('#live-root .lv-m').length;},600);""" % json.dumps(mine), wait=3000)
+        self.assertEqual(r["tabs"], ["Matchups", "Roto", "Raw stats", "All-play"])
+        self.assertEqual(r["roto"], 16)
+        self.assertEqual(sum(r["totals"]), 9 * 136)                                  # every category hands out 1+2+...+16
+        self.assertEqual(r["totals"], sorted(r["totals"], reverse=True))
+        self.assertEqual(r["ranks"][0], "1")
+        self.assertEqual(r["mineRow"], 1)
+        self.assertIn("Descriptive only", r["note"])
+        self.assertEqual((r["stats"], r["cols"]), (16, 11))
+        self.assertEqual((r["cells"], r["act"]), (240, 16))                          # 16 x 15 cells, one real matchup per row
+        self.assertEqual((r["detailAuto"], r["sel"], r["detail"]), (9, 1, 9))        # my team's real matchup is opened; a click selects another
+        self.assertEqual(r["back"], 8)
+
+    def test_the_roto_views_are_hidden_without_a_live_week(self):
+        r = self.drive("""
+          document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){R.strip=document.querySelectorAll('#live-root .lv-views').length;},600);""", wait=2500)
+        self.assertEqual(r["strip"], 0)
+
+    def test_on_a_phone_the_roto_tables_scroll_inside_their_card(self):
+        css = open(os.path.join(HERE, "..", "scripts", "live.css"), encoding="utf-8").read()
+        phone = css[css.index("/* ---- phones ---- */") if "/* ---- phones ---- */" in css else css.index("@media(max-width:680px){"):]
+        narrow = "#live{width:390px!important;max-width:390px!important;margin:0!important;padding:0 12px!important;box-sizing:border-box}.lv-grid{grid-template-columns:minmax(0,1fr)!important}" + phone
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var q=function(s){return document.querySelector(s)};var o={};
+            [2,4].forEach(function(n){q('#live-root .lv-views button:nth-child('+n+')').click();var w=q('#live-root .lv-sw'),c=w.closest('.lv-pane');o[n]=[w.clientWidth,w.scrollWidth,c.clientWidth];});
+            R.o=o;},600);""", wait=3000, extra_css=narrow)
+        for n in ("2", "4"):
+            client, scroll, card = r["o"][n]
+            self.assertGreater(scroll, client)                                      # more to the right than fits ...
+            self.assertLessEqual(client, card)                                      # ... and the scroller stays inside the card
+
 
 if __name__ == "__main__":
     unittest.main()
