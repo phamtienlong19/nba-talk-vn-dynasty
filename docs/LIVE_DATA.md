@@ -57,7 +57,7 @@ Golden check (2026-11-02): summed weeks 1-2 equal Yahoo's published standings fo
 ## Live feed and LIVE tab (phase 3)
 
 - `scripts/build_live_feed.py` builds `live.json` (week in progress: scores, rosters, standings if the week ended now, playoff picture,
-  projected reverse order). `.github/workflows/update-live-data.yml` runs it on a UTC schedule (every 5 min in game hours (GitHub's minimum; it may slip to 10+ when GitHub is busy). The page polls every 2 min while visible, bypassing the 5-min raw-file cache with a per-minute query, and flags a feed older than 30 min, hourly
+  projected reverse order). `.github/workflows/update-live-data.yml` runs `scripts/live_feed_loop.sh` (a build and publish every 4 min in game hours, every 15 min otherwise, for ~115 min per run; an hourly-ish cron starts the next run, which queues behind the current one). GitHub's cron alone is too unreliable for a 5-minute cadence: scheduled runs start tens of minutes late or not at all. The page polls every 2 min while visible, bypassing the 5-min raw-file cache with a per-minute query, and flags a feed older than 30 min, hourly
   otherwise, plus the Yahoo day/waiver rollover at 08:00 and 07:00 UTC) and force-pushes it as one orphan commit to the `live-data`
   branch. It never touches main or `data/`.
 - The page (`scripts/live_page.py embed` -> LIVE block in index.html) fetches
