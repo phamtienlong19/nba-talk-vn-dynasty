@@ -134,3 +134,18 @@ class TestGameState(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRosterLines(unittest.TestCase):
+    ROW = {"slot": "BN", "name": "Bench Guy", "playerId": "1", "nba": "AAA", "positions": ["PG"], "status": "", "game": "W, 100-90 vs BBB",
+           "line": {k: None for k in blf.LINE_KEYS}}
+
+    def test_the_line_is_in_the_usual_nine_category_order(self):
+        self.assertEqual(blf.LINE_KEYS, ("fgPct", "ftPct", "tpm", "pts", "reb", "ast", "st", "blk", "to"))
+
+    def test_a_benched_player_carries_the_day_line_not_the_week_line(self):
+        day = {"1": {"slot": "BN", "line": dict(zip(blf.LINE_KEYS, (0.5, 1.0, 2, 12, 3, 4, 1, 0, 2)))}}
+        r = blf._roster([self.ROW], day)[0]
+        self.assertEqual(r["l"], [None] * 9)
+        self.assertEqual(r["d"], [0.5, 1.0, 2, 12, 3, 4, 1, 0, 2])
+        self.assertIsNone(blf._roster([self.ROW])[0]["d"])
