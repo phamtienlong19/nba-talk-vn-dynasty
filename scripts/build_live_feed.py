@@ -21,6 +21,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import import_rosters as ir  # noqa: E402
 import live_standings as lst  # noqa: E402
 import season_state as ss  # noqa: E402
+import live_days as ldy  # noqa: E402
+import live_lineups as lln  # noqa: E402
+import live_schedule as lsch  # noqa: E402
 import update_yahoo_matchups as um  # noqa: E402
 import yahoo_matchups as ym  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
@@ -35,46 +38,48 @@ def _utc(dt=None):
     return (dt or datetime.datetime.now(datetime.timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _roster(rows, day=None):
-    """`l` = the player's week line (starters only: Yahoo counts only starters); `d` = the line of the one day fetched, which is
-    the only stat a benched or IL player has."""
-    day = day or {}
+def _fix(pair):
+    return [pair[0], pair[1]] if pair else None
+
+
+def _roster(rows, day=None, sched=None, week=None, today_counts=False):
+    """`l` = the player's week line from the matchup totals (starters only: Yahoo counts only starters); `wfg`/`wft` = his week made/attempted
+    (starting days only); `d` = the line of the latest day with a started game, with its minutes and made/attempted (`dm`, `dfg`, `dft`) and the
+    slot he held that day (`ds`): the only stat a benched or IL player has."""
+    day, week = day or {}, week or {}
     out = []
     for r in rows:
         if r["name"] is None:
             out.append({"s": r["slot"], "n": None})
             continue
-        d = day.get(r.get("playerId") or r["name"])
-        out.append({"s": r["slot"], "n": r["name"], "p": r.get("playerId"), "t": r.get("nba"), "pos": r.get("positions"),
+        pid = r.get("playerId")
+        d = day.get(pid or r["name"])
+        w = list(week.get(pid, [0, 0, 0, 0])) if pid else [0, 0, 0, 0]
+        if d and today_counts and d["slot"] in ldy.STARTING:
+            fg, ft = d.get("fg") or [0, 0], d.get("ft") or [0, 0]
+            w = [w[0] + fg[0], w[1] + fg[1], w[2] + ft[0], w[3] + ft[1]]
+        out.append({"s": r["slot"], "n": r["name"], "p": pid, "t": r.get("nba"), "pos": r.get("positions"),
                     "st": r.get("status") or "", "g": r.get("game"), "gs": ym.game_state(r.get("game")),
                     "l": [r["line"].get(k) for k in LINE_KEYS],
-                    "d": [d["line"].get(k) for k in LINE_KEYS] if d else None, "ds": d["slot"] if d else None})
+                    "wfg": [w[0], w[1]] if w[1] else None, "wft": [w[2], w[3]] if w[3] else None,
+                    "d": [d["line"].get(k) for k in LINE_KEYS] if d else None, "ds": d["slot"] if d else None,
+                    "dm": d.get("min") if d else None, "dfg": _fix(d.get("fg")) if d else None, "dft": _fix(d.get("ft")) if d else None,
+                    "gl": lsch.games_left(r.get("nba"), ym.game_state(r.get("game")), sched) if sched and r.get("nba") else None})
     return out
 
 
-def _day_pages(cfg, cur, pages, fetcher, now_dt, sleep):
-    """The roster view of one Yahoo day (US Pacific), for the bench and IL lines that the week totals leave out. The latest day with a
-    game started: today, else yesterday if today has none yet. -> (date or None, {teamId: {key: row}}). Never fatal."""
-    import zoneinfo
+def _day_choice(cfg, cur, pages, now_dt):
+    """The Yahoo day (US Pacific) the day view shows: today once a game has started, else yesterday (inside the week), else none."""
     start = datetime.date.fromisoformat(cfg["seasonStartMonday"]) + datetime.timedelta(days=7 * (cur - 1))
-    today = now_dt.astimezone(zoneinfo.ZoneInfo("America/Los_Angeles")).date()
-    for day in (today, today - datetime.timedelta(days=1)):
-        if not start <= day <= start + datetime.timedelta(days=6):
+    today = lsch.pacific_today(now_dt)
+    started = any(ym.game_state(r.get("game")) in ("live", "final") for p in pages for rows in (p.get("rosters") or {}).values()
+                  for r in rows if r["name"] is not None)
+    for day, closed in ((today, False), (today - datetime.timedelta(days=1), True)):
+        if day == today and not started:
             continue
-        got, any_game = {}, False
-        try:
-            for p in pages:
-                sleep(cfg.get("requestDelaySeconds", 1.5))
-                tid = min(t["teamId"] for t in p["teams"])
-                dp = um.fetch_page(cfg, fetcher, um.url_for(cfg, cur, tid).replace("date=totals", "date=" + day.isoformat()))
-                for tm, rows in (dp.get("rosters") or {}).items():
-                    got[tm] = {(r.get("playerId") or r["name"]): r for r in rows if r["name"] is not None}
-                    any_game = any_game or any(ym.game_state(r.get("game")) in ("live", "final") for r in rows if r["name"] is not None)
-        except (ym.MatchupError, yr.FetchError):
-            return None, {}
-        if any_game:
-            return day.isoformat(), got
-    return None, {}
+        if start <= day <= start + datetime.timedelta(days=6):
+            return day, today, closed
+    return None, today, False
 
 
 def _to_play(rows):
@@ -86,15 +91,53 @@ def _to_play(rows):
     return n
 
 
+def _games_left(rows, sched):
+    """Games the starting lineup still has this week (players who are out are not counted); None when the schedule is unknown."""
+    if not sched:
+        return None
+    return sum(lsch.games_left(r.get("nba"), ym.game_state(r.get("game")), sched) for r in rows
+               if r["name"] is not None and r["slot"] in STARTING and r.get("status") not in lsch.OUT and r.get("nba"))
+
+
+def _day_result(p, day_rows, day_date):
+    """The matchup as played on the one day shown: category inputs and winners from the starters' lines (not Yahoo's number: Yahoo scores the week)."""
+    if not day_date:
+        return None
+    a, b = (ldy.team_stats(day_rows.get(t["teamId"], [])) for t in p["teams"])
+    res = ym.category_results(a, b)
+    return {"date": day_date.isoformat(), "stats": [a, b], "cats": res["cats"], "score": [res["a"], res["b"], res["t"]]}
+
+
+def _lineup_out(lineup, fid):
+    if not lineup:
+        return None
+    return dict(lineup, teams=[dict(t, team=fid(t["yahooId"])) for t in lineup["teams"]])
+
+
 def _dt_of(iso):
     return datetime.datetime.strptime(iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
 
 
-def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=None, sleep=time.sleep) -> dict:
+def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=None, sleep=time.sleep, schedule_cache=None, previous=None, day_cache=None) -> dict:
     now = now or _utc()
     cur = um.current_week(cfg, fetcher)
     pages = um.walk_week(cfg, cur, fetcher, sleep=sleep)
-    day_date, day = _day_pages(cfg, cur, pages, fetcher, _dt_of(now), sleep)
+    day_date, today, day_closed = _day_choice(cfg, cur, pages, _dt_of(now))
+    days = ldy.Days(cfg, fetcher, sleep, day_cache)
+    try:
+        lineup, week_agg = ldy.closed_days(cfg, cur, _dt_of(now), lln.load_ranks(), days, previous)
+    except OSError:
+        lineup, week_agg = None, {"p": {}}                                          # evidence is a nicety: never fail the feed over it
+    day_rows = {}
+    if day_date:
+        try:
+            day_rows = days.rows(day_date, day_closed)
+        except (ym.MatchupError, yr.FetchError, OSError):
+            day_date, day_rows = None, {}
+    try:
+        sched = lsch.schedule(cfg, cur, pages, fetcher, _dt_of(now), schedule_cache, sleep)
+    except OSError:
+        sched = None                                                                # games left is a nicety: never fail the feed over it
     stored = ym.load_weeks(matchup_dir)
     finished, transient = {}, []
     for w in range(1, cur):
@@ -129,9 +172,12 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
         for i, t in enumerate(p["teams"]):
             rs = p["rosters"][t["teamId"]] if p.get("rosters") else []
             sides.append({"team": fid(t["teamId"]), "yahooId": t["teamId"], "name": t["name"], "stats": t["stats"], "printed": t["printedWins"],
-                          "toPlay": _to_play(rs), "roster": _roster(rs, day.get(t["teamId"]))})
-        matchups.append({"teams": sides, "cats": res["cats"], "score": [res["a"], res["b"], res["t"]], "decided": res["decided"]})
-    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date, "lineKeys": list(LINE_KEYS),
+                          "toPlay": _to_play(rs), "gamesLeft": _games_left(rs, sched),
+                          "roster": _roster(rs, {(r.get("playerId") or r["name"]): r for r in day_rows.get(t["teamId"], [])}, sched, week_agg.get("p"),
+                                            bool(day_date) and not day_closed)})
+        matchups.append({"teams": sides, "cats": res["cats"], "score": [res["a"], res["b"], res["t"]], "decided": res["decided"],
+                         "day": _day_result(p, day_rows, day_date)})
+    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date.isoformat() if day_date else None, "playerWeek": {k: v for k, v in week_agg.items()} if week_agg.get("through") is not None else None, "lineupChecks": _lineup_out(lineup, fid), "gamesLeftComplete": bool(sched) and not sched["missing"], "lineKeys": list(LINE_KEYS),
             "weekStatus": "LIVE" if started else "NOT_STARTED", "finishedWeeks": sorted(finished), "notStoredYet": transient,
             "table": table, "playoff": {"spots": pic["spots"], "divisionTie": pic["divisionTie"], "linePct": pic["linePct"]},
             "projectedReverse": [{"team": fid(t["teamId"]), "tied": t["tied"]} for t in reversed(proj["teams"])],
@@ -141,10 +187,20 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
 def main(argv=None, fetcher=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--previous", help="the last published feed: its closed-day lineup evidence is reused, not captured again")
+    ap.add_argument("--day-cache", help="JSON file that keeps closed days' team pages between runs of a loop")
+    ap.add_argument("--schedule-cache", help="JSON file that keeps the week's schedule between runs of a loop")
     args = ap.parse_args(argv)
     cfg = yr.load_config()
     try:
-        doc = build(cfg, fetcher or yr.HttpFetcher())
+        previous = None
+        if args.previous and os.path.exists(args.previous):
+            try:
+                with open(args.previous, encoding="utf-8") as f:
+                    previous = json.load(f)
+            except (OSError, ValueError):
+                previous = None
+        doc = build(cfg, fetcher or yr.HttpFetcher(), schedule_cache=args.schedule_cache, previous=previous, day_cache=args.day_cache)
     except (ym.MatchupError, yr.FetchError, OSError) as e:
         print("FAILED: %s (the previous feed stays up)" % e)
         return 1

@@ -70,3 +70,38 @@ Golden check (2026-11-02): summed weeks 1-2 equal Yahoo's published standings fo
   for an anonymous client. The feed therefore reads `matchup?date=totals&week=N&mid1=T`, which has the same table for finished
   and in-progress weeks, and derives the current week from `seasonStartMonday` (Pacific) in `config/yahoo_league.json`.
 - A failed parse names the URL, final URL, size and page title in the error.
+
+## Lineup-integrity evidence (built: `scripts/live_lineups.py`, the LINEUP CHECKS card, visible to everyone)
+Counts what `docs/LEAGUE_RULES_MODEL.md` ("AFK / lineup-integrity") already counts as a misset, from the day-closed `date=` lineup of each
+finished Yahoo day. Neutral wording, evidence for review, never a verdict. A "misset" day for a team is any of:
+1. **A healthy bench or IL-eligible player with a game, and a star (top-50 O-Rank) left on the bench** (benching a star).
+2. **A starting slot held by a player who is Out (O/INJ/SUSP/NA) while a healthy bench player with a game that day is eligible for that
+   slot** (position eligibility from the player's positions; Util takes anyone). The slot is wasted although a replacement was on the bench.
+3. **An empty starting slot while an eligible, healthy bench player had a game.**
+4. A long-term-injured (IL-status) player started on purpose.
+Per week the panel shows the days and players affected against the rule's thresholds (2+ days or 3+ players; 2 players if stars) and, in the
+last three weeks, the bench-games share against the late-season allowance. Caveat shown with the evidence: a status is what Yahoo showed at
+capture time, so a late scratch after the lineup locked looks like an Out starter; the commissioner decides.
+
+## Games left (built)
+`scripts/live_schedule.py` reads the NBA teams playing on each remaining day of the week from Yahoo's own future-day roster pages (a game time
+and opponent appear for every player whose team plays), from as few pairings as it takes to see all 30 teams. A day is fetched once and kept in
+`schedule-cache.json` on the runner (reused for 12 h by the looping run; a fresh run fetches again, about 25 requests once). A player's `gl` is
+today's game if it has not finished plus every later day his NBA team plays; a side's `gamesLeft` sums its starting lineup, leaving out
+players whose status is out. A day Yahoo cannot serve is left out and the feed sets `gamesLeftComplete: false` (the page shows "~").
+
+Built as designed with these details: a closed day is captured once (8 requests) from the `date=` pages and carried in the feed's
+`lineupChecks.byDate`; the looping run reads the last published feed (`--previous live.json`) so a new run does not capture those days
+again. An out starter counts only when his status is out, his team had a game and he recorded nothing. A star is top 50 by Yahoo's
+preseason O-Rank (`data/yahoo/player_registry.json`), the stand-in for the rule's XRank. The card lists only teams with something found,
+flags the ones at the rule's count (2+ days, 3+ players or 2 stars in the week) and says nothing more: the commissioner decides.
+
+## Day view, minutes and made/attempted (built)
+The matchup page has only percentages per player, so day-level data comes from Yahoo's team page for one day
+(`/nba/<league>/<team>?date=YYYY-MM-DD&stat1=S&stat2=D`, `scripts/yahoo_teamday.py`): slot that day, minutes, FGM/A, FTM/A and the counting
+stats, 16 requests per day. `scripts/live_days.py` captures each closed day once (lineup evidence and the starters' week made/attempted, carried
+in the feed as `lineupChecks.byDate` and `playerWeek` and reused through `--previous`; a runner-local `--day-cache` serves the day shown) and
+the latest day with a started game fresh on every build. Feed fields: per player `wfg`/`wft` (week made/attempted, starting days only, as Yahoo
+scores), `d`/`dm`/`dfg`/`dft`/`ds` (that day's line, minutes, made/attempted, slot); per matchup `day` (the starters' category inputs and
+winners for that day, our arithmetic, not Yahoo's score). The page's Week totals / Day switch changes the category rows, the score and the rosters
+together and labels the card WEEK TOTALS or DAY. The first build after a deploy fetches every closed day of the week (up to ~100 requests, once).

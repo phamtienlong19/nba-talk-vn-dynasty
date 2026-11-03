@@ -25,12 +25,16 @@ class TestLiveTab(unittest.TestCase):
         cls.feed = tlf.feed()
         cls.feed["asOf"] = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    def drive(self, body_js, qs="", wait=2000):
+    def drive(self, body_js, qs="", wait=2000, rookies=None, extra_css=""):
         with open(INDEX, encoding="utf-8") as f:
             page = f.read()
         script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
                   "setTimeout(function(){var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},%d);},500);})();</script>" % wait)
+        if rookies is not None:
+            page = re.sub(r'"rookies":\[[^\]]*\]', '"rookies":' + json.dumps(rookies), page, count=1)
         page = page.replace("https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/live-data/live.json", "http://127.0.0.1:9/live.json")   # never the real feed: the fetch fails fast
+        if extra_css:
+            page = page.replace("</head>", "<style>" + extra_css + "</style></head>", 1)
         page = page[:page.rindex("</body>")] + script + page[page.rindex("</body>"):]
         d = tempfile.mkdtemp()
         try:
@@ -134,6 +138,107 @@ class TestLiveTab(unittest.TestCase):
         self.assertEqual(set(r["out"]), {"–"})
         self.assertEqual(r["sg"][2], "0")
         self.assertEqual((r["zeros"], r["outZeros"]), (3, 0))
+
+    def test_rookies_get_the_purple_name_and_an_r_tag(self):
+        pid = next(p["p"] for m in self.feed["matchups"] for t in m["teams"] for p in t["roster"] if p.get("n") and p.get("p"))
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelectorAll('#live-root .lv-det').forEach(function(d){d.open=true;});
+          R.rk=document.querySelectorAll('#live-root .lv-r tr.rk').length;R.tags=document.querySelectorAll('#live-root .lv-rk').length;
+          R.color=getComputedStyle(document.querySelector('#live-root .lv-r tr.rk td.nm b')).color;""", rookies=[pid])
+        self.assertGreaterEqual(r["rk"], 1)
+        self.assertEqual(r["rk"], r["tags"])
+        self.assertEqual(r["color"], "rgb(93, 39, 150)")
+
+    def test_the_payload_lists_2026_rookies_by_yahoo_id(self):
+        import live_page as lp
+        ids = lp.payload()["rookies"]
+        self.assertTrue(ids and all(i.isdigit() for i in ids))
+
+    def test_rosters_close_from_the_sticky_bar_and_collapse_all(self):
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);var ds=function(){return document.querySelectorAll('#live-root .lv-det[open]').length;};
+          document.getElementById('lv-all').click();R.afterExpand=ds();R.label=document.getElementById('lv-all').textContent;
+          document.querySelector('#live-root .lv-det[open] .lv-x').click();R.afterClose=ds();
+          document.getElementById('lv-all').click();R.afterAll=ds();
+          document.querySelector('#live-root .lv-m .lv-mh').click();R.afterHeader=ds();""")
+        self.assertEqual(r["afterExpand"], 8)
+        self.assertEqual(r["label"], "Collapse all")
+        self.assertEqual(r["afterClose"], 7)
+        self.assertEqual(r["afterAll"], 0)
+        self.assertEqual(r["afterHeader"], 1)
+
+    def test_my_team_is_pinned_first_and_highlighted(self):
+        mine = self.feed["matchups"][-1]["teams"][1]["team"]
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);window.NBA_ME=function(){return %s;};document.dispatchEvent(new Event('nba:me'));
+          var ms=document.querySelectorAll('#live-root .lv-m');R.first=ms[0].classList.contains('me');R.ribbons=document.querySelectorAll('#live-root .lv-ribbon').length;
+          R.rows=Array.prototype.map.call(document.querySelectorAll('#live-root .lv-stand tbody tr.me'),function(t){return t.getAttribute('data-team');});""" % json.dumps(mine))
+        self.assertTrue(r["first"])
+        self.assertEqual(r["ribbons"], 1)
+        self.assertEqual(r["rows"], [mine])
+
+    def test_on_a_phone_the_roster_scrolls_sideways_inside_its_card(self):
+        css = open(os.path.join(HERE, "..", "scripts", "live.css"), encoding="utf-8").read()
+        phone = css[css.index("@media(max-width:680px){"):].replace("@media(max-width:680px){", "", 1).rsplit("}", 1)[0]
+        narrow = "#live{width:390px!important;max-width:390px!important;margin:0!important;padding:0 12px!important;box-sizing:border-box}.lv-grid{grid-template-columns:minmax(0,1fr)!important}" + phone
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var d=document.querySelector('#live-root .lv-m .lv-det');d.setAttribute('open','');
+            var w=d.querySelector('.lv-wrap'),card=d.closest('.lv-m');
+            R.client=w.clientWidth;R.scroll=w.scrollWidth;R.card=card.clientWidth;R.panel=d.querySelector('.lv-rc').clientWidth;},600);""", wait=2500, extra_css=narrow)
+        self.assertGreater(r["scroll"], r["client"])               # there is more to the right than fits ...
+        self.assertLessEqual(r["panel"], r["card"])                # ... and the panel stays inside its card, so it scrolls instead of being clipped
+
+    def test_lineup_checks_are_listed_for_everyone_with_neutral_wording(self):
+        t1, t2 = self.feed["table"][0]["team"], self.feed["table"][1]["team"]
+        lc = {"week": 3, "rule": {"days": 2, "players": 3, "stars": 2}, "missing": [], "byDate": {"2026-11-02": {}, "2026-11-03": {}},
+              "teams": [{"team": t1, "yahooId": 1, "missetDays": 2, "players": 2, "stars": 1, "meetsCount": True,
+                         "days": [{"date": "2026-11-02", "issues": [{"k": "out_starter", "p": "Out Guy", "id": "1", "s": "PG", "r": "Bench Guy"}]},
+                                  {"date": "2026-11-03", "issues": [{"k": "star_benched", "p": "Star", "id": "2", "s": "BN", "r": None, "rank": 9}]}]},
+                        {"team": t2, "yahooId": 2, "missetDays": 0, "players": 0, "stars": 0, "meetsCount": False, "days": []}]}
+        r = self.drive(self.feed_js(lineupChecks=lc) + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var b=document.querySelector('#live-root .lv-lc');R.has=!!b;R.title=b?b.querySelector('.lv-ct').textContent:'';
+            R.teams=b?b.querySelectorAll('details.lv-lc-t').length:0;R.flag=b?(b.querySelector('.flag')||{}).textContent:'';
+            R.items=b?b.querySelectorAll('li').length:0;R.text=b?b.textContent:'';},600);""", wait=2500)
+        self.assertTrue(r["has"])
+        self.assertEqual((r["title"], r["teams"], r["items"]), ("LINEUP CHECKS", 1, 2))
+        self.assertEqual(r["flag"], "at the rule's count")
+        self.assertIn("Out player held a starting slot", r["text"])
+        self.assertNotIn("tank", r["text"].lower())                                # evidence, never a verdict
+        self.assertIn("1 team: nothing found", r["text"])
+
+    def test_week_totals_and_one_day_are_told_apart_and_players_show_made_over_attempted(self):
+        feed = json.loads(json.dumps(self.feed))
+        feed["dayDate"] = "2026-11-02"
+        for m in feed["matchups"]:
+            m["day"] = {"date": "2026-11-02", "stats": [{"fg": [1, 2], "ft": [1, 1], "tpm": 1, "pts": 9, "reb": 1, "ast": 1, "st": 1, "blk": 0, "to": 1},
+                                                          {"fg": [2, 4], "ft": [0, 0], "tpm": 0, "pts": 7, "reb": 2, "ast": 0, "st": 0, "blk": 1, "to": 3}],
+                        "cats": {"fgPct": "t", "ftPct": "a", "tpm": "a", "pts": "a", "reb": "b", "ast": "a", "st": "a", "blk": "b", "to": "a"}, "score": [6, 2, 1]}
+            for t in m["teams"]:
+                for r in t["roster"]:
+                    if r.get("n"):
+                        r.update({"wfg": [7, 15], "wft": [3, 4], "dfg": [5, 9], "dft": [2, 2], "dm": "30:01", "d": [0.556, 1.0, 1, 12, 4, 3, 1, 0, 2], "ds": r["s"]})
+        r = self.drive("var FEED=%s;" % json.dumps(feed).replace("</", "<\\/") + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var q=function(s){return document.querySelector(s);};
+            q('#live-root .lv-det').setAttribute('open','');
+            R.cap1=q('#live-root .lv-m .lv-cap b').textContent;R.score1=q('#live-root .lv-m .lv-w').textContent;
+            R.ratio1=q('#live-root .lv-r tbody tr:not(.gh) td.num small').textContent;R.cols1=q('#live-root .lv-r thead tr').children.length;
+            q('#live-root .lv-seg button:nth-child(2)').click();
+            setTimeout(function(){q('#live-root .lv-det').setAttribute('open','');
+              R.cap2=q('#live-root .lv-m .lv-cap b').textContent;R.score2=q('#live-root .lv-m .lv-w').textContent;
+              R.cols2=q('#live-root .lv-r thead tr').children.length;R.min=q('#live-root .lv-r tbody tr:not(.gh) td.num').textContent;
+              R.ratio2=q('#live-root .lv-r tbody tr:not(.gh) td.num:nth-child(4) small').textContent;
+              R.on=q('#live-root .lv-seg button.on').textContent;},300);},600);""", wait=3500)
+        self.assertEqual(r["cap1"], "WEEK TOTALS")
+        self.assertEqual(r["ratio1"], "7/15")
+        self.assertEqual(r["cap2"], "DAY · 2 Nov")
+        self.assertEqual(r["score2"], "6")                                         # the day's own category score, not the week's
+        self.assertEqual(r["cols2"], r["cols1"] + 1)                               # the day view adds minutes
+        self.assertEqual(r["min"], "30:01")
+        self.assertEqual(r["ratio2"], "5/9")
+        self.assertTrue(r["on"].startswith("Day"))
 
 
 if __name__ == "__main__":
