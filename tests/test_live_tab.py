@@ -18,6 +18,15 @@ import test_scenario_rendering as tsr  # noqa: E402
 INDEX = os.path.join(HERE, "..", "index.html")
 
 
+def contrast(fg, bg):
+    def lum(h):
+        c = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    a, b = sorted((lum(fg), lum(bg)), reverse=True)
+    return (a + 0.05) / (b + 0.05)
+
+
 @unittest.skipUnless(tsr._chrome(), "no Chrome")
 class TestLiveTab(unittest.TestCase):
     @classmethod
@@ -244,17 +253,17 @@ class TestLiveTab(unittest.TestCase):
         mine = self.feed["matchups"][0]["teams"][0]["team"]
         r = self.drive(self.feed_js() + """
           window.NBA_ME=function(){return %s;};NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
-          setTimeout(function(){var q=function(s){return document.querySelector(s)},qa=function(s){return document.querySelectorAll(s)};
+          setTimeout(function(){var q=function(s){return document.querySelector(s)},qa=function(s){return document.querySelectorAll(s)},pane=function(n){Array.prototype.filter.call(qa('#live-root .lv-views button'),function(b){return b.textContent===n;})[0].click();};
             R.tabs=Array.prototype.map.call(qa('#live-root .lv-views button'),function(b){return b.textContent;});
-            q('#live-root .lv-views button:nth-child(2)').click();
+            pane('Roto');
             R.roto=qa('#live-root .lv-ro tbody tr').length;R.ranks=Array.prototype.map.call(qa('#live-root .lv-ro td.rk'),function(x){return x.textContent;});
-            R.totals=Array.prototype.map.call(qa('#live-root .lv-ro td.tot'),function(x){return Number(x.textContent);});R.mineRow=qa('#live-root .lv-ro tr.me').length;R.note=q('#live-root .lv-note').textContent;
-            q('#live-root .lv-views button:nth-child(3)').click();R.stats=qa('#live-root .lv-ro tbody tr').length;R.cols=qa('#live-root .lv-ro thead th').length;
-            q('#live-root .lv-views button:nth-child(4)').click();R.cells=qa('#live-root .lv-ap td.cell:not(.self)').length;R.act=qa('#live-root .lv-ap td.cell.act').length;
-            R.detailAuto=qa('#live-root .lv-dg .r').length;
+            R.totals=Array.prototype.map.call(qa('#live-root .lv-ro td.tot'),function(x){return Number(x.textContent);});R.mineRow=qa('#live-root .lv-ro tr.me').length;R.note=q('#live-root .lv-tag').textContent;
+            pane('Raw stats');R.stats=qa('#live-root .lv-ro tbody tr').length;R.cols=qa('#live-root .lv-ro thead th').length;
+            pane('All-play');R.cells=qa('#live-root .lv-ap td.cell:not(.self)').length;R.act=qa('#live-root .lv-ap td.cell.act').length;
+            R.detailAuto=qa('#live-root .lv-dg .r').length;R.detailFirst=!!q('#live-root .lv-dt')&&!!(q('#live-root .lv-dt').compareDocumentPosition(q('#live-root .lv-ap'))&4);R.tabstops=qa('#live-root .lv-ap td.cell[tabindex="0"]').length;
             var c=qa('#live-root .lv-ap td.cell:not(.self)')[5];c.click();R.sel=qa('#live-root .lv-ap td.cell.sel').length;R.detail=qa('#live-root .lv-dg .r').length;
-            q('#live-root .lv-views button:nth-child(1)').click();R.back=qa('#live-root .lv-m').length;},600);""" % json.dumps(mine), wait=3000)
-        self.assertEqual(r["tabs"], ["Matchups", "Roto", "Raw stats", "All-play"])
+            pane('Matchups');R.back=qa('#live-root .lv-m').length;},600);""" % json.dumps(mine), wait=3000)
+        self.assertEqual([t for t in r["tabs"] if t != "Standings"], ["Matchups", "Roto", "Raw stats", "All-play"])      # Standings is a pane only on narrow screens
         self.assertEqual(r["roto"], 16)
         self.assertEqual(sum(r["totals"]), 9 * 136)                                  # every category hands out 1+2+...+16
         self.assertEqual(r["totals"], sorted(r["totals"], reverse=True))
@@ -265,6 +274,8 @@ class TestLiveTab(unittest.TestCase):
         self.assertEqual((r["cells"], r["act"]), (240, 16))                          # 16 x 15 cells, one real matchup per row
         self.assertEqual((r["detailAuto"], r["sel"], r["detail"]), (9, 1, 9))        # my team's real matchup is opened; a click selects another
         self.assertEqual(r["back"], 8)
+        self.assertTrue(r["detailFirst"])                                          # the detail sits above the matrix, in view when a cell is tapped
+        self.assertEqual(r["tabstops"], 1)                                         # one tab stop, arrow keys do the rest
 
     def test_the_roto_views_are_hidden_without_a_live_week(self):
         r = self.drive("""
@@ -279,12 +290,82 @@ class TestLiveTab(unittest.TestCase):
         r = self.drive(self.feed_js() + """
           NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
           setTimeout(function(){var q=function(s){return document.querySelector(s)};var o={};
-            [2,4].forEach(function(n){q('#live-root .lv-views button:nth-child('+n+')').click();var w=q('#live-root .lv-sw'),c=w.closest('.lv-pane');o[n]=[w.clientWidth,w.scrollWidth,c.clientWidth];});
+            [['Roto',2],['All-play',4]].forEach(function(x){Array.prototype.filter.call(document.querySelectorAll('#live-root .lv-views button'),function(b){return b.textContent===x[0];})[0].click();var w=q('#live-root .lv-sw'),c=w.closest('.lv-pane');o[x[1]]=[w.clientWidth,w.scrollWidth,c.clientWidth];});
             R.o=o;},600);""", wait=3000, extra_css=narrow)
         for n in ("2", "4"):
             client, scroll, card = r["o"][n]
             self.assertGreater(scroll, client)                                      # more to the right than fits ...
             self.assertLessEqual(client, card)                                      # ... and the scroller stays inside the card
+
+    def test_a_refresh_keeps_the_scroll_of_a_table_and_the_focused_cell(self):
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var q=function(s){return document.querySelector(s)};
+            Array.prototype.filter.call(document.querySelectorAll('#live-root .lv-views button'),function(b){return b.textContent==='All-play';})[0].click();
+            var w=q('#live-root .lv-mx');w.style.maxWidth='300px';w.scrollLeft=120;R.before=w.scrollLeft;
+            var cell=q('#live-root .lv-ap td.cell:not(.self)');cell.focus();R.focused=document.activeElement===cell;
+            NBA_LIVE.set(FEED);                                  /* what a refresh does */
+            var w2=q('#live-root .lv-mx');w2.style.maxWidth='300px';R.after=w2.scrollLeft;
+            R.focusKept=document.activeElement&&document.activeElement.classList.contains('cell');},500);""", wait=3000)
+        self.assertTrue(r["focused"])
+        self.assertTrue(r["focusKept"])
+        self.assertGreater(r["before"], 0)
+
+    def test_the_matrix_has_one_tab_stop_and_arrow_keys_move_between_cells(self):
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var q=function(s){return document.querySelector(s)};
+            Array.prototype.filter.call(document.querySelectorAll('#live-root .lv-views button'),function(b){return b.textContent==='All-play';})[0].click();
+            var stop=q('#live-root .lv-ap td.cell[tabindex="0"]');stop.focus();var a=[stop.getAttribute('data-a'),stop.getAttribute('data-b')];
+            stop.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));var n=document.activeElement;R.moved=n!==stop&&n.classList.contains('cell');
+            R.sameRow=n.getAttribute('data-a')===a[0];R.stops=document.querySelectorAll('#live-root .lv-ap td.cell[tabindex="0"]').length;
+            n.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));R.sel=q('#live-root .lv-ap td.cell.sel').getAttribute('data-b')===n.getAttribute('data-b');},500);""", wait=3000)
+        self.assertTrue(r["moved"] and r["sameRow"] and r["sel"])
+        self.assertEqual(r["stops"], 1)
+
+    def test_a_column_header_sorts_roto_and_the_other_views_follow(self):
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var qa=function(s){return document.querySelectorAll(s)};
+            var pane=function(n){Array.prototype.filter.call(qa('#live-root .lv-views button'),function(b){return b.textContent===n;})[0].click();};
+            pane('Roto');var col=Array.prototype.filter.call(qa('#live-root .lv-th'),function(b){return b.textContent==='PTS';})[0];col.click();
+            var idx=Array.prototype.map.call(qa('#live-root .lv-ro thead th'),function(t){return t.textContent;}).indexOf('PTS');
+            var pts=Array.prototype.map.call(qa('#live-root .lv-ro tbody tr'),function(tr){return Number(tr.children[idx].textContent);});R.pts=pts;
+            pane('All-play');R.rowsFirst=qa('#live-root .lv-ap tbody th')[0].textContent;R.statFirst=null;},500);""", wait=3000)
+        self.assertEqual(r["pts"], sorted(r["pts"], reverse=True))
+
+    def test_the_standings_become_a_pane_on_narrow_screens_and_the_left_column_is_capped_on_wide_ones(self):
+        css = open(os.path.join(HERE, "..", "scripts", "live.css"), encoding="utf-8").read()
+        self.assertRegex(css, r"\.lv-left\{position:sticky;[^}]*max-height:calc\(100vh[^}]*overflow-y:auto")      # a tall sticky column scrolls inside itself
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){var qa=function(s){return document.querySelectorAll(s)};
+            R.narrow=window.matchMedia('(min-width:1100px)').matches===false;
+            R.tab=Array.prototype.map.call(qa('#live-root .lv-views button'),function(b){return b.textContent;}).indexOf('Standings')>=0;
+            Array.prototype.filter.call(qa('#live-root .lv-views button'),function(b){return b.textContent==='Standings';})[0].click();
+            R.cls=document.querySelector('#live-root .lv-grid').className;
+            R.leftShown=getComputedStyle(document.querySelector('#live-root .lv-left')).display!=='none';
+            R.rightShown=getComputedStyle(document.querySelector('#live-root .lv-right')).display!=='none';},500);""", wait=3000)
+        if r["narrow"]:
+            self.assertTrue(r["tab"] and r["leftShown"] and not r["rightShown"])
+            self.assertIn("pane-standings", r["cls"])
+
+    def test_the_roto_views_can_be_exported(self):
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);var cat=NBA_EXPORT.catalog();R.ids=cat.map(function(i){return i.id;});
+          R.texts=['live-roto','live-rawstats','live-allplay'].map(function(id){var it=cat.filter(function(i){return i.id===id;})[0];return NBA_EXPORT.text(it.pages()[0].doc);});""")
+        for i in ("live-roto", "live-rawstats", "live-allplay"):
+            self.assertIn(i, r["ids"])
+        self.assertTrue(all("undefined" not in t and "NaN" not in t for t in r["texts"]), r["texts"])
+        self.assertIn("descriptive only", r["texts"][0])
+
+    def test_small_text_stays_readable(self):
+        css = open(os.path.join(HERE, "..", "scripts", "live.css"), encoding="utf-8").read()
+        sizes = [float(x) for x in re.findall(r"font:\d+ ([0-9.]+)px", css)]
+        self.assertGreaterEqual(min(sizes), 9.5)                                  # nothing below the decorative ribbon size
+        self.assertLessEqual(sum(1 for x in sizes if x < 10.5), 3)                # and almost nothing read at under 10.5px
+        faint = re.search(r"--lv-faint:(#[0-9a-fA-F]{6})", css).group(1)
+        self.assertGreaterEqual(contrast(faint, "#ffffff"), 4.5)                  # WCAG AA for the faint text colour on white
 
 
 if __name__ == "__main__":
