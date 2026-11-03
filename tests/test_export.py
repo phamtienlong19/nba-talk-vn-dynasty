@@ -10,6 +10,7 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import test_live_feed as tlf  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
 
 INDEX = os.path.join(HERE, "..", "index.html")
@@ -53,9 +54,9 @@ class TestExportHub(unittest.TestCase):
           document.querySelector('#ex-hub .ex-item[data-ex=rosters]').click();
           setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;if(!ov)return;
             R.tabs=ov.querySelectorAll('.imgov-t').length;var im=ov.querySelector('img.imgov-img');R.w=im.naturalWidth;R.h=im.naturalHeight;
-            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});},1800);""", wait=4000)
+            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});},5000);""", wait=7000)
         self.assertTrue(r["ov"])
-        self.assertEqual(r["tabs"], 2)                                                     # teams 1-8 and 9-16
+        self.assertEqual(r["tabs"], 4)                                                     # four teams an image, readable on a phone
         self.assertGreaterEqual(r["w"], 1080)
         self.assertGreater(r["h"], 1000)
         for label in ("Copy link", "Copy text", "Save"):
@@ -67,7 +68,7 @@ class TestExportHub(unittest.TestCase):
           cat.forEach(function(it){try{var pg=it.pages();if(!pg.length)R.bad.push(it.id+': empty');pg.forEach(function(p){if(!p.doc&&!p.cv)R.bad.push(it.id+': no doc');if(p.doc){var t=NBA_EXPORT.text(p.doc);if(!t||t.indexOf('undefined')>=0||t.indexOf('NaN')>=0)R.bad.push(it.id+': bad text');R.texts[it.id]=t;}});}catch(e){R.bad.push(it.id+': '+e);}});
           document.getElementById('tb-export').click();R.chips=document.querySelectorAll('#ex-hub .ex-teams .tp-btn').length;
           document.querySelector('#ex-hub .ex-teams .tp-btn').click();
-          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;},1800);""", wait=4000)
+          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;},5000);""", wait=7000)
         for want in ("rosters", "cap", "trades", "il", "salaries", "picks"):
             self.assertIn(want, r["ids"])
         self.assertEqual(r["bad"], [])
@@ -75,14 +76,14 @@ class TestExportHub(unittest.TestCase):
         self.assertTrue(r["ov"])
         self.assertIn("PLAYER", r["texts"]["salaries"])
 
-    def test_the_trade_machine_proposal_is_an_export_with_three_images(self):
+    def test_the_trade_machine_proposal_is_an_export_with_the_page_view_and_three_drawn_images(self):
         r = self.drive("""
           var it=NBA_EXPORT.catalog().filter(function(i){return i.id==='trade';})[0];R.has=!!it;
           if(it){document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=trade]').click();
-            setTimeout(function(){var ov=document.getElementById('chk-imgov');R.tabs=ov?ov.querySelectorAll('.imgov-t').length:0;},2000);}""",
-                       qs="?check=478.p.5432~franchise-01", wait=4500)
+            setTimeout(function(){var ov=document.getElementById('chk-imgov');R.tabs=ov?ov.querySelectorAll('.imgov-t').length:0;},5000);}""",
+                       qs="?check=478.p.5432~franchise-01", wait=7500)
         self.assertTrue(r["has"])
-        self.assertEqual(r["tabs"], 3)                                                     # proposal, teams after, both
+        self.assertEqual(r["tabs"], 4)                                                     # as on the page, proposal, teams after, both
 
     def test_text_is_derived_from_the_same_document(self):
         r = self.drive("""
@@ -94,3 +95,133 @@ class TestExportHub(unittest.TestCase):
         self.assertEqual(r["text"].count("\n") >= 18, True)                                # title + header + 16 rows
         self.assertTrue(r["link"].endswith("#cap"))
         self.assertNotIn("$", r["text"])                                                   # house rule: no dollar signs, here too
+
+    SMOKE = """
+      var out=[];NBA_EXPORT.catalog().forEach(function(it){var r={id:it.id,pages:0,bad:[]};
+        try{var ps=it.pages();r.pages=ps.length;ps.forEach(function(p){
+          if(p.doc){var cv=NBA_EXPORT.canvas(p.doc);if(!(cv.width>=1000&&cv.height>200))r.bad.push('canvas '+cv.width+'x'+cv.height);
+            [NBA_EXPORT.text(p.doc),NBA_EXPORT.list(p.doc)].forEach(function(t){if(/undefined|NaN|\\[object/.test(t))r.bad.push('text: '+t.slice(0,80));});}
+          else if(!p.cv)r.bad.push('no doc and no canvas');});}catch(e){r.bad.push(String(e));}
+        if(!r.pages)r.bad.push('no pages');out.push(r);});R.items=out;"""
+
+    def _smoke(self, r):
+        self.assertGreater(len(r["items"]), 5)
+        for it in r["items"]:
+            self.assertEqual(it["bad"], [], it["id"])
+
+    def test_every_export_draws_and_reads_cleanly_in_the_official_view(self):
+        self._smoke(self.drive(self.SMOKE))
+
+    def test_every_export_draws_and_reads_cleanly_in_a_scenario(self):
+        self._smoke(self.drive(self.SMOKE, qs="?mode=scenario"))
+
+    def test_every_export_draws_and_reads_cleanly_in_keepers_mode(self):
+        r = self.drive(self.SMOKE + "R.ids=R.items.map(function(i){return i.id;});", qs="?mode=whatif&view=keepers")
+        self._smoke(r)
+        self.assertTrue(any(i.startswith("kb-") for i in r["ids"]), r["ids"])
+
+    def test_every_export_draws_and_reads_cleanly_with_a_live_feed(self):
+        feed = json.dumps(tlf.feed()).replace("</", "<\\/")
+        r = self.drive("NBA_LIVE.set(" + feed + ");" + self.SMOKE + "R.ids=R.items.map(function(i){return i.id;});")
+        self._smoke(r)
+        for want in ("live-standings", "live-matchups"):
+            self.assertIn(want, r["ids"])
+
+    def test_the_hub_groups_exports_puts_this_page_first_and_traps_focus(self):
+        r = self.drive("""
+          var b=document.getElementById('tb-export');b.focus();b.click();var hub=document.getElementById('ex-hub');
+          R.heads=Array.prototype.map.call(hub.querySelectorAll('.ex-h'),function(x){return x.textContent;});
+          var f=Array.prototype.filter.call(hub.querySelectorAll('button'),function(x){return x.offsetParent!==null;});
+          f[f.length-1].focus();document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true}));R.wrapped=hub.contains(document.activeElement);
+          document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));R.closed=!document.getElementById('ex-hub');R.back=document.activeElement&&document.activeElement.id;""")
+        self.assertTrue(r["heads"][0].endswith("this page"), r["heads"])
+        self.assertIn("One team", r["heads"])
+        self.assertTrue(r["wrapped"] and r["closed"])
+        self.assertEqual(r["back"], "tb-export")                                     # focus returns to what opened it
+
+    def test_from_the_rankings_board_the_hub_owns_tab_and_esc(self):
+        r = self.drive("""
+          NBA_WHATIF.openBoard();setTimeout(function(){document.getElementById('kbb-export').click();var hub=document.getElementById('ex-hub');R.hub=!!hub;
+            var it=hub.querySelector('.ex-item');it.focus();document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true}));R.stays=hub.contains(document.activeElement);
+            document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));R.hubGone=!document.getElementById('ex-hub');R.boardStays=!!document.getElementById('kb-board');},300);""",
+            qs="?mode=whatif&view=keepers", wait=2500)
+        self.assertTrue(r["hub"] and r["stays"])
+        self.assertTrue(r["hubGone"] and r["boardStays"])                            # Esc closed the export, not the board under it
+
+    def test_saved_files_carry_the_date_links_keep_the_mode_and_there_is_a_list_text(self):
+        r = self.drive("""
+          document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=cap]').click();
+          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.name=ov.querySelector('a[download]').getAttribute('download');
+            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});R.full=!!ov.querySelector('.imgov-full');
+            R.alt=ov.querySelector('img').getAttribute('alt');},5000);   /* a snapshot export takes a moment (fonts, layout) */
+          R.link=NBA_EXPORT.catalog().filter(function(i){return i.id==='cap';})[0].link();""", qs="?mode=scenario", wait=7000)
+        self.assertRegex(r["name"], r"^cap-table-\d{4}-\d{2}-\d{2}\.png$")
+        self.assertIn("Copy as list", r["btns"])
+        self.assertTrue(r["full"])
+        self.assertGreater(len(r["alt"]), 40)                                         # the alt text carries the content, not just "Cap table"
+        self.assertIn("mode=scenario", r["link"])                                     # the link opens the scenario the image shows
+
+    def test_image_text_is_large_enough_to_read_when_a_phone_shrinks_it(self):
+        with open(INDEX, encoding="utf-8") as f:
+            src = f.read()
+        body = src[src.index("function exRun(c,doc,draw,W){"):src.index("function exCanvas(doc){")]
+        sizes = [int(x) for x in re.findall(r'"\d{3} (\d+)px "', body)]
+        self.assertGreaterEqual(min(sizes), 20, sorted(set(sizes)))                   # 20px of 1080 is about 7px on a phone: the floor
+
+    def test_the_roto_image_has_heat_cells_whole_numbers_and_no_stray_buttons(self):
+        feed = json.dumps(tlf.feed()).replace("</", "<\\/")
+        r = self.drive("NBA_LIVE.set(" + feed + ");" + """
+          var it=NBA_EXPORT.catalog().filter(function(i){return i.id==='live-roto';})[0];var doc=it.pages()[0].doc;var rows=doc.blocks[0].rows;
+          R.heat=rows.every(function(rw){return rw.c.slice(2,11).every(function(x){return x&&x.bg;});});
+          NBA_EXPORT.open(it);setTimeout(function(){var ov=document.getElementById('chk-imgov');
+            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});R.tabs=ov.querySelectorAll('.imgov-t').length;
+            R.headFirst=ov.querySelector('.imgov-box').firstChild.classList.contains('imgov-head');},5000);""", wait=7000)
+        self.assertTrue(r["heat"])                                                     # every category and the total carry the page's heat colour
+        self.assertNotIn("Save 2 images", r["btns"])                                  # only for multi-image exports
+        self.assertEqual(r["tabs"], 0)
+        self.assertTrue(r["headFirst"])                                               # tabs and close sit above the image, not on it
+
+    def test_numbers_are_never_ellipsized_in_image_tables(self):
+        with open(INDEX, encoding="utf-8") as f:
+            src = f.read()
+        body = src[src.index("function exRun(c,doc,draw,W){"):src.index("function exCanvas(doc){")]
+        self.assertIn("k.m?cell.t:imgFit(", body)                                     # numeric columns shrink the type instead of cutting digits
+
+    def test_team_trade_and_live_exports_are_snapshots_of_the_page(self):
+        feed = json.dumps(tlf.feed()).replace("</", "<\\/")
+        r = self.drive("NBA_LIVE.set(" + feed + ");" + """
+          var cat=NBA_EXPORT.catalog(),T0=NBA_NAV.D.teams[0];
+          var specs={team:NBA_EXPORT.snapEl([].filter.call(document.querySelectorAll('section.team-card'),function(c){var t=c.querySelector('.identity-tag');return t&&t.textContent.trim()===T0.short;})[0],430,'x'),
+                     roto:null,standings:NBA_LIVE.snap('standings',430)};
+          R.hasSnap=['rosters','cap','live-standings','live-matchups'].map(function(id){var it=cat.filter(function(i){return i.id===id;})[0];return !!(it&&it.pages()[0].snap);});
+          var out={};var keys=Object.keys(specs).filter(function(k){return specs[k];});
+          Promise.all(keys.map(function(k){return NBA_EXPORT.snap(specs[k]).then(function(cv){out[k]=cv?[cv.width,cv.height]:null;});})).then(function(){R.out=out;});""", wait=9000)
+        self.assertEqual(r["hasSnap"], [True, True, True, True])
+        for k, size in r["out"].items():
+            self.assertIsNotNone(size, k)
+            self.assertGreaterEqual(size[0], 1000, k)                                   # 430 css px drawn at 2.5x: a 1080px phone-shaped image
+            self.assertGreater(size[1], 400, k)
+
+    def test_a_snapshot_made_from_what_if_or_scenario_mode_is_not_blank(self):
+        for qs in ("?mode=whatif&view=keepers", "?mode=scenario"):
+            r = self.drive("""
+              var T0=NBA_NAV.D.teams[2];var el=[].filter.call(document.querySelectorAll('section.team-card'),function(c){var t=c.querySelector('.identity-tag');return t&&t.textContent.trim()===T0.short;})[0];
+              R.found=!!el;NBA_EXPORT.snap(NBA_EXPORT.snapEl(el,430,'x')).then(function(cv){R.size=cv?[cv.width,cv.height]:null;
+                if(cv){var c=cv.getContext('2d'),d=c.getImageData(0,0,cv.width,Math.min(cv.height,600)).data,seen={};for(var i=0;i<d.length;i+=40){seen[d[i]+','+d[i+1]+','+d[i+2]]=1;}R.colours=Object.keys(seen).length;}});""", qs=qs, wait=9000)
+            self.assertTrue(r["found"], qs)
+            self.assertIsNotNone(r["size"], qs)
+            self.assertGreater(r["size"][1], 800, qs)                                 # a roster card is tall; a blank frame was ~150px
+            self.assertGreater(r["colours"], 12, qs)                                  # and it has content, not one flat colour
+
+    def test_a_snapshot_keeps_the_sizes_the_page_has(self):
+        """The page sets * {box-sizing:border-box}; the image has no stylesheet. A 100px box with 10px padding must stay 100px wide, and an
+        element that the page hides by default must not push anything out (the pills that overlapped names were this bug)."""
+        r = self.drive("""
+          var n=document.createElement('div');n.innerHTML='<div id="b" style="width:100px;min-width:100px;height:30px;padding:10px;background:#f00"></div><div style="height:12px"></div><div id="c" style="display:inline-block;min-width:22px;padding:3px;font:800 8px/1 Inter;background:#00f;color:#fff">IL</div>';
+          var nb=n;NBA_EXPORT.snap({node:nb,wrap:[],width:300,foot:null}).then(function(cv){
+            var c=cv.getContext('2d'),S=cv.width/300,y=Math.round((14+15)*S),row=c.getImageData(0,y,cv.width,1).data,red=0,blue=0;
+            for(var i=0;i<row.length;i+=4){if(row[i]>200&&row[i+1]<60&&row[i+2]<60)red++;}
+            var yb=Math.round((14+30+12+8)*S),rb=c.getImageData(0,yb,cv.width,1).data;for(var j=0;j<rb.length;j+=4){if(rb[j]<60&&rb[j+1]<60&&rb[j+2]>200)blue++;}
+            R.S=S;R.red=red/S;R.blue=blue/S;R.h=cv.height/S;});""", wait=8000)
+        self.assertAlmostEqual(r["red"], 100, delta=3)                                    # border-box held: 100, not 120
+        self.assertAlmostEqual(r["blue"], 22, delta=3)                                    # a 22px chip, not 28
