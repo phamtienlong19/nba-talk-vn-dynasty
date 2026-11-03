@@ -2399,33 +2399,40 @@ function exportsFor(){
   return [
    {id:"live-standings",label:live?"Live standings":"Standings (finished weeks)",desc:"Records, playoff line and movement"+(live?" if the week ended now":""),pages:function(){
      var rows=f.table.map(function(r){return {c:[(r.tied?"T-":"")+r.rank,{team:r.team},r.w+"-"+r.l+(r.t?"-"+r.t:""),pct(r.pct),r.moved&&live?{t:r.moved>0?"▲"+r.moved:"▼"+(-r.moved),fg:r.moved>0?"#0f7a40":"#b42318"}:"",{t:r.playoff==="in"?"IN #"+r.seed:r.playoff==="bubble"?"BUBBLE":"OUT",pill:r.playoff==="in"?"ok":r.playoff==="bubble"?"warn":"mute"}]};});
-     return [{label:"Standings",name:"live-standings.png",alt:"Standings",doc:{title:live?"Standings if the week ended now":"Standings",tag:live?"PROVISIONAL":"",sub:(live?"Week "+f.week+" · as of "+ict(f.asOf)+" · ":"")+"equal records share a rank",
+     return [{label:"Standings",name:"live-standings.png",alt:"Standings",snap:function(){return snapFor("standings",430);},doc:{title:live?"Standings if the week ended now":"Standings",tag:live?"PROVISIONAL":"",sub:(live?"Week "+f.week+" · as of "+ict(f.asOf)+" · ":"")+"equal records share a rank",
        blocks:[{t:"table",cols:[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"W-L-T",w:2,a:"r",m:1},{h:"PCT",w:1.6,a:"r",m:1},{h:"MOVE",w:1.4,a:"r"},{h:"PLAYOFFS",w:2,a:"r"}],rh:44,rows:rows}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}},
    {id:"live-matchups",label:live?"This week's matchups":"Last finished week",desc:"Category score of every matchup",pages:function(){
      var cards=f.matchups.map(function(m){var a=m.teams[0],b=m.teams[1];
        return {team:a.team,head:m.score[0]+"–"+m.score[1]+(m.score[2]?"–"+m.score[2]:""),sub:"vs "+(TM[b.team]?TM[b.team].short:b.name),lines:CATS.map(function(c){var w=m.cats[c[0]];
          return {l:c[1]+"  "+val(c[0],a.stats[c[0]],a.stats)+" – "+val(c[0],b.stats[c[0]],b.stats),r:w==="a"?"✓":w==="b"?"✗":w==="t"?"=":"",tone:w==="a"?"ok":w==="b"?"bad":"mute"};})};});
-     return [{label:"Matchups",name:"live-matchups.png",alt:"Matchups",doc:{title:live?"Week "+f.week+" matchups":"Last finished week",tag:live?"PROVISIONAL":"",sub:live?"as of "+ict(f.asOf):"",blocks:[{t:"cards",cols:2,cards:cards}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}}].concat(rotoExports());}
+     return [{label:"Matchups",name:"live-matchups.png",alt:"Matchups",snap:function(){return snapFor("matchups",860);},doc:{title:live?"Week "+f.week+" matchups":"Last finished week",tag:live?"PROVISIONAL":"",sub:live?"as of "+ict(f.asOf):"",blocks:[{t:"cards",cols:2,cards:cards}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}}].concat(rotoExports());}
 function rotoExports(){   /* roto, raw stats and all-play as images/text, once the week has numbers */
   var R=rotoData();if(!R)return [];
   var ids=Object.keys(R.roto).map(Number).sort(function(a,b){return R.roto[a].rank-R.roto[b].rank||a-b;}),sub="Week "+FEED.week+" · as of "+ict(FEED.asOf)+" · descriptive only, the league is head-to-head";
   var HEAT={"h3":["#a4e4b9","#17492b"],"h2":["#d0f1dd","#17492b"],"h1":["#ebf8f0","#1d3b2a"],"h0":["#ffffff","#12264d"],"h-1":["#fdecee","#5c1f2a"],"h-2":["#f6cbd1","#6a1f2c"],"h-3":["#efadb8","#6a1f2c"]};
   function hc(t,p){if(p==null)return t;var x=HEAT[heat(p)];return {t:t,bg:x[0],fg:x[1]};}   /* the page's heat colours, in the image too */
-  function page(name,label,title,cols,rows){return [{label:label,name:name+".png",alt:label,doc:{title:title,tag:"PROVISIONAL",sub:sub,blocks:[{t:"table",cols:cols,rh:40,rows:rows}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}
+  function page(name,label,title,cols,rows,kind,width){return [{label:label,name:name+".png",alt:label,snap:kind?function(){return snapFor(kind,width);}:null,doc:{title:title,tag:"PROVISIONAL",sub:sub,blocks:[{t:"table",cols:cols,rh:40,rows:rows}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}
   var catCols=CATS.map(function(c){return {h:c[1],w:1.25,a:"c",m:1};});
   return [
    {id:"live-roto",label:"Roto rankings",desc:"Roto points for the week in progress",pages:function(){
      return page("live-roto","Roto","Week "+FEED.week+" roto rankings",[{h:"#",w:1,m:1},{h:"TEAM",w:3.2}].concat(catCols,[{h:"TOTAL",w:1.5,a:"c",m:1}]),
-       ids.map(function(i){var r=R.roto[i];return {c:[String(r.rank),{team:R.side[i].team}].concat(CATS.map(function(c){return hc(pts(r.points[c[0]]),r.points[c[0]]);}),[hc(pts(r.total),r.total/9)])};}));}},
+       ids.map(function(i){var r=R.roto[i];return {c:[String(r.rank),{team:R.side[i].team}].concat(CATS.map(function(c){return hc(pts(r.points[c[0]]),r.points[c[0]]);}),[hc(pts(r.total),r.total/9)])};}),"roto",760);}},
    {id:"live-rawstats",label:"Raw stats",desc:"Category totals of all 16 teams",pages:function(){
      return page("live-rawstats","Raw stats","Week "+FEED.week+" raw stats",[{h:"#",w:1,m:1},{h:"TEAM",w:3.2}].concat(catCols,[{h:"SCORE",w:1.4,a:"r",m:1}]),
-       ids.map(function(i){var sd=R.side[i];return {c:[String(R.roto[i].rank),{team:sd.team}].concat(CATS.map(function(c){return hc(val(c[0],sd.stats[c[0]],sd.stats),R.roto[i].points[c[0]]);}),[String(sd.printed!=null?sd.printed:sd.wins)])};}));}},
+       ids.map(function(i){var sd=R.side[i];return {c:[String(R.roto[i].rank),{team:sd.team}].concat(CATS.map(function(c){return hc(val(c[0],sd.stats[c[0]],sd.stats),R.roto[i].points[c[0]]);}),[String(sd.printed!=null?sd.printed:sd.wins)])};}),"stats",820);}},
    {id:"live-allplay",label:"All-play records",desc:"Each team against all 15 others, category by category",pages:function(){
      var order=ids.slice().sort(function(a,b){var x=R.ap.record[a],y=R.ap.record[b];return (y[0]-x[0])||(x[1]-y[1])||(R.roto[a].rank-R.roto[b].rank);});
      return page("live-allplay","All-play","Week "+FEED.week+" all-play",[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"ALL-PLAY W-L-T",w:2.2,a:"c",m:1},{h:"ROTO",w:1.4,a:"c",m:1},{h:"MATCHUP",w:2.8,a:"r"}],
-       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}));}}];}
+       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}),"allplay",1180);}}];}
 
-window.NBA_LIVE={standings:standingsFor,exports:exportsFor,source:function(){return SRC;},feed:function(){return FEED;},reload:function(){return load(true);},
+function snapFor(kind,width){   /* a detached copy of one LIVE view, for the export hub's snapshot images */
+  var R=rotoData(),node=null;
+  if(kind==="standings")node=standings();
+  else if(kind==="matchups"){node=h("div",{class:"lv-ms"});FEED.matchups.forEach(function(m){var c=matchup(m);var d=c.querySelector("details");if(d)d.remove();node.appendChild(c);});}
+  else if(R&&kind==="roto")node=rotoPane(R);else if(R&&kind==="stats")node=statsPane(R);else if(R&&kind==="allplay"){node=allPane(R);var fl=node.querySelector(".lv-fl");if(fl)fl.remove();}
+  if(!node)return null;if(window.NBA_MONO)window.NBA_MONO(node);
+  return {node:node,wrap:[{tag:"section",id:"live",cls:"page"},{tag:"div",id:"live-root",cls:"",style:"--lv-nav:0px"}],width:width,foot:"NBA Talk VN Dynasty · LIVE · as of "+ict(FEED.asOf)};}
+window.NBA_LIVE={standings:standingsFor,exports:exportsFor,snap:snapFor,source:function(){return SRC;},feed:function(){return FEED;},reload:function(){return load(true);},
   /* tests and tools hand a feed in directly */ set:function(d){accept(d,"live");render();}};
 render();
 load(false);
@@ -3288,7 +3295,7 @@ function kbExports(){
      var blocks=[{t:"stats",items:[{v:fit.eff.length+"/"+kb.keeperMax,l:"KEEPING"},{v:fit.pay,l:"KEEPER PAYROLL",tone:fit.pay>b.ceiling?"bad":""},{v:b.floor+"–"+b.ceiling,l:"OFFICIAL BAND"},{v:fit.pay>b.ceiling?fit.pay-b.ceiling:b.ceiling-fit.pay,l:fit.pay>b.ceiling?"OVER CEILING":"ROOM TO CEILING",tone:fit.pay>b.ceiling?"bad":"ok"}]},
        {t:"table",cols:[{h:"",w:2},{h:"RANK",w:1.2,a:"r",m:1},{h:"PLAYER",w:5},{h:"SALARY",w:1.5,a:"r",m:1}],rows:rows}];
      if(fit.off.length)blocks.splice(1,0,{t:"note",tone:"warn",text:"Auto-adjusted: "+fit.off.map(kbName).join(", ")+" left out to stay at or under "+b.ceiling+"."});
-     return [{label:t.short,name:"keepers-"+t.short+".png",alt:"Keeper plan for "+t.short,doc:kbDocBase(t.name||t.short,"Next season's keepers · rank decides salary",blocks,kbLink(label()))}];}},
+     return [{label:t.short,name:"keepers-"+t.short+".png",alt:"Keeper plan for "+t.short,snap:function(){var m=document.querySelector("#wi-root .wi-kbx-main");return m&&window.NBA_EXPORT&&NBA_EXPORT.snapEl?NBA_EXPORT.snapEl(m,560,"NBA Talk VN Dynasty · keepers · your assumption, not official"):null;},doc:kbDocBase(t.name||t.short,"Next season's keepers · rank decides salary",blocks,kbLink(label()))}];}},
    {id:"kb-all",label:"All teams' keeper plans",desc:"Every team's chosen keepers on two images",link:function(){return kbLink(label());},pages:function(){
      var rank=kbRanking(),fits=kbFitsAll(rank),cards=kb.teams.map(function(t){var f=fits[t.id],it=kbIntent(t),offs={};f.off.forEach(function(k){offs[k]=1;});
        var lines=it.length?it.slice().sort(function(a,c){return rank[a]-rank[c];}).map(function(k){return {l:kbName(k)+(offs[k]?" (auto-off)":""),r:kbSalaryAt(rank[k]),tone:offs[k]?"mute":"",b:!offs[k]};}):[{l:"no plan yet",r:"",tone:"mute"}];
@@ -4411,6 +4418,75 @@ function exToast(msg,actions,ms){var old=document.getElementById("ex-toast");if(
  var t=h("div",{class:"ex-toast",id:"ex-toast",role:"status","aria-live":"polite"},[h("span",{text:msg})].concat(actions||[]));document.body.appendChild(t);
  if(ms)setTimeout(function(){if(t.parentNode)t.remove();},ms);return t;}
 function exDate(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
+/* ---------- snapshot exports: the page's own element, laid out at phone width, as a PNG ----------
+   The element (or a detached node a view builds) is copied into a hidden frame of the chosen width with the site's stylesheets, so the
+   phone layout applies; every computed style is then written inline (pseudo-elements become spans), the result goes into an SVG
+   foreignObject with the fonts embedded, and that is drawn on a canvas. Anything that fails returns null and the caller falls back to
+   the drawn image. */
+var EX_FONTS=null,EX_INH={"color":1,"font-family":1,"font-size":1,"font-style":1,"font-weight":1,"font-variant":1,"font-feature-settings":1,"font-variant-numeric":1,"font-stretch":1,
+ "letter-spacing":1,"line-height":1,"text-align":1,"text-transform":1,"text-indent":1,"white-space":1,"word-spacing":1,"visibility":1,"list-style-type":1,"list-style-position":1,
+ "direction":1,"cursor":1,"text-rendering":1,"-webkit-font-smoothing":1,"text-shadow":1,"word-break":1,"overflow-wrap":1,"tab-size":1,"hyphens":1,"quotes":1,"caption-side":1,
+ "border-collapse":1,"border-spacing":1,"empty-cells":1,"orphans":1,"widows":1,"-webkit-text-fill-color":1,"-webkit-text-stroke-color":1,"font-kerning":1,"font-optical-sizing":1};
+function exFontCss(){
+ if(EX_FONTS)return EX_FONTS;var link=document.querySelector('link[href*="fonts.googleapis.com/css"]');
+ if(!link||!window.fetch||!window.FileReader){EX_FONTS=Promise.resolve("");return EX_FONTS;}
+ EX_FONTS=fetch(link.href).then(function(r){return r.text();}).then(function(css){
+   var keep=css.split("/*").filter(function(seg){var lab=seg.split("*/")[0].trim();return /^(latin|latin-ext|vietnamese)$/.test(lab);}).map(function(seg){return seg.slice(seg.indexOf("*/")+2);}).join("\n");
+   var urls=[];keep.replace(/url\((https:[^)]+)\)/g,function(_,u){urls.push(u);return _;});
+   return Promise.all(urls.map(function(u){return fetch(u).then(function(r){return r.blob();}).then(function(b){return new Promise(function(ok){var f=new FileReader();f.onload=function(){ok([u,f.result]);};f.onerror=function(){ok([u,u]);};f.readAsDataURL(b);});});}))
+     .then(function(pairs){pairs.forEach(function(p){keep=keep.split(p[0]).join(p[1]);});return keep;});
+ }).catch(function(){return "";});
+ return EX_FONTS;}
+/* the ancestors of a page element, so the stylesheet's selectors and the CSS variables they set still apply */
+function exWrapOf(el){var w=[],p=el.parentElement;while(p&&p!==document.body){w.unshift({tag:p.tagName.toLowerCase(),id:p.id||"",cls:(p.className&&p.className.baseVal==null?p.className:"").replace(/\b(tab-off|hidden)\b/g,""),style:p.getAttribute("style")||""});p=p.parentElement;}return w;}
+function exCloneOf(el){var c=el.cloneNode(true),a=el.querySelectorAll("input,select,textarea"),b=c.querySelectorAll("input,select,textarea");
+ for(var i=0;i<a.length;i++){if(a[i].type==="checkbox"||a[i].type==="radio"){if(a[i].checked)b[i].setAttribute("checked","");else b[i].removeAttribute("checked");}
+  else if(a[i].tagName==="SELECT"){[].forEach.call(b[i].options,function(o,k){if(k===a[i].selectedIndex)o.setAttribute("selected","");else o.removeAttribute("selected");});}else b[i].setAttribute("value",a[i].value);}
+ c.removeAttribute("hidden");c.classList.remove("tab-off");return c;}
+function exSnap(spec){   /* spec: {node, wrap:[{tag,id,cls,style}], width, foot} -> Promise<canvas|null> */
+ return exFontCss().then(function(fonts){return new Promise(function(done){
+  var W=spec.width||430,fr=document.createElement("iframe"),css=[].map.call(document.querySelectorAll("style"),function(x){return x.textContent;}).join("\n");
+  fr.setAttribute("aria-hidden","true");fr.style.cssText="position:fixed;left:-30000px;top:0;width:"+W+"px;height:200px;border:0;opacity:0;pointer-events:none";
+  var bodyCls=document.body.className.replace(/\b(kbb-open|modal-open)\b/g,"");
+  var open=(spec.wrap||[]).map(function(w){return "<"+w.tag+(w.id?' id="'+w.id+'"':"")+(w.cls?' class="'+w.cls+'"':"")+(w.style?' style="'+w.style.replace(/"/g,"&quot;")+'"':"")+">";}).join(""),
+      close=(spec.wrap||[]).slice().reverse().map(function(w){return "</"+w.tag+">";}).join("");
+  fr.srcdoc="<!doctype html><html lang='en'><head><meta charset='utf-8'><style>"+fonts+"\n"+css+"\n*,*::before,*::after{animation:none!important;transition:none!important}html,body{margin:0!important;padding:0!important;overflow:hidden}#__x{padding:14px;background:#f4f6fa}#__d{position:absolute;left:-9999px;top:0}</style></head><body class='"+bodyCls+"'><div id='__x'>"+open+"<i id='__slot'></i>"+close+"</div><div id='__d'></div></body></html>";
+  var finish=function(cv){if(fr.parentNode)fr.remove();done(cv);};
+  fr.onload=function(){try{
+   var d=fr.contentDocument,slot=d.getElementById("__slot");slot.parentNode.replaceChild(d.importNode(spec.node,true),slot);
+   if(spec.foot){var f=d.createElement("div");f.className="ex-snap-foot";f.textContent=spec.foot;f.style.cssText="margin:12px 2px 0;font:600 12px Inter,Arial,sans-serif;color:#66748d;display:flex;justify-content:space-between";d.getElementById("__x").appendChild(f);}
+   var ready=d.fonts&&d.fonts.ready?Promise.all(["400 14px Inter","600 14px Inter","800 14px Inter","700 14px 'Roboto Mono'"].map(function(x){return d.fonts.load(x).catch(function(){});})).then(function(){return d.fonts.ready;}):Promise.resolve();
+   ready.then(function(){setTimeout(function(){try{exFreezeDraw(fr,W,fonts,finish);}catch(e){finish(null);}},60);},function(){finish(null);});
+  }catch(e){finish(null);}};
+  document.body.appendChild(fr);setTimeout(function(){finish(null);},15000);});});}
+function exFreezeDraw(fr,W,fonts,finish){
+ var d=fr.contentDocument,win=fr.contentWindow,root=d.getElementById("__x"),def={},dbox=d.getElementById("__d");
+ function base(tag,pseudo){var k=tag+(pseudo||"");if(!def[k]){var e=d.createElement(pseudo?"span":tag);dbox.appendChild(e);var cs=win.getComputedStyle(e),o={};for(var i=0;i<cs.length;i++)o[cs[i]]=cs.getPropertyValue(cs[i]);def[k]=o;}return def[k];}
+ function decl(cs,b,parent,full,box){var out=[];for(var i=0;i<cs.length;i++){var n=cs[i];if(/^(transition|animation)/.test(n)||(box&&(n==="height"||n==="block-size"||n==="grid-template-rows")))continue;   /* heights follow the content, so nothing is clipped if a font measures a hair differently */var v=cs.getPropertyValue(n);
+   if(full){out.push(n+":"+v);continue;}if(EX_INH[n]?(parent&&parent[n]===v):b[n]===v)continue;out.push(n+":"+v);}return out.join(";");}
+ var els=[root].concat([].slice.call(root.querySelectorAll("*"))),jobs=[],vals=new Map();
+ els.forEach(function(el,i){var cs=win.getComputedStyle(el),o={};for(var k=0;k<cs.length;k++)o[cs[k]]=cs.getPropertyValue(cs[k]);vals.set(el,o);
+   var par=el.parentElement&&vals.get(el.parentElement),st=decl(cs,base(el.tagName.toLowerCase()),par,i===0,el.children.length>0),ps=[];   /* containers size to their content; leaves (badges, dots, bars) keep their size */
+   ["::before","::after"].forEach(function(pp){var pc=win.getComputedStyle(el,pp),ct=pc.getPropertyValue("content");if(!ct||ct==="none"||ct==="normal")return;
+     var txt=/counter\(/.test(ct)?String(1+[].indexOf.call(el.parentNode.children,el)):ct.replace(/^["']|["']$/g,"").replace(/\\([0-9a-f]{1,6}) ?/gi,function(_,h){return String.fromCodePoint(parseInt(h,16));});
+     ps.push([pp,decl(pc,base("span","p"),o,false),txt]);});
+   jobs.push([el,st,ps]);});
+ jobs.forEach(function(j){var el=j[0];el.setAttribute("style",j[1]);el.removeAttribute("class");
+   j[2].forEach(function(p){var sp=d.createElement("span");sp.setAttribute("style",p[1]);sp.textContent=p[2];if(p[0]==="::before")el.insertBefore(sp,el.firstChild);else el.appendChild(sp);});});
+ var H=Math.ceil(Math.max(root.getBoundingClientRect().height,root.scrollHeight))+4,S=Math.max(1080/W,2);   /* measured after freezing: the frozen layout is the one the image shows */if(W*S*H*S>15000000)S=Math.sqrt(15000000/(W*H));
+ var xml=new XMLSerializer().serializeToString(root);
+ var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+Math.round(W*S)+'" height="'+Math.round(H*S)+'" viewBox="0 0 '+W+" "+H+'"><style>'+fonts.replace(/</g,"")+'</style><foreignObject x="0" y="0" width="'+W+'" height="'+H+'">'+xml+"</foreignObject></svg>";
+ var img=new Image();img.onload=function(){try{var cv=document.createElement("canvas");cv.width=Math.round(W*S);cv.height=Math.round(H*S);var c=cv.getContext("2d");
+   c.fillStyle="#f4f6fa";c.fillRect(0,0,cv.width,cv.height);c.drawImage(img,0,0,cv.width,cv.height);
+   setTimeout(function(){try{c.drawImage(img,0,0,cv.width,cv.height);cv.toDataURL("image/png",0.1);finish(cv);}catch(e){finish(null);}},120);   /* drawn twice: Safari fills fonts on the second pass; toDataURL proves the canvas is not tainted */
+  }catch(e){finish(null);}};img.onerror=function(){finish(null);};img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);}
+function exCardOf(short){return [].filter.call(document.querySelectorAll("section.team-card"),function(c){var t=c.querySelector(".identity-tag");return t&&t.textContent.trim()===short;})[0]||null;}
+function exSnapFoot(){return "NBA Talk VN Dynasty · "+shortDate(exDate())+" · "+location.host;}
+/* several page elements side by side in their own container (e.g. four team cards in the cards grid) */
+function exSnapGroup(els,containerOf,width){els=els.filter(Boolean);if(!els.length)return null;var box=containerOf.cloneNode(false);els.forEach(function(e){box.appendChild(exCloneOf(e));});
+ return {node:box,wrap:exWrapOf(containerOf),width:width,foot:exSnapFoot()};}
+/* a snapshot spec for an element on the page */
+function exSnapEl(el,width,foot,strip){if(!el)return null;var n=exCloneOf(el);if(strip)[].forEach.call(n.querySelectorAll(strip),function(x){x.remove();});return {node:n,wrap:exWrapOf(el),width:width||430,foot:foot};}
 /* ---------- export hub: any view as an image, a link and a chat-ready text ----------
    A document is a title plus blocks (stats, table, cards, note, heading). One drawing routine paints it on a canvas (the same look
    as the trade images) and one routine turns it into plain text, so every export has the same three forms: image, link, text.
@@ -4516,10 +4592,10 @@ function exCatalog(){
  function rosterLines(t){var tm=v.teams[t.id];return tm.roster.slice().sort(function(a,b){return b.c-a.c;}).map(function(r){return {l:r.n+(r.s==="IL"||r.s==="IL+"?" · "+r.s:r.st?" · "+r.st:""),r:r.c,tone:(r.s==="IL"||r.s==="IL+")?"mute":r.x?"mute":""};});}
  function rosterCard(t){var tm=v.teams[t.id];return {team:t.id,head:String(tm.cap),sub:stText(tm)+" · "+tm.count+" players",tone:tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR"?"bad":"",lines:rosterLines(t)};}
  function rostersDoc(list,title,part){return {title:title,sub:mode+" · cap band "+D.cap.floor+"–"+D.cap.ceiling+" · top "+D.season.counting.n+" salaries count"+(part?" · "+part:""),tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"cards",cols:2,cards:list.map(rosterCard)}],foot:exFoot(),link:exLinkHere("#teams")};}
- items.push({id:"rosters",label:"All 16 rosters",desc:"Every team's players and salaries, four images (four teams each)",pages:function(){return [0,4,8,12].map(function(i){var a=D.teams.slice(i,i+4),r=(i+1)+"–"+(i+4);return {label:"Teams "+r,name:"rosters-"+(i+1)+"-"+(i+4)+".png",alt:"Rosters of teams "+(i+1)+" to "+(i+4),doc:rostersDoc(a,"League rosters","teams "+r)};});},link:function(){return exLinkHere("#teams");}});
- if(me&&T[me])items.push({id:"myroster",label:"My roster ("+T[me].short+")",desc:"Your team on one image",pages:function(){return [{label:T[me].short,name:"roster-"+T[me].short+".png",alt:"Roster of "+T[me].short,doc:rostersDoc([T[me]],T[me].name||T[me].short)}];},link:function(){return exLinkHere("#teams");}});
+ items.push({id:"rosters",label:"All 16 rosters",desc:"Every team's players and salaries, four images (four teams each)",pages:function(){return [0,4,8,12].map(function(i){var a=D.teams.slice(i,i+4),r=(i+1)+"–"+(i+4);return {label:"Teams "+r,name:"rosters-"+(i+1)+"-"+(i+4)+".png",alt:"Rosters of teams "+(i+1)+" to "+(i+4),snap:function(){var cards=a.map(function(t){return exCardOf(t.short);}),host=cards[0]&&cards[0].parentElement;return host?exSnapGroup(cards,host,860):null;},doc:rostersDoc(a,"League rosters","teams "+r)};});},link:function(){return exLinkHere("#teams");}});
+ if(me&&T[me])items.push({id:"myroster",label:"My roster ("+T[me].short+")",desc:"Your team on one image",pages:function(){return [{label:T[me].short,name:"roster-"+T[me].short+".png",alt:"Roster of "+T[me].short,snap:function(){return exSnapEl(exCardOf(T[me].short),430,exSnapFoot());},doc:rostersDoc([T[me]],T[me].name||T[me].short)}];},link:function(){return exLinkHere("#teams");}});
  items.push({id:"cap",label:"Cap table",desc:"Payroll, room and roster size for all 16 teams",pages:function(){var rows=D.teams.map(function(t){var tm=v.teams[t.id],bad=tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR",near=tm.status==="NEAR_CEILING",k=bad?"bad":near?"warn":"ok";return {c:[{team:t.id},exB(tm.cap,tm.cap/(D.cap.ceiling*1.08),bad?["rgba(216,69,61,.10)","rgba(216,69,61,.34)"]:near?["rgba(232,162,29,.12)","rgba(232,162,29,.38)"]:["rgba(47,165,100,.10)","rgba(47,165,100,.32)"]),exP(stText(tm),k),String(tm.count),tm.il?exP(tm.il,"mute"):"0"]};}).sort(function(a,b){return +exCell(b.c[1]).t-+exCell(a.c[1]).t;});
-   return [{label:"Cap",name:"cap-table.png",alt:"Cap table",doc:{title:"Cap table",sub:mode+" · band "+D.cap.floor+"–"+D.cap.ceiling+" · highest payroll first",tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"table",cols:[{h:"TEAM",w:3},{h:"PAYROLL",w:2,a:"r",m:1},{h:"STATUS",w:3,a:"r"},{h:"PLAYERS",w:2,a:"r",m:1},{h:"IL",w:1,a:"r",m:1}],rows:rows}],foot:exFoot(),link:exLinkHere("#cap")}}];},link:function(){return exLinkHere("#cap");}});
+   return [{label:"Cap",name:"cap-table.png",alt:"Cap table",snap:function(){var g=document.querySelector("#cap .cap-grid");return g?exSnapEl(g,560,exSnapFoot()):null;},doc:{title:"Cap table",sub:mode+" · band "+D.cap.floor+"–"+D.cap.ceiling+" · highest payroll first",tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"table",cols:[{h:"TEAM",w:3},{h:"PAYROLL",w:2,a:"r",m:1},{h:"STATUS",w:3,a:"r"},{h:"PLAYERS",w:2,a:"r",m:1},{h:"IL",w:1,a:"r",m:1}],rows:rows}],foot:exFoot(),link:exLinkHere("#cap")}}];},link:function(){return exLinkHere("#cap");}});
  var ST_=D.standings;
  if(ST_&&ST_.started&&ST_.teams)items.push({id:"standings",label:"Standings and draft order",desc:"Yahoo standings, with the provisional reverse order",pages:function(){var ids=Object.keys(ST_.teams).sort(function(a,b){return ST_.teams[a].rank-ST_.teams[b].rank;});
    var rows=ids.map(function(f){var s=ST_.teams[f];return {c:[exP(s.rank,s.rank<=8?"ok":"mute"),{team:f},s.w+"-"+s.l+(s.t?"-"+s.t:""),exB((s.pct||0).toFixed(3).replace(/^0/,""),s.pct||0),s.gb==null?"–":String(s.gb)]};});
@@ -4528,11 +4604,11 @@ function exCatalog(){
            {label:"Reverse order",name:"reverse-order.png",alt:"Provisional reverse order",doc:{title:"Reverse standings",tag:"PROVISIONAL · NOT THE DRAFT ORDER",sub:"Worst record first. Penalties, the lottery and the rank 3/4 bonus are not applied.",blocks:[{t:"table",cols:[{h:"PICK",w:1,m:1},{h:"TEAM",w:4},{h:"RECORD",w:2,a:"r",m:1}],rows:wrows}],foot:exFoot(),link:exLinkHere("#draft")}}];},link:function(){return exLinkHere("#teams");}});
  if(LOT.res)items.push({id:"lottery",label:"Lottery draw",desc:"The draw you just simulated (not the real order)",pages:function(){var L=D.lottery,by={};L.teams.forEach(function(t){by[t.franchiseId]=t;});
    var rows=LOT.res.map(function(f,i){var t=by[f],mv=(t.naturalPick||i+1)-(i+1);return {c:[exP(lotPickLabel(i+1),i<2?"gold":"mute"),{team:f},mv>0?exF("▲ "+mv,EX_GOOD):mv<0?exF("▼ "+(-mv),EX_BAD):""]};});
-   return [{label:"Draw",name:"lottery-draw.png",alt:"Simulated lottery draw",doc:{title:"Lottery simulation",tag:"SIMULATION · NOT OFFICIAL",sub:"One simulated round-1 draw on the live standings.",blocks:[{t:"table",cols:[{h:"PICK",w:1,m:1},{h:"TEAM",w:4},{h:"VS REVERSE ORDER",w:2,a:"r"}],rows:rows}],foot:exFoot(),link:exLinkHere("#draft")}}];},link:function(){return exLinkHere("#draft");}});
+   return [{label:"Draw",name:"lottery-draw.png",alt:"Simulated lottery draw",snap:function(){return exSnapEl(document.getElementById("lottery-sim"),430,exSnapFoot());},doc:{title:"Lottery simulation",tag:"SIMULATION · NOT OFFICIAL",sub:"One simulated round-1 draw on the live standings.",blocks:[{t:"table",cols:[{h:"PICK",w:1,m:1},{h:"TEAM",w:4},{h:"VS REVERSE ORDER",w:2,a:"r"}],rows:rows}],foot:exFoot(),link:exLinkHere("#draft")}}];},link:function(){return exLinkHere("#draft");}});
  /* the trade being built in the Trade Machine: the three images and the summary the machine itself shares */
  if(typeof CHK!=="undefined"&&CHK.teams&&chkMoves().length)items.push({id:"trade",label:"Trade in the Trade Machine",desc:"The proposal, each team after it, and the verdict",link:function(){return location.href;},pages:function(){
    var mv=chkMoves(),dr=chkDrops(),il=chkIls(),res=chkRun(mv,CHK.now,dr,il),a=chkImageCanvas(res,mv,dr),b=chkRostersCanvas(res,mv,dr,il),txt=chkSummaryText(res,mv,dr);
-   return [{label:"Trade",name:"trade-proposal.png",alt:"The proposed trade: "+res.status,cv:a,text:txt},{label:"Teams after",name:"teams-after-trade.png",alt:"Rosters after the trade",cv:b,text:txt},{label:"Both",name:"trade-and-teams-after.png",alt:"Trade and rosters after it",cv:chkCompositeCanvas(a,b),text:txt}];}});
+   return [{label:"As on the page",name:"trade-machine.png",alt:"The Trade Machine: "+res.status,cv:a,text:txt,snap:function(){return exSnapEl(document.getElementById("chk"),520,exSnapFoot(),".chk-act button,.chk-act a,.chk-fl,.chk-btn,.chk-ti span,input,select,textarea,button:not(.tchip):not(.tpill)");}},{label:"Trade",name:"trade-proposal.png",alt:"The proposed trade: "+res.status,cv:a,text:txt},{label:"Teams after",name:"teams-after-trade.png",alt:"Rosters after the trade",cv:b,text:txt},{label:"Both",name:"trade-and-teams-after.png",alt:"Trade and rosters after it",cv:chkCompositeCanvas(a,b),text:txt}];}});
  items.push({id:"trades",label:"Trades this season",desc:"Completed trades and what each side got",pages:function(){
    var done=(D.trades||[]).filter(function(t){return t.status==="COMPLETED"||(t.phase==="IN_SEASON"&&t.status!=="VOID");}).slice(-12),
      cards=done.map(function(t){var side=function(f){return (t.receives[f]||[]).map(function(a){return a.t==="p"?a.n:"Pick "+a.n;});};
@@ -4562,8 +4638,11 @@ function exOpen(item){
  var pages;try{pages=item.pages();}catch(e){exToast("Could not build “"+item.label+"”. Please report it.",null,5000);return;}
  var busy=exToast("Making "+(pages.length>1?pages.length+" images":"the image")+"…");
  chkImageReady(function(){
-  var jobs=pages.map(function(p){var cv;try{cv=p.cv||exCanvas(p.doc);}catch(e){cv=null;}
-    return new Promise(function(ok){if(!cv){ok({label:p.label,blob:null,doc:p.doc,text:p.text});return;}cv.toBlob(function(b){ok({label:p.label,name:String(p.name||"export.png").replace(/\.png$/,"-"+exDate()+".png"),alt:exAlt(p),blob:b,doc:p.doc,text:p.text});},"image/png");});});
+  var jobs=pages.map(function(p){
+    var spec=null;try{spec=p.snap?p.snap():null;}catch(e){spec=null;}
+    var drawn=function(){try{return p.cv||exCanvas(p.doc);}catch(e){return null;}};
+    return (spec?exSnap(spec):Promise.resolve(null)).then(function(cv){cv=cv||drawn();
+     return new Promise(function(ok){if(!cv){ok({label:p.label,blob:null,doc:p.doc,text:p.text});return;}cv.toBlob(function(b){ok({label:p.label,name:String(p.name||"export.png").replace(/\.png$/,"-"+exDate()+".png"),alt:exAlt(p),blob:b,doc:p.doc,text:p.text});},"image/png");});});});
   Promise.all(jobs).then(function(out){
    var text=out.some(function(p){return p.text;})?out[0].text:out.map(function(p){return p.doc?exText(p.doc):"";}).join("\n\n"),list=out.every(function(p){return p.doc;})?out.map(function(p){return exList(p.doc);}).join("\n\n"):null,link=item.link?item.link():exLinkHere();
    if(!out.every(function(p){return p.blob;})){   /* big canvases can fail on phones: say so, and still offer the text */
@@ -4588,7 +4667,7 @@ function exTeamItem(t){return {id:"team-"+t.short,label:t.short,desc:"",link:fun
  if(ck.coverage&&ck.coverage.short&&ck.coverage.short.length)notes.push({t:"note",tone:"warn",text:"Short at "+ck.coverage.short.join(", ")});
  if(tm.fold&&tm.fold.tradeIds&&tm.fold.tradeIds.length)notes.push({t:"note",tone:"mute",text:"In: "+tm.fold.in.map(function(a){return a.n;}).join(", ")+" · Out: "+tm.fold.out.map(function(a){return a.n;}).join(", ")});
  var rows=tm.roster.slice().sort(function(a,b){return b.c-a.c;}).map(function(r,i){var il=r.s==="IL"||r.s==="IL+";return {tone:il?"mute":"",b:i<D.season.counting.n&&!r.x,c:[String(i+1),r.n+(r.st?" · "+r.st:""),r.pos||"",il?exP(r.s,"mute"):"",exB(r.c,r.c/((tm.roster.reduce(function(a,q){return Math.max(a,q.c);},0))||1),i<D.season.counting.n&&!r.x?null:["rgba(107,122,147,.08)","rgba(107,122,147,.22)"])]};});
- return [{label:t.short,name:"team-"+t.short+".png",alt:"Roster of "+t.short,doc:{title:t.name||t.short,sub:mode+" · payroll "+tm.cap+" · "+stText(tm)+" · "+tm.count+" players · picks "+((tm.picks||[]).join(", ")||"none"),tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",
+ return [{label:t.short,name:"team-"+t.short+".png",alt:"Roster of "+t.short,snap:function(){return exSnapEl(exCardOf(t.short),430,exSnapFoot());},doc:{title:t.name||t.short,sub:mode+" · payroll "+tm.cap+" · "+stText(tm)+" · "+tm.count+" players · picks "+((tm.picks||[]).join(", ")||"none"),tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",
    blocks:[{t:"stats",items:[{v:tm.cap,l:"PAYROLL (TOP "+D.season.counting.n+")",tone:tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR"?"bad":""},{v:D.cap.floor+"–"+D.cap.ceiling,l:"BAND"},{v:tm.count,l:"PLAYERS"},{v:tm.il,l:"ON IL"}]}].concat(notes,[{t:"table",cols:[{h:"#",w:.8,m:1},{h:"PLAYER",w:5},{h:"POS",w:1.8},{h:"SLOT",w:1.2},{h:"CAP",w:1.2,a:"r",m:1}],rh:42,rows:rows}]),foot:exFoot(),link:exLinkHere("#teams")}}];}};}
 function exHub(){
  var old=document.getElementById("ex-hub");if(old){old.remove();return;}
@@ -4605,7 +4684,7 @@ function exHub(){
  var x=h("button",{type:"button",class:"imgov-x","aria-label":"Close",text:"✕"});x.addEventListener("click",close);
  ov.appendChild(h("div",{class:"imgov-box ex-box"},[x,h("div",{class:"imgov-scroll ex-scroll"},[h("div",{class:"ex-t",id:"ex-hub-t",text:"Export"}),h("div",{class:"ex-s",text:"Each export gives an image, a link and text for chat."})].concat(body))]));document.body.appendChild(ov);
  var f=ov.querySelector(".ex-item");if(f)f.focus();}
-window.NBA_EXPORT={open:exOpen,hub:exHub,text:exText,list:exList,canvas:exCanvas,catalog:exCatalog,group:exGroup};
+window.NBA_EXPORT={open:exOpen,hub:exHub,text:exText,list:exList,canvas:exCanvas,catalog:exCatalog,group:exGroup,snap:exSnap,snapEl:exSnapEl};
 function renderCheck(){
  var box=document.getElementById("chk");if(!box)return;box.textContent="";
  var me=getMe();if(CHK.teams.length<2){CHK.teams=[];if(me&&T[me])CHK.teams.push(me);D.teams.forEach(function(t){if(CHK.teams.length<2&&CHK.teams.indexOf(t.id)<0)CHK.teams.push(t.id);});}

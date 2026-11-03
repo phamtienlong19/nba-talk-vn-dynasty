@@ -76,14 +76,14 @@ class TestExportHub(unittest.TestCase):
         self.assertTrue(r["ov"])
         self.assertIn("PLAYER", r["texts"]["salaries"])
 
-    def test_the_trade_machine_proposal_is_an_export_with_three_images(self):
+    def test_the_trade_machine_proposal_is_an_export_with_the_page_view_and_three_drawn_images(self):
         r = self.drive("""
           var it=NBA_EXPORT.catalog().filter(function(i){return i.id==='trade';})[0];R.has=!!it;
           if(it){document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=trade]').click();
             setTimeout(function(){var ov=document.getElementById('chk-imgov');R.tabs=ov?ov.querySelectorAll('.imgov-t').length:0;},2000);}""",
                        qs="?check=478.p.5432~franchise-01", wait=4500)
         self.assertTrue(r["has"])
-        self.assertEqual(r["tabs"], 3)                                                     # proposal, teams after, both
+        self.assertEqual(r["tabs"], 4)                                                     # as on the page, proposal, teams after, both
 
     def test_text_is_derived_from_the_same_document(self):
         r = self.drive("""
@@ -186,3 +186,18 @@ class TestExportHub(unittest.TestCase):
             src = f.read()
         body = src[src.index("function exRun(c,doc,draw,W){"):src.index("function exCanvas(doc){")]
         self.assertIn("k.m?cell.t:imgFit(", body)                                     # numeric columns shrink the type instead of cutting digits
+
+    def test_team_trade_and_live_exports_are_snapshots_of_the_page(self):
+        feed = json.dumps(tlf.feed()).replace("</", "<\\/")
+        r = self.drive("NBA_LIVE.set(" + feed + ");" + """
+          var cat=NBA_EXPORT.catalog(),T0=NBA_NAV.D.teams[0];
+          var specs={team:NBA_EXPORT.snapEl([].filter.call(document.querySelectorAll('section.team-card'),function(c){var t=c.querySelector('.identity-tag');return t&&t.textContent.trim()===T0.short;})[0],430,'x'),
+                     roto:null,standings:NBA_LIVE.snap('standings',430)};
+          R.hasSnap=['rosters','cap','live-standings','live-matchups'].map(function(id){var it=cat.filter(function(i){return i.id===id;})[0];return !!(it&&it.pages()[0].snap);});
+          var out={};var keys=Object.keys(specs).filter(function(k){return specs[k];});
+          Promise.all(keys.map(function(k){return NBA_EXPORT.snap(specs[k]).then(function(cv){out[k]=cv?[cv.width,cv.height]:null;});})).then(function(){R.out=out;});""", wait=9000)
+        self.assertEqual(r["hasSnap"], [True, True, True, True])
+        for k, size in r["out"].items():
+            self.assertIsNotNone(size, k)
+            self.assertGreaterEqual(size[0], 1000, k)                                   # 430 css px drawn at 2.5x: a 1080px phone-shaped image
+            self.assertGreater(size[1], 400, k)

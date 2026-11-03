@@ -335,33 +335,40 @@ function exportsFor(){
   return [
    {id:"live-standings",label:live?"Live standings":"Standings (finished weeks)",desc:"Records, playoff line and movement"+(live?" if the week ended now":""),pages:function(){
      var rows=f.table.map(function(r){return {c:[(r.tied?"T-":"")+r.rank,{team:r.team},r.w+"-"+r.l+(r.t?"-"+r.t:""),pct(r.pct),r.moved&&live?{t:r.moved>0?"▲"+r.moved:"▼"+(-r.moved),fg:r.moved>0?"#0f7a40":"#b42318"}:"",{t:r.playoff==="in"?"IN #"+r.seed:r.playoff==="bubble"?"BUBBLE":"OUT",pill:r.playoff==="in"?"ok":r.playoff==="bubble"?"warn":"mute"}]};});
-     return [{label:"Standings",name:"live-standings.png",alt:"Standings",doc:{title:live?"Standings if the week ended now":"Standings",tag:live?"PROVISIONAL":"",sub:(live?"Week "+f.week+" · as of "+ict(f.asOf)+" · ":"")+"equal records share a rank",
+     return [{label:"Standings",name:"live-standings.png",alt:"Standings",snap:function(){return snapFor("standings",430);},doc:{title:live?"Standings if the week ended now":"Standings",tag:live?"PROVISIONAL":"",sub:(live?"Week "+f.week+" · as of "+ict(f.asOf)+" · ":"")+"equal records share a rank",
        blocks:[{t:"table",cols:[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"W-L-T",w:2,a:"r",m:1},{h:"PCT",w:1.6,a:"r",m:1},{h:"MOVE",w:1.4,a:"r"},{h:"PLAYOFFS",w:2,a:"r"}],rh:44,rows:rows}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}},
    {id:"live-matchups",label:live?"This week's matchups":"Last finished week",desc:"Category score of every matchup",pages:function(){
      var cards=f.matchups.map(function(m){var a=m.teams[0],b=m.teams[1];
        return {team:a.team,head:m.score[0]+"–"+m.score[1]+(m.score[2]?"–"+m.score[2]:""),sub:"vs "+(TM[b.team]?TM[b.team].short:b.name),lines:CATS.map(function(c){var w=m.cats[c[0]];
          return {l:c[1]+"  "+val(c[0],a.stats[c[0]],a.stats)+" – "+val(c[0],b.stats[c[0]],b.stats),r:w==="a"?"✓":w==="b"?"✗":w==="t"?"=":"",tone:w==="a"?"ok":w==="b"?"bad":"mute"};})};});
-     return [{label:"Matchups",name:"live-matchups.png",alt:"Matchups",doc:{title:live?"Week "+f.week+" matchups":"Last finished week",tag:live?"PROVISIONAL":"",sub:live?"as of "+ict(f.asOf):"",blocks:[{t:"cards",cols:2,cards:cards}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}}].concat(rotoExports());}
+     return [{label:"Matchups",name:"live-matchups.png",alt:"Matchups",snap:function(){return snapFor("matchups",860);},doc:{title:live?"Week "+f.week+" matchups":"Last finished week",tag:live?"PROVISIONAL":"",sub:live?"as of "+ict(f.asOf):"",blocks:[{t:"cards",cols:2,cards:cards}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}}].concat(rotoExports());}
 function rotoExports(){   /* roto, raw stats and all-play as images/text, once the week has numbers */
   var R=rotoData();if(!R)return [];
   var ids=Object.keys(R.roto).map(Number).sort(function(a,b){return R.roto[a].rank-R.roto[b].rank||a-b;}),sub="Week "+FEED.week+" · as of "+ict(FEED.asOf)+" · descriptive only, the league is head-to-head";
   var HEAT={"h3":["#a4e4b9","#17492b"],"h2":["#d0f1dd","#17492b"],"h1":["#ebf8f0","#1d3b2a"],"h0":["#ffffff","#12264d"],"h-1":["#fdecee","#5c1f2a"],"h-2":["#f6cbd1","#6a1f2c"],"h-3":["#efadb8","#6a1f2c"]};
   function hc(t,p){if(p==null)return t;var x=HEAT[heat(p)];return {t:t,bg:x[0],fg:x[1]};}   /* the page's heat colours, in the image too */
-  function page(name,label,title,cols,rows){return [{label:label,name:name+".png",alt:label,doc:{title:title,tag:"PROVISIONAL",sub:sub,blocks:[{t:"table",cols:cols,rh:40,rows:rows}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}
+  function page(name,label,title,cols,rows,kind,width){return [{label:label,name:name+".png",alt:label,snap:kind?function(){return snapFor(kind,width);}:null,doc:{title:title,tag:"PROVISIONAL",sub:sub,blocks:[{t:"table",cols:cols,rh:40,rows:rows}],foot:"NBA Talk VN Dynasty",link:location.origin+location.pathname+"#live"}}];}
   var catCols=CATS.map(function(c){return {h:c[1],w:1.25,a:"c",m:1};});
   return [
    {id:"live-roto",label:"Roto rankings",desc:"Roto points for the week in progress",pages:function(){
      return page("live-roto","Roto","Week "+FEED.week+" roto rankings",[{h:"#",w:1,m:1},{h:"TEAM",w:3.2}].concat(catCols,[{h:"TOTAL",w:1.5,a:"c",m:1}]),
-       ids.map(function(i){var r=R.roto[i];return {c:[String(r.rank),{team:R.side[i].team}].concat(CATS.map(function(c){return hc(pts(r.points[c[0]]),r.points[c[0]]);}),[hc(pts(r.total),r.total/9)])};}));}},
+       ids.map(function(i){var r=R.roto[i];return {c:[String(r.rank),{team:R.side[i].team}].concat(CATS.map(function(c){return hc(pts(r.points[c[0]]),r.points[c[0]]);}),[hc(pts(r.total),r.total/9)])};}),"roto",760);}},
    {id:"live-rawstats",label:"Raw stats",desc:"Category totals of all 16 teams",pages:function(){
      return page("live-rawstats","Raw stats","Week "+FEED.week+" raw stats",[{h:"#",w:1,m:1},{h:"TEAM",w:3.2}].concat(catCols,[{h:"SCORE",w:1.4,a:"r",m:1}]),
-       ids.map(function(i){var sd=R.side[i];return {c:[String(R.roto[i].rank),{team:sd.team}].concat(CATS.map(function(c){return hc(val(c[0],sd.stats[c[0]],sd.stats),R.roto[i].points[c[0]]);}),[String(sd.printed!=null?sd.printed:sd.wins)])};}));}},
+       ids.map(function(i){var sd=R.side[i];return {c:[String(R.roto[i].rank),{team:sd.team}].concat(CATS.map(function(c){return hc(val(c[0],sd.stats[c[0]],sd.stats),R.roto[i].points[c[0]]);}),[String(sd.printed!=null?sd.printed:sd.wins)])};}),"stats",820);}},
    {id:"live-allplay",label:"All-play records",desc:"Each team against all 15 others, category by category",pages:function(){
      var order=ids.slice().sort(function(a,b){var x=R.ap.record[a],y=R.ap.record[b];return (y[0]-x[0])||(x[1]-y[1])||(R.roto[a].rank-R.roto[b].rank);});
      return page("live-allplay","All-play","Week "+FEED.week+" all-play",[{h:"#",w:1,m:1},{h:"TEAM",w:3.4},{h:"ALL-PLAY W-L-T",w:2.2,a:"c",m:1},{h:"ROTO",w:1.4,a:"c",m:1},{h:"MATCHUP",w:2.8,a:"r"}],
-       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}));}}];}
+       order.map(function(i,k){var r=R.ap.record[i],o=R.opp[i],c=R.ap.cells[i][o];return {c:[String(k+1),{team:R.side[i].team},hc(r[0]+"-"+r[1]+"-"+r[2],1+15*(r[0]+r[2]/2)/15),hc(pts(R.roto[i].total),R.roto[i].total/9),{t:wlt(c)+" v "+nameOf(R.side[o].team),pill:c.margin>0?"ok":c.margin<0?"bad":"mute"}]};}),"allplay",1180);}}];}
 
-window.NBA_LIVE={standings:standingsFor,exports:exportsFor,source:function(){return SRC;},feed:function(){return FEED;},reload:function(){return load(true);},
+function snapFor(kind,width){   /* a detached copy of one LIVE view, for the export hub's snapshot images */
+  var R=rotoData(),node=null;
+  if(kind==="standings")node=standings();
+  else if(kind==="matchups"){node=h("div",{class:"lv-ms"});FEED.matchups.forEach(function(m){var c=matchup(m);var d=c.querySelector("details");if(d)d.remove();node.appendChild(c);});}
+  else if(R&&kind==="roto")node=rotoPane(R);else if(R&&kind==="stats")node=statsPane(R);else if(R&&kind==="allplay"){node=allPane(R);var fl=node.querySelector(".lv-fl");if(fl)fl.remove();}
+  if(!node)return null;if(window.NBA_MONO)window.NBA_MONO(node);
+  return {node:node,wrap:[{tag:"section",id:"live",cls:"page"},{tag:"div",id:"live-root",cls:"",style:"--lv-nav:0px"}],width:width,foot:"NBA Talk VN Dynasty · LIVE · as of "+ict(FEED.asOf)};}
+window.NBA_LIVE={standings:standingsFor,exports:exportsFor,snap:snapFor,source:function(){return SRC;},feed:function(){return FEED;},reload:function(){return load(true);},
   /* tests and tools hand a feed in directly */ set:function(d){accept(d,"live");render();}};
 render();
 load(false);
