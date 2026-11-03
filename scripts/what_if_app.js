@@ -596,7 +596,7 @@ function kbExports(){
    {id:"kb-team",label:"Keeper plan: "+kbTeam().short,desc:"This team's keepers, salaries and payroll against the band",link:function(){return kbLink(label());},pages:function(){
      var t=kbTeam(),rank=kbRanking(),fit=kbFit(t,kbIntent(t),rank,KB.auto),b=kb.band,intent=kbIntent(t),eff={},off={};fit.eff.forEach(function(k){eff[k]=1;});fit.off.forEach(function(k){off[k]=1;});
      var rows=t.players.map(function(p){return {p:p,rk:rank[p.k],s:kbSalaryAt(rank[p.k])};}).sort(function(a,c){return a.rk-c.rk;}).map(function(x){var st=eff[x.p.k]?"KEEP":off[x.p.k]?"AUTO-OFF":"";
-       return {tone:off[x.p.k]?"warn":"",b:!!eff[x.p.k],c:[st,String(x.rk),x.p.n+(x.p.rk?" · R":""),String(x.s)]};});
+       return {tone:off[x.p.k]?"warn":"",b:!!eff[x.p.k],c:[st?{t:st,pill:st==="KEEP"?"ok":"warn"}:"",String(x.rk),x.p.n+(x.p.rk?" · R":""),{t:String(x.s),bar:x.s/(kbSalaryAt(1)||1)}]};});
      var blocks=[{t:"stats",items:[{v:fit.eff.length+"/"+kb.keeperMax,l:"KEEPING"},{v:fit.pay,l:"KEEPER PAYROLL",tone:fit.pay>b.ceiling?"bad":""},{v:b.floor+"–"+b.ceiling,l:"OFFICIAL BAND"},{v:fit.pay>b.ceiling?fit.pay-b.ceiling:b.ceiling-fit.pay,l:fit.pay>b.ceiling?"OVER CEILING":"ROOM TO CEILING",tone:fit.pay>b.ceiling?"bad":"ok"}]},
        {t:"table",cols:[{h:"",w:2},{h:"RANK",w:1.2,a:"r",m:1},{h:"PLAYER",w:5},{h:"SALARY",w:1.5,a:"r",m:1}],rows:rows}];
      if(fit.off.length)blocks.splice(1,0,{t:"note",tone:"warn",text:"Auto-adjusted: "+fit.off.map(kbName).join(", ")+" left out to stay at or under "+b.ceiling+"."});
@@ -610,18 +610,18 @@ function kbExports(){
    {id:"kb-league",label:"League impact of this ranking",desc:"Every team's payroll under this ranking against Yahoo's order",link:function(){return kbLink(label());},pages:function(){
      var rank=kbRanking(),y0=kbRankOf([]),fits=kbFitsAll(rank),max=kb.keeperMax;
      var rows=kb.teams.map(function(t){var top=kbTop9(t,rank),top0=kbTop9(t,y0),f=fits[t.id],it=kbIntent(t),st=kbBandStatus(top);
-       return {tone:st==="over"?"bad":st==="near"?"warn":"",c:[{team:t.id},String(top),top===top0?"0":sgn(top-top0),it.length?f.eff.length+"/"+max+(f.off.length?" (−"+f.off.length+" auto)":""):"no plan",it.length?String(f.pay):"–"]};}).sort(function(a,c){return +c.c[1]-+a.c[1];});
+       return {c:[{team:t.id},{t:String(top),pill:st==="over"?"bad":st==="near"?"warn":st==="under"?"mute":"ok"},top===top0?"0":{t:sgn(top-top0),fg:top>top0?"#a14b00":"#0f7a40"},it.length?f.eff.length+"/"+max+(f.off.length?" (−"+f.off.length+" auto)":""):"no plan",it.length?{t:String(f.pay),fg:f.pay>kb.band.ceiling?"#b42318":"#12264d"}:"–"]};}).sort(function(a,c){return +c.c[1]-+a.c[1];});
      return [{label:"League",name:"keepers-league-impact.png",alt:"League impact of this ranking",doc:kbDocBase("League impact","Top "+max+" payroll under this ranking vs Yahoo's order · band "+kb.band.floor+"–"+kb.band.ceiling,[{t:"table",cols:[{h:"TEAM",w:3},{h:"TOP "+max,w:1.6,a:"r",m:1},{h:"VS YAHOO",w:1.6,a:"r",m:1},{h:"PLAN",w:2.4,a:"r"},{h:"PLAN PAY",w:1.6,a:"r",m:1}],rows:rows}],kbLink(label()))}];}},
    {id:"kb-movers",label:"Biggest salary swings",desc:"Rostered players whose cap moves most under this ranking",link:function(){return kbLink(label());},pages:function(){
      var rank=kbRanking(),y0=kbRankOf([]),own=kbOwnerCache(),rows=[];
      Object.keys(own).forEach(function(k){var a=kbSalaryAt(y0[k]),b=kbSalaryAt(rank[k]);if(a!==b)rows.push({k:k,a:a,b:b,d:b-a,o:own[k]});});
      rows.sort(function(x,y){return Math.abs(y.d)-Math.abs(x.d)||x.k.localeCompare(y.k);});
-     var r=rows.slice(0,40).map(function(x){return {tone:x.d>0?"warn":"",c:[{team:x.o.t.id},kbName(x.k),"#"+y0[x.k]+" → #"+rank[x.k],String(x.b),sgn(x.d)]};});
+     var r=rows.slice(0,40).map(function(x){return {c:[{team:x.o.t.id},kbName(x.k),"#"+y0[x.k]+" → #"+rank[x.k],{t:String(x.b),bar:x.b/(kbSalaryAt(1)||1)},{t:sgn(x.d),pill:x.d>0?"warn":"ok"}]};});
      if(!r.length)r=[{c:["","Nothing moves: this is Yahoo's order","","",""]}];
      return [{label:"Swings",name:"keepers-salary-swings.png",alt:"Biggest salary swings",doc:kbDocBase(label(),"Cap under this ranking vs Yahoo's order · "+rows.length+" rostered players change",[{t:"table",cols:[{h:"TEAM",w:2.2},{h:"PLAYER",w:4},{h:"RANK",w:2.4,a:"r",m:1},{h:"CAP",w:1,a:"r",m:1},{h:"Δ",w:1,a:"r",m:1}],rh:42,rows:r}],kbLink(label()))}];}},
    {id:"kb-rank",label:"My ranking",desc:"The top of your ranking and every player you moved",link:function(){return kbLink(label());},pages:function(){
      var rank=kbRanking(),y0=kbRankOf([]),own=kbOwnerCache(),s=set(),movedSet={};s.pins.forEach(function(x){movedSet[x[0]]=1;});
-     var order=kbUniverse().slice().sort(function(a,b){return rank[a]-rank[b];}),mk=function(k){var o=own[k],rk=rank[k],d=y0[k]-rk;return {tone:movedSet[k]?"warn":"",c:[String(rk),kbName(k),o?{team:o.t.id}:"free agent",String(kbSalaryAt(rk)),d?(d>0?"↑":"↓")+Math.abs(d):""]};};
+     var order=kbUniverse().slice().sort(function(a,b){return rank[a]-rank[b];}),mk=function(k){var o=own[k],rk=rank[k],d=y0[k]-rk;return {tone:movedSet[k]?"warn":"",c:[String(rk),kbName(k),o?{team:o.t.id}:"free agent",{t:String(kbSalaryAt(rk)),bar:kbSalaryAt(rk)/(kbSalaryAt(1)||1)},d?{t:(d>0?"↑":"↓")+Math.abs(d),fg:d>0?"#1b4fb8":"#6b3fa0"}:""]};};
      var cols=[{h:"RANK",w:1.2,a:"r",m:1},{h:"PLAYER",w:4.4},{h:"TEAM",w:2.2},{h:"SALARY",w:1.5,a:"r",m:1},{h:"VS YAHOO",w:1.6,a:"r"}];
      var pages=[{label:"Top 60",name:"ranking-top-60.png",alt:"Top 60 of the ranking",doc:kbDocBase(s.label,"Top 60 · highlighted rows are players you moved off Yahoo's order",[{t:"table",cols:cols,rh:42,rows:order.slice(0,60).map(mk)}],kbLink(label()))}];
      var mv=order.filter(function(k){return movedSet[k];});

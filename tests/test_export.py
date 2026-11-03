@@ -167,3 +167,22 @@ class TestExportHub(unittest.TestCase):
         body = src[src.index("function exRun(c,doc,draw,W){"):src.index("function exCanvas(doc){")]
         sizes = [int(x) for x in re.findall(r'"\d{3} (\d+)px "', body)]
         self.assertGreaterEqual(min(sizes), 20, sorted(set(sizes)))                   # 20px of 1080 is about 7px on a phone: the floor
+
+    def test_the_roto_image_has_heat_cells_whole_numbers_and_no_stray_buttons(self):
+        feed = json.dumps(tlf.feed()).replace("</", "<\\/")
+        r = self.drive("NBA_LIVE.set(" + feed + ");" + """
+          var it=NBA_EXPORT.catalog().filter(function(i){return i.id==='live-roto';})[0];var doc=it.pages()[0].doc;var rows=doc.blocks[0].rows;
+          R.heat=rows.every(function(rw){return rw.c.slice(2,11).every(function(x){return x&&x.bg;});});
+          NBA_EXPORT.open(it);setTimeout(function(){var ov=document.getElementById('chk-imgov');
+            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});R.tabs=ov.querySelectorAll('.imgov-t').length;
+            R.headFirst=ov.querySelector('.imgov-box').firstChild.classList.contains('imgov-head');},1800);""", wait=4000)
+        self.assertTrue(r["heat"])                                                     # every category and the total carry the page's heat colour
+        self.assertNotIn("Save 2 images", r["btns"])                                  # only for multi-image exports
+        self.assertEqual(r["tabs"], 0)
+        self.assertTrue(r["headFirst"])                                               # tabs and close sit above the image, not on it
+
+    def test_numbers_are_never_ellipsized_in_image_tables(self):
+        with open(INDEX, encoding="utf-8") as f:
+            src = f.read()
+        body = src[src.index("function exRun(c,doc,draw,W){"):src.index("function exCanvas(doc){")]
+        self.assertIn("k.m?cell.t:imgFit(", body)                                     # numeric columns shrink the type instead of cutting digits
