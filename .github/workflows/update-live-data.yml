@@ -14,6 +14,15 @@ name: Update Live Data
 on:
   schedule:
     - cron: "5,35 * * * *"
+  push:                      # merging a change to the feed itself starts it at once (no waiting for GitHub's cron to notice)
+    branches: [main]
+    paths:
+      - ".github/workflows/update-live-data.yml"
+      - "scripts/live_feed_loop.sh"
+      - "scripts/build_live_feed.py"
+      - "scripts/yahoo_matchups.py"
+      - "scripts/update_yahoo_matchups.py"
+      - "scripts/live_standings.py"
   workflow_dispatch:
 
 permissions:
