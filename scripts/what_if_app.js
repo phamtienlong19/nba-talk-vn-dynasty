@@ -342,7 +342,8 @@ function kbRankOf(pins){
   var rank={};list.forEach(function(k,i){rank[k]=i+1;});return rank;}
 function kbRanking(){KB.rank=kbRankOf(kbSet().pins);return KB.rank;}
 function kbSalaryAt(rank){return W.keeperBoard.salaryByRank[rank-1]||0;}
-function kbTeam(){var ts=W.keeperBoard.teams;for(var i=0;i<ts.length;i++)if(ts[i].id===KB.team)return ts[i];KB.team=ts[0].id;return ts[0];}
+function kbTeam(){var ts=W.keeperBoard.teams,me=window.NBA_ME?NBA_ME():null;if(!KB.team&&me)KB.team=me;   /* My team is where Keepers starts */
+  for(var i=0;i<ts.length;i++)if(ts[i].id===KB.team)return ts[i];KB.team=ts[0].id;return ts[0];}
 function kbName(k){kbUniverse();return KB.names[k]||k;}
 function kbTeamOf(k){var ts=W.keeperBoard.teams;for(var i=0;i<ts.length;i++)for(var j=0;j<ts[i].players.length;j++)if(ts[i].players[j].k===k)return ts[i];return null;}
 /* keeper picks stay as the manager's intent; what counts is the fitted set: when ranks move and the plan goes over the ceiling,
@@ -697,5 +698,9 @@ document.head.appendChild(css);
 function kbFact(k){if(!W.keeperBoard)return null;if(!KB.loaded)kbLoad();var rank=kbRanking(),y0=kbRankOf([]),rk=rank[k];if(!rk)return null;
   return {rank:rk,salary:kbSalaryAt(rk),yahooRank:y0[k],yahooSalary:kbSalaryAt(y0[k]),set:kbSet().label,moved:kbSet().pins.length};}
 function kbShow(k){if(!W.keeperBoard)return false;if(!KB.loaded)kbLoad();var o=kbTeamOf(k);if(o)KB.team=o.id;S.view="keepers";S.flashKey=k;kbSave();return true;}
-window.NBA_WHATIF={keeper:kbFact,showPlayer:kbShow,exports:function(){return S.view==="keepers"&&W.keeperBoard?kbExports():[];},openBoard:function(){if(W.keeperBoard)bdOpen();},openKeepers:function(){if(W.keeperBoard)S.view="keepers";return !!W.keeperBoard;},viewName:function(){return S.view;},setActive:setActive,isActive:function(){return S.on;},query:query,restore:restore,classify:classify,compliance:compliance,state:S};
+/* a team's keeper plan in numbers (for the My team page) and a way to open Keepers on a given team */
+function kbPlan(fid){if(!W.keeperBoard)return null;if(!KB.loaded)kbLoad();var kb=W.keeperBoard,t=null;kb.teams.forEach(function(x){if(x.id===fid)t=x;});if(!t)return null;
+  var it=kbIntent(t),f=kbFit(t,it,kbRanking(),KB.auto);return {kept:f.eff.length,max:kb.keeperMax,pay:f.pay,floor:kb.band.floor,ceiling:kb.band.ceiling,near:kb.band.near,set:kbSet().label,moved:kbSet().pins.length};}
+function kbOpenFor(fid){if(!KB.loaded)kbLoad();KB.team=fid;kbSave();}
+window.NBA_WHATIF={plan:kbPlan,openFor:kbOpenFor,keeper:kbFact,showPlayer:kbShow,exports:function(){return S.view==="keepers"&&W.keeperBoard?kbExports():[];},openBoard:function(){if(W.keeperBoard)bdOpen();},openKeepers:function(){if(W.keeperBoard)S.view="keepers";return !!W.keeperBoard;},viewName:function(){return S.view;},setActive:setActive,isActive:function(){return S.on;},query:query,restore:restore,classify:classify,compliance:compliance,state:S};
 })();
