@@ -207,7 +207,7 @@ class TestLiveTab(unittest.TestCase):
                         {"team": t2, "yahooId": 2, "missetDays": 0, "players": 0, "stars": 0, "meetsCount": False, "days": []}]}
         r = self.drive(self.feed_js(lineupChecks=lc) + """
           NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
-          setTimeout(function(){var b=document.querySelector('#live-root .lv-lc');R.has=!!b;R.title=b?b.querySelector('.lv-ct').textContent:'';
+          setTimeout(function(){var b=document.querySelector('#live-root .lv-lc');R.has=!!b;R.title=b?b.querySelector('.lv-ct').firstChild.textContent:'';
             R.teams=b?b.querySelectorAll('details.lv-lc-t').length:0;R.flag=b?(b.querySelector('.flag')||{}).textContent:'';
             R.items=b?b.querySelectorAll('li').length:0;R.text=b?b.textContent:'';},600);""", wait=2500)
         self.assertTrue(r["has"])
@@ -366,6 +366,16 @@ class TestLiveTab(unittest.TestCase):
         self.assertLessEqual(sum(1 for x in sizes if x < 10.5), 3)                # and almost nothing read at under 10.5px
         faint = re.search(r"--lv-faint:(#[0-9a-fA-F]{6})", css).group(1)
         self.assertGreaterEqual(contrast(faint, "#ffffff"), 4.5)                  # WCAG AA for the faint text colour on white
+
+    def test_live_cards_can_be_exported_in_place_and_names_open_the_player(self):
+        r = self.drive(self.feed_js() + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          setTimeout(function(){R.stand=!!document.querySelector('#live-root .lv-stand .share-btn');R.cards=document.querySelectorAll('#live-root .lv-m').length;
+            R.cardBtns=document.querySelectorAll('#live-root .lv-m .lv-cap .share-btn').length;
+            document.querySelector('#live-root .lv-det').setAttribute('open','');R.pl=document.querySelectorAll('#live-root .lv-r td.nm.pl[role=button]').length;},600);""", wait=2500)
+        self.assertTrue(r["stand"])
+        self.assertEqual(r["cardBtns"], r["cards"])
+        self.assertGreater(r["pl"], 0)
 
 
 if __name__ == "__main__":

@@ -287,3 +287,5 @@ body.kbb-open{overflow:hidden}.wi-reset.pri{background:var(--wi);border-color:va
  .kbb-row,.kbb-head{grid-template-columns:52px 46px minmax(0,1fr) 38px 50px;gap:6px}
  .kbb-grip,.kbb-rd,.kbb-head>span:nth-child(1),.kbb-head>span:nth-child(4){display:none}
 }
+
+.wi-kb td.wi-pl{cursor:pointer}.wi-kb td.wi-pl:hover b{text-decoration:underline;text-underline-offset:2px}.wi-kb-shr{display:flex;justify-content:flex-end;margin:-4px 0 6px}

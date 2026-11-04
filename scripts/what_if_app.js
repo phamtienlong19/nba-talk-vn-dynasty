@@ -484,6 +484,7 @@ function viewKeepers(){
     h("div",{class:"wi-stat "+(stt==="over"?"bad":stt==="near"?"warn":"ok")},[h("b",{text:String(fit.pay)}),h("span",{text:"PAYROLL"+(intent.length&&set.pins.length&&dY?" · "+sgn(dY)+" vs Yahoo":"")})]),
     h("div",{class:"wi-stat"},[h("b",{text:b.floor+"–"+b.ceiling}),h("span",{text:"BAND"})]),
     h("div",{class:"wi-stat "+(stt==="over"?"bad":stt==="near"?"warn":"ok")},[h("b",{text:txt}),h("span",{text:fit.pay>b.ceiling?"OVER":"ROOM"})])]));
+  if(window.NBA_PLAYER&&NBA_PLAYER.shareBtn){var shb=NBA_PLAYER.shareBtn("keeper plan "+t.short,function(){return document.querySelector("#wi-root .wi-kbx-main");},{width:560,name:"keepers-"+t.short,strip:".share-btn,.wi-kb-ur,.wi-kb-fit,.wi-kb-nc,.wi-kb-act,input[type=number]+button,.wi-kb-mv"});shb.classList.add("wi-sh");mainc.appendChild(h("div",{class:"wi-kb-shr"},[shb]));}
   mainc.appendChild(h("div",{class:"wi-kbx-meter"},[kbMeter(fit.pay,b,true),h("div",{class:"wi-kbx-scale"},[h("span",{text:"floor "+b.floor}),h("span",{text:"ceiling "+b.ceiling})])]));
   var nc=h("details",{class:"wi-kb-nc"},[h("summary",{text:"Not checked here"}),KB_NOT_CHECKED.join(", ")+". Under the ceiling is not an approved declaration."]);if(fit.off.length||fit.pay>b.ceiling)nc.setAttribute("open","");mainc.appendChild(nc);
   var ctl=h("div",{class:"wi-kb-fit"}),au=h("input",{type:"checkbox",id:"kb-auto"});au.checked=KB.auto;au.addEventListener("change",function(){KB.auto=au.checked;kbSave();kbRender();});
@@ -513,6 +514,7 @@ function viewKeepers(){
     var up=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+p.n+" up one rank",text:"▲"}),dn=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+p.n+" down one rank",text:"▼"});
     up.addEventListener("click",function(){kbEdit(p.k,x.rank-1);kbRender();});dn.addEventListener("click",function(){kbEdit(p.k,x.rank+1);kbRender();});
     var moved=set.pins.some(function(q){return q[0]===p.k;}),nmc=h("td",null,[h("b",{text:p.n}),h("small",{text:" "+p.pos+(p.nba?" · "+p.nba:"")})]);
+    if(window.NBA_PLAYER){nmc.classList.add("wi-pl");nmc.setAttribute("tabindex","0");nmc.setAttribute("role","button");nmc.setAttribute("aria-label","Player details: "+p.n);var op=function(){NBA_PLAYER.open(p.k);};nmc.addEventListener("click",op);nmc.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();op();}});}
     if(p.rk)nmc.appendChild(h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));if(p.s==="IL"||p.s==="IL+")nmc.appendChild(h("span",{class:"wi-kb-tag",title:"On the injured list",text:p.s}));
     if(!x.sal)nmc.appendChild(h("span",{class:"wi-kb-tag z",title:"Ranked outside the paid ranks: cap 0",text:"0"}));
     if(off)nmc.appendChild(h("span",{class:"wi-kb-tag auto",title:"Picked, but left out automatically to keep the team under the ceiling",text:"AUTO-OFF"}));
@@ -691,5 +693,9 @@ var css=document.createElement("style");css.textContent="@keyframes wi-flash{fro
 document.head.appendChild(css);
 (function(){var tb=document.querySelector(".topbar"),set=function(){if(tb)document.documentElement.style.setProperty("--wi-nav",tb.offsetHeight+"px");};   /* sticky panels sit below the site bar */
   set();if(window.ResizeObserver&&tb)new ResizeObserver(set).observe(tb);window.addEventListener("resize",set);})();
-window.NBA_WHATIF={exports:function(){return S.view==="keepers"&&W.keeperBoard?kbExports():[];},openBoard:function(){if(W.keeperBoard)bdOpen();},openKeepers:function(){if(W.keeperBoard)S.view="keepers";return !!W.keeperBoard;},viewName:function(){return S.view;},setActive:setActive,isActive:function(){return S.on;},query:query,restore:restore,classify:classify,compliance:compliance,state:S};
+/* for the site's player sheet: a player's rank and salary next year under the active keeper ranking, and a way to show him in Keepers */
+function kbFact(k){if(!W.keeperBoard)return null;if(!KB.loaded)kbLoad();var rank=kbRanking(),y0=kbRankOf([]),rk=rank[k];if(!rk)return null;
+  return {rank:rk,salary:kbSalaryAt(rk),yahooRank:y0[k],yahooSalary:kbSalaryAt(y0[k]),set:kbSet().label,moved:kbSet().pins.length};}
+function kbShow(k){if(!W.keeperBoard)return false;if(!KB.loaded)kbLoad();var o=kbTeamOf(k);if(o)KB.team=o.id;S.view="keepers";S.flashKey=k;kbSave();return true;}
+window.NBA_WHATIF={keeper:kbFact,showPlayer:kbShow,exports:function(){return S.view==="keepers"&&W.keeperBoard?kbExports():[];},openBoard:function(){if(W.keeperBoard)bdOpen();},openKeepers:function(){if(W.keeperBoard)S.view="keepers";return !!W.keeperBoard;},viewName:function(){return S.view;},setActive:setActive,isActive:function(){return S.on;},query:query,restore:restore,classify:classify,compliance:compliance,state:S};
 })();

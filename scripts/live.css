@@ -214,3 +214,7 @@
 .lv-foot{margin:9px 0 0;font:500 12px/1.45 "Inter",Arial,sans-serif;color:var(--lv-mute)}
 .lv-views{margin:0 0 14px}
 @media(max-width:1099px){.lv-grid .lv-left{display:none}.lv-grid.pane-standings .lv-left{display:grid}.lv-grid.pane-standings .lv-right{display:none}}
+
+/* export from the card, open a player from his name */
+.lv-sh{margin-left:auto;width:30px;height:30px}.lv-ct.lv-ctx,.lv-ph .lv-ct{display:flex;align-items:center;gap:8px}.lv-cap .lv-sh{margin-left:auto}
+.lv-r td.nm.pl{cursor:pointer}.lv-r td.nm.pl:hover b{text-decoration:underline;text-underline-offset:2px}.lv-r td.nm.pl:focus-visible{outline:2px solid var(--lv);outline-offset:-2px}
