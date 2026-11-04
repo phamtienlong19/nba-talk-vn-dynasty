@@ -27,15 +27,17 @@ class TestTradeSketch(unittest.TestCase):
     def drive(self, body_js, qs="", wait=2500):
         with open(INDEX, encoding="utf-8") as f:
             page = f.read()
-        script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
-                  "setTimeout(function(){var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},%d);},500);})();</script>" % wait)
+        # waitFor(cond, then, ms) polls instead of a fixed wait (a slow runner needs longer); a test that uses it sets R.__done in `then`
+        script = ("<script>(function(){var R={},t0=Date.now();window.waitFor=function(c,cb,ms){var t=Date.now();(function p(){if(c()||Date.now()-t>ms)cb();else setTimeout(p,100);})();};"
+                  "setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
+                  "(function w(){if(R.__done||Date.now()-t0>%d){var p=document.createElement('pre');p.id='o';delete R.__done;p.textContent=JSON.stringify(R);document.body.appendChild(p);}else setTimeout(w,100);})();},500);})();</script>" % wait)
         page = page[:page.rindex("</body>")] + script + page[page.rindex("</body>"):]
         d = tempfile.mkdtemp()
         try:
             path = os.path.join(d, "index.html")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(page)
-            out = tsr._chrome_run(["--window-size=1200,1400", "--virtual-time-budget=10000", "--dump-dom", "file://" + path + qs], 150).stdout
+            out = tsr._chrome_run(["--window-size=1200,1400", "--virtual-time-budget=60000", "--dump-dom", "file://" + path + qs], 150).stdout
         finally:
             shutil.rmtree(d)
         m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
@@ -124,7 +126,7 @@ class TestPlayerSheetAndShare(TestTradeSketch):
     def test_every_team_card_and_the_cap_grid_have_a_share_button_that_opens_its_own_image(self):
         r = self.drive("""R.cards=document.querySelectorAll('section.team-card').length;R.btns=document.querySelectorAll('section.team-card .share-btn').length;
           R.cap=!!document.querySelector('#cap .title .share-btn');document.querySelector('section.team-card .share-btn').click();
-          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;R.ttl=ov?(ov.querySelector('.imgov-ttl')||{}).textContent:'';},5000);""", wait=7000)
+          waitFor(function(){return !!document.getElementById('chk-imgov');},function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;R.ttl=ov?(ov.querySelector('.imgov-ttl')||{}).textContent:'';R.__done=1;},30000);""", wait=35000)
         self.assertEqual(r["btns"], r["cards"])
         self.assertTrue(r["cap"])
         self.assertTrue(r["ov"])

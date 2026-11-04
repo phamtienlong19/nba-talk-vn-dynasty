@@ -55,9 +55,9 @@ class TestExportHub(unittest.TestCase):
         r = self.drive("""
           document.getElementById('tb-export').click();
           document.querySelector('#ex-hub .ex-item[data-ex=rosters]').click();
-          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;if(!ov)return;
+          waitFor(function(){var o=document.getElementById('chk-imgov'),i=o&&o.querySelector('img.imgov-img');return i&&i.naturalWidth;},function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;if(ov){
             R.tabs=ov.querySelectorAll('.imgov-t').length;var im=ov.querySelector('img.imgov-img');R.w=im.naturalWidth;R.h=im.naturalHeight;
-            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});},5000);""", wait=7000)
+            R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});}R.__done=1;},30000);""", wait=35000)
         self.assertTrue(r["ov"])
         self.assertEqual(r["tabs"], 4)                                                     # four teams an image, readable on a phone
         self.assertGreaterEqual(r["w"], 1080)

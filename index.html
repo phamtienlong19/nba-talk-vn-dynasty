@@ -868,6 +868,10 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .plc-t small{display:block;margin-top:3px;font:600 11px/1.3 "Inter",Arial,sans-serif;color:#66748d}
 .plc-st{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px 4px}
 .plc-p{padding:4px 10px;border-radius:999px;font:700 12px/1.3 "Inter",Arial,sans-serif;background:#eef1f6;color:#44546f}.plc-p.ok{background:#dcf7e8;color:#0f6b3a}.plc-p.warn{background:#fff0d6;color:#8a4b00}.plc-p.bad{background:#fde4e2;color:#a11a1a}
+.plc-form[hidden]{display:none}.plc-fw{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}.plc-fm{width:100%;border-collapse:collapse;min-width:380px}
+.plc-fm th,.plc-fm td{padding:5px 4px;text-align:right;font:700 11.5px "Roboto Mono",ui-monospace,Menlo,monospace;color:#12264d;white-space:nowrap}
+.plc-fm thead th{font:800 10px "Inter",Arial,sans-serif;letter-spacing:.06em;color:#66748d}.plc-fm tbody th{text-align:left;font:700 11.5px "Inter",Arial,sans-serif;position:sticky;left:0;background:#fff;padding-right:8px}
+.plc-fm tbody tr+tr th,.plc-fm tbody tr+tr td{border-top:1px solid #eef1f7}
 .plc-s{padding:12px 14px 4px}.plc-k{font:800 10.5px/1.3 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#2c3796;margin-bottom:8px}
 .plc-w{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.plc-w div{padding:7px 4px;border-radius:10px;background:#f5f7fc;text-align:center}.plc-w b{display:block;font:800 15px "Roboto Mono",ui-monospace,Menlo,monospace}.plc-w span{font:800 10px "Inter",Arial,sans-serif;color:#66748d;letter-spacing:.06em}
 .plc-tl{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid #dfe5f1}.plc-tl li{position:relative;display:grid;grid-template-columns:56px 1fr;gap:8px;padding:5px 0}
@@ -5071,11 +5075,35 @@ function plFacts(k){
  return {k:k,r:r,f:f,t:T[f],il:il,lk:lk,kf:kf,lv:lv,rk:isRk(k),hist:plHistory(k,f),mine:getMe()===f,
   status:[r.x?"Not counted in the top "+D.season.counting.n:"Counts toward the cap",il?"On the injured list":"",lk?"Tradable in "+lk.days+" day"+(lk.days>1?"s":""):"Tradable now"].filter(Boolean)};}
 function plLink(k){return location.origin+location.pathname+"?player="+String(k).split(".p.")[1];}
+/* averages per window (season, last 7 / 14 / 30 days, the two previous seasons): a daily file on the stats-data branch, fetched once when a card is first opened */
+var PF={url:"https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/stats-data/player_stats.json",doc:null,state:"idle",wait:[]},
+ PF_ROWS=[["season","This season"],["l7","Last 7 days"],["l14","Last 14 days"],["l30","Last 30 days"],["y2025","2025-26"],["y2024","2024-25"]],
+ PF_COLS=[["gp","GP"],["min","MIN"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","STL"],["blk","BLK"],["tpm","3PM"],["fgPct","FG%"],["ftPct","FT%"],["to","TO"]];
+function plFormSet(doc){PF.doc=doc&&doc.windows?doc:null;PF.state=PF.doc?"ready":"failed";var w=PF.wait;PF.wait=[];w.forEach(function(f){f();});}
+function plFormLoad(cb){
+ if(PF.state==="ready"||PF.state==="failed"){if(cb)cb();return;}
+ if(cb)PF.wait.push(cb);if(PF.state==="loading")return;PF.state="loading";
+ try{var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){if(ctl)ctl.abort();},8000);
+  fetch(PF.url+"?t="+Math.floor(Date.now()/3600000),{signal:ctl?ctl.signal:undefined}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(d){clearTimeout(tm);plFormSet(d);},function(){clearTimeout(tm);plFormSet(null);});}
+ catch(e){plFormSet(null);}}
+function plFormRows(k){   /* the player's lines that exist: [{label, v:{gp,min,...}}] */
+ if(!PF.doc)return [];var id=String(k).split(".").pop(),keys=PF.doc.keys,out=[];
+ PF_ROWS.forEach(function(w){var a=(PF.doc.windows[w[0]]||{})[id];if(!a)return;var v={};keys.forEach(function(x,i){v[x]=a[i];});if(v.gp==null)return;out.push({label:w[1],v:v});});
+ return out;}
+function plFormCell(key,x){if(x==null)return "–";if(key==="fgPct"||key==="ftPct")return x.toFixed(3).replace(/^0/,"");if(key==="gp")return String(x);return x%1?x.toFixed(1):String(x);}
+function plFormFill(sec,k){   /* fills (or hides) the averages section of a card once the file is here */
+ var rows=plFormRows(k);sec.textContent="";if(!rows.length){sec.hidden=true;return;}sec.hidden=false;
+ sec.appendChild(h("div",{class:"plc-k",text:"AVERAGES PER GAME"+(PF.doc.capturedAt?" · AS OF "+shortDate(PF.doc.capturedAt.slice(0,10)).toUpperCase():"")}));
+ var t=h("table",{class:"plc-fm"}),hd=h("tr",null,[h("th",{scope:"col",text:""})]);PF_COLS.forEach(function(c){hd.appendChild(h("th",{scope:"col",class:"num",text:c[1]}));});t.appendChild(h("thead",null,[hd]));
+ var tb=h("tbody");rows.forEach(function(r){var tr=h("tr",null,[h("th",{scope:"row",text:r.label})]);PF_COLS.forEach(function(c){tr.appendChild(h("td",{class:"num",text:plFormCell(c[0],r.v[c[0]])}));});tb.appendChild(tr);});
+ t.appendChild(tb);sec.appendChild(h("div",{class:"plc-fw"},[t]));monoDigits(sec);}
+function plFormText(k){var rows=plFormRows(k);return rows.map(function(r){return r.label+": "+[r.v.gp+" GP",r.v.pts!=null?plFormCell("pts",r.v.pts)+" PTS":null,r.v.reb!=null?plFormCell("reb",r.v.reb)+" REB":null,r.v.ast!=null?plFormCell("ast",r.v.ast)+" AST":null,r.v.fgPct!=null?plFormCell("fgPct",r.v.fgPct)+" FG%":null].filter(Boolean).join(" · ");});}
 function plText(F){
  var r=F.r,L=[r.n+" · "+[r.pos,r.nba].filter(Boolean).join(" · ")+" · "+F.t.short,"Salary now: "+r.c+(r.x?" (not counted)":" (counts)")];
  if(F.kf)L.push("Next year: #"+F.kf.rank+" → salary "+F.kf.salary+(F.kf.moved?" under “"+F.kf.set+"”":" (Yahoo order)"));
  L.push(F.status.join(" · "));
  if(F.lv)L.push("Week "+F.lv.week+": "+[F.lv.pts!=null?F.lv.pts+" PTS":null,F.lv.reb!=null?F.lv.reb+" REB":null,F.lv.ast!=null?F.lv.ast+" AST":null,F.lv.tpm!=null?F.lv.tpm+" 3PM":null,F.lv.fg?"FG "+F.lv.fg[0]+"/"+F.lv.fg[1]:null,F.lv.left!=null?F.lv.left+" games left":null].filter(Boolean).join(" · "));
+ var fm=plFormText(F.k||F.r.k);if(fm.length){L.push("Averages per game");fm.forEach(function(x){L.push("  "+x);});}
  F.hist.forEach(function(e){L.push((e.at?shortDate(e.at)+": ":"")+e.what+e.extra);});
  return L.join("\n")+"\n"+plLink(r.k||F.k);}
 /* the card: one standalone element (no dialog around it) used by the sheet, the share image and the link */
@@ -5093,17 +5121,20 @@ function plCard(k){
  if(lv){var cells=[["FG",lv.fg?lv.fg[0]+"/"+lv.fg[1]:"–"],["FT",lv.ft?lv.ft[0]+"/"+lv.ft[1]:"–"],["3PM",lv.tpm],["PTS",lv.pts],["REB",lv.reb],["AST",lv.ast],["STL",lv.st],["BLK",lv.blk]];
   var g=h("div",{class:"plc-w"});cells.forEach(function(c){g.appendChild(h("div",null,[h("b",{text:c[1]==null?"–":String(c[1])}),h("span",{text:c[0]})]));});
   card.appendChild(h("section",{class:"plc-s"},[h("div",{class:"plc-k",text:"WEEK "+lv.week+(lv.starter?"":" · BENCH / IL, NOT COUNTED")+(lv.left!=null?" · "+lv.left+" GAMES LEFT":"")}),g]));}
+ var fsec=h("section",{class:"plc-s plc-form",hidden:""});card.appendChild(fsec);
+ if(PF.state==="ready")plFormFill(fsec,k);else plFormLoad(function(){plFormFill(fsec,k);});
  if(F.hist.length){var ol=h("ol",{class:"plc-tl"});F.hist.forEach(function(e){ol.appendChild(h("li",null,[h("span",{class:"d",text:e.at?shortDate(e.at):"Draft"}),h("span",{class:"e",text:e.what+e.extra})]));});
   card.appendChild(h("section",{class:"plc-s"},[h("div",{class:"plc-k",text:"HOW HE GOT HERE"}),ol]));}
  card.appendChild(h("footer",{class:"plc-f",text:S.mode==="SCENARIO"?"As in the scenario · league facts only":"League facts only · salaries, locks and ranks follow the league's rules"}));
  monoDigits(card);return card;}
 /* the export for one player: a fresh card (never the dialog around it), its own text, and a drawn fallback */
 function plExport(k){
+ if(PF.state!=="ready"&&PF.state!=="failed"){plFormLoad(function(){plExport(k);});return;}
  var F=plFacts(k);if(!F)return;var r=F.r,kf=F.kf;
  exOpen({id:"player",label:r.n,link:function(){return plLink(k);},pages:function(){return [{label:r.n,name:"player-"+r.n.replace(/\W+/g,"-").toLowerCase()+".png",alt:r.n,text:plText(F),
   snap:function(){var c=plCard(k);return c?{node:c,wrap:[],width:430,foot:exSnapFoot()}:null;},
   doc:{title:r.n,sub:[r.pos,r.nba,F.t.short].filter(Boolean).join(" · "),blocks:[{t:"stats",items:[{v:r.c,l:"SALARY NOW",tone:r.x?"mute":""},{v:kf?kf.salary:"–",l:"NEXT YEAR"},{v:kf?"#"+kf.rank:"–",l:"KEEPER RANK"}]},
-   {t:"note",tone:"mute",text:F.status.join(" · ")}].concat(F.hist.length?[{t:"table",cols:[{h:"WHEN",w:2},{h:"WHAT",w:6}],rows:F.hist.map(function(e){return {c:[e.at?shortDate(e.at):"Draft",e.what+e.extra]};})}]:[]),foot:exFoot(),link:plLink(k)}}];}});}
+   {t:"note",tone:"mute",text:F.status.join(" · ")}].concat(plFormRows(k).length?[{t:"table",cols:[{h:"AVERAGES",w:4},{h:"GP",w:1},{h:"PTS",w:1},{h:"REB",w:1},{h:"AST",w:1}],rows:plFormRows(k).map(function(x){return {c:[x.label,plFormCell("gp",x.v.gp),plFormCell("pts",x.v.pts),plFormCell("reb",x.v.reb),plFormCell("ast",x.v.ast)]};})}]:[]).concat(F.hist.length?[{t:"table",cols:[{h:"WHEN",w:2},{h:"WHAT",w:6}],rows:F.hist.map(function(e){return {c:[e.at?shortDate(e.at):"Draft",e.what+e.extra]};})}]:[]),foot:exFoot(),link:plLink(k)}}];}});}
 function plSheet(k){
  var F=plFacts(k);if(!F)return false;var r=F.r,f=F.f;
  var old=document.getElementById("pl-sheet");if(old)old.remove();
@@ -5130,7 +5161,7 @@ window.NBA_SHARE=function(el,o){if(!el)return;o=o||{};var label=o.label||"Export
 function shareBtn(label,get,o){var b=h("button",{type:"button",class:"share-btn","aria-label":"Export "+label,title:"Export "+label+" as an image, a link or text",text:"⇪"});
  b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();NBA_SHARE(get(),Object.assign({label:label},o||{}));});return b;}
 var PL_PREFIX=(function(){var k=D.scenarios[""].teams[D.teams[0].id].roster[0].k;return k.slice(0,k.indexOf(".p.")+3);})();
-window.NBA_PLAYER={card:plCard,facts:plFacts,text:function(k){var F=plFacts(k);return F?plText(F):"";},export:plExport,open:plSheet,shareBtn:shareBtn,keyOf:function(id){return PL_PREFIX+id;}};
+window.NBA_PLAYER={formSet:plFormSet,formRows:plFormRows,card:plCard,facts:plFacts,text:function(k){var F=plFacts(k);return F?plText(F):"";},export:plExport,open:plSheet,shareBtn:shareBtn,keyOf:function(id){return PL_PREFIX+id;}};
 /* team cards: rows open the sheet; each card and the cap grid get a share button */
 function wirePlayers(){
  meEnsure();

@@ -131,6 +131,16 @@ pairs of Yahoo team ids (no stats, no ownership). Finished weeks come from the s
 each (8 requests, 1.5 s apart); a week already kept is never walked again. The playoff weeks (18-20) are seeded from the final
 standings and Yahoo lists no opponent for them yet, so they are not stored and the LIVE Schedule pane shows "seeded". Display data only.
 
+## Player averages (`stats-data` branch, `player_stats.json`)
+
+`.github/workflows/update-player-stats.yml` runs `scripts/update_yahoo_player_stats.py` once a day (09:40 UTC, after Yahoo's day rolls
+over): about 55 read-only anonymous GETs, 1.5 s apart, of the public player list (`players?status=T&stat1=<window>&count=<offset>`,
+25 players a page) for six windows: this season (`S_AS_2026`), last 7 / 14 / 30 days (`S_AL7/14/30`) and the two previous seasons
+(`S_AS_2025`, `S_AS_2024`). Taken players only. The result is ONE file force-pushed as an orphan commit to the `stats-data` branch; it never
+touches main or `data/`. A failure (or fewer than 150 players in the season window) keeps the previous file. The player card fetches it once
+and shows a plain "Averages per game" table (no colours, ranks or verdicts); a missing file or a player with no games just hides the section.
+Windows with no games print dashes, stored as null. The 14- and 30-day windows are identical until the season is 30 days old.
+
 ## Roster changes and departed players (live feed `moves`)
 
 Each closed day's rosters are compared with the day before (`live_days.moves_between`): who was added and who was dropped, by team and
