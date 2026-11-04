@@ -21,15 +21,18 @@ class TestExportHub(unittest.TestCase):
     def drive(self, body_js, qs="", wait=2500):
         with open(INDEX, encoding="utf-8") as f:
             html = f.read()
-        script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
-                  "setTimeout(function(){var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},%d);},400);})();</script>" % wait)
+        # waitFor(cond, then, ms): poll for a snapshot export's preview instead of a fixed wait (a slow runner needs longer; virtual time races
+        # ahead of the real work). A test that uses it sets R.__done in `then`; the result is written as soon as that is set, or after `wait` ms.
+        script = ("<script>(function(){var R={},t0=Date.now();window.waitFor=function(c,cb,ms){var t=Date.now();(function p(){if(c()||Date.now()-t>ms)cb();else setTimeout(p,100);})();};"
+                  "setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
+                  "(function w(){if(R.__done||Date.now()-t0>%d){var p=document.createElement('pre');p.id='o';delete R.__done;p.textContent=JSON.stringify(R);document.body.appendChild(p);}else setTimeout(w,100);})();},400);})();</script>" % wait)
         html = html[:html.rindex("</body>")] + script + html[html.rindex("</body>"):]
         d = tempfile.mkdtemp()
         try:
             path = os.path.join(d, "index.html")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(html)
-            out = tsr._chrome_run(["--window-size=1000,1400", "--virtual-time-budget=12000", "--dump-dom", "file://" + path + qs], 150).stdout
+            out = tsr._chrome_run(["--window-size=1000,1400", "--virtual-time-budget=60000", "--dump-dom", "file://" + path + qs], 150).stdout
         finally:
             shutil.rmtree(d)
         m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
@@ -68,7 +71,7 @@ class TestExportHub(unittest.TestCase):
           cat.forEach(function(it){try{var pg=it.pages();if(!pg.length)R.bad.push(it.id+': empty');pg.forEach(function(p){if(!p.doc&&!p.cv)R.bad.push(it.id+': no doc');if(p.doc){var t=NBA_EXPORT.text(p.doc);if(!t||t.indexOf('undefined')>=0||t.indexOf('NaN')>=0)R.bad.push(it.id+': bad text');R.texts[it.id]=t;}});}catch(e){R.bad.push(it.id+': '+e);}});
           document.getElementById('tb-export').click();R.chips=document.querySelectorAll('#ex-hub .ex-teams .tp-btn').length;
           document.querySelector('#ex-hub .ex-teams .tp-btn').click();
-          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.ov=!!ov;},5000);""", wait=7000)
+          waitFor(function(){return document.getElementById('chk-imgov');},function(){R.ov=!!document.getElementById('chk-imgov');R.__done=1;},30000);""", wait=35000)
         for want in ("rosters", "cap", "trades", "il", "salaries", "picks"):
             self.assertIn(want, r["ids"])
         self.assertEqual(r["bad"], [])
@@ -80,8 +83,8 @@ class TestExportHub(unittest.TestCase):
         r = self.drive("""
           var it=NBA_EXPORT.catalog().filter(function(i){return i.id==='trade';})[0];R.has=!!it;
           if(it){document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=trade]').click();
-            setTimeout(function(){var ov=document.getElementById('chk-imgov');R.tabs=ov?ov.querySelectorAll('.imgov-t').length:0;},5000);}""",
-                       qs="?check=478.p.5432~franchise-01", wait=7500)
+            waitFor(function(){return document.getElementById('chk-imgov');},function(){var ov=document.getElementById('chk-imgov');R.tabs=ov?ov.querySelectorAll('.imgov-t').length:0;R.__done=1;},30000);}else R.__done=1;""",
+                       qs="?check=478.p.5432~franchise-01", wait=35000)
         self.assertTrue(r["has"])
         self.assertEqual(r["tabs"], 4)                                                     # as on the page, proposal, teams after, both
 
@@ -151,10 +154,10 @@ class TestExportHub(unittest.TestCase):
     def test_saved_files_carry_the_date_links_keep_the_mode_and_there_is_a_list_text(self):
         r = self.drive("""
           document.getElementById('tb-export').click();document.querySelector('#ex-hub .ex-item[data-ex=cap]').click();
-          setTimeout(function(){var ov=document.getElementById('chk-imgov');R.name=ov.querySelector('a[download]').getAttribute('download');
+          waitFor(function(){return document.getElementById('chk-imgov');},function(){var ov=document.getElementById('chk-imgov');R.name=ov.querySelector('a[download]').getAttribute('download');
             R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});R.full=!!ov.querySelector('.imgov-full');
-            R.alt=ov.querySelector('img').getAttribute('alt');},5000);   /* a snapshot export takes a moment (fonts, layout) */
-          R.link=NBA_EXPORT.catalog().filter(function(i){return i.id==='cap';})[0].link();""", qs="?mode=scenario", wait=7000)
+            R.alt=ov.querySelector('img').getAttribute('alt');R.__done=1;},30000);   /* a snapshot export takes a moment (fonts, layout) */
+          R.link=NBA_EXPORT.catalog().filter(function(i){return i.id==='cap';})[0].link();""", qs="?mode=scenario", wait=35000)
         self.assertRegex(r["name"], r"^cap-table-\d{4}-\d{2}-\d{2}\.png$")
         self.assertIn("Copy as list", r["btns"])
         self.assertTrue(r["full"])
@@ -173,9 +176,9 @@ class TestExportHub(unittest.TestCase):
         r = self.drive("NBA_LIVE.set(" + feed + ");" + """
           var it=NBA_EXPORT.catalog().filter(function(i){return i.id==='live-roto';})[0];var doc=it.pages()[0].doc;var rows=doc.blocks[0].rows;
           R.heat=rows.every(function(rw){return rw.c.slice(2,11).every(function(x){return x&&x.bg;});});
-          NBA_EXPORT.open(it);setTimeout(function(){var ov=document.getElementById('chk-imgov');
+          NBA_EXPORT.open(it);waitFor(function(){return document.getElementById('chk-imgov');},function(){var ov=document.getElementById('chk-imgov');
             R.btns=Array.prototype.map.call(ov.querySelectorAll('.imgov-b'),function(b){return b.textContent;});R.tabs=ov.querySelectorAll('.imgov-t').length;
-            R.headFirst=ov.querySelector('.imgov-box').firstChild.classList.contains('imgov-head');},5000);""", wait=7000)
+            R.headFirst=ov.querySelector('.imgov-box').firstChild.classList.contains('imgov-head');R.__done=1;},30000);""", wait=35000)
         self.assertTrue(r["heat"])                                                     # every category and the total carry the page's heat colour
         self.assertNotIn("Save 2 images", r["btns"])                                  # only for multi-image exports
         self.assertEqual(r["tabs"], 0)
