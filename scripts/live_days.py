@@ -95,17 +95,42 @@ def team_stats(rows) -> dict:
     return s
 
 
+def roster_names(rows) -> dict:
+    """{playerId: name} of everyone on a team's page that day (starters, bench and IL; empty slots have no player)."""
+    return {r["playerId"]: r["name"] for r in rows if r.get("playerId") and r.get("name")}
+
+
+def moves_between(before, after, date, rosters) -> list:
+    """Adds and drops of each team between two days: [{date, team, add: [[id, name]], drop: [[id, name]]}], only teams that changed.
+    `before` / `after` are {teamId: {playerId: name}}; a team missing from either side is skipped (no baseline, nothing to say)."""
+    out = []
+    for t in sorted(after):
+        if t not in before:
+            continue
+        add = sorted(([i, n] for i, n in after[t].items() if i not in before[t]), key=lambda x: x[1])
+        drop = sorted(([i, n] for i, n in before[t].items() if i not in after[t]), key=lambda x: x[1])
+        if add or drop:
+            out.append({"date": date, "team": int(t), "add": add, "drop": drop})
+    return out
+
+
 def closed_days(cfg, cur, now_dt, ranks, days, previous=None, today=None):
-    """-> (lineupChecks, playerWeek). Every closed day of the week is captured once: its lineup issues (misses) and its starters' made/att."""
+    """-> (lineupChecks, playerWeek). Every closed day of the week is captured once: its lineup issues (misses) and its starters' made/att.
+    `playerWeek.moves` are the adds and drops between consecutive closed days (a feed built before it existed is backfilled from the day cache);
+    `playerWeek.last` is the latest closed day's rosters, the baseline for the next day and for today."""
     prev_l = (previous or {}).get("lineupChecks") or {}
     prev_w = (previous or {}).get("playerWeek") or {}
+    same = prev_w.get("week") == cur
     by_date = dict(prev_l.get("byDate") or {}) if prev_l.get("week") == cur else {}
-    through = set(prev_w.get("through") or []) if prev_w.get("week") == cur else set()
-    p = {k: list(v) for k, v in (prev_w.get("p") or {}).items()} if prev_w.get("week") == cur else {}
+    through = set(prev_w.get("through") or []) if same else set()
+    p = {k: list(v) for k, v in (prev_w.get("p") or {}).items()} if same else {}
+    moves = list(prev_w.get("moves") or []) if same and "moves" in prev_w else []
+    last = prev_w.get("last") if same and "moves" in prev_w else None
+    backfill = not (same and "moves" in prev_w)
     missing = []
     for d in lln.closed_dates(cfg, cur, now_dt):
         key = d.isoformat()
-        if key in by_date and key in through:
+        if key in by_date and key in through and not backfill:
             continue
         try:
             rows = days.rows(d, True)
@@ -118,5 +143,21 @@ def closed_days(cfg, cur, now_dt, ranks, days, previous=None, today=None):
             for r in rows.values():
                 agg_add(p, r)
             through.add(key)
+        names = {str(t): roster_names(r) for t, r in rows.items()}
+        if last and last["date"] < key:
+            moves += moves_between(last["teams"], names, key, rows)
+        if not last or last["date"] < key:
+            last = {"date": key, "teams": names}
     lineup = {"week": cur, "rule": lln.RULE, "byDate": by_date, "missing": missing, "teams": lln.summarize(by_date, cur)}
-    return lineup, {"week": cur, "through": sorted(through), "p": p}
+    return lineup, {"week": cur, "through": sorted(through), "p": p, "moves": moves, "last": last}
+
+
+def today_moves(last, pages, date) -> list:
+    """Adds and drops since the latest closed day, read from the matchup pages (the live rosters; players who only left are not on them)."""
+    if not last or not date or last["date"] >= date:
+        return []
+    now = {}
+    for pg in pages:
+        for t, rows in (pg.get("rosters") or {}).items():
+            now[str(t)] = roster_names([r for r in rows if r.get("slot") != "--"])
+    return moves_between(last["teams"], now, date, None)
