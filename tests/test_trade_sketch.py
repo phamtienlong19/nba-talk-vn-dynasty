@@ -65,7 +65,7 @@ class TestTradeSketch(unittest.TestCase):
         mv, q = self.legal()
         r = self.drive("""
           R.before=NBA_CHK.owner('%(k)s');document.getElementById('chk-stack').click();
-          R.after=NBA_CHK.owner('%(k)s');R.stack=NBA_CHK.stack().length;R.tag=(document.querySelector('#chk .chk-tag')||{}).textContent||'';
+          R.after=NBA_CHK.owner('%(k)s');R.stack=NBA_CHK.stack().length;R.tag=(document.querySelector('#chk .bdg.sketch')||{}).textContent||'';
           R.param=NBA_CHK.param();
           var back=NBA_CHK.run([{key:'%(k)s',from:'%(to)s',to:R.before}]);R.status=back.status;
           R.reasons=back.rules.filter(function(x){return x.level!=='ok';}).map(function(x){return x.reason;}).join(' | ');""" % {"k": mv[0]["key"], "to": mv[0]["to"]},
@@ -101,14 +101,17 @@ if __name__ == "__main__":
 class TestPlayerSheetAndShare(TestTradeSketch):
     def test_a_team_card_row_opens_the_player_sheet_with_league_facts(self):
         r = self.drive("""var row=document.querySelector('section.team-card .player-row[data-k]');R.k=row.getAttribute('data-k');R.role=row.getAttribute('role');row.click();
-          var s=document.getElementById('pl-sheet');R.open=!!s;R.terms=Array.prototype.map.call(s.querySelectorAll('dt'),function(x){return x.textContent;});
+          var s=document.getElementById('pl-sheet');R.open=!!s;R.tiles=Array.prototype.map.call(s.querySelectorAll('.plc-t > span'),function(x){return x.textContent;});
+          R.pills=Array.prototype.map.call(s.querySelectorAll('.plc-p'),function(x){return x.textContent;});
           R.btns=Array.prototype.map.call(s.querySelectorAll('.pls-b'),function(x){return x.textContent;});R.text=s.textContent;""")
         self.assertTrue(r["open"])
         self.assertEqual(r["role"], "button")
-        for t in ("Salary now", "Trade lock", "Drafted"):
-            self.assertIn(t, r["terms"])
+        self.assertEqual(r["tiles"], ["SALARY NOW", "NEXT YEAR", "KEEPER RANK"])
+        self.assertTrue(any("Tradable" in p for p in r["pills"]), r["pills"])
         self.assertEqual(r["btns"][:3], ["Add to Trade Machine", "Show on team card", "Show in Keepers"])
-        for word in ("should", "recommend", "value", "fair"):                        # facts, never advice
+        self.assertIn("Export", r["btns"])
+        self.assertIn("Copy link", r["btns"])
+        for word in ("should", "recommend", "fair"):                                      # facts, never advice
             self.assertNotIn(word, r["text"].lower())
 
     def test_add_to_trade_machine_puts_him_in_the_trade(self):

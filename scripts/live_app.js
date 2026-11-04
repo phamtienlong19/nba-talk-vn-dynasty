@@ -117,7 +117,7 @@ function rosterTable(side,dayDate,mode){
       tr.appendChild(h("td",{class:"sl",text:slotOf(r)}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(r.p&&window.NBA_PLAYER){nm.classList.add("pl");nm.setAttribute("tabindex","0");nm.setAttribute("role","button");var op=function(){NBA_PLAYER.open(NBA_PLAYER.keyOf(r.p));};nm.addEventListener("click",op);nm.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();op();}});}
-      if(rk)nm.appendChild(h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));
+      if(rk){var rm=window.NBA_RK&&window.NBA_PLAYER?NBA_RK.mark(NBA_PLAYER.keyOf(r.p)):null;nm.appendChild(rm||h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));}
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g||r.gl!=null)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+(r.g||"no game today")+(r.gl!=null?" · "+r.gl+" left":"")}));}
       tr.appendChild(nm);
       var dash=r.n!=null&&noStats(r,vals);

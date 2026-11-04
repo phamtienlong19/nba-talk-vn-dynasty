@@ -507,8 +507,8 @@ class TestRenderedCards(unittest.TestCase):
             dom = _dump("file://" + path)
             a, b = dom.split('id="rosters-a"')[1].split('id="rosters-b"')
             txt = lambda x: " ".join(re.sub(r"<[^>]+>", "", x).split())  # noqa: E731
-            self.assertTrue(txt(a).startswith(">STANDINGS 16–9"), txt(a)[:40])
-            self.assertTrue(txt(b).startswith(">STANDINGS 8–1"), txt(b)[:40])
+            self.assertTrue(txt(a).startswith(">TEAMS BY STANDINGS · 16TH–9TH"), txt(a)[:40])
+            self.assertTrue(txt(b).startswith(">TEAMS BY STANDINGS · 8TH–1ST"), txt(b)[:40])
             self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', a)[0], "TT")      # 16th first
             self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', b)[-1], "Bsy")    # 1st last
             tag = re.search(r'<span class="stand-tag low"[^>]*>(.*?)</span></span>(?=\s*<span class="identity-tag)', _card(dom, "TT"), re.S)
@@ -648,7 +648,7 @@ class TestRenderedCards(unittest.TestCase):
         r = self._drive("""
           var rook=D.available.rows.filter(function(a){return a[7]==='R';})[0];R.fa=rook&&rook[1];
           if(rook){NBA_NAV.open();var i=document.getElementById('sp-in');i.value=rook[1];i.dispatchEvent(new Event('input'));
-            R.faTag=!!document.querySelector('#sp-body .sp-n.rk .in-tag.rk');}""")
+            R.faTag=!!document.querySelector('#sp-body .sp-n.rk .rk-mark');}""")
         if r.get("fa"):
             self.assertTrue(r["faTag"], r["fa"])
 
@@ -1153,8 +1153,7 @@ class TestRenderedCards(unittest.TestCase):
         self.assertEqual(len(r["mineCards"]), 1)
         self.assertEqual(r["mineCap"], 1)                                          # the Cap page marks it too
         self.assertEqual((r["firstChip"], r["chips"]), ("\u2605 " + r["short"], 16))   # my team's chip leads the jump bar
-        self.assertEqual(r["hash"], "#teams")
-        self.assertTrue(r["flash"])
+        self.assertEqual(r["hash"], "#me")                                         # with a team set, the star opens the My team page (its roster card is on it)
         self.assertIsNone(r["bogus"])                                              # an unknown stored id is ignored
         self.assertIsNone(r["blocked"])                                            # storage that throws never breaks the page
         self.assertTrue(r["setNoThrow"])

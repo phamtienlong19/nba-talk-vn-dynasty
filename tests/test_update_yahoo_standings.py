@@ -566,7 +566,7 @@ class TestPublishedOrder(Base):
         data = json.loads(re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1).replace("<\\/", "</"))
         self.assertEqual(data["standings"], bls.standings_view(ss.load_season(ls.load_inputs())))
         self.assertIn("function renderStandings()", html)
-        self.assertIn('"STANDINGS 16–9":"TEAMS 1–8"', html)
+        self.assertIn('"TEAMS BY STANDINGS · 16TH–9TH":"TEAMS 1–8"', html)
 
     def test_the_published_snapshot_is_valid_and_its_pointer_resolves(self):
         idx = ys.load_index()
