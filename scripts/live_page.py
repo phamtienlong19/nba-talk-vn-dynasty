@@ -21,6 +21,7 @@ import live_standings as lst  # noqa: E402
 import season_state as ss  # noqa: E402
 import yahoo_matchups as ym  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
+import yahoo_schedule as sched  # noqa: E402
 import yahoo_standings as ys  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -64,13 +65,34 @@ def fallback(data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR) -> dict:
             "matchups": matchups}
 
 
+def schedule_block(data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, path=sched.SCHEDULE_PATH) -> list:
+    """The 20 weeks of pairings by franchise id, with the result of each finished game (the first team's wins, losses, ties). [] before any capture."""
+    cfg = yr.load_config()
+    kept, stored = sched.load(path), ym.load_weeks(matchup_dir)
+    team_map, _ = ir.load_maps(data_dir)
+    fid = lambda tid: yr.franchise_for(cfg, team_map, tid)  # noqa: E731
+    out = []
+    for w in sorted(set(kept) | set(stored)):
+        score = {}
+        if w in stored:
+            for m in stored[w]["matchups"]:
+                r = m["result"]
+                score[tuple(sorted(t["teamId"] for t in m["teams"]))] = {m["teams"][0]["teamId"]: [r["a"], r["b"], r["t"]], m["teams"][1]["teamId"]: [r["b"], r["a"], r["t"]]}
+        games = []
+        for a, b in (sched.pairs(stored[w]) if w in stored else kept[w]):
+            sc = score.get((a, b))
+            games.append({"a": fid(a), "b": fid(b), "score": sc[a] if sc else None})
+        out.append({"week": w, "games": games})
+    return out
+
+
 def payload() -> dict:
     inputs = ls.load_inputs()
     teams = [{"id": t["franchiseId"], "short": t["short"], "color": t["color"], "text": t["text"],
               "crown": t["short"] == pool.DEFENDING_CHAMPION_SHORT_NAME} for t in inputs["freeze"]["teams"]]
     prefix = ir.GAME_KEY + ".p."                                     # Yahoo player ids of the 2026 rookies (same set as the rest of the site)
     rookies = sorted(k[len(prefix):] for k in bls.rookie_keys(ss.load_season(inputs)) if k.startswith(prefix))
-    return {"liveUrl": LIVE_URL, "teams": teams, "rookies": rookies, "fallback": fallback()}
+    return {"liveUrl": LIVE_URL, "teams": teams, "rookies": rookies, "schedule": schedule_block(), "fallback": fallback()}
 
 
 def render_block(data: dict) -> str:

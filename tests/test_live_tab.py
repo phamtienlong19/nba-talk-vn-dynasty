@@ -263,7 +263,7 @@ class TestLiveTab(unittest.TestCase):
             R.detailAuto=qa('#live-root .lv-dg .r').length;R.detailFirst=!!q('#live-root .lv-dt')&&!!(q('#live-root .lv-dt').compareDocumentPosition(q('#live-root .lv-ap'))&4);R.tabstops=qa('#live-root .lv-ap td.cell[tabindex="0"]').length;
             var c=qa('#live-root .lv-ap td.cell:not(.self)')[5];c.click();R.sel=qa('#live-root .lv-ap td.cell.sel').length;R.detail=qa('#live-root .lv-dg .r').length;
             pane('Matchups');R.back=qa('#live-root .lv-m').length;},600);""" % json.dumps(mine), wait=3000)
-        self.assertEqual([t for t in r["tabs"] if t != "Standings"], ["Matchups", "Roto", "Raw stats", "All-play"])      # Standings is a pane only on narrow screens
+        self.assertEqual([t for t in r["tabs"] if t != "Standings"], ["Matchups", "Roto", "Raw stats", "All-play", "Schedule"])      # Standings is a pane only on narrow screens
         self.assertEqual(r["roto"], 16)
         self.assertEqual(sum(r["totals"]), 9 * 136)                                  # every category hands out 1+2+...+16
         self.assertEqual(r["totals"], sorted(r["totals"], reverse=True))
@@ -280,8 +280,9 @@ class TestLiveTab(unittest.TestCase):
     def test_the_roto_views_are_hidden_without_a_live_week(self):
         r = self.drive("""
           document.querySelector('.navlink[data-tab=live]').click();
-          setTimeout(function(){R.strip=document.querySelectorAll('#live-root .lv-views').length;},600);""", wait=2500)
-        self.assertEqual(r["strip"], 0)
+          setTimeout(function(){R.tabs=[].map.call(document.querySelectorAll('#live-root .lv-views button'),function(b){return b.textContent;});},600);""", wait=2500)
+        self.assertNotIn("Roto", r["tabs"])                                         # the schedule needs no live week, the roto views do
+        self.assertNotIn("Raw stats", r["tabs"])
 
     def test_on_a_phone_the_roto_tables_scroll_inside_their_card(self):
         css = open(os.path.join(HERE, "..", "scripts", "live.css"), encoding="utf-8").read()
