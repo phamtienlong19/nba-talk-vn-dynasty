@@ -507,8 +507,8 @@ class TestRenderedCards(unittest.TestCase):
             dom = _dump("file://" + path)
             a, b = dom.split('id="rosters-a"')[1].split('id="rosters-b"')
             txt = lambda x: " ".join(re.sub(r"<[^>]+>", "", x).split())  # noqa: E731
-            self.assertTrue(txt(a).startswith(">STANDINGS 16–9"), txt(a)[:40])
-            self.assertTrue(txt(b).startswith(">STANDINGS 8–1"), txt(b)[:40])
+            self.assertTrue(txt(a).startswith(">TEAMS BY STANDINGS · 16TH–9TH"), txt(a)[:40])
+            self.assertTrue(txt(b).startswith(">TEAMS BY STANDINGS · 8TH–1ST"), txt(b)[:40])
             self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', a)[0], "TT")      # 16th first
             self.assertEqual(re.findall(r'<span class="identity-tag">([^<]*)</span>', b)[-1], "Bsy")    # 1st last
             tag = re.search(r'<span class="stand-tag low"[^>]*>(.*?)</span></span>(?=\s*<span class="identity-tag)', _card(dom, "TT"), re.S)
@@ -648,7 +648,7 @@ class TestRenderedCards(unittest.TestCase):
         r = self._drive("""
           var rook=D.available.rows.filter(function(a){return a[7]==='R';})[0];R.fa=rook&&rook[1];
           if(rook){NBA_NAV.open();var i=document.getElementById('sp-in');i.value=rook[1];i.dispatchEvent(new Event('input'));
-            R.faTag=!!document.querySelector('#sp-body .sp-n.rk .in-tag.rk');}""")
+            R.faTag=!!document.querySelector('#sp-body .sp-n.rk .rk-mark');}""")
         if r.get("fa"):
             self.assertTrue(r["faTag"], r["fa"])
 
