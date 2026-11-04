@@ -123,3 +123,10 @@ fewer-turnovers note on the roto views; a phone list (team picker, 48px rows) in
 (they used to sit above the matchups); roto, raw stats and all-play records in the export hub; text no smaller than 10.5px except the ribbon, and the
 faint grey darkened to 4.6:1 on white (test-enforced). The last pane chosen is remembered in `localStorage` (per device; no shareable URL, because
 the site's own router owns the hash and query). Not done: a roto-rank trend since yesterday (needs a daily history in the feed).
+
+## Season schedule (`data/2026-27/schedule.json`)
+
+`python3 scripts/update_yahoo_matchups.py --schedule [--apply]` keeps the head-to-head pairings of the 17 regular-season weeks as plain
+pairs of Yahoo team ids (no stats, no ownership). Finished weeks come from the stored results, other weeks from one matchup-page walk
+each (8 requests, 1.5 s apart); a week already kept is never walked again. The playoff weeks (18-20) are seeded from the final
+standings and Yahoo lists no opponent for them yet, so they are not stored and the LIVE Schedule pane shows "seeded". Display data only.

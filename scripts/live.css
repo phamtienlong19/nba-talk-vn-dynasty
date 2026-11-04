@@ -218,3 +218,16 @@
 /* export from the card, open a player from his name */
 .lv-sh{margin-left:auto;width:30px;height:30px}.lv-ct.lv-ctx,.lv-ph .lv-ct{display:flex;align-items:center;gap:8px}.lv-cap .lv-sh{margin-left:auto}
 .lv-r td.nm.pl{cursor:pointer}.lv-r td.nm.pl:hover b{text-decoration:underline;text-underline-offset:2px}.lv-r td.nm.pl:focus-visible{outline:2px solid var(--lv);outline-offset:-2px}
+
+/* season schedule */
+.lv-sc{width:100%;border-collapse:separate;border-spacing:2px;min-width:1500px}
+.lv-sc th{position:sticky;top:0;padding:6px 4px;font:800 10px/1 "Inter",Arial,sans-serif;letter-spacing:.06em;color:var(--lv-faint);text-align:center}
+.lv-sc th.cur{color:var(--lv)}.lv-sc th.tm{position:sticky;left:0;z-index:1;background:var(--lv-card);text-align:left;padding:3px 8px 3px 12px}
+.lv-sc td.sc{padding:4px 3px;border-radius:8px;background:#f5f7fb;text-align:center;font:600 11px/1.15 "Inter",Arial,sans-serif;color:var(--lv-ink);white-space:nowrap}
+.lv-sc td.sc small{display:block;font:700 10px "Roboto Mono",ui-monospace,Menlo,monospace;color:var(--lv-mute)}
+.lv-sc td.w,.lv-fr.sc.w{background:#dcf5e6}.lv-sc td.l,.lv-fr.sc.l{background:#fbe0e5}.lv-sc td.t,.lv-fr.sc.t{background:#fdf0cf}
+.lv-sc td.cur,.lv-fr.sc.cur{box-shadow:inset 0 0 0 2px var(--lv)}
+.lv-sc tr.me th.tm{box-shadow:inset 4px 0 0 var(--lv);background:var(--lv-soft)}
+.lv-lg .c.sc{padding:3px 9px;border-radius:999px;background:#f5f7fb}.lv-lg .c.sc.w{background:#dcf5e6}.lv-lg .c.sc.l{background:#fbe0e5}.lv-lg .c.sc.t{background:#fdf0cf}.lv-lg .c.sc.cur{box-shadow:inset 0 0 0 2px var(--lv)}
+.lv-fr.sc{background:#f5f7fb;cursor:default}.lv-fr.sc .wk{min-width:30px;font:800 12px "Inter",Arial,sans-serif;color:var(--lv-mute)}
+.lv-sc td.po{background:transparent;border:1px dashed var(--lv-line);color:var(--lv-faint);font-style:italic}.lv-fr.sc.po{background:transparent;box-shadow:inset 0 0 0 1px var(--lv-line)}

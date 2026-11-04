@@ -8,7 +8,7 @@ if(!dataEl||!root)return;
 var B=JSON.parse(dataEl.textContent),TM={},RK={};
 (B.rookies||[]).forEach(function(id){RK[id]=1;});
 B.teams.forEach(function(t){TM[t.id]=t;});
-var PANE_KEY="nbaTalkVN.livePane",PANE=(function(){try{var v=localStorage.getItem("nbaTalkVN.livePane");return /^(matchups|standings|roto|stats|allplay)$/.test(v)?v:"matchups";}catch(e){return "matchups";}})(),PICK=null,VIEW="week",FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
+var PANE_KEY="nbaTalkVN.livePane",PANE=(function(){try{var v=localStorage.getItem("nbaTalkVN.livePane");return /^(matchups|standings|roto|stats|allplay|schedule)$/.test(v)?v:"matchups";}catch(e){return "matchups";}})(),PICK=null,VIEW="week",FEED=B.fallback,SRC="fallback",ERR=null,LOADING=false,CHECKED=null,OPEN={},REFRESH_MS=2*60*1000,STALE_MIN=30;
 var CATS=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PTM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","ST"],["blk","BLK"],["to","TO"]];
 var LINE=[["fgPct","FG%"],["ftPct","FT%"],["tpm","3PM"],["pts","PTS"],["reb","REB"],["ast","AST"],["st","STL"],["blk","BLK"],["to","TO"]];   /* display order */
 var OLD_KEYS=["pts","reb","ast","st","blk","tpm","to","fgPct","ftPct"];   /* the order of a feed built before lineKeys existed */
@@ -161,7 +161,7 @@ function matchup(m){
   det.appendChild(bar);det.appendChild(cols);card.appendChild(det);return card;}
 
 /* ---------- roto / raw stats / all-play (descriptive, for the week in progress: the league is head-to-head) ---------- */
-var PANES=[["matchups","Matchups"],["standings","Standings"],["roto","Roto"],["stats","Raw stats"],["allplay","All-play"]],SORT=null,FOCUS=null;
+var PANES=[["matchups","Matchups"],["standings","Standings"],["roto","Roto"],["stats","Raw stats"],["allplay","All-play"],["schedule","Schedule"]],SORT=null,FOCUS=null;
 function narrow(){return !!(window.matchMedia&&!window.matchMedia("(min-width:1100px)").matches);}   /* one column: standings become a pane of their own */
 function rotoData(){   /* {yahooId: stats} for all 16 teams from the matchups, once the week has numbers */
   if(SRC!=="live"||FEED.weekStatus!=="LIVE"||!window.NBA_ROTO)return null;
@@ -264,6 +264,45 @@ function allPane(R){
     row.addEventListener("click",function(){select(fid,o,true);});list.appendChild(row);});
   box.appendChild(list);
   select(pick[0],pick[1],false);return box;}
+
+/* ---------- season schedule: who plays whom in each of the 20 weeks (pairings only; finished weeks carry their result) ---------- */
+var SCH_TEAM=null;
+function schedWeeks(){return B.schedule||[];}
+function schedState(w){var cur=FEED.week;return cur==null?"future":w<cur?"done":w===cur?"cur":"future";}
+var PLAYOFF_FROM=18;
+function schedRows(){   /* each team's 20 weeks: [{week, opp, score:[w,l,t]|null, state}] */
+  var by={};TM&&Object.keys(TM).forEach(function(id){by[id]=[];});
+  schedWeeks().forEach(function(wk){wk.games.forEach(function(g){
+    var st=schedState(wk.week),sa=g.score,sb=sa?[sa[1],sa[0],sa[2]]:null;
+    if(by[g.a])by[g.a].push({week:wk.week,opp:g.b,score:sa,state:st});if(by[g.b])by[g.b].push({week:wk.week,opp:g.a,score:sb,state:st});});});
+  return by;}
+function schedOrder(){var mt=me(),ids=(FEED.table||[]).map(function(r){return r.team;}).filter(Boolean);Object.keys(TM).forEach(function(id){if(ids.indexOf(id)<0)ids.push(id);});
+  return ids.sort(function(a,b){return (a===mt?0:1)-(b===mt?0:1);});}
+function schedRes(c){if(!c.score||c.state!=="done")return "";return c.score[0]>c.score[1]?"w":c.score[0]<c.score[1]?"l":"t";}
+function schedPane(){
+  var by=schedRows(),ids=schedOrder(),mt=me();
+  var legend=h("div",{class:"lv-lg",role:"list","aria-label":"Colour key"});[["w","Won"],["l","Lost"],["t","Tied"],["cur","This week"],["","Still to play"]].forEach(function(x){legend.appendChild(h("span",{class:"c sc "+x[0],role:"listitem",text:x[1]}));});
+  var box=h("section",{class:"lv-card lv-pane lv-sched"},[paneHead("SCHEDULE · "+(FEED.week!=null?"WEEK "+FEED.week+" OF 20":"20 WEEKS"),"Head-to-head pairings for the regular season. Finished weeks show the category score. Weeks 18 to 20 are the playoffs: opponents are set by the final standings.",legend)]);
+  var weeks=[];for(var w=1;w<=20;w++)weeks.push(w);
+  var t=h("table",{class:"lv-sc"},[h("caption",{class:"sr",text:"Opponent of each team in each of the 20 weeks"})]),hd=h("tr",null,[h("th",{scope:"col"})]);
+  weeks.forEach(function(w){hd.appendChild(h("th",{scope:"col",class:"num"+(schedState(w)==="cur"?" cur":""),text:"W"+w,title:"Week "+w+(w>=18?" (playoffs)":"")}));});
+  t.appendChild(h("thead",null,[hd]));var tb=h("tbody");
+  ids.forEach(function(id){var tr=h("tr",{class:id===mt?"me":""});tr.appendChild(h("th",{scope:"row",class:"tm"},[chip(id)]));
+    var row={};(by[id]||[]).forEach(function(c){row[c.week]=c;});
+    weeks.forEach(function(w){var c=row[w];if(!c){tr.appendChild(h("td",{class:"sc po",text:w>=PLAYOFF_FROM?"seeded":"–",title:w>=PLAYOFF_FROM?"Playoff opponents are set by the final standings":""}));return;}
+      var res=schedRes(c);tr.appendChild(h("td",{class:"sc "+res+(c.state==="cur"?" cur":""),title:"Week "+w+": "+nameOf(id)+" v "+nameOf(c.opp)+(c.score&&c.state==="done"?", "+c.score[0]+"–"+c.score[1]+(c.score[2]?"–"+c.score[2]:""):"")},
+        [h("span",{class:"o",text:nameOf(c.opp)}),c.score&&c.state==="done"?h("small",{text:c.score[0]+"–"+c.score[1]+(c.score[2]?"–"+c.score[2]:"")}):null]));});
+    tb.appendChild(tr);});
+  t.appendChild(tb);box.appendChild(h("div",{class:"lv-wrap lv-sw lv-mx"},[t]));
+  /* phones: one team's 20 weeks as a list */
+  var fid=SCH_TEAM&&TM[SCH_TEAM]?SCH_TEAM:(mt&&TM[mt]?mt:ids[0]);
+  var sel=h("select",{class:"lv-fs","aria-label":"Show the schedule of"});ids.forEach(function(i){var o=h("option",{value:i,text:nameOf(i)});if(i===fid)o.selected=true;sel.appendChild(o);});
+  sel.addEventListener("change",function(){SCH_TEAM=sel.value;render();});
+  var list=h("div",{class:"lv-fl"},[h("label",{class:"lv-fh"},[h("span",{text:"Schedule of "}),sel])]);
+  (by[fid]||[]).concat([{week:18,po:1},{week:19,po:1},{week:20,po:1}]).forEach(function(c){if(c.po){list.appendChild(h("div",{class:"lv-fr sc po"},[h("span",{class:"wk",text:"W"+c.week}),h("small",{text:"playoffs · opponent set by the final standings"})]));return;}var res=schedRes(c);
+    list.appendChild(h("div",{class:"lv-fr sc "+res+(c.state==="cur"?" cur":"")},[h("span",{class:"wk",text:"W"+c.week}),chip(c.opp),
+      c.score&&c.state==="done"?h("b",{text:c.score[0]+"–"+c.score[1]+(c.score[2]?"–"+c.score[2]:"")}):h("small",{text:c.state==="cur"?"this week":c.week>=18?"playoffs":""})]));});
+  box.appendChild(list);return box;}
 function paneBody(R){return PANE==="roto"?rotoPane(R):PANE==="stats"?statsPane(R):allPane(R);}
 
 /* ---------- render ---------- */
@@ -294,20 +333,21 @@ function render(){
     [["week","Week totals"],["day","Day · "+dayWord()]].forEach(function(o){var b=h("button",{type:"button",class:VIEW===o[0]?"on":"","aria-pressed":VIEW===o[0]?"true":"false",text:o[1]});b.addEventListener("click",function(){if(VIEW!==o[0]){VIEW=o[0];render();}});seg.appendChild(b);});}
   else VIEW="week";
   var R=rotoData(),nar=narrow();
-  var avail=PANES.filter(function(o){return o[0]==="matchups"||(o[0]==="standings"?nar:!!R);});
+  var avail=PANES.filter(function(o){return o[0]==="matchups"||(o[0]==="schedule"?schedWeeks().length>0:o[0]==="standings"?nar:!!R);});
   if(!avail.some(function(o){return o[0]===PANE;}))PANE="matchups";
   if(avail.length>1){var strip=h("div",{class:"lv-views",role:"tablist","aria-label":"What to show"});
     avail.forEach(function(o){var b=h("button",{type:"button",role:"tab","data-pane":o[0],class:PANE===o[0]?"on":"","aria-selected":PANE===o[0]?"true":"false",text:o[1]});b.addEventListener("click",function(){if(PANE!==o[0]){PANE=o[0];try{localStorage.setItem(PANE_KEY,PANE);}catch(e){}render();}});strip.appendChild(b);});
     root.appendChild(strip);}
   grid.className="lv-grid pane-"+PANE;
-  if(R&&PANE!=="matchups"&&PANE!=="standings")right.appendChild(paneBody(R));
+  if(PANE==="schedule")right.appendChild(schedPane());
+  else if(R&&PANE!=="matchups"&&PANE!=="standings")right.appendChild(paneBody(R));
   else if(PANE!=="standings"||!nar){right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),seg,allBtn]));right.appendChild(ms);}
   grid.appendChild(left);grid.appendChild(right);root.appendChild(grid);
   /* every card can be exported from where it is */
   var add=function(el,host,label,w,name){if(!el||!host)return;var b=shareEl(label,function(){return el;},{width:w,name:name,strip:".share-btn,.lv-det"});if(b){b.classList.add("lv-sh");host.appendChild(b);}};
   add(root.querySelector(".lv-stand"),root.querySelector(".lv-stand .lv-ct"),"live standings",430,"live-standings");
   add(root.querySelector(".lv-lc"),root.querySelector(".lv-lc .lv-ct"),"lineup checks",430,"lineup-checks");
-  var pn=root.querySelector(".lv-pane");if(pn)add(pn,pn.querySelector(".lv-ph .lv-ct"),PANE==="roto"?"roto rankings":PANE==="stats"?"raw stats":"all-play",PANE==="roto"?760:PANE==="stats"?820:1000,"live-"+PANE);
+  var pn=root.querySelector(".lv-pane");if(pn)add(pn,pn.querySelector(".lv-ph .lv-ct"),PANE==="roto"?"roto rankings":PANE==="stats"?"raw stats":PANE==="schedule"?"season schedule":"all-play",PANE==="roto"?760:PANE==="stats"?820:PANE==="schedule"?1100:1000,"live-"+PANE);
   [].forEach.call(root.querySelectorAll(".lv-m"),function(c){var cap=c.querySelector(".lv-cap"),nm=[].map.call(c.querySelectorAll(".lv-mh .tchip"),function(x){return x.textContent.replace(/^\W+/,"");}).join(" v ");add(c,cap,"matchup "+nm,430,"matchup");});
   if(window.NBA_MONO)window.NBA_MONO(root);
   restore(snap);
@@ -376,7 +416,8 @@ function snapFor(kind,width){   /* a detached copy of one LIVE view, for the exp
   else if(R&&kind==="roto")node=rotoPane(R);else if(R&&kind==="stats")node=statsPane(R);else if(R&&kind==="allplay"){node=allPane(R);var fl=node.querySelector(".lv-fl");if(fl)fl.remove();}
   if(!node)return null;if(window.NBA_MONO)window.NBA_MONO(node);
   return {node:node,wrap:[{tag:"section",id:"live",cls:"page"},{tag:"div",id:"live-root",cls:"",style:"--lv-nav:0px"}],width:width,foot:"NBA Talk VN Dynasty · LIVE · as of "+ict(FEED.asOf)};}
-window.NBA_LIVE={standings:standingsFor,exports:exportsFor,snap:snapFor,source:function(){return SRC;},feed:function(){return FEED;},reload:function(){return load(true);},
+function nextOpps(fid,n){var cur=FEED.week;if(cur==null)return [];var by=schedRows()[fid]||[];return by.filter(function(c){return c.week>cur;}).slice(0,n).map(function(c){return {week:c.week,opp:c.opp};});}
+window.NBA_LIVE={next:nextOpps,standings:standingsFor,exports:exportsFor,snap:snapFor,source:function(){return SRC;},feed:function(){return FEED;},reload:function(){return load(true);},
   /* tests and tools hand a feed in directly */ set:function(d){accept(d,"live");render();}};
 render();
 load(false);
