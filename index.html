@@ -404,6 +404,16 @@ span.num{font-family:"Roboto Mono",ui-monospace,Menlo,monospace!important;font-w
      (--tb-fold, measured in initNav), so brand/search + tabs stay pinned and nothing changes size while scrolling (no flicker). */
   .topbar{top:calc(-1 * var(--tb-fold,44px))}
 }
+/* ---- phone header: one scrolling row of sections; the bar hides while reading down ---- */
+.navrow{display:contents}
+@media(max-width:680px){
+ .navrow{order:3;flex:1 1 100%;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 2px 2px;scroll-snap-type:x proximity}.navrow::-webkit-scrollbar{display:none}
+ .navrow .navlink{flex:0 0 auto;min-width:78px;min-height:40px;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;font-size:12px;scroll-snap-align:start}
+ .topbar{transition:transform .22s ease}.topbar.tb-hide{transform:translateY(-100%)}
+ .modeswitch button{min-height:36px}
+}
+@media(prefers-reduced-motion:reduce){.topbar{transition:none!important}}
+@media(pointer:coarse){.tc-info{width:44px;height:44px;margin:-9px -9px 0 0}.so{min-height:36px;padding:8px 10px;font-size:11px}.tj-chip,.team-jump .tchip{min-height:36px}}
 /* ---- navigation helpers: search palette, my team, team jump chips ---- */
 .tb-actions{display:flex;gap:6px;align-items:center}
 .tb-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:999px;border:1px solid #ffffff2b;background:#ffffff10;color:#e6ecf8;font:700 11px/1 "Inter",Arial,sans-serif;letter-spacing:.04em;cursor:pointer;white-space:nowrap}
@@ -4101,6 +4111,18 @@ function initNav(){
   if((e.key==="/"&&!typing&&!e.ctrlKey&&!e.metaKey&&!e.altKey)||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k")){e.preventDefault();openSearch();}
   else if(e.key==="Escape"&&NAV.open)closeSearch();});
  var tb=document.querySelector(".topbar"),brand=document.querySelector(".topbar .brand");
+ var navs=[].slice.call(document.querySelectorAll(".topbar-inner .navlink"));
+ if(navs.length&&!document.querySelector(".navrow")){var row=h("nav",{class:"navrow","aria-label":"Sections"});navs[0].parentNode.insertBefore(row,navs[0]);navs.forEach(function(a){row.appendChild(a);});
+  var on=row.querySelector(".navlink.on");if(on&&on.scrollIntoView)try{row.scrollLeft=on.offsetLeft-20;}catch(e){}}
+ /* phones: the header leaves while you read down and comes back when you scroll up; sticky panels follow its height */
+ var lastY=window.pageYOffset,hidden=false,small=window.matchMedia&&matchMedia("(max-width:680px)"),calm=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)");
+ function navVars(hh){document.documentElement.style.setProperty("--wi-nav",hh+"px");var lr=document.getElementById("live-root");if(lr)lr.style.setProperty("--lv-nav",hh+"px");}
+ function onScroll(){if(!tb||!small||!small.matches){if(hidden){hidden=false;tb.classList.remove("tb-hide");}return;}
+  var y=window.pageYOffset,d=y-lastY;lastY=y;if(Math.abs(d)<6)return;
+  var busy=NAV.open||document.querySelector(".imgov,.kbb,.pls-ov")||tb.contains(document.activeElement);
+  var want=d>0&&y>120&&!busy;if(d<0||busy)want=false;
+  if(want!==hidden){hidden=want;tb.classList.toggle("tb-hide",hidden);navVars(hidden?0:tb.offsetHeight);}}
+ window.addEventListener("scroll",onScroll,{passive:true});
  function foldH(){if(!tb||!brand)return;var f=Math.max(0,Math.round(brand.getBoundingClientRect().top-tb.getBoundingClientRect().top-6));tb.style.setProperty("--tb-fold",f+"px");}
  foldH();window.addEventListener("resize",foldH);window.addEventListener("load",foldH);
  if(window.MutationObserver)new MutationObserver(function(m){if(m.some(function(x){return x.addedNodes&&x.addedNodes.length;}))scheduleMine();}).observe(document.body,{childList:true,subtree:true});   /* views that re-render: What-If, Trade Lab, scenarios */
