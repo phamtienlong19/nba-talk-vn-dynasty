@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-04T08:25:58Z
+Generated: 2026-11-04T09:03:21Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/season-schedule
-Commit: 1027fe9
+Branch: feat/who-counted
+Commit: ac3af27
 Base: main
 Working tree: dirty
 
@@ -27,25 +27,32 @@ Fingerprint: FRESH
 
 ## Changes
 ```
+ ai_exchange/REVIEW_PACKET.md                       |  120 +-
  data/2026-27/rosters/index.json                    |   11 +-
  .../rosters/snapshots/RS-2026-11-04-1ef07fff.json  | 1211 ++++++++++++++++++++
- index.html                                         |  388 ++++++-
- scripts/live.css                                   |    4 +
- scripts/live_app.js                                |   12 +-
+ data/2026-27/schedule.json                         |  587 ++++++++++
+ docs/LIVE_DATA.md                                  |    7 +
+ index.html                                         |  456 +++++++-
+ scripts/live.css                                   |   17 +
+ scripts/live_app.js                                |   63 +-
+ scripts/live_page.py                               |   24 +-
+ scripts/update_yahoo_matchups.py                   |   34 +
  scripts/what_if.css                                |    2 +
  scripts/what_if_app.js                             |   21 +-
+ scripts/yahoo_schedule.py                          |   65 ++
  tests/_phone.py                                    |   39 +
  tests/test_consistency.py                          |   55 +
  tests/test_export.py                               |   25 +-
  tests/test_keeper_board.py                         |    9 +
- tests/test_live_tab.py                             |   12 +-
+ tests/test_live_tab.py                             |   19 +-
  tests/test_my_team.py                              |   82 ++
  tests/test_phone.py                                |   42 +
  tests/test_player_card.py                          |   79 ++
  tests/test_scenario_rendering.py                   |    9 +-
+ tests/test_schedule.py                             |  143 +++
  tests/test_trade_sketch.py                         |  131 +++
  tests/test_update_yahoo_standings.py               |    2 +-
- 18 files changed, 2073 insertions(+), 61 deletions(-)
+ 25 files changed, 3092 insertions(+), 161 deletions(-)
 ```
 
 ## Validation
@@ -60,13 +67,19 @@ Cap snapshot: 131-178
 Yahoo source timestamp: 2026-10-05T03:27:30Z
 
 ## Files Changed
+- ai_exchange/REVIEW_PACKET.md
 - data/2026-27/rosters/index.json
 - data/2026-27/rosters/snapshots/RS-2026-11-04-1ef07fff.json
+- data/2026-27/schedule.json
+- docs/LIVE_DATA.md
 - index.html
 - scripts/live.css
 - scripts/live_app.js
+- scripts/live_page.py
+- scripts/update_yahoo_matchups.py
 - scripts/what_if.css
 - scripts/what_if_app.js
+- scripts/yahoo_schedule.py
 - tests/_phone.py
 - tests/test_consistency.py
 - tests/test_export.py
@@ -76,6 +89,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - tests/test_phone.py
 - tests/test_player_card.py
 - tests/test_scenario_rendering.py
+- tests/test_schedule.py
 - tests/test_trade_sketch.py
 - tests/test_update_yahoo_standings.py
 
@@ -90,4 +104,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/season-schedule` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/who-counted` if not already done, then request human/ChatGPT review of this packet.

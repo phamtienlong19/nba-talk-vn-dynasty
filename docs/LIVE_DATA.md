@@ -130,3 +130,11 @@ the site's own router owns the hash and query). Not done: a roto-rank trend sinc
 pairs of Yahoo team ids (no stats, no ownership). Finished weeks come from the stored results, other weeks from one matchup-page walk
 each (8 requests, 1.5 s apart); a week already kept is never walked again. The playoff weeks (18-20) are seeded from the final
 standings and Yahoo lists no opponent for them yet, so they are not stored and the LIVE Schedule pane shows "seeded". Display data only.
+
+## Roster changes and departed players (live feed `moves`)
+
+Each closed day's rosters are compared with the day before (`live_days.moves_between`): who was added and who was dropped, by team and
+date, plus today against the last closed day. The latest closed day's rosters are kept in `playerWeek.last` as the baseline; a feed
+built before this existed is backfilled once from the day cache. A player whose slot reads `--` on the week-totals page (dropped or
+traded away, still counted in the totals) is listed apart on the matchup card as "Left this roster" and is not a roster member for
+today's comparison. Facts only: nothing here says whether a move was good, legal or disputed.

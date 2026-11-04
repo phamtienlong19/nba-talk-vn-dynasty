@@ -106,10 +106,12 @@ function rosterTable(side,dayDate,mode){
   t.appendChild(h("thead",null,[hd]));var tb=h("tbody");t.appendChild(tb);
   var haveDay=side.roster.some(function(r){return r.d;});
   var slotOf=function(r){return day?(r.ds||r.s):r.s;};
-  var groups=[["STARTERS",day?"day: "+when:"week totals, starting days only",function(r){var x=slotOf(r);return x!=="BN"&&x!=="IL";}],
+  var gone=function(r){return r.s==="--";};   /* in the week totals but no longer on the roster (dropped or traded away) */
+  var groups=[["STARTERS",day?"day: "+when:"week totals, starting days only",function(r){var x=slotOf(r);return x!=="BN"&&x!=="IL"&&!gone(r);}],
     ["BENCH",day?"day: "+when:"stats from "+when+" only, not counted",function(r){return slotOf(r)==="BN";}],
-    ["INJURED LIST",day?"day: "+when:"stats from "+when+" only, not counted",function(r){return slotOf(r)==="IL";}]];
-  groups.forEach(function(g){var rows=side.roster.filter(function(r){return r.n==null?!day&&g[2](r):g[2](r);});if(!rows.length)return;var bench=g[0]!=="STARTERS";
+    ["INJURED LIST",day?"day: "+when:"stats from "+when+" only, not counted",function(r){return slotOf(r)==="IL"&&!gone(r);}]];
+  if(!day)groups.push(["LEFT THIS ROSTER","their games still count in the week totals",function(r){return gone(r)&&r.n!=null;}]);
+  groups.forEach(function(g){var rows=side.roster.filter(function(r){return r.n==null?!day&&!gone(r)&&g[2](r):g[2](r);});if(!rows.length)return;var bench=g[0]!=="STARTERS";
     var gh=h("tr",{class:"gh"+(bench?" off":"")}),td=h("td",{colspan:String(COLS.length+2)},[h("b",{text:g[0]}),h("small",{text:g[1]+((bench||day)&&!haveDay?" (arrives with the next feed update)":"")})]);gh.appendChild(td);tb.appendChild(gh);
     rows.forEach(function(r){var useDay=day||bench,vals=lineOf(useDay?r.d:r.l),fg=useDay?r.dfg:r.wfg,ft=useDay?r.dft:r.wft;
       var rk=r.n!=null&&r.p&&RK[r.p];
@@ -129,6 +131,17 @@ function rosterTable(side,dayDate,mode){
         tr.appendChild(td);});
       tb.appendChild(tr);});});
   return t;}
+function movesOf(fid){return (FEED.moves||[]).filter(function(m){return m.team===fid;});}
+function shortDay(iso){try{return new Intl.DateTimeFormat("en-US",{timeZone:"UTC",weekday:"short"}).format(new Date(iso+"T12:00:00Z"));}catch(e){return iso;}}
+function movesNode(fid){   /* adds and drops since the week began, by day: facts only */
+  var ms=movesOf(fid);if(!ms.length)return null;
+  var box=h("div",{class:"lv-mv"},[h("div",{class:"lv-mvh",text:"ROSTER CHANGES THIS WEEK"})]);
+  ms.forEach(function(m){var line=h("div",{class:"lv-mvr"},[h("span",{class:"d",text:shortDay(m.date)})]);
+    m.add.forEach(function(n,i){line.appendChild(mvName("+",n,m.addIds&&m.addIds[i]));});m.drop.forEach(function(n,i){line.appendChild(mvName("−",n,m.dropIds&&m.dropIds[i]));});box.appendChild(line);});
+  return box;}
+function mvName(sign,name,pid){var c=h("span",{class:"mv "+(sign==="+"?"in":"out")},[h("i",{text:sign}),document.createTextNode(name)]);
+  if(pid&&window.NBA_PLAYER){c.setAttribute("role","button");c.setAttribute("tabindex","0");var op=function(){NBA_PLAYER.open(NBA_PLAYER.keyOf(pid));};c.addEventListener("click",op);c.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();op();}});}
+  return c;}
 function matchup(m){
   var a=m.teams[0],b=m.teams[1],dm=VIEW==="day"&&m.day?m.day:null;
   var sc=dm?dm.score:m.score,cats=dm?dm.cats:m.cats,sa=dm?dm.stats[0]:a.stats,sb=dm?dm.stats[1]:b.stats;
@@ -157,7 +170,7 @@ function matchup(m){
   var bar=h("div",{class:"lv-bar"},[chip(a.team),h("span",{class:"vs",text:"vs"}),chip(b.team),h("button",{type:"button",class:"lv-x",text:"Close ✕",title:"Close the rosters (Esc)"})]);
   bar.querySelector(".lv-x").addEventListener("click",shut);
   var cols=h("div",{class:"lv-cols"});
-  m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate,VIEW)])]);cols.appendChild(rc);});
+  m.teams.forEach(function(s,i){var rc=h("div",{class:"lv-rc "+(i?"cb":"ca")},[h("div",{class:"lv-rt"},[chip(s.team)]),movesNode(s.team),h("div",{class:"lv-wrap"},[rosterTable(s,FEED.dayDate,VIEW)])]);cols.appendChild(rc);});
   det.appendChild(bar);det.appendChild(cols);card.appendChild(det);return card;}
 
 /* ---------- roto / raw stats / all-play (descriptive, for the week in progress: the league is head-to-head) ---------- */

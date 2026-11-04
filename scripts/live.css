@@ -231,3 +231,10 @@
 .lv-lg .c.sc{padding:3px 9px;border-radius:999px;background:#f5f7fb}.lv-lg .c.sc.w{background:#dcf5e6}.lv-lg .c.sc.l{background:#fbe0e5}.lv-lg .c.sc.t{background:#fdf0cf}.lv-lg .c.sc.cur{box-shadow:inset 0 0 0 2px var(--lv)}
 .lv-fr.sc{background:#f5f7fb;cursor:default}.lv-fr.sc .wk{min-width:30px;font:800 12px "Inter",Arial,sans-serif;color:var(--lv-mute)}
 .lv-sc td.po{background:transparent;border:1px dashed var(--lv-line);color:var(--lv-faint);font-style:italic}.lv-fr.sc.po{background:transparent;box-shadow:inset 0 0 0 1px var(--lv-line)}
+
+/* roster changes of the week */
+.lv-mv{margin:0 0 8px 2px;display:grid;gap:3px}.lv-mvh{font:800 10.5px/1 "Inter",Arial,sans-serif;letter-spacing:.1em;color:var(--lv-faint);margin:2px 0 3px}
+.lv-mvr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font:600 12px/1.3 "Inter",Arial,sans-serif;color:var(--lv-ink)}.lv-mvr .d{min-width:30px;font:800 11px "Inter",Arial,sans-serif;color:var(--lv-mute)}
+.lv-mv .mv{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:#f5f7fb;cursor:default}.lv-mv .mv[role=button]{cursor:pointer}
+.lv-mv .mv i{font-style:normal;font-weight:800}.lv-mv .mv.in i{color:#0f8a45}.lv-mv .mv.out i{color:#c23a50}
+.lv-r tr.gh.gone td b{color:var(--lv-mute)}
