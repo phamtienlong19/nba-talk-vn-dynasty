@@ -1153,8 +1153,7 @@ class TestRenderedCards(unittest.TestCase):
         self.assertEqual(len(r["mineCards"]), 1)
         self.assertEqual(r["mineCap"], 1)                                          # the Cap page marks it too
         self.assertEqual((r["firstChip"], r["chips"]), ("\u2605 " + r["short"], 16))   # my team's chip leads the jump bar
-        self.assertEqual(r["hash"], "#teams")
-        self.assertTrue(r["flash"])
+        self.assertEqual(r["hash"], "#me")                                         # with a team set, the star opens the My team page (its roster card is on it)
         self.assertIsNone(r["bogus"])                                              # an unknown stored id is ignored
         self.assertIsNone(r["blocked"])                                            # storage that throws never breaks the page
         self.assertTrue(r["setNoThrow"])
