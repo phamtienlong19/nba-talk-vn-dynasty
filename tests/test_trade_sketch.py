@@ -65,7 +65,7 @@ class TestTradeSketch(unittest.TestCase):
         mv, q = self.legal()
         r = self.drive("""
           R.before=NBA_CHK.owner('%(k)s');document.getElementById('chk-stack').click();
-          R.after=NBA_CHK.owner('%(k)s');R.stack=NBA_CHK.stack().length;R.tag=(document.querySelector('#chk .chk-tag')||{}).textContent||'';
+          R.after=NBA_CHK.owner('%(k)s');R.stack=NBA_CHK.stack().length;R.tag=(document.querySelector('#chk .bdg.sketch')||{}).textContent||'';
           R.param=NBA_CHK.param();
           var back=NBA_CHK.run([{key:'%(k)s',from:'%(to)s',to:R.before}]);R.status=back.status;
           R.reasons=back.rules.filter(function(x){return x.level!=='ok';}).map(function(x){return x.reason;}).join(' | ');""" % {"k": mv[0]["key"], "to": mv[0]["to"]},

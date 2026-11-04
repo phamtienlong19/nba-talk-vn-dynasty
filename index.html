@@ -883,6 +883,12 @@ section.team-card .player-row[data-k]{cursor:pointer}section.team-card .player-r
 .me-cardw{max-width:520px;padding:12px}.me-empty{padding:24px;text-align:center;color:#44546f;font:500 14px/1.5 "Inter",Arial,sans-serif}
 .cap-card.mine-first{order:-1}
 @media(max-width:680px){.me-g{grid-template-columns:minmax(0,1fr)}.me-c,.me-cardw{padding:12px}.me-r{font-size:13.5px}}
+
+/* shared marks */
+.in-tag.rk,.pick-extra.pick-sel i.pick-r{margin-left:6px;padding:1px 5px;border-radius:5px;border:1px solid #d5c3f0;background:#f3ecfc;color:#5e2c91;font:800 10px/1.3 "Inter",Arial,sans-serif;letter-spacing:.05em;vertical-align:1px;white-space:nowrap}
+.rk-mark{display:inline-block;margin-left:6px;padding:1px 5px;border-radius:5px;border:1px solid #d5c3f0;background:#f3ecfc;color:#5e2c91;font:800 10px/1.3 "Inter",Arial,sans-serif;letter-spacing:.05em;vertical-align:1px;white-space:nowrap}
+.bdg{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid #d9e1f2;background:#eef2ff;color:#2c3796;font:800 10.5px/1.2 "Inter",Arial,sans-serif;letter-spacing:.06em;white-space:nowrap}
+.bdg.scenario{background:#fff6e0;border-color:#f0cf8a;color:#7a4f00}.bdg.sketch{background:#efe6fb;border-color:#d5c3f0;color:#5d2796}.bdg.live{background:#e4f6ec;border-color:#b6e2c8;color:#17734c}.bdg.official{background:#eef1f6;border-color:#dde3ee;color:#44546f}
 .chk-base{margin:8px 0 10px;padding:9px 12px;border-radius:12px;background:#f4f6fb;border:1px solid #e3e8f2;font:500 12.5px/1.45 "Inter",Arial,sans-serif;color:#44546f}
 .chk-base.has{background:#fbf7ff;border-color:#e4d8f5}
 .chk-base-l{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}.chk-base-l b{font:800 10.5px "Inter",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#2c3796}
@@ -1226,8 +1232,8 @@ body{background:var(--canvas);color:var(--text)}
 <a class="navlink" href="#trade-lab" data-tab="trade-lab">TRADE LAB</a>
 <a class="navlink" href="#draft" data-tab="draft">DRAFT</a>
 <a class="navlink navlive" href="#live" data-tab="live" title="This week's matchups and the standings if the week ended now">LIVE</a>
-<a class="navlink navkeep" href="#keepers" data-tab="keepers" title="Simulator: preview next year's keepers">KEEPERS</a>
-<div class="modeswitch" role="group" aria-label="State mode"><button type="button" data-mode="OFFICIAL" class="on">OFFICIAL</button><button type="button" data-mode="SCENARIO">SCENARIO</button><button type="button" data-mode="WHATIF" title="Giả định — post-freeze what-if">WHAT IF</button></div>
+<a class="navlink navkeep" href="#keepers" data-tab="keepers" title="Opens What If: re-rank players and preview next year's keepers (your assumption, not official)">KEEPERS</a>
+<div class="modeswitch" role="group" aria-label="State mode"><button type="button" data-mode="OFFICIAL" class="on" title="The league as it stands now">OFFICIAL</button><button type="button" data-mode="SCENARIO" title="Apply the recorded trade proposals to see the league after them">SCENARIO</button><button type="button" data-mode="WHATIF" title="Simulations (Giả định): next year's keepers and what-if history. Not official.">WHAT IF</button></div>
 </div><div class="scn-banner" id="scn-banner" hidden></div></div>
 <section class="page" id="rosters-a"><div class="title">TEAMS 1–8</div>
 <div class="meta-strip"><span class="meta-pill meta-pill-cap"><span class="pill-k">CAP</span><span class="pill-v">131–178</span></span><span class="meta-pill roster-verified"></span><span class="meta-pill cap-rule"></span><span class="meta-pill key-pill"><i class="kp-tr">⇄</i>TRADED <i class="kp-rk">R</i>ROOKIE</span></div>
@@ -2232,7 +2238,7 @@ function rosterTable(side,dayDate,mode){
       tr.appendChild(h("td",{class:"sl",text:slotOf(r)}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(r.p&&window.NBA_PLAYER){nm.classList.add("pl");nm.setAttribute("tabindex","0");nm.setAttribute("role","button");var op=function(){NBA_PLAYER.open(NBA_PLAYER.keyOf(r.p));};nm.addEventListener("click",op);nm.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();op();}});}
-      if(rk)nm.appendChild(h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));
+      if(rk){var rm=window.NBA_RK&&window.NBA_PLAYER?NBA_RK.mark(NBA_PLAYER.keyOf(r.p)):null;nm.appendChild(rm||h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));}
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g||r.gl!=null)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+(r.g||"no game today")+(r.gl!=null?" · "+r.gl+" left":"")}));}
       tr.appendChild(nm);
       var dash=r.n!=null&&noStats(r,vals);
@@ -3233,7 +3239,7 @@ function viewKeepers(){
   /* 1. what this is */
   frag.appendChild(h("div",{class:"wi-kb-hd"},[h("div",null,[h("h3",{text:"Next year's keepers"}),
     h("p",{text:"Re-rank players, pick up to "+max+" keepers a team. Salary follows rank."})]),
-    h("span",{class:"wi-kb-pill",text:"YOUR ASSUMPTION · NOT OFFICIAL"})]));
+    (window.NBA_BADGE?NBA_BADGE("assumption","wi-kb-pill"):h("span",{class:"wi-kb-pill",text:"YOUR ASSUMPTION · NOT OFFICIAL"}))]));
   /* 2. ranking set: mine / imported, import, share */
   var tools=h("details",{class:"wi-kb-tools"},[h("summary",null,[h("span",{text:"Ranking tools"}),h("small",{text:set.label+(set.pins.length?" · "+set.pins.length+" moved":" · Yahoo's order")})])]);
   if(KB.tools===undefined?!(window.matchMedia&&matchMedia("(max-width:680px)").matches):KB.tools)tools.setAttribute("open","");tools.addEventListener("toggle",function(){KB.tools=tools.open;});
@@ -3307,7 +3313,7 @@ function viewKeepers(){
     up.addEventListener("click",function(){kbEdit(p.k,x.rank-1);kbRender();});dn.addEventListener("click",function(){kbEdit(p.k,x.rank+1);kbRender();});
     var moved=set.pins.some(function(q){return q[0]===p.k;}),nmc=h("td",null,[h("b",{text:p.n}),h("small",{text:" "+p.pos+(p.nba?" · "+p.nba:"")})]);
     if(window.NBA_PLAYER){nmc.classList.add("wi-pl");nmc.setAttribute("tabindex","0");nmc.setAttribute("role","button");nmc.setAttribute("aria-label","Player details: "+p.n);var op=function(){NBA_PLAYER.open(p.k);};nmc.addEventListener("click",op);nmc.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();op();}});}
-    if(p.rk)nmc.appendChild(h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));if(p.s==="IL"||p.s==="IL+")nmc.appendChild(h("span",{class:"wi-kb-tag",title:"On the injured list",text:p.s}));
+    if(p.rk){var rm=window.NBA_RK?NBA_RK.mark(p.k):null;nmc.appendChild(rm||h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));}if(p.s==="IL"||p.s==="IL+")nmc.appendChild(h("span",{class:"wi-kb-tag",title:"On the injured list",text:p.s}));
     if(!x.sal)nmc.appendChild(h("span",{class:"wi-kb-tag z",title:"Ranked outside the paid ranks: cap 0",text:"0"}));
     if(off)nmc.appendChild(h("span",{class:"wi-kb-tag auto",title:"Picked, but left out automatically to keep the team under the ceiling",text:"AUTO-OFF"}));
     var s0=kbSalaryAt(y0[p.k]),dr=y0[p.k]-x.rank,sc=h("td",{class:"num wi-kb-cap",style:"--w:"+Math.min(100,Math.round(x.sal/(kbSalaryAt(1)||50)*100))+"%"},[h("span",{text:String(x.sal)})]),cd=h("td",{class:"num"},[s0!==x.sal?h("small",{class:"wi-kb-dl "+(x.sal>s0?"up":"down"),title:"Salary under Yahoo's order: "+s0,text:sgn(x.sal-s0)}):null]),
@@ -3366,7 +3372,7 @@ function bdRender(){
     var up=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+kbName(k)+" up one rank",text:"▲"}),dn=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+kbName(k)+" down one rank",text:"▼"});
     up.addEventListener("click",function(){bdEdit(k,rk-1);});dn.addEventListener("click",function(){bdEdit(k,rk+1);});
     var nm=h("div",{class:"kbb-nm"},[h("b",{text:kbName(k)}),o?h("small",{text:" "+(o.p.pos||"")+(o.p.nba?" · "+o.p.nba:"")}):h("small",{text:" not on a roster"})]);
-    if(o&&o.p.rk)nm.appendChild(h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));
+    if(o&&o.p.rk){var rm2=window.NBA_RK?NBA_RK.mark(k):null;nm.appendChild(rm2||h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));}
     var dr=y0[k]-rk,rkd=h("span",{class:"kbb-rd"+(dr>0?" up":dr<0?" dn":""),title:dr?("Yahoo's order: #"+y0[k]+(dr>0?" · you moved him up "+dr:" · you moved him down "+(-dr))):"Same rank as Yahoo's order"},[dr?(dr>0?"▲ ":"▼ ")+Math.abs(dr):""]);
     var capd=h("span",{class:"kbb-cd"+(sal>s0?" up":sal<s0?" dn":""),title:s0!==sal?"Salary under Yahoo's order: "+s0:"Same salary as Yahoo's order"},[s0!==sal?sgn(sal-s0):""]);
     tr.appendChild(h("span",{class:"kbb-grip","aria-hidden":"true",title:FINE?"Drag onto another row to take that rank":"",text:FINE?"⋮⋮":""}));tr.appendChild(inp);tr.appendChild(h("span",{class:"kbb-arrows"},[up,dn]));tr.appendChild(rkd);tr.appendChild(nm);
@@ -3526,6 +3532,11 @@ window.NBA_MONO=monoDigits;
 function money(n){return String(Math.round(n*100)/100);}
 function sgn(n){return (n>0?"+":n<0?"−":"")+Math.abs(Math.round(n*100)/100);}
 function cr(t){return t&&t.crown?"\uD83D\uDC51 ":"";}
+/* one rookie mark everywhere ("R · 1.02", or "R" when the slot is unknown) and one set of status badges with fixed words */
+var BADGE={official:["OFFICIAL","The league as it stands"],live:["PROVISIONAL · LIVE DATA","Updates every few minutes and can be corrected by Yahoo"],scenario:["SCENARIO · NOT OFFICIAL","Recorded trade proposals applied"],sketch:["SKETCH · NOT A PROPOSAL","Your own Trade Machine trades, stacked"],assumption:["YOUR ASSUMPTION · NOT OFFICIAL","Keeper simulation with your own ranking"]};
+function badgeEl(kind,extra){var b=BADGE[kind];return h("span",{class:"bdg "+kind+(extra?" "+extra:""),title:b[1],text:b[0]});}
+function rkMark(k,slot){if(!isRk(k))return null;var d=DR.byKey[k],lb=slot||(d&&d.label)||"";return h("span",{class:"rk-mark",title:"2026 rookie"+(lb?", drafted at "+lb:""),text:"R"+(lb?" · "+lb:"")});}
+window.NBA_RK={mark:rkMark,is:function(k){return isRk(k);}};window.NBA_BADGE=badgeEl;
 function tchip(id){var t=T[id];var c=h("span",{class:"tchip",text:t?cr(t)+t.short:id});if(t){c.style.setProperty("--team-color",t.color);c.style.setProperty("--team-text",t.text);}return c;}
 function key(){return Object.keys(S.sel).filter(function(k){return S.sel[k];}).sort().join(",");}
 function view(){return D.scenarios[S.mode==="SCENARIO"?key():""]||D.scenarios[""];}
@@ -3899,7 +3910,7 @@ function lotRun(L,n){var cnt={},i,o;L.teams.forEach(function(t){cnt[t.franchiseI
 function lotPickLabel(p){return "1."+(p<10?"0":"")+p;}
 function renderLottery(){var host=document.getElementById("lottery-sim");if(!host)return;host.textContent="";var L=D.lottery;if(!L)return;
  var pct=function(x){return (x*100).toFixed(1)+"%";},by={};L.teams.forEach(function(t){by[t.franchiseId]=t;});
- var chip=function(f){var tm=T[f];return h("span",{class:"lot-chip",style:"--team-color:"+tm.color+";--team-text:"+tm.text,title:tm.name,text:tm.short});};
+ var chip=function(f){var tm=T[f];return h("span",{class:"lot-chip",style:"--team-color:"+tm.color+";--team-text:"+tm.text,title:tm.name,text:cr(tm)+tm.short});};
  var box=h("div",{class:"lot"});
  box.appendChild(h("div",{class:"lot-hd"},[h("div",{class:"k",text:"PROVISIONAL · LIVE STANDINGS "+shortDate((L.standingsSourceUpdatedAt||"").slice(0,10))}),h("h3",{text:"Draft lottery simulator"}),
   h("p",{text:"Twelve non-playoff teams hold the balls (ranks 16 to 5); ranks 3 and 4 get a bonus slot instead. Odds and draws only: this is not the draft order and nothing is saved."})]));
@@ -3942,8 +3953,8 @@ function renderStandings(){
  var byShort={};cards.forEach(function(c){var t=c.querySelector(".identity-tag");if(t)byShort[t.textContent.trim()]=c;});
  var order=(byStand?ST_.worstFirst:D.teams.map(function(t){return t.id;})).map(function(fid){return byShort[T[fid].short];}).filter(Boolean);
  order.forEach(function(c,i){secs[i<8?0:1].querySelector(".cards").appendChild(c);});
- secs[0].querySelector(".title").textContent=byStand?"STANDINGS 16–9":"TEAMS 1–8";
- secs[1].querySelector(".title").textContent=byStand?"STANDINGS 8–1":"TEAMS 9–16";
+ secs[0].querySelector(".title").textContent=byStand?"TEAMS BY STANDINGS · 16TH–9TH":"TEAMS 1–8";
+ secs[1].querySelector(".title").textContent=byStand?"TEAMS BY STANDINGS · 8TH–1ST":"TEAMS 9–16";
  monoDigits(secs[0].querySelector(".title"));monoDigits(secs[1].querySelector(".title"));
  cards.forEach(function(c){var old=c.querySelector(".stand-tag");if(old)old.remove();});
  if(live)D.teams.forEach(function(t){var c=byShort[t.short],s=ST_.teams[t.id];if(!c||!s)return;var row=c.querySelector(".team-meta");if(!row)return;   /* the record stays visible in the header, not inside the collapsed detail */
@@ -4055,7 +4066,7 @@ function teamRow(t){var me=getMe()===t.id;
   h("div",{class:"sp-main"},[h("div",{class:"sp-n",text:(me?"★ ":"")+t.name}),h("div",{class:"sp-s"},[h("b",{text:t.short})])])]);return n;}
 function playerRow(p,fa){var t=p.t&&T[p.t],cap=money(p.c);
  var sub=h("div",{class:"sp-s"},[fa?h("span",{class:"sp-tag fa",text:"FREE AGENT"}):(t?h("b",{text:t.short}):null),(t&&!fa?" · ":""),statusLine(p)]);
- var head=h("div",{class:"sp-n"+(p.rk?" rk":"")},[p.st?statusChip(p.st):null,p.n,p.rk?h("span",{class:"in-tag rk",title:p.slot?"2026 rookie, drafted at "+p.slot:"2026 rookie",text:"R"+(p.slot?" · "+p.slot:"")}):null]);
+ var head=h("div",{class:"sp-n"+(p.rk?" rk":"")},[p.st?statusChip(p.st):null,p.n,p.rk?(rkMark(p.k,p.slot)||h("span",{class:"rk-mark",title:"2026 rookie",text:"R"+(p.slot?" · "+p.slot:"")})):null]);
  return h("div",{class:"sp-it",role:"option",style:t?"--team-color:"+t.color:""},[h("span",{class:"sp-dot"}),h("div",{class:"sp-main"},[head,sub]),
   h("div",{class:"sp-r"+(p.x?" nc":""),title:p.x?"Not counted toward the cap":"",text:cap})]);}
 function renderSearch(){
@@ -4159,7 +4170,7 @@ function chkOwnerOf(k){return CHK_OWN[k]||CHK_PO[k]||(TKP[k]&&TKP[k].o)||null;}
 function chkPickName(k){var p=TKP[k];return p.y+" R"+p.r+(p.f!==p.o?" ("+T[p.f].short+")":"");}
 function chkNm(k){return chkIsPick(k)?chkPickName(k)+" pick":CHK_ROW[k].n;}
 function tTitle(t){var n=t.name||"",i=n.indexOf("|"),s=(i>=0?n.slice(i+1):n).trim();return s&&s!==t.short?s:"";}
-function tPill(t,cls){return h("span",{class:"tpill "+(cls||""),style:"background:"+t.color+";color:"+t.text,title:t.name,text:t.short});}
+function tPill(t,cls){return h("span",{class:"tpill "+(cls||""),style:"background:"+t.color+";color:"+t.text,title:t.name,text:cr(t)+t.short});}
 function chkInj(r){return r.s==="IL"||r.s==="IL+"||!!(r.st&&TKR.longTermInjured.outStatuses.indexOf(r.st)>=0);}
 function chkPos(r){var o=[];String(r.pos||"").split("/").forEach(function(p){p=p.trim();if(TKR.positions.indexOf(p)>=0&&o.indexOf(p)<0)o.push(p);});return o;}
 function chkCap(rows){var n=D.season.counting.n,c=rows.map(function(r){return r.c;}).sort(function(a,b){return b-a;});if(n)c=c.slice(0,n);return Math.round(c.reduce(function(a,b){return a+b;},0)*100)/100;}
@@ -4952,7 +4963,7 @@ function plSheet(k){
  var old=document.getElementById("pl-sheet");if(old)old.remove();
  var ov=h("div",{class:"imgov pls-ov",id:"pl-sheet",role:"dialog","aria-modal":"true","aria-labelledby":"pl-n"}),close=exModal(ov,function(){ov.remove();});
  var il=r.s==="IL"||r.s==="IL+",me=getMe();
- var head=h("div",{class:"pls-h"},[h("div",null,[h("b",{id:"pl-n",class:"pls-n"+(rk?" rk":""),text:r.n}),rk?h("span",{class:"pls-r",title:"2026 rookie",text:"R"+(d&&d.label?" · "+d.label:"")}):null,il?h("span",{class:"pls-il",text:r.s}):null,r.st?h("span",{class:"pls-st",text:r.st}):null,
+ var head=h("div",{class:"pls-h"},[h("div",null,[h("b",{id:"pl-n",class:"pls-n"+(rk?" rk":""),text:r.n}),rk?rkMark(k):null,il?h("span",{class:"pls-il",text:r.s}):null,r.st?h("span",{class:"pls-st",text:r.st}):null,
    h("div",{class:"pls-sub",text:[r.pos,r.nba].filter(Boolean).join(" · ")})]),tchip(f)]);
  var facts=[["Salary now",String(r.c)+(r.x?" · not counted":" · counts toward the cap")],
    ["Slot",il?r.s+" (injured list)":r.s||"–"],
@@ -5007,7 +5018,7 @@ box.appendChild(h("div",{class:"chk-h"},[h("div",{class:"chk-ti"},[h("b",{text:"
  box.appendChild(chkBaseEl(mv,res));
  /* the teams in the trade: a quiet summary line that opens into the full picker */
  var picker=h("div",{class:"chk-teams",role:"group","aria-label":"Teams in the trade (2 to "+CHK_MAX+")"},D.teams.map(function(t){var on=CHK.teams.indexOf(t.id)>=0;
-  var e=h("button",{type:"button",class:"tpill tp-btn"+(on?" on":""),style:on?"background:"+t.color+";color:"+t.text:"","aria-pressed":on?"true":"false",title:t.name,text:t.short});e.addEventListener("click",function(){chkToggleTeam(t.id);});return e;}));
+  var e=h("button",{type:"button",class:"tpill tp-btn"+(on?" on":""),style:on?"background:"+t.color+";color:"+t.text:"","aria-pressed":on?"true":"false",title:t.name,text:cr(t)+t.short});e.addEventListener("click",function(){chkToggleTeam(t.id);});return e;}));
  var det=h("details",{class:"chk-tm"},[h("summary",null,[h("span",{class:"tm-l",text:"TEAMS"})].concat(CHK.teams.map(function(f){return tPill(T[f],"");})).concat([h("span",{class:"tm-add",text:"add or remove"})])),picker]);
  if(CHK.tmOpen)det.open=true;det.addEventListener("toggle",function(){CHK.tmOpen=det.open;});box.appendChild(det);
 var info=res&&res.teams&&Object.keys(res.teams).length?res.teams:null;
@@ -5095,7 +5106,7 @@ function chkBaseEl(mv,res){
    var x=h("button",{type:"button",class:"chk-x",title:"Remove this trade from your sketch (and the ones after it)","aria-label":"Remove sketch trade "+(i+1),text:"✕"});
    x.addEventListener("click",function(){CHK.stack=CHK.stack.slice(0,i);CHK_SIG="";chkTouch();});
    ol.appendChild(h("li",null,[h("span",{text:parts.join(" · ")}),x]));});
-  box.appendChild(h("div",{class:"chk-base-l"},[h("b",{text:"Then your sketch"}),h("span",{class:"chk-tag",text:"SKETCH · NOT A PROPOSAL"})]));box.appendChild(ol);}
+  box.appendChild(h("div",{class:"chk-base-l"},[h("b",{text:"Then your sketch"}),badgeEl("sketch")]));box.appendChild(ol);}
  if(mv.length){var ok=res&&res.status!=="BLOCKED",add=h("button",{type:"button",class:"chk-btn chk-stackb",id:"chk-stack",text:"＋ Add another trade on top",title:ok?"Keep this trade in your sketch and build the next one on the rosters after it":"Fix what is blocked first"});
   if(!ok)add.disabled=true;add.addEventListener("click",function(){CHK.stack.push({moves:chkMoves(),drops:chkDrops(),ils:chkIls()});CHK.sel={};CHK.drop={};CHK.il={};CHK_SIG="";chkTouch();});box.appendChild(add);}
  return box;}

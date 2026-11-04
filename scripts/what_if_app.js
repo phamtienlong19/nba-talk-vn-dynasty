@@ -442,7 +442,7 @@ function viewKeepers(){
   /* 1. what this is */
   frag.appendChild(h("div",{class:"wi-kb-hd"},[h("div",null,[h("h3",{text:"Next year's keepers"}),
     h("p",{text:"Re-rank players, pick up to "+max+" keepers a team. Salary follows rank."})]),
-    h("span",{class:"wi-kb-pill",text:"YOUR ASSUMPTION · NOT OFFICIAL"})]));
+    (window.NBA_BADGE?NBA_BADGE("assumption","wi-kb-pill"):h("span",{class:"wi-kb-pill",text:"YOUR ASSUMPTION · NOT OFFICIAL"}))]));
   /* 2. ranking set: mine / imported, import, share */
   var tools=h("details",{class:"wi-kb-tools"},[h("summary",null,[h("span",{text:"Ranking tools"}),h("small",{text:set.label+(set.pins.length?" · "+set.pins.length+" moved":" · Yahoo's order")})])]);
   if(KB.tools===undefined?!(window.matchMedia&&matchMedia("(max-width:680px)").matches):KB.tools)tools.setAttribute("open","");tools.addEventListener("toggle",function(){KB.tools=tools.open;});
@@ -516,7 +516,7 @@ function viewKeepers(){
     up.addEventListener("click",function(){kbEdit(p.k,x.rank-1);kbRender();});dn.addEventListener("click",function(){kbEdit(p.k,x.rank+1);kbRender();});
     var moved=set.pins.some(function(q){return q[0]===p.k;}),nmc=h("td",null,[h("b",{text:p.n}),h("small",{text:" "+p.pos+(p.nba?" · "+p.nba:"")})]);
     if(window.NBA_PLAYER){nmc.classList.add("wi-pl");nmc.setAttribute("tabindex","0");nmc.setAttribute("role","button");nmc.setAttribute("aria-label","Player details: "+p.n);var op=function(){NBA_PLAYER.open(p.k);};nmc.addEventListener("click",op);nmc.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();op();}});}
-    if(p.rk)nmc.appendChild(h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));if(p.s==="IL"||p.s==="IL+")nmc.appendChild(h("span",{class:"wi-kb-tag",title:"On the injured list",text:p.s}));
+    if(p.rk){var rm=window.NBA_RK?NBA_RK.mark(p.k):null;nmc.appendChild(rm||h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));}if(p.s==="IL"||p.s==="IL+")nmc.appendChild(h("span",{class:"wi-kb-tag",title:"On the injured list",text:p.s}));
     if(!x.sal)nmc.appendChild(h("span",{class:"wi-kb-tag z",title:"Ranked outside the paid ranks: cap 0",text:"0"}));
     if(off)nmc.appendChild(h("span",{class:"wi-kb-tag auto",title:"Picked, but left out automatically to keep the team under the ceiling",text:"AUTO-OFF"}));
     var s0=kbSalaryAt(y0[p.k]),dr=y0[p.k]-x.rank,sc=h("td",{class:"num wi-kb-cap",style:"--w:"+Math.min(100,Math.round(x.sal/(kbSalaryAt(1)||50)*100))+"%"},[h("span",{text:String(x.sal)})]),cd=h("td",{class:"num"},[s0!==x.sal?h("small",{class:"wi-kb-dl "+(x.sal>s0?"up":"down"),title:"Salary under Yahoo's order: "+s0,text:sgn(x.sal-s0)}):null]),
@@ -575,7 +575,7 @@ function bdRender(){
     var up=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+kbName(k)+" up one rank",text:"▲"}),dn=h("button",{type:"button",class:"wi-kb-mv","aria-label":"Move "+kbName(k)+" down one rank",text:"▼"});
     up.addEventListener("click",function(){bdEdit(k,rk-1);});dn.addEventListener("click",function(){bdEdit(k,rk+1);});
     var nm=h("div",{class:"kbb-nm"},[h("b",{text:kbName(k)}),o?h("small",{text:" "+(o.p.pos||"")+(o.p.nba?" · "+o.p.nba:"")}):h("small",{text:" not on a roster"})]);
-    if(o&&o.p.rk)nm.appendChild(h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));
+    if(o&&o.p.rk){var rm2=window.NBA_RK?NBA_RK.mark(k):null;nm.appendChild(rm2||h("span",{class:"wi-kb-tag",title:"2026 rookie",text:"R"}));}
     var dr=y0[k]-rk,rkd=h("span",{class:"kbb-rd"+(dr>0?" up":dr<0?" dn":""),title:dr?("Yahoo's order: #"+y0[k]+(dr>0?" · you moved him up "+dr:" · you moved him down "+(-dr))):"Same rank as Yahoo's order"},[dr?(dr>0?"▲ ":"▼ ")+Math.abs(dr):""]);
     var capd=h("span",{class:"kbb-cd"+(sal>s0?" up":sal<s0?" dn":""),title:s0!==sal?"Salary under Yahoo's order: "+s0:"Same salary as Yahoo's order"},[s0!==sal?sgn(sal-s0):""]);
     tr.appendChild(h("span",{class:"kbb-grip","aria-hidden":"true",title:FINE?"Drag onto another row to take that rank":"",text:FINE?"⋮⋮":""}));tr.appendChild(inp);tr.appendChild(h("span",{class:"kbb-arrows"},[up,dn]));tr.appendChild(rkd);tr.appendChild(nm);
