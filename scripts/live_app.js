@@ -17,6 +17,7 @@ function noStats(r,vals){return !!OUT[r.st]&&(!vals||vals.every(function(v){retu
 function cell(x,key){return x==null?"–":(key==="fgPct"||key==="ftPct"?pct(x):String(x));}
 function lineOf(arr){var keys=FEED.lineKeys||OLD_KEYS;return arr?LINE.map(function(c){var i=keys.indexOf(c[0]);return i<0?null:arr[i];}):null;}
 function me(){try{return window.NBA_ME?window.NBA_ME():null;}catch(e){return null;}}
+function shareEl(label,get,o){return window.NBA_PLAYER&&NBA_PLAYER.shareBtn?NBA_PLAYER.shareBtn(label,get,o):null;}   /* the site's export button for one element */
 function tcolor(fid){return (TM[fid]||{}).color||"#8b95a7";}
 function num(key,stats){if(key==="fgPct"||key==="ftPct"){var p=stats[key==="fgPct"?"fg":"ft"];return p&&p[1]?p[0]/p[1]:null;}var v=stats[key];return v==null?null:Number(v);}
 function share(key,a,b){   /* the left side's share of the bar: a ratio for counting stats, the gap for percentages (a ratio makes .477 v .375 look level) */
@@ -54,7 +55,7 @@ function note(){
   return h("div",{class:"lv-note",role:"status",text:ERR?"Live feed unavailable ("+ERR+"). Showing the official finished weeks.":"Loading the live feed…"});}
 function standings(){
   var f=FEED,rows=f.table,live=SRC==="live"&&f.weekStatus==="LIVE";
-  var box=h("section",{class:"lv-card lv-stand"},[h("div",{class:"lv-ct",text:live?"IF THE WEEK ENDED NOW":"FINISHED WEEKS",title:"Provisional. Equal records share a rank. 8 playoff teams: each division's winner plus the best records, seeded by overall record. GB is from the overall leader; the small number is the margin in games over (+) or behind (−) the last playoff spot."})]);
+  var box=h("section",{class:"lv-card lv-stand"},[h("div",{class:"lv-ct lv-ctx",text:live?"IF THE WEEK ENDED NOW":"FINISHED WEEKS",title:"Provisional. Equal records share a rank. 8 playoff teams: each division's winner plus the best records, seeded by overall record. GB is from the overall leader; the small number is the margin in games over (+) or behind (−) the last playoff spot."})]);
   var tb=h("table",{class:"lv-t"}),hd=h("tr");["#","Team","W-L-T","GB","Playoffs"].forEach(function(x,i){hd.appendChild(h("th",{text:x,class:i>=2&&i<4?"num":"",title:i===3?"Games behind the overall leader":i===4?"Seed if in; the small number is the margin in games over (+) or behind (−) the last playoff spot":""}));});
   tb.appendChild(h("thead",null,[hd]));var body=h("tbody"),prevIn=null;
   rows.forEach(function(r,i){
@@ -115,6 +116,7 @@ function rosterTable(side,dayDate,mode){
       var tr=h("tr",{class:(r.n==null?"empty ":"")+(bench?"off ":"")+(rk?"rk":"")});
       tr.appendChild(h("td",{class:"sl",text:slotOf(r)}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
+      if(r.p&&window.NBA_PLAYER){nm.classList.add("pl");nm.setAttribute("tabindex","0");nm.setAttribute("role","button");var op=function(){NBA_PLAYER.open(NBA_PLAYER.keyOf(r.p));};nm.addEventListener("click",op);nm.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();op();}});}
       if(rk)nm.appendChild(h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));
       if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st",text:r.st}));if(r.g||r.gl!=null)nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+(r.g||"no game today")+(r.gl!=null?" · "+r.gl+" left":"")}));}
       tr.appendChild(nm);
@@ -301,6 +303,12 @@ function render(){
   if(R&&PANE!=="matchups"&&PANE!=="standings")right.appendChild(paneBody(R));
   else if(PANE!=="standings"||!nar){right.appendChild(h("div",{class:"lv-tb"},[h("div",{class:"lv-st",text:title}),seg,allBtn]));right.appendChild(ms);}
   grid.appendChild(left);grid.appendChild(right);root.appendChild(grid);
+  /* every card can be exported from where it is */
+  var add=function(el,host,label,w,name){if(!el||!host)return;var b=shareEl(label,function(){return el;},{width:w,name:name,strip:".share-btn,.lv-det"});if(b){b.classList.add("lv-sh");host.appendChild(b);}};
+  add(root.querySelector(".lv-stand"),root.querySelector(".lv-stand .lv-ct"),"live standings",430,"live-standings");
+  add(root.querySelector(".lv-lc"),root.querySelector(".lv-lc .lv-ct"),"lineup checks",430,"lineup-checks");
+  var pn=root.querySelector(".lv-pane");if(pn)add(pn,pn.querySelector(".lv-ph .lv-ct"),PANE==="roto"?"roto rankings":PANE==="stats"?"raw stats":"all-play",PANE==="roto"?760:PANE==="stats"?820:1000,"live-"+PANE);
+  [].forEach.call(root.querySelectorAll(".lv-m"),function(c){var cap=c.querySelector(".lv-cap"),nm=[].map.call(c.querySelectorAll(".lv-mh .tchip"),function(x){return x.textContent.replace(/^\W+/,"");}).join(" v ");add(c,cap,"matchup "+nm,430,"matchup");});
   if(window.NBA_MONO)window.NBA_MONO(root);
   restore(snap);
   try{document.dispatchEvent(new Event("nba:live"));}catch(e){}}
