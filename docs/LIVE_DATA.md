@@ -140,3 +140,11 @@ over): about 55 read-only anonymous GETs, 1.5 s apart, of the public player list
 touches main or `data/`. A failure (or fewer than 150 players in the season window) keeps the previous file. The player card fetches it once
 and shows a plain "Averages per game" table (no colours, ranks or verdicts); a missing file or a player with no games just hides the section.
 Windows with no games print dashes, stored as null. The 14- and 30-day windows are identical until the season is 30 days old.
+
+## Roster changes and departed players (live feed `moves`)
+
+Each closed day's rosters are compared with the day before (`live_days.moves_between`): who was added and who was dropped, by team and
+date, plus today against the last closed day. The latest closed day's rosters are kept in `playerWeek.last` as the baseline; a feed
+built before this existed is backfilled once from the day cache. A player whose slot reads `--` on the week-totals page (dropped or
+traded away, still counted in the totals) is listed apart on the matchup card as "Left this roster" and is not a roster member for
+today's comparison. Facts only: nothing here says whether a move was good, legal or disputed.

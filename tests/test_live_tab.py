@@ -96,6 +96,26 @@ class TestLiveTab(unittest.TestCase):
         self.assertIn("ICT", r["asof"])
         self.assertIn("min ago", r["asof"])
 
+    def test_a_player_who_left_a_roster_is_listed_apart_and_the_week_shows_its_roster_changes(self):
+        f = json.loads(json.dumps(self.feed))
+        m = [x for x in f["matchups"] if x["teams"][0]["yahooId"] == 8][0]
+        t = m["teams"][0]
+        t["roster"].append(dict(t["roster"][0], s="--", n="Gone Guy", p="1234"))
+        t["roster"].append({"s": "--", "n": None})
+        f["moves"] = [{"date": "2026-11-03", "team": t["team"], "yahooId": 8, "add": ["New Guy"], "drop": ["Gone Guy"], "addIds": ["999"], "dropIds": ["1234"]}]
+        r = self.drive("var FEED=%s;" % json.dumps(f).replace("</", "<\\/") + """
+          NBA_LIVE.set(FEED);var d=document.querySelector('#live-root .lv-m[data-m="8"] .lv-det');d.setAttribute('open','');
+          var col=d.querySelector('.lv-rc.ca');R.heads=Array.prototype.map.call(col.querySelectorAll('tr.gh b'),function(b){return b.textContent;});
+          var gone=Array.prototype.filter.call(col.querySelectorAll('tbody tr'),function(tr){return /Gone Guy/.test(tr.textContent);});
+          R.goneRows=gone.length;R.goneSlot=gone[0]&&gone[0].querySelector('td.sl').textContent;
+          R.empty=Array.prototype.filter.call(col.querySelectorAll('tr.empty td.sl'),function(x){return x.textContent==='--';}).length;
+          var mv=col.querySelector('.lv-mv');R.mv=mv?mv.textContent:'';R.chips=col.querySelectorAll('.lv-mv .mv').length;""")
+        self.assertIn("LEFT THIS ROSTER", r["heads"])
+        self.assertEqual((r["goneRows"], r["goneSlot"], r["empty"]), (1, "--", 0))      # listed once, apart from the starters; never an empty "--" row
+        self.assertIn("ROSTER CHANGES THIS WEEK", r["mv"])
+        self.assertRegex(r["mv"], "Tue")
+        self.assertEqual(r["chips"], 2)
+
     def test_an_old_feed_is_flagged_stale(self):
         old = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
         r = self.drive(self.feed_js(asOf=old) + """
@@ -138,7 +158,7 @@ class TestLiveTab(unittest.TestCase):
 
     def test_an_out_starter_with_nothing_recorded_shows_dashes_and_real_zeros_are_dimmed(self):
         r = self.drive(self.feed_js() + """
-          var M=FEED.matchups.filter(function(x){return x.teams.some(function(t){return t.roster.length;});})[0],T=M.teams.filter(function(t){return t.roster.length;})[0],m=T.roster;var st=m.filter(function(x){return x.n&&x.s!=='BN'&&x.s!=='IL';});var s=st[0];s.st='O';s.l=[null,null,0,0,0,0,0,0,0];
+          var M=FEED.matchups.filter(function(x){return x.teams.some(function(t){return t.roster.length;});})[0],T=M.teams.filter(function(t){return t.roster.length;})[0],m=T.roster;var st=m.filter(function(x){return x.n&&x.s!=='BN'&&x.s!=='IL'&&x.s!=='--';});var s=st[0];s.st='O';s.l=[null,null,0,0,0,0,0,0,0];
           var q=st[1];q.st='';q.l=[0.4,1,0,5,1,1,0,0,2];
           NBA_LIVE.set(FEED);var d=document.querySelector('#live-root .lv-m[data-m="'+M.teams[0].yahooId+'"] .lv-det');d.setAttribute('open','');
           var rows=d.querySelectorAll('.lv-rc'+(M.teams[0]===T?'.ca':'.cb')+' .lv-r tbody tr');var pick=function(slot){return Array.prototype.filter.call(rows,function(t){var c=t.querySelector('td.sl');return c&&c.textContent===slot;})[0];};
@@ -149,7 +169,7 @@ class TestLiveTab(unittest.TestCase):
         self.assertEqual((r["zeros"], r["outZeros"]), (3, 0))
 
     def test_rookies_get_the_purple_name_and_an_r_tag(self):
-        pid = next(p["p"] for m in self.feed["matchups"] for t in m["teams"] for p in t["roster"] if p.get("n") and p.get("p"))
+        pid = next(p["p"] for m in self.feed["matchups"] for t in m["teams"] for p in t["roster"] if p.get("n") and p.get("p") and p["s"] not in ("--", "BN", "IL"))
         r = self.drive(self.feed_js() + """
           NBA_LIVE.set(FEED);document.querySelectorAll('#live-root .lv-det').forEach(function(d){d.open=true;});
           R.rk=document.querySelectorAll('#live-root .lv-r tr.rk').length;R.tags=document.querySelectorAll('#live-root .lv-rk').length;

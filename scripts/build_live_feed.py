@@ -68,6 +68,16 @@ def _roster(rows, day=None, sched=None, week=None, today_counts=False):
     return out
 
 
+def _moves_out(week_agg, pages, today, fid):
+    """Roster changes this week by franchise: between closed days, then today so far (names only, dated). Facts, no reading of them."""
+    found = list(week_agg.get("moves") or []) + ldy.today_moves(week_agg.get("last"), pages, today.isoformat() if today else None)
+    out = []
+    for m in found:
+        out.append({"date": m["date"], "team": fid(m["team"]), "yahooId": m["team"], "add": [x[1] for x in m["add"]], "drop": [x[1] for x in m["drop"]],
+                    "addIds": [x[0] for x in m["add"]], "dropIds": [x[0] for x in m["drop"]]})
+    return sorted(out, key=lambda m: (m["date"], m["yahooId"]))
+
+
 def _day_choice(cfg, cur, pages, now_dt):
     """The Yahoo day (US Pacific) the day view shows: today once a game has started, else yesterday (inside the week), else none."""
     start = datetime.date.fromisoformat(cfg["seasonStartMonday"]) + datetime.timedelta(days=7 * (cur - 1))
@@ -177,7 +187,7 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
                                             bool(day_date) and not day_closed)})
         matchups.append({"teams": sides, "cats": res["cats"], "score": [res["a"], res["b"], res["t"]], "decided": res["decided"],
                          "day": _day_result(p, day_rows, day_date)})
-    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date.isoformat() if day_date else None, "playerWeek": {k: v for k, v in week_agg.items()} if week_agg.get("through") is not None else None, "lineupChecks": _lineup_out(lineup, fid), "gamesLeftComplete": bool(sched) and not sched["missing"], "lineKeys": list(LINE_KEYS),
+    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date.isoformat() if day_date else None, "playerWeek": {k: v for k, v in week_agg.items()} if week_agg.get("through") is not None else None, "lineupChecks": _lineup_out(lineup, fid), "moves": _moves_out(week_agg, pages, today, fid), "gamesLeftComplete": bool(sched) and not sched["missing"], "lineKeys": list(LINE_KEYS),
             "weekStatus": "LIVE" if started else "NOT_STARTED", "finishedWeeks": sorted(finished), "notStoredYet": transient,
             "table": table, "playoff": {"spots": pic["spots"], "divisionTie": pic["divisionTie"], "linePct": pic["linePct"]},
             "projectedReverse": [{"team": fid(t["teamId"]), "tied": t["tied"]} for t in reversed(proj["teams"])],
