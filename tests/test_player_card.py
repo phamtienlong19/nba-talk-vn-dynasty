@@ -11,7 +11,7 @@ import test_export as tex  # noqa: E402
 import test_live_feed as tlf  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
 
-PRE = "localStorage.setItem('nbaTalkVN.myTeam','franchise-05')"
+PRE = "localStorage.setItem('nbaTalkVN.myTeam','franchise-05');window.fetch=function(){return Promise.reject(new Error('offline'))}"       # offline: no feed, no averages file
 # a 2026 rookie who was drafted by one team and then traded in-season (CrazyCat -> HCMC, 2026-10-16)
 TRADED = "478.p.10572"
 
@@ -35,14 +35,14 @@ class TestPlayerCard(unittest.TestCase):
     def test_the_week_block_appears_only_with_the_live_feed(self):
         feed = json.dumps(tlf.feed()).replace("</", "<\\/")
         r = _phone.phone_run("""var a=NBA_PLAYER.card('%s');R.before=/WEEK/.test(a.textContent);NBA_LIVE.set(%s);var b=NBA_PLAYER.card('%s');R.after=/WEEK/.test(b.textContent);""" % (TRADED, feed, TRADED),
-                             pre_js=PRE + ";window.fetch=function(){return Promise.reject(new Error('offline'))}", width=1100, wait_ms=2500)
+                             pre_js=PRE, width=1100, wait_ms=2500)
         self.assertFalse(r["before"])
 
     def test_the_export_is_the_card_itself_not_the_dialog_around_it(self):
         r = _phone.phone_run("""return new Promise(function(done){var spec={node:NBA_PLAYER.card('%s'),wrap:[],width:430,foot:'x'};NBA_EXPORT.snap(spec).then(function(cv){
             var c=cv.getContext('2d'),S=cv.width/430,px=function(x,y){var d=c.getImageData(Math.round(x),Math.round(y),1,1).data;return [d[0],d[1],d[2]];};
             R.size=[cv.width,cv.height];R.w=cv.width/S;R.h=cv.height/S;R.corner=px(3,3);R.mid=px(cv.width/2,cv.height*0.45);
-            var dark=0;for(var i=0;i<cv.width;i+=20){var p=px(i,cv.height*0.5);if(p[0]<80&&p[1]<80&&p[2]<110)dark++;}R.dark=dark;done(R);});});""" % TRADED, pre_js=PRE, width=1100, wait_ms=6000)
+            var dark=0;[3,cv.width-4].forEach(function(x){for(var y=cv.height*0.1;y<cv.height*0.9;y+=cv.height/40){var p=px(x,y);if(p[0]<80&&p[1]<80&&p[2]<110)dark++;}});R.dark=dark;done(R);});});""" % TRADED, pre_js=PRE, width=1100, wait_ms=6000)
         self.assertAlmostEqual(r["w"], 430, delta=2)                                       # phone width, 2.5x
         self.assertGreater(r["h"], 380)
         self.assertLess(r["h"], 1200)
