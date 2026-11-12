@@ -1,0 +1,25 @@
+{
+  "schema": "league-violations/1",
+  "season": "2026-27",
+  "note": "Commissioner-recorded violations, entered on the league owner's instruction. The tool only displays them: it does not decide, count points or apply the Tank Violator ladder. 'points' stays null until the commissioner sets them; nothing downstream (lottery, trades) reads this file.",
+  "violations": [
+    {
+      "id": "VIOL-2026-001",
+      "franchiseId": "franchise-05",
+      "kind": "TANK_VIOLATION",
+      "week": 3,
+      "summary": "Healthy player held in an injured-list slot",
+      "detail": "Jalen Johnson was in HCMC's injured-list (IL) slot on 2026-11-07 with no injury status showing, and played that day (30 PTS, which do not count from an IL slot). The commissioner recorded this as a tank violation for week 3, after earlier warnings.",
+      "evidence": [
+        {"date": "2026-11-07", "player": "Jalen Johnson", "playerKey": "478.p.6562", "slot": "IL", "status": "", "game": "W, 124-121 vs BKN", "source": "Yahoo team page for that day, read-only capture on 2026-11-12"},
+        {"date": "2026-11-08", "player": "Jalen Johnson", "playerKey": "478.p.6562", "slot": "BN", "status": "", "game": null, "source": "Yahoo team page for that day, read-only capture on 2026-11-12"}
+      ],
+      "priorWarnings": "Stated by the league owner on 2026-11-12; the warnings themselves are not recorded in this repository.",
+      "points": null,
+      "pointsNote": "Tank Violator points not set yet (commissioner).",
+      "status": "RECORDED",
+      "recordedAt": "2026-11-12T00:00:00Z",
+      "source": "League owner in chat, 2026-11-12: HCMC kept Jalen Johnson in IL in week 3 although he was healthy, despite previous warnings."
+    }
+  ]
+}

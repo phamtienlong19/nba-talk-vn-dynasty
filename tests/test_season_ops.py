@@ -161,20 +161,20 @@ class TestLayers(unittest.TestCase):
         before = ss._load(ss.TXN_PATH)
         views = ss.enumerate_views(self.si)
         self.assertEqual(ss._load(ss.TXN_PATH), before)  # enumerating writes nothing
-        self.assertEqual(sorted(views), ["", "PROP-2026-003"])  # on the baseline the Long con / Thịnh trade is still to simulate
+        self.assertEqual(sorted(views), ["", "PROP-2026-003", "PROP-2026-003,PROP-2026-004", "PROP-2026-004"])  # on the baseline the two staged trades are still to simulate
         cur = ss.season_state(self.si)
         for k, f in ((WEMBY, THINH), (TYSON, THINH), (JOKIC, BSY), (OSO, BSY)):
             self.assertEqual(cur["playerOwner"][k], f)                       # both completed trades are in the baseline
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
         live = ss.enumerate_views(ss.load_season(ls.load_inputs()))          # the page renders the live state
         self.assertEqual(data["official"]["teams"], live[""]["teams"])
-        self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003"])
+        self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003"])      # the staged trade is not official
         for done in ("TXN-2026-001", "PROP-2026-001", "PROP-2026-002"):
             with self.assertRaises(ls.StateError):
                 ss.season_state(self.si, [done])                               # completed is not a scenario
 
     def test_no_pending_proposals_remain_and_scenarios_start_from_the_updated_baseline(self):
-        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], ["PROP-2026-003"])  # only the staged trade
+        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], ["PROP-2026-003", "PROP-2026-004"])  # only the staged trades
         base = ss.season_view(self.si, [])
         self.assertEqual({f: base["teams"][f]["cap"] for f in (BSY, THINH, SUP)}, {BSY: 176, THINH: 176, SUP: 144})
         self.assertEqual(sum(t["count"] for t in base["teams"].values()), 192)     # players move, none appear or vanish
@@ -252,7 +252,7 @@ class TestBsyTradesCompleted(unittest.TestCase):
 
     def test_records_are_promoted_in_place_with_an_audit_trail(self):
         ids = [t["txnId"] for t in self.si["seasonTxns"]]
-        self.assertEqual(ids, ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003"])      # no duplicate records; the last is staged, not completed
+        self.assertEqual(ids, ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003", "PROP-2026-004"])      # no duplicate records; the last is staged, not completed
         for tid in ("PROP-2026-001", "PROP-2026-002"):
             t = self.si["tradeIndex"][tid]
             self.assertEqual((t["status"], t["phase"]), ("COMPLETED", "IN_SEASON"))
@@ -304,8 +304,8 @@ class TestBsyTradesCompleted(unittest.TestCase):
         again = ss.season_state(draft_night(ss.load_season(ls.load_inputs())))              # a rebuild gives the same state
         self.assertEqual(again["playerOwner"], owners)
         self.assertEqual((owners[MOREZ], owners[ZION]), (HCMC, CC))                         # the earlier completed trade still stands
-        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], ["PROP-2026-003"])              # only the staged trade is pending
-        self.assertEqual(sorted(ss.enumerate_views(self.si)), ["", "PROP-2026-003"])
+        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], ["PROP-2026-003", "PROP-2026-004"])              # only the staged trades are pending
+        self.assertEqual(sorted(ss.enumerate_views(self.si)), ["", "PROP-2026-003", "PROP-2026-003,PROP-2026-004", "PROP-2026-004"])
 
     def test_applying_the_same_trade_twice_fails_loudly(self):
         si = copy.deepcopy(self.si)
@@ -334,7 +334,7 @@ class TestBsyTradesCompleted(unittest.TestCase):
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
         by = {t["id"]: t for t in data["trades"]}
         self.assertEqual((by["PROP-2026-001"]["status"], by["PROP-2026-002"]["status"]), ("COMPLETED", "COMPLETED"))
-        self.assertEqual(sorted(data["scenarios"]), [""])                      # every trade is completed: nothing left to simulate
+        self.assertEqual(sorted(data["scenarios"]), ["", "PROP-2026-004"])    # one staged trade (Long con / CrazyCat) is left to simulate
         blob = json.dumps(data)
         for internal in ("statusHistory", "directionCheck", "not supplied", "relayed", "DISCREPANCY", "NOT specified", "RESOLVED_ASSUMED"):
             self.assertNotIn(internal, blob)
@@ -645,7 +645,7 @@ class TestLongConThinhTradeCompleted(unittest.TestCase):
         for a in self.txn["assets"]:
             if a["playerKey"] in owner:                                                    # a player Yahoo has since dropped has no owner
                 self.assertEqual(owner[a["playerKey"]], a["to"], a["name"])
-        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], [])                 # nothing left to simulate
+        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], ["PROP-2026-004"])  # only the staged Long con / CrazyCat trade
 
     def test_it_is_applied_once_whether_or_not_yahoo_shows_it_yet(self):
         res = {r["tradeId"]: r for r in ss.season_state(self.si)["tradeResults"]}
