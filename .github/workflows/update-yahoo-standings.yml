@@ -1,10 +1,12 @@
 name: Update Yahoo Standings
 
-# Manual only (no schedule). Reads the league's public standings page with ONE plain GET (no sign-in, no cookies), validates it with
+# Daily (09:05 UTC) and on demand. Reads the league's public standings page with ONE plain GET (no sign-in, no cookies), validates it with
 # the same importer as the saved-HTML path, and either opens a pull request or publishes a report. It never pushes to main and
 # never merges. Procedure and limits: docs/STANDINGS_REFRESH.md
 
 on:
+  schedule:
+    - cron: "5 9 * * *"      # a scheduled run only ever opens a PR for a human to review; it never merges
   workflow_dispatch:
     inputs:
       open_pr:
@@ -25,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      APPLY: ${{ inputs.open_pr && github.ref == 'refs/heads/main' }}
+      APPLY: ${{ (github.event_name == 'schedule' || inputs.open_pr) && github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
