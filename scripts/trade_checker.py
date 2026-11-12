@@ -15,6 +15,7 @@ import os
 
 import league_state as ls
 import season_state as ss
+import yahoo_standings as ys
 
 RULES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "trade_rules.json")
 LEVELS = ("ok", "info", "review", "blocked")
@@ -57,6 +58,16 @@ def future_picks(si, rules=None) -> dict:
             for fid in sorted(si["franchises"]):
                 out[f"{year}-R{rnd}-{fid}"] = {"year": year, "round": rnd, "original": fid, "owner": fid}
     return out
+
+
+def projected_picks(si) -> dict:
+    """{franchiseId: projected pick number} from the published Yahoo standings: the reverse of the rank (worst record = pick 1). {} until games
+    have been played. A projection from the standings, not the lottery."""
+    snap = ys.current_snapshot(os.path.join(si.get("dataDir", ss.DATA_DIR), "standings"))
+    if not snap or not snap.get("started"):
+        return {}
+    n = len(snap["teams"])
+    return {t["franchiseId"]: n + 1 - t["rank"] for t in snap["teams"] if t.get("rank")}
 
 
 def pick_label(si, pk) -> str:
@@ -255,18 +266,26 @@ def check_proposal(si, state, moves, now, rules=None, drops=(), ils=()) -> dict:
         rows.append(_row("deadline", "blocked", SRC_DEAD, f"The trade deadline passed on {end}: no trades after that date.", None))
     else:
         rows.append(_row("deadline", "ok", SRC_DEAD, f"Before the trade deadline ({end}).", None))
+    prot = pr.get("protectedTop")
+    proj = projected_picks(si) if prot else {}
     for m in pmoves:
         pk = picks[m["key"]]
         who = short[m["from"]]
-        if pk["round"] in pr["lockedRounds"]:
+        pos = proj.get(pk["original"])
+        if prot and pk["round"] == prot["round"] and pos is not None and pos <= prot["top"]:
+            rows.append(_row("pick", "blocked", SRC_PICK, f"{pick_label(si, pk)} is projected to land in the top {prot['top']} (pick {pos}, from {short[pk['original']]}'s record): a 1st-round pick can only be "
+                             f"traded in a Trade Tank trade when it is not projected in the top {prot['top']}. This follows the standings and can change.", who))
+        elif pk["round"] in pr["lockedRounds"]:
             rows.append(_row("pick", "blocked", SRC_PICK, f"{pick_label(si, pk)} is a 1st-round pick: it can't be traded in-season. 1st-round picks only move in the pre-draft window "
                              "(after keepers, before the draft), and only the current year's.", who))
         elif now[:10] > tank_cutoff:
             rows.append(_row("pick", "blocked", SRC_PICK, f"{pick_label(si, pk)} is next season's pick: it can only move in a Trade Tank trade, which must be at least 2 weeks "
                              f"before the deadline. The last day was {tank_cutoff}.", who))
         else:
+            extra = f" Projected pick {pos}, outside the top {prot['top']}." if prot and pk["round"] == prot["round"] and pos is not None else (
+                f" Its place in the top {prot['top']} can't be projected yet (no published standings)." if prot and pk["round"] == prot["round"] else "")
             rows.append(_row("pick", "review", SRC_PICK, f"{pick_label(si, pk)} is next season's pick: it can only be traded inside a Trade Tank trade "
-                             "(team out of playoff contention, at least 2 weeks before the deadline, one per team). Eligibility isn't checked here.", who))
+                             f"(team out of playoff contention, at least 2 weeks before the deadline, one per team). Eligibility isn't checked here.{extra}", who))
     rows.append(_row("pending", "info", SRC_PEND, f"{rules['pendingDays']}-day pending period; Yahoo trade review is the commissioner (2 days to reject) and a veto needs 7 of 16 team votes. Whether the trade is acceptable is the commissioner's call.", None))
     rows.append(_row("tank", "info", SRC_TANK, "Not checked here: Trade Tank eligibility (needs the standings) and trade bans from earlier cap violations.", None))
     level = max((r["level"] for r in rows), key=LEVELS.index)

@@ -55,9 +55,10 @@ class TestLotteryEligibility(unittest.TestCase):
         self.assertEqual((len(t), lot["participants"], sum(t.values()), lot["totalCombinations"]), (12, 12, 120, 120))
         self.assertEqual(lot["drawOrder"], ["1.02", "1.01"])
         self.assertTrue(all(t[str(r)] == 2 for r in (5, 6, 7, 8)))             # a few playoff teams get balls
-        self.assertNotIn("3", t)                                                # ranks 3 and 4 get the bonus, not balls
+        self.assertNotIn("3", t)                                                # ranks 2, 3 and 4 get the bonus, not balls
         self.assertNotIn("4", t)
-        self.assertIn("rank 3", lot["rank3And4Bonus"])
+        self.assertNotIn("2", t)
+        self.assertIn("rank 2 takes pick 9", lot["rank3And4Bonus"])
         with open(os.path.join(os.path.dirname(__file__), "..", "docs", "LEAGUE_RULES_MODEL.md"), encoding="utf-8") as f:
             self.assertIn("`16,16,15,15,14,13,12,11,2,2,2,2`", f.read())      # same numbers as the rule document
 
