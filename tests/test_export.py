@@ -198,7 +198,7 @@ class TestExportHub(unittest.TestCase):
                      roto:null,standings:NBA_LIVE.snap('standings',430)};
           R.hasSnap=['rosters','cap','live-standings','live-matchups'].map(function(id){var it=cat.filter(function(i){return i.id===id;})[0];return !!(it&&it.pages()[0].snap);});
           var out={};var keys=Object.keys(specs).filter(function(k){return specs[k];});
-          Promise.all(keys.map(function(k){return NBA_EXPORT.snap(specs[k]).then(function(cv){out[k]=cv?[cv.width,cv.height]:null;});})).then(function(){R.out=out;});""", wait=9000)
+          Promise.all(keys.map(function(k){return NBA_EXPORT.snap(specs[k]).then(function(cv){out[k]=cv?[cv.width,cv.height]:null;});})).then(function(){R.out=out;R.__done=1;});""", wait=60000)
         self.assertEqual(r["hasSnap"], [True, True, True, True])
         for k, size in r["out"].items():
             self.assertIsNotNone(size, k)

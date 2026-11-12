@@ -30,10 +30,13 @@
   "picks": {
     "nextDraftYear": 2027,
     "maxYearsAhead": 1,
-    "lockedRounds": [
-      1
-    ],
-    "source": "Dynasty-Rule-Oct-2025: 1st-round picks may only be traded in the pre-draft window (after keepers, before the draft) and only the current year's; next season's picks only inside a Trade Tank trade (2+ weeks before the deadline, eligible team); no picks beyond that."
+    "lockedRounds": [],
+    "source": "Dynasty-Rule-Oct-2025: 1st-round picks may only be traded in the pre-draft window (after keepers, before the draft) and only the current year's; next season's picks only inside a Trade Tank trade (2+ weeks before the deadline, eligible team); no picks beyond that. Updated 2026-11-12: 1st-round picks of the next draft are allowed inside a Trade Tank trade unless projected in the top 4 (protectedTop).",
+    "protectedTop": {
+      "round": 1,
+      "top": 4,
+      "source": "Rule change confirmed by the commissioner and relayed by the league owner, 2026-11-12: a Trade Tank trade can still include next draft's 1st-round pick, but not a pick projected to land in the top 4 (the worst four records). The projection is the reverse of the published Yahoo standings; it is a projection, not a lottery result."
+    }
   },
   "yahoo": {
     "activeSlots": 9,

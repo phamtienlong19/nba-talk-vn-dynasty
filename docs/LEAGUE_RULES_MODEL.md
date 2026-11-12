@@ -193,3 +193,14 @@ combination scheme, `21-21-19-19-16-12-8-3`, and various proposed
 alternate-format contingencies if tanking became severe, e.g. dropping to
 6-team or 4-team playoffs). Those are historical/contingency context, not
 the current authoritative numbers.
+
+## Rule changes confirmed by the commissioner (relayed by the league owner, 2026-11-12)
+
+1. **2027 draft bonus extends to the 2nd-place team.** Ranks 2, 3 and 4 get the bonus slots (picks 9, 10, 11) instead of lottery balls, subject to
+   the lottery results, as ranks 3 and 4 did for 2026. The ball allocation is unchanged. Recorded in `config/draft_lottery_rules.json`
+   (`lottery.rank3And4`: `ranks` [2, 3, 4], `byDraft`); the pick order within 9-11 (rank 2, then 3, then 4) is our reading and is labelled as such.
+2. **Trade Tank trades may include next draft's 1st-round pick, unless it is projected in the top 4.** Before, all 1st-round picks were locked
+   in-season. Now a 1st-round pick of the next draft is allowed inside a Trade Tank trade, but not when its team's record projects it to pick 1-4
+   (the worst four records in the published Yahoo standings; a projection, not a lottery result). Recorded in `config/trade_rules.json`
+   (`picks.protectedTop`); `scripts/trade_checker.py` and the page's port block a protected pick and send the others to commissioner review.
+   The Trade Tank eligibility of the team itself is still not checked.

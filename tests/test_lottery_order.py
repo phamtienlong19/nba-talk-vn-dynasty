@@ -26,18 +26,18 @@ class TestLotteryOrder(unittest.TestCase):
         by = {t["rank"]: t for t in out["teams"]}
         self.assertEqual([t["rank"] for t in out["teams"]], list(range(16, 0, -1)))        # worst first, Yahoo's ranks untouched
         self.assertEqual(sum(t["tickets"] or 0 for t in out["teams"]), CFG["lottery"]["totalCombinations"])
-        for r in range(1, 5):                                                              # ranks 1-4 never hold tickets (3/4 take the bonus, unmodelled)
+        for r in range(1, 5):                                                              # ranks 1-4 never hold tickets (2/3/4 take the bonus, unmodelled)
             self.assertFalse(by[r]["inLottery"])
             self.assertIsNone(by[r]["tickets"])
         for r in range(5, 17):
             self.assertEqual(by[r]["tickets"], CFG["lottery"]["ticketsByRank"][str(r)])
 
-    def test_the_rank_3_4_bonus_block_comes_from_config(self):
+    def test_the_rank_2_3_4_bonus_block_comes_from_config(self):
         out = lo.provisional_lottery(snap(), CFG)
-        self.assertEqual(out["bonus"]["ranks"], [3, 4])
-        self.assertEqual(out["bonus"]["block"], [9, 14])                                   # ranks 8..3 of 16 sit at picks 9..14
+        self.assertEqual(out["bonus"]["ranks"], [2, 3, 4])                                   # extended to rank 2 for the 2027 draft (commissioner, 2026-11-12)
+        self.assertEqual(out["bonus"]["block"], [9, 15])                                   # ranks 8..2 of 16 sit at picks 9..15; the bonus takes 9, 10, 11
         self.assertEqual(out["bonus"]["firstPick"], 9)
-        self.assertIn("not yet confirmed", out["bonus"]["interpretation"])
+        self.assertIn("our reading", out["bonus"]["interpretation"])
         self.assertEqual({t["rank"]: t["naturalPick"] for t in out["teams"]}[16], 1)
 
     def test_everything_is_labelled_provisional_and_no_order_is_assigned(self):

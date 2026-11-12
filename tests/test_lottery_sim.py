@@ -37,10 +37,10 @@ class TestLotterySim(unittest.TestCase):
             self.assertNotEqual(order[0], order[1])
             bonus = [next(t["franchiseId"] for t in L["teams"] if t["rank"] == r) for r in L["bonus"]["ranks"]]
             at = L["bonus"]["firstPick"] - 1
-            self.assertEqual(order[at:at + 2], bonus)                                      # rank 3 then rank 4 take the first two block slots
+            self.assertEqual(order[at:at + 3], bonus)                                      # ranks 2, 3 and 4 take picks 9, 10 and 11 (2027)
             rest = [f for f in L["reverseOrder"] if f not in order[:2] and f not in bonus]
             self.assertEqual([f for f in order[2:] if f not in bonus], rest)               # the others stay in provisional reverse order
-            self.assertEqual({t["franchiseId"] for t in L["teams"] if not t["inLottery"]} - set(bonus), set(order[-2:]))   # ranks 2 and 1 stay last
+            self.assertEqual({t["franchiseId"] for t in L["teams"] if not t["inLottery"]} - set(bonus), set(order[-1:]))   # only rank 1 stays last
 
     def test_unrestricted_odds_match_the_ticket_share(self):
         L = json.loads(json.dumps(DATA["lottery"]))
@@ -58,7 +58,7 @@ class TestLotterySim(unittest.TestCase):
         self.assertIn('id="lottery-sim"', HTML)
         self.assertIn("Draft lottery simulator", HTML)
         self.assertIn("not the draft order", HTML)
-        self.assertIn("Rank 3/4 bonus:", HTML)
+        self.assertIn("Bonus (ranks ", HTML)
         self.assertLess(HTML.index('id="lottery-sim"'), HTML.index('class="order-grid"'))   # above the draft results
         self.assertEqual(DATA["lottery"]["label"][:11], "PROVISIONAL")
 
