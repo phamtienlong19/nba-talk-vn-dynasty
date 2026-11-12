@@ -101,3 +101,12 @@ Draft Order status strip (on the clock / latest / counts / holds) and per-pick s
 After the draft the default page view is the current season (verified roster snapshot + completed in-season
 trades); everything above is the historical layer. See `docs/SEASON_STATE_MODEL.md`, `docs/ROSTER_REFRESH.md` and
 `docs/YAHOO_API_FEASIBILITY.md`.
+
+## Commissioner-recorded violations (`data/2026-27/violations.json`)
+
+A record the commissioner decided, entered on the league owner's instruction: franchise, kind, week, a summary, the evidence (dated Yahoo
+slot readings) and what was said about earlier warnings. The tool only shows it (a "Violation" chip and a "Commissioner record" block on the
+team card, a row on My team); it does not count points, apply the Tank Violator ladder or read the file anywhere else. `points` stays null until
+the commissioner sets it. A withdrawn record stays in the file and is not shown. First entry: VIOL-2026-001, HCMC, week 3, a healthy player held in
+an IL slot (Yahoo's page for 2026-11-07), after earlier warnings. This is a 2026-27 record entered at the owner's instruction, separate from the
+2024-25 names that `docs/OPEN_RULE_QUESTIONS.md` item 4 keeps out of the repository.
