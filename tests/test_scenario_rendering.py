@@ -221,7 +221,9 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("OUTMorez Johnson Jr.R2.07 CrazyCat", cc)  # rookie chip + where he was drafted
         self.assertNotIn("Morez Johnson Jr.", _read(_card(self.official, "CrazyCat"))["names"])
         self.assertIn("Morez Johnson Jr.", _read(_card(self.official, "HCMC"))["names"])
-        self.assertIn(">DRAFTED<", _card(self.official, "Quân"))  # every team has drafted: movement lists the draftees
+        # movement lists a team's draftees while it still holds them; a team that has dropped all of them (Quân did by 2026-11-04) shows none,
+        # so the label is checked across the league rather than on one team's live roster
+        self.assertIn(">DRAFTED<", "".join(re.findall(r'<section class="team-card[^"]*".*?</section>', self.official, re.S)))
 
     def test_in_season_acquisitions_are_styled_apart_from_own_draftees(self):
         owner = self.cur["playerOwner"]
