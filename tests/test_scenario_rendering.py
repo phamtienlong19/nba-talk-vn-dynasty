@@ -703,7 +703,7 @@ class TestRenderedCards(unittest.TestCase):
             cases.append({"moves": mv, "drops": [{"key": rows[f][-1]["k"], "team": f}]})
             cases.append({"moves": mv, "drops": [{"key": rows[f][0]["k"], "team": f}, {"key": rows[g][-2]["k"], "team": g}]})
         elig = set(tc.load_rules()["yahoo"]["ilEligibleStatuses"])
-        for i, f in enumerate(fids[:8]):                                       # draft picks (1st locked, 2nd / 3rd to review), alone and with players
+        for i, f in enumerate(fids[:8]):                                       # draft picks (1st, 2nd and 3rd: the protected 1sts blocked, the rest to review), alone and with players
             g = fids[(i + 1) % len(fids)]
             for rnd in (1, 2, 3):
                 cases.append({"moves": [{"key": "2027-R%d-%s" % (rnd, f), "type": "pick", "from": f, "to": g}], "drops": [], "ils": []})
@@ -726,6 +726,12 @@ class TestRenderedCards(unittest.TestCase):
             for pick in (next((r for r in rows[f][:-1] if r["k"] in pre50), None), next((r for r in rows[f][:-1] if 10 <= r["c"] < 20 and r["k"] not in pre50), None), rows[f][-2]):
                 if pick:
                     cases.append({"moves": mv, "drops": [{"key": pick["k"], "team": f}], "ils": []})
+        proj = tc.projected_picks(si)                                                  # picks: the five worst records (the first four are protected) and a later round
+        worst = sorted(proj, key=lambda f: proj[f])[:5]
+        other = next(f for f in fids if f not in worst)
+        for f in worst:
+            cases.append({"moves": [{"key": "2027-R1-" + f, "type": "pick", "from": f, "to": other}], "drops": [], "ils": []})
+        cases.append({"moves": [{"key": "2027-R2-" + worst[0], "type": "pick", "from": worst[0], "to": other}], "drops": [], "ils": []})
         nows = ["2026-10-21T12:00:00Z", "2026-12-31T00:00:00Z", "2027-02-10T00:00:00Z", "2027-03-01T00:00:00Z"]
         expect = [[tc.signature(tc.check_proposal(si, state, c["moves"], n, drops=c["drops"], ils=c.get("ils", []))) for c in cases] for n in nows]
         r = self._drive("var C=%s,N=%s,E=[];N.forEach(function(n){E.push(C.map(function(m){var x=NBA_NAV.check(m.moves,n,m.drops,m.ils||[]);"
@@ -738,6 +744,8 @@ class TestRenderedCards(unittest.TestCase):
         self.assertGreaterEqual(len({e["status"] for e in expect[1]}), 2)   # the cases are not all the same verdict
         self.assertTrue(any(rr[0] == "size" and rr[2] == "blocked" for e in expect[1] for rr in e["rules"]))   # the overflow cases do overflow
         self.assertTrue(any(rr[0] == "drop" for e in expect[1] for rr in e["rules"]))
+        picks = [rr[2] for e in expect[1][-6:-1] for rr in e["rules"] if rr[0] == "pick"]
+        self.assertEqual(picks, ["blocked"] * 4 + ["review"])                          # the page and the checker agree: top 4 protected, the 5th is not
 
     def test_trade_machine_panel_multi_team_live_cap_url_and_colored_teams(self):
         r = self._drive("""
@@ -817,10 +825,10 @@ class TestRenderedCards(unittest.TestCase):
           var cols=q('#chk .chk-col');R.cols=cols.length;
           var col=cols[0];R.pickRows=col.querySelectorAll('.pickrow').length;R.locked=col.querySelectorAll('.pickrow .hold').length;
           R.pickLabels=Array.prototype.map.call(col.querySelectorAll('.pickrow .pname'),function(x){return x.textContent;});
-          // a 1st-round pick is not on the table, but if one arrives by link the rules still block it
-          var res=NBA_NAV.check([{key:'2027-R1-'+ids[0],type:'pick',from:ids[0],to:ids[1]}],'2026-12-31T00:00:00Z');
-          R.r1Blocked=res.rules.some(function(x){return x.rule==='pick'&&x.level==='blocked'&&x.reason.indexOf('1st-round')>=0;});
-          var rows=col.querySelectorAll('.pickrow');rows[0].click();                      // a 2nd
+          // next season's 1st is on the table again; one projected in the top 4 is still blocked (franchise-05 has the worst record), the others go to review
+          var res=NBA_NAV.check([{key:'2027-R1-franchise-05',type:'pick',from:'franchise-05',to:'franchise-01'}],'2026-12-31T00:00:00Z');
+          R.r1Blocked=res.rules.some(function(x){return x.rule==='pick'&&x.level==='blocked'&&x.reason.indexOf('top 4')>=0;});
+          var rows=col.querySelectorAll('.pickrow');rows[1].click();                      // a 2nd
           var rev=document.querySelector('#chk .chk-r.review[data-rule="pick"]');R.r2Review=!!rev&&rev.textContent.indexOf('Trade Tank')>=0;
           R.pickOut=q('#chk .chk-ol').length;R.url=location.search;
           R.slotsInSummary=q('#chk .chk-sc .ck').some(function(c){return c.textContent.indexOf('SLOTS')>=0;});
@@ -831,9 +839,9 @@ class TestRenderedCards(unittest.TestCase):
           // the action tray offers IL only for injured players
           var m=q('#chk .chk-col')[0].querySelector('.tm-more');m.click();R.tray=!!document.querySelector('#chk .chk-tray .tr-btn.drop');""")
         self.assertEqual(r["cols"], 2)
-        self.assertEqual(r["pickRows"], 2)                                         # 2nd and 3rd round of next season only: 1sts are not on the table
+        self.assertEqual(r["pickRows"], 3)                                         # 1st, 2nd and 3rd round of next season only
         self.assertEqual(r["locked"], 0)
-        self.assertTrue(all("Round 1" not in x for x in r["pickLabels"]), r["pickLabels"])
+        self.assertTrue(any("Round 1" in x or "R1" in x for x in r["pickLabels"]), r["pickLabels"])
         self.assertTrue(r["r1Blocked"])
         self.assertTrue(r["r2Review"])
         self.assertEqual(r["pickOut"], 1)

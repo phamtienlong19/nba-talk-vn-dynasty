@@ -270,21 +270,48 @@ class TradeChecker(unittest.TestCase):
         self.assertEqual(self.rules["drops"]["reviewFrom"], wi["reviewDropFrom"])
         self.assertEqual(len(tc.preseason_ranks(self.si, self.rules["drops"]["neverTopRanked"])), self.rules["drops"]["neverTopRanked"])
 
-    # ---- picks: 1sts are locked in-season, next season's 2nd / 3rd only inside a Trade Tank trade, nothing further ahead
+    # ---- picks: next season's 1st / 2nd / 3rd only inside a Trade Tank trade, nothing further ahead; a 1st projected in the top 4 stays out (commissioner, 2026-11-12)
     def _pk(self, rnd, fid, year=2027):
         return {"key": f"{year}-R{rnd}-{fid}", "type": "pick"}
 
-    def test_first_round_picks_are_blocked_and_later_rounds_go_to_review(self):
-        a, b = sorted(self.si["franchises"])[:2]
-        keys = {m["key"]: m for m in [self._pk(1, a), self._pk(2, a), self._pk(3, a)]}
-        r1 = self.verdict([{**self._pk(1, a), "from": a, "to": b}])
-        self.assertEqual([x["level"] for x in r1["rules"] if x["rule"] == "pick"], ["blocked"])
-        self.assertIn("1st-round", [x for x in r1["rules"] if x["rule"] == "pick"][0]["reason"])
-        for rnd in (2, 3):
-            r = self.verdict([{**self._pk(rnd, a), "from": a, "to": b}])
+    def _projected(self):
+        proj = tc.projected_picks(self.si)
+        self.assertTrue(proj, "the published standings must have started for these checks")
+        return proj
+
+    def test_a_first_round_pick_projected_in_the_top_4_is_blocked_and_the_rest_go_to_review(self):
+        proj = self._projected()
+        top4 = sorted((f for f in proj if proj[f] <= 4), key=lambda f: proj[f])
+        safe = sorted((f for f in proj if proj[f] > 4), key=lambda f: proj[f])
+        self.assertEqual(len(top4), 4)
+        other = safe[-1]
+        for f in top4:
+            r = self.verdict([{**self._pk(1, f), "from": f, "to": other}])
+            row = [x for x in r["rules"] if x["rule"] == "pick"][0]
+            self.assertEqual(row["level"], "blocked", f)
+            self.assertIn("top 4", row["reason"])
+            self.assertIn(f"pick {proj[f]}", row["reason"])
+        f = safe[0]                                                                      # the best-placed non-protected pick: projected 5th
+        r = self.verdict([{**self._pk(1, f), "from": f, "to": top4[0]}])
+        row = [x for x in r["rules"] if x["rule"] == "pick"][0]
+        self.assertEqual(row["level"], "review")
+        self.assertIn("Trade Tank", row["reason"])
+        self.assertIn("outside the top 4", row["reason"])
+        for rnd in (2, 3):                                                               # later rounds are not protected, even from a top-4 team
+            r = self.verdict([{**self._pk(rnd, top4[0]), "from": top4[0], "to": other}])
             self.assertEqual([x["level"] for x in r["rules"] if x["rule"] == "pick"], ["review"])
-            self.assertIn("Trade Tank", [x for x in r["rules"] if x["rule"] == "pick"][0]["reason"])
-        self.assertEqual(len(keys), 3)
+
+    def test_without_published_standings_a_first_round_pick_goes_to_review_and_says_it_cannot_be_projected(self):
+        a, b = sorted(self.si["franchises"])[:2]
+        orig = tc.projected_picks
+        tc.projected_picks = lambda si: {}
+        try:
+            r = self.verdict([{**self._pk(1, a), "from": a, "to": b}])
+        finally:
+            tc.projected_picks = orig
+        row = [x for x in r["rules"] if x["rule"] == "pick"][0]
+        self.assertEqual(row["level"], "review")
+        self.assertIn("can't be projected", row["reason"])
 
     def test_picks_must_be_owned_and_cannot_be_further_ahead(self):
         a, b = sorted(self.si["franchises"])[:2]

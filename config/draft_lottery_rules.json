@@ -1,5 +1,5 @@
 {
-  "note": "Draft-order eligibility rules confirmed by the commissioner on 2026-10-20, plus the top-of-draft history they are computed from. Eligibility is derived by scripts/lottery_eligibility.py. The ball allocation is recorded under 'lottery'.",
+  "note": "Draft-order eligibility rules confirmed by the commissioner on 2026-10-20, plus the top-of-draft history they are computed from. Eligibility is derived by scripts/lottery_eligibility.py. The ball allocation is recorded under 'lottery'. Updated 2026-11-12: the 2027 bonus covers ranks 2, 3 and 4.",
   "rules": {
     "noTop2TwiceInARow": {
       "text": "A team that picked 1st or 2nd in a draft cannot pick 1st or 2nd in the next draft.",
@@ -49,7 +49,7 @@
       2026,
       2027
     ],
-    "source": "docs/LEAGUE_RULES_MODEL.md (rule document, 2026-27 model); owner, 2026-10-20: the ball allocation is the same for next season (2027 draft): a few playoff teams get balls and the 3rd and 4th place teams get a bonus, as the rule document indicates.",
+    "source": "docs/LEAGUE_RULES_MODEL.md (rule document, 2026-27 model); owner, 2026-10-20: the ball allocation is the same for next season (2027 draft): a few playoff teams get balls and the 3rd and 4th place teams get a bonus, as the rule document indicates. Rule change confirmed by the commissioner and relayed by the league owner, 2026-11-12: for 2027 the bonus extends to the 2nd place team, so 2nd, 3rd and 4th get the pick 9-10-11 bonus subject to the lottery results, as last year.",
     "participants": 12,
     "ranksCovered": "regular-season ranks 16 down to 5",
     "ticketsByRank": {
@@ -72,19 +72,32 @@
       "1.01"
     ],
     "drawNote": "Pick 1.02 is resolved first, then 1.01. The prior winner remains eligible for 1.01; if the same team wins both, it keeps its choice of pick and the other pick is redrawn.",
-    "rank3And4Bonus": "Regular-season ranks 3 and 4 do not enter the lottery. After 1.01 and 1.02 resolve, rank 3 takes the earliest remaining slot in the rank 3-8 round-1 block, then rank 4 takes the next earliest.",
-    "rounds2And3": "plain inverse regular-season standings: no lottery, no rank 3/4 bonus",
+    "rank3And4Bonus": "From the 2027 draft, regular-season ranks 2, 3 and 4 do not enter the lottery (2026: ranks 3 and 4). After 1.01 and 1.02 resolve, rank 2 takes pick 9, rank 3 pick 10 and rank 4 pick 11, subject to the lottery results.",
+    "rounds2And3": "plain inverse regular-season standings: no lottery, no rank 2/3/4 bonus",
     "ineligibleResult": "A draw that lands on a team ineligible under 'rules' is redrawn (owner, 2026-10-20).",
     "rank3And4": {
+      "note": "Key name kept for compatibility: it holds the bonus ranks of the draft being simulated (2027: ranks 2, 3 and 4).",
       "ranks": [
+        2,
         3,
         4
       ],
       "blockRanks": [
         8,
-        3
+        2
       ],
-      "interpretation": "Reading used by the simulator (not yet confirmed by the commissioner): the 'rank 3-8 round-1 block' is the run of round-1 slots a 16-team reverse order gives ranks 8 down to 3, i.e. picks 9-14. After 1.01 and 1.02 resolve, rank 3 takes the first slot of that block (pick 9) and rank 4 the next (pick 10); the other teams keep reverse-standings order around them."
+      "interpretation": "Reading used by the simulator (the pick numbers 9, 10 and 11 are the commissioner's; the order within them is our reading): after 1.01 and 1.02 resolve, rank 2 takes pick 9, rank 3 pick 10 and rank 4 pick 11; the other teams keep reverse-standings order around them.",
+      "byDraft": {
+        "2026": [
+          3,
+          4
+        ],
+        "2027": [
+          2,
+          3,
+          4
+        ]
+      }
     }
   }
 }
