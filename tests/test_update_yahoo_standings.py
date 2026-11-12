@@ -513,12 +513,13 @@ class TestCommandLine(Base):
 
 
 class TestWorkflowFile(unittest.TestCase):
-    def test_the_standings_workflow_is_manual_only_never_merges_and_has_no_session(self):
+    def test_the_standings_workflow_is_daily_and_on_demand_only_opens_a_pr_never_merges_and_has_no_session(self):
         root = os.path.join(os.path.dirname(__file__), "..")
         text = read(os.path.join(root, ".github", "workflows", "update-yahoo-standings.yml"))
         head = text.split("jobs:")[0]
         self.assertIn("workflow_dispatch:", head)
-        for trigger in ("schedule:", "push:", "pull_request:", "pull_request_target:"):
+        self.assertIn("\n  schedule:", head)                                           # daily: a stale snapshot misled the top-4 pick check
+        for trigger in ("push:", "pull_request:", "pull_request_target:"):
             self.assertNotIn("\n  " + trigger, head, trigger)
         for forbidden in ("YAHOO_STORAGE_STATE", "cookie", "gh pr merge", "--auto", "playwright"):
             self.assertNotIn(forbidden.lower(), text.split("jobs:")[1].lower(), forbidden)
