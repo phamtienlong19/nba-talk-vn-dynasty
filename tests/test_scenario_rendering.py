@@ -258,10 +258,10 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_trade_lab_separates_proposals_from_completed_trades(self):
         lab = re.search(r'id="lab-trades">(.*?)<div id="lab-window"', self.official, re.S).group(1)
-        self.assertEqual(lab.count('class="tcard prop'), 0)           # every in-season trade is completed: nothing pending
-        self.assertEqual(lab.count('<input type="checkbox">'), 0)
+        self.assertEqual(lab.count('class="tcard prop'), 1)           # one staged trade (Long con / CrazyCat); every other in-season trade is completed
+        self.assertEqual(lab.count('<input type="checkbox">'), 1)
         text = re.sub(r"<[^>]+>", " ", lab)
-        self.assertIn("No proposals", text)
+        self.assertIn("Jaxson Hayes", text)                            # the staged Long con / CrazyCat trade is the one proposal
         for name in ("OG Anunoby", "Donovan Clingan", "Stephon Castle", "Victor Wembanyama"):
             self.assertNotIn(name, text)                               # completed trades are not proposals
         self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
