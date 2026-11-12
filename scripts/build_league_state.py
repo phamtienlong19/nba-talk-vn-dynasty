@@ -30,6 +30,7 @@ import build_fa_draft_pool as pool  # noqa: E402
 import league_state as ls
 import yahoo_standings as ys
 import trade_checker as tc
+import violations
 import season_state as ss  # noqa: E402
 
 REPO_ROOT = ls.REPO_ROOT
@@ -566,6 +567,7 @@ def build_page_data(inputs: dict, index_html: str, yahoo_path: str = CANONICAL_Y
                     "checkpoint": {k: ((si["postDraft"] or {}).get("checkpoint") or {}).get(k) for k in ("id", "date")}},
         "standings": standings_view(si),
         "lottery": lottery_view(si),
+        "violations": violations.page_view(violations.load(set(inputs["franchises"]) if "franchises" in inputs else {t["franchiseId"] for t in inputs["freeze"]["teams"]})),
         "season": {"snapshot": {k: snap.get(k) for k in ("snapshotId", "verifiedAt", "source", "kind")},
                    "appliedAfterSnapshot": [t["txnId"] for t in ss.pending_completed(si)],
                    "checkpoints": [{k: c.get(k) for k in ("id", "label", "date", "status")} for c in si["checkpoints"]["checkpoints"]],
