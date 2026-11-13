@@ -1,0 +1,66 @@
+name: Update Player Stats
+
+# Per-player display data for the player card, from Yahoo's public pages (no sign-in, no cookies, read-only GETs, 1.5 s apart):
+#   player_stats.json  averages per game for six windows (about 55 requests)       scripts/update_yahoo_player_stats.py
+#   player_log.json    a day-by-day game line per player (new closed days only)     scripts/update_player_log.py
+# Both files go to the `stats-data` branch as ONE orphan commit (force-pushed, so the branch never grows). It never pushes to main, never
+# opens a PR and never touches data/. A failed step keeps that file's previous version. The first run walks every closed day of the season
+# (about 10 minutes); after that only new days. Details: docs/LIVE_DATA.md
+
+on:
+  schedule:
+    - cron: "40 9 * * *"     # after Yahoo's day rolls over (12:00 am Pacific = 08:00 / 07:00 UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-player-stats
+  cancel-in-progress: false
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch the previous files from the stats-data branch
+        run: |
+          mkdir -p out
+          if git ls-remote --exit-code --heads origin stats-data >/dev/null 2>&1; then
+            git fetch --depth=1 origin stats-data
+            for f in player_stats.json player_log.json; do git show "FETCH_HEAD:$f" > "out/$f" 2>/dev/null || rm -f "out/$f"; done
+          fi
+          ls -l out
+
+      - name: Averages per game
+        id: stats
+        continue-on-error: true
+        run: python3 scripts/update_yahoo_player_stats.py --out out/player_stats.json
+
+      - name: Day-by-day log (new closed days)
+        id: log
+        continue-on-error: true
+        run: python3 scripts/update_player_log.py --out out/player_log.json
+
+      - name: Publish to the stats-data branch (main is untouched)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -n "$(ls out)" ] || { echo "nothing to publish"; exit 1; }
+          cd out
+          git init -q -b stats-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "player stats $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" stats-data
+
+      - name: Fail the run when a step failed (the files that did succeed were still published)
+        if: steps.stats.outcome == 'failure' || steps.log.outcome == 'failure'
+        run: exit 1

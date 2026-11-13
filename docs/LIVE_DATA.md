@@ -141,6 +141,19 @@ touches main or `data/`. A failure (or fewer than 150 players in the season wind
 and shows a plain "Averages per game" table (no colours, ranks or verdicts); a missing file or a player with no games just hides the section.
 Windows with no games print dashes, stored as null. The 14- and 30-day windows are identical until the season is 30 days old.
 
+## Day-by-day game log (`stats-data` branch, `player_log.json`)
+
+The same workflow (`update-player-stats.yml`, daily 09:40 UTC) also runs `scripts/update_player_log.py`: for every closed day of the season
+it reads each team's page for that day (`yahoo_teamday`, `?date=`; one request per team per day, 1.5 s apart) and keeps one compact line per
+player who played: date, slot, opponent, minutes, FGM/A, FTM/A, 3PM, PTS, REB, AST, STL, BLK, TO and the Yahoo team id. The first run walks
+the whole season (about 10 minutes, at most 45 days a run); after that only new days are fetched. A day that fails is skipped and retried
+next run, never invented; the previous file stays unless something new was captured. Only rostered players appear (team pages), so a free
+agent has no log. Minutes are kept as Yahoo shows them (some pages give 36:07, others 36). The file goes to the `stats-data` branch with
+`player_stats.json` as one orphan commit; it never touches main or `data/`.
+
+The player card shows the last 10 games as plain lines (`13-7-1-1-1` = PTS-REB-AST-STL-BLK, `5/7 FG`, `2 3PM`, `1/2 FT`, `3 TO`), newest
+first, with "Show all"; the feed's current day is added on top until the file has it. No totals anywhere. Display data only.
+
 ## Roster changes and departed players (live feed `moves`)
 
 Each closed day's rosters are compared with the day before (`live_days.moves_between`): who was added and who was dropped, by team and

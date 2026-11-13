@@ -15,8 +15,11 @@ HEAD_TAIL = ("MIN*", "FGM/A*", "FG%", "FTM/A*", "FT%", "3PTM", "PTS", "REB", "AS
 
 
 def _minutes(s):
-    m = re.fullmatch(r"\s*(\d+):(\d{2})\s*", s or "")
-    return "%d:%s" % (int(m.group(1)), m.group(2)) if m else None
+    """Yahoo shows minutes as 36:07 on some pages and as a whole number (36) on others; kept as shown, never padded."""
+    m = re.fullmatch(r"\s*(\d+)(?::(\d{2}))?\s*", s or "")
+    if not m:
+        return None
+    return "%d:%s" % (int(m.group(1)), m.group(2)) if m.group(2) else str(int(m.group(1)))
 
 
 def url_for(cfg, team_id, date) -> str:

@@ -446,7 +446,7 @@ class TestKeeperBoardPage(unittest.TestCase):
     def test_a_keeper_row_name_opens_the_player_sheet_and_the_plan_can_be_exported(self):
         r = self.drive(self.SETUP + """
           var nm=document.querySelector('#wi-root .wi-kb tbody td.wi-pl');R.role=nm.getAttribute('role');nm.click();
-          var s=document.getElementById('pl-sheet');R.sheet=!!s;R.keep=s?s.textContent.indexOf('Next year (keepers)')>=0||s.textContent.indexOf('NEXT YEAR')>=0:false;
+          var s=document.getElementById('pl-sheet');R.sheet=!!s;R.keep=s?!!s.querySelector('.plc-keep'):false;                       /* the keeper line is the quiet last line of the card */
           R.share=!!document.querySelector('#wi-root .wi-kb-shr .share-btn');""")
         self.assertEqual(r["role"], "button")
         self.assertTrue(r["sheet"] and r["keep"])

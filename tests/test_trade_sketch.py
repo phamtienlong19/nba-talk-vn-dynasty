@@ -103,12 +103,12 @@ if __name__ == "__main__":
 class TestPlayerSheetAndShare(TestTradeSketch):
     def test_a_team_card_row_opens_the_player_sheet_with_league_facts(self):
         r = self.drive("""var row=document.querySelector('section.team-card .player-row[data-k]');R.k=row.getAttribute('data-k');R.role=row.getAttribute('role');row.click();
-          var s=document.getElementById('pl-sheet');R.open=!!s;R.tiles=Array.prototype.map.call(s.querySelectorAll('.plc-t > span'),function(x){return x.textContent;});
+          var s=document.getElementById('pl-sheet');R.open=!!s;R.tiles=Array.prototype.map.call(s.querySelectorAll('.plc-sal i'),function(x){return x.textContent;});
           R.pills=Array.prototype.map.call(s.querySelectorAll('.plc-p'),function(x){return x.textContent;});
           R.btns=Array.prototype.map.call(s.querySelectorAll('.pls-b'),function(x){return x.textContent;});R.text=s.textContent;""")
         self.assertTrue(r["open"])
         self.assertEqual(r["role"], "button")
-        self.assertEqual(r["tiles"], ["SALARY NOW", "NEXT YEAR", "KEEPER RANK"])
+        self.assertEqual(r["tiles"], ["SALARY NOW"])
         self.assertTrue(any("Tradable" in p for p in r["pills"]), r["pills"])
         self.assertEqual(r["btns"][:3], ["Add to Trade Machine", "Show on team card", "Show in Keepers"])
         self.assertIn("Export", r["btns"])
