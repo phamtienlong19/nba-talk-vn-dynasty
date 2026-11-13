@@ -148,7 +148,9 @@ def parse_settings(html):
     c = re.search(r"Stat Categories:\s*(.+?)\s+(?:Stat Modifiers|Roster Positions|Max |Minimum|Games|Lineup|League|Waiver|Trade)", t)
     cats = re.findall(r"\(([A-Z0-9%/+\-]+)\)", c.group(1)) if c else []
     pub = re.search(r"Make League Publicly Viewable:\s*(Yes|No)", t)
-    return {"scoring": m.group(1).strip() if m else None, "categories": cats, "public": (pub.group(1) == "Yes") if pub else None}
+    nm = re.search(r"League Name:\s*(.+?)\s+(?:League Logo|Auto-renew|Custom|Draft|Scoring Type|Max )", t)
+    return {"scoring": m.group(1).strip() if m else None, "categories": cats, "public": (pub.group(1) == "Yes") if pub else None,
+            "name": nm.group(1).strip() if nm else None}
 
 
 def parse_teams(html, league):
@@ -300,14 +302,70 @@ def roto(stats_by_team, specs):
 
 
 # ------------------------------------------------------------------ the run
+def head_to_head(a, b, specs):
+    w = l = t = 0
+    for sp in specs:
+        x, y = cat_value(a, sp), cat_value(b, sp)
+        if x is None or y is None:
+            continue
+        if x == y:
+            t += 1
+        elif (x < y) == sp["lower"]:
+            w += 1
+        else:
+            l += 1
+    return [w, l, t]
+
+
+def all_play(stats_by_team, specs):
+    """Every team against every other, category by category: {a: {b: [w, l, t]}} and each team's [W, L, T] record (a cell is won with more category wins)."""
+    ids = sorted(stats_by_team)
+    cells = {a: {b: head_to_head(stats_by_team[a], stats_by_team[b], specs) for b in ids if b != a} for a in ids}
+    rec = {}
+    for a in ids:
+        r = [0, 0, 0]
+        for c in cells[a].values():
+            r[0 if c[0] > c[1] else 1 if c[0] < c[1] else 2] += 1
+        rec[a] = r
+    return cells, rec
+
+
+def _enc(v):
+    return list(v) if isinstance(v, tuple) else (None if v is None else str(v))
+
+
+def _dec(v):
+    return tuple(v) if isinstance(v, list) else (None if v is None else Fraction(v))
+
+
+def _cache_path(cache, league, week):
+    return os.path.join(cache, "%s-week-%d.json" % (league, week)) if cache else None
+
+
+def _cache_get(cache, league, week):
+    p = _cache_path(cache, league, week)
+    if p and os.path.exists(p):
+        with open(p, encoding="utf-8") as f:
+            d = json.load(f)
+        return {"week": week, "teams": {int(t): {"name": r["name"], "cols": {h: _dec(v) for h, v in r["cols"].items()}} for t, r in d.items()}}
+    return None
+
+
+def _cache_put(cache, league, wk):
+    p = _cache_path(cache, league, wk["week"])
+    if p:
+        os.makedirs(cache, exist_ok=True)
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump({str(t): {"name": r["name"], "cols": {h: _enc(v) for h, v in r["cols"].items()}} for t, r in wk["teams"].items()}, f)
+
+
 def collect_week(fx, league, week, team_ids, base):
     """All teams' totals for one week, walking only as many matchup pages as needed (each page covers two teams)."""
-    got, parsed = {}, None
+    got = {}
     for tid in team_ids:
         if tid in got:
             continue
-        html = fx.get("%s/matchup?date=totals&week=%d&mid1=%d" % (base, week, tid), keep=True)
-        parsed = parse_week(html, league)
+        parsed = parse_week(fx.get("%s/matchup?date=totals&week=%d&mid1=%d" % (base, week, tid)), league)
         if parsed["week"] not in (None, week):
             raise RotoError("asked for week %d but Yahoo showed week %s" % (week, parsed["week"]))
         got.update(parsed["teams"])
@@ -318,11 +376,12 @@ def has_data(wk):
     return any(v is not None for rec in wk["teams"].values() for v in rec["cols"].values())
 
 
-def run(league, week=None, through=None, cache=None, delay=1.5, sport="nba", out=print):
+def load(league, cache=None, delay=1.5, sport="nba", only_week=None, through=None):
+    """-> (settings, teams {id: name}, weeks_data [{week, teams}], in_progress_week or None). Weeks are read in order and the walk stops at the first
+    week with no stats. A week is kept in the cache only once a later week has stats (it is then final); the newest week is always fetched again."""
     base = "https://%s/%s" % (SPORTS[sport], league)
-    fx = Fetcher(delay=delay, cache=cache)
-    page = fx.get(base + "/settings")
-    st = parse_settings(page)
+    fx = Fetcher(delay=delay)
+    st = parse_settings(fx.get(base + "/settings"))
     if st["scoring"] is None and not st["categories"]:
         raise RotoError("could not read league %s's public settings: it does not exist or it is not publicly viewable (Yahoo shows a generic "
                         "error page). Only public leagues can be read; a commissioner can turn on 'Make League Publicly Viewable' in the settings." % league)
@@ -331,19 +390,59 @@ def run(league, week=None, through=None, cache=None, delay=1.5, sport="nba", out
     teams = parse_teams(fx.get(base + "?lhst=stand"), league)
     if len(teams) < 2:
         raise RotoError("could not read the teams from the standings page")
-    first = parse_week(fx.get("%s/matchup?date=totals&week=1&mid1=%d" % (base, sorted(teams)[0]), keep=True), league)
+    ids = sorted(teams)
+    first = parse_week(fx.get("%s/matchup?date=totals&week=1&mid1=%d" % (base, ids[0])), league)
     all_weeks = first["weeks"] or [1]
-    last = through or max(all_weeks)
-    wanted = [week] if week else [w for w in all_weeks if w <= last]
+    limit = min(only_week or 10 ** 6, through or 10 ** 6)
     weeks_data = []
-    for w in wanted:
-        wk = collect_week(fx, league, w, sorted(teams), base)
-        if has_data(wk):
-            weeks_data.append(wk)
-        elif week:
-            raise RotoError("week %d has no stats yet" % week)
+    for w in [x for x in all_weeks if x <= limit]:
+        wk = _cache_get(cache, league, w) or collect_week(fx, league, w, ids, base)
+        if not has_data(wk):
+            break
+        weeks_data.append(wk)
+    for wk in weeks_data[:-1]:
+        _cache_put(cache, league, wk)                                   # final: a later week already has stats
+    if only_week:
+        weeks_data = [wk for wk in weeks_data if wk["week"] == only_week]
+        if not weeks_data:
+            raise RotoError("week %d has no stats yet" % only_week)
     if not weeks_data:
         raise RotoError("no week with stats yet")
+    return st, teams, weeks_data, base
+
+
+def _view(weeks_data, teams, specs, label):
+    tot = totals(weeks_data, teams)
+    res, ranked = roto(tot, specs)
+    cells, rec = all_play(tot, specs)
+    return {"label": label, "weeks": [w["week"] for w in weeks_data],
+            "order": ranked,
+            "teams": {str(t): {"rank": res[t]["rank"], "total": res[t]["total"], "points": res[t]["points"], "allPlay": rec[t],
+                               "values": {sp["cat"]: _plain(cat_value(tot[t], sp)) for sp in specs}} for t in tot},
+            "matrix": {str(a): {str(b): c for b, c in row.items()} for a, row in cells.items()}}
+
+
+def report(league, cache=None, delay=1.5, sport="nba", now=None):
+    """The whole report: one view for the season and one per week that has stats (what the page and the PNGs are drawn from)."""
+    import datetime
+    st, teams, weeks_data, _base = load(league, cache, delay, sport)
+    headers = list(next(iter(weeks_data[0]["teams"].values()))["cols"])
+    cats = st["categories"] or [h for h in headers if h and not h.endswith("M/A*")]
+    specs, skipped = plan(cats, headers)
+    if not specs:
+        raise RotoError("none of the league's categories (%s) can be computed from the matchup pages" % ", ".join(cats))
+    names = {t: teams.get(t) or next((wk["teams"][t]["name"] for wk in weeks_data if t in wk["teams"]), str(t)) for t in teams}
+    views = {"season": _view(weeks_data, teams, specs, "Season, weeks %s" % (("%d-%d" % (weeks_data[0]["week"], weeks_data[-1]["week"])) if len(weeks_data) > 1 else weeks_data[0]["week"]))}
+    for wk in weeks_data:
+        views["w%d" % wk["week"]] = _view([wk], teams, specs, "Week %d" % wk["week"])
+    when = now or datetime.datetime.now(datetime.timezone.utc)
+    return {"schema": "yahoo-roto-report/1", "league": str(league), "leagueName": st.get("name"), "sport": sport, "scoring": st["scoring"], "asOf": when.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "inProgressWeek": weeks_data[-1]["week"], "categories": [{"cat": sp["cat"], "lower": sp["lower"], "pct": sp["kind"] == "pct"} for sp in specs],
+            "skipped": skipped, "teams": {str(t): names[t] for t in names}, "weeks": [wk["week"] for wk in weeks_data], "views": views}
+
+
+def run(league, week=None, through=None, cache=None, delay=1.5, sport="nba", out=print):
+    st, teams, weeks_data, _base = load(league, cache, delay, sport, only_week=week, through=through)
     headers = list(next(iter(weeks_data[0]["teams"].values()))["cols"])
     cats = st["categories"] or [h for h in headers if h and not h.endswith("M/A*")]
     specs, skipped = plan(cats, headers)
@@ -385,6 +484,60 @@ def _fmt(cat, v):
     return ("%.3f" % v).lstrip("0") if cat.endswith("%") else ("%g" % v)
 
 
+# ------------------------------------------------------------------ files: self-contained HTML and the three images
+IMAGES = (("roto", 720), ("raw", 720), ("allplay", 1040))          # (view, css width); drawn at device scale 2.5
+
+
+def write_html(doc, out_dir):
+    """index.html = report.html with the report inlined: opens anywhere, offline, no server. Returns the path."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(here, "report.html"), encoding="utf-8") as f:
+        page = f.read()
+    blob = json.dumps(doc, ensure_ascii=False).replace("</", "<\\/")
+    page = page.replace("<script>\n(function(){", "<script>window.__REPORT__=%s;</script>\n<script>\n(function(){" % blob, 1)
+    os.makedirs(out_dir, exist_ok=True)
+    path = os.path.join(out_dir, "index.html")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(page)
+    with open(os.path.join(out_dir, "report.json"), "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False, separators=(",", ":"))
+    return path
+
+
+def find_chrome():
+    import shutil
+    for c in (os.environ.get("CHROME"), "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/Applications/Chromium.app/Contents/MacOS/Chromium",
+              shutil.which("google-chrome"), shutil.which("google-chrome-stable"), shutil.which("chromium"), shutil.which("chromium-browser")):
+        if c and os.path.exists(c):
+            return c
+    return None
+
+
+def write_images(html_path, out_dir, week=None, chrome=None):
+    """Three PNGs (roto, raw stats, all-play) by screenshotting the page in headless Chrome at device scale 2.5. The page height is measured first so
+    each image is exactly as tall as its table. Needs Google Chrome / Chromium; fonts come from Google Fonts (system fonts are used if offline)."""
+    import subprocess
+    chrome = chrome or find_chrome()
+    if not chrome:
+        raise RotoError("Chrome/Chromium not found: set $CHROME to its path to draw the images (the HTML file works without it)")
+    base = ["--headless", "--disable-gpu", "--hide-scrollbars", "--no-sandbox", "--virtual-time-budget=20000"]
+    paths = []
+    for view, width in IMAGES:
+        url = "file://%s?static=1&view=%s%s" % (html_path, view, "&week=%d" % week if week else "")
+        dom = subprocess.run([chrome] + base + ["--window-size=%d,1000" % width, "--dump-dom", url], capture_output=True, text=True, timeout=120).stdout
+        m = re.search(r'name="report-height"[^>]*content="(\d+)"|content="(\d+)"[^>]*name="report-height"', dom)
+        if not m:
+            raise RotoError("could not measure the %s page (Chrome printed no document)" % view)
+        height = int(m.group(1) or m.group(2)) + 8
+        path = os.path.join(out_dir, "%s.png" % view)
+        subprocess.run([chrome] + base + ["--force-device-scale-factor=2.5", "--window-size=%d,%d" % (width, height), "--screenshot=" + path, url],
+                       capture_output=True, timeout=120)
+        if not os.path.exists(path):
+            raise RotoError("Chrome did not write %s" % path)
+        paths.append(path)
+    return paths
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("league", help="the Yahoo league id (the number in the league's URL)")
@@ -394,8 +547,18 @@ def main(argv=None):
     ap.add_argument("--cache", help="directory to keep fetched pages in")
     ap.add_argument("--delay", type=float, default=1.5, help="seconds between requests (default 1.5)")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--report", metavar="DIR", help="write DIR/report.json and a self-contained DIR/index.html (all weeks, all three views)")
+    ap.add_argument("--png", action="store_true", help="with --report: also draw DIR/roto.png, raw.png, allplay.png (needs Chrome)")
     a = ap.parse_args(argv)
     try:
+        if a.report:
+            doc = report(a.league, a.cache, a.delay, a.sport)
+            path = write_html(doc, a.report)
+            print("wrote %s and report.json (weeks %s, week %d in progress)" % (path, ", ".join(map(str, doc["weeks"])), doc["inProgressWeek"]))
+            if a.png:
+                for p in write_images(os.path.abspath(path), a.report, a.week):
+                    print("wrote", p)
+            return 0
         doc = run(a.league, a.week, a.through, a.cache, a.delay, a.sport)
     except RotoError as e:
         print("error: %s" % e, file=sys.stderr)

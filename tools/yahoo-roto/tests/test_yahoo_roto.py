@@ -96,6 +96,57 @@ class Fake(yr.Fetcher):
         raise yr.RotoError("unexpected " + url)
 
 
+class AllPlayAndReport(unittest.TestCase):
+    SPECS = [{"cat": "PTS", "kind": "count", "col": "PTS", "lower": False}, {"cat": "TO", "kind": "count", "col": "TO", "lower": True}]
+
+    def test_all_play_counts_category_wins_and_records(self):
+        stats = {1: {"PTS": Fraction(30), "TO": Fraction(5)}, 2: {"PTS": Fraction(20), "TO": Fraction(9)}, 3: {"PTS": Fraction(30), "TO": Fraction(9)}}
+        cells, rec = yr.all_play(stats, self.SPECS)
+        self.assertEqual(cells[1][2], [2, 0, 0])
+        self.assertEqual(cells[1][3], [1, 0, 1])                                     # level on PTS, fewer TO
+        self.assertEqual(cells[2][3], [0, 1, 1])
+        self.assertEqual(rec, {1: [2, 0, 0], 2: [0, 2, 0], 3: [1, 1, 0]})
+        self.assertNotIn(1, cells[1])
+
+    def test_finished_weeks_are_cached_and_the_newest_week_is_not(self):
+        import tempfile
+        wk = {"week": 1, "teams": {1: {"name": "A", "cols": {"FGM/A*": (5, 10), "PTS": Fraction(30)}}}}
+        with tempfile.TemporaryDirectory() as d:
+            yr._cache_put(d, "9", wk)
+            back = yr._cache_get(d, "9", 1)
+            self.assertEqual(back["teams"][1]["cols"], {"FGM/A*": (5, 10), "PTS": Fraction(30)})
+            self.assertIsNone(yr._cache_get(d, "9", 2))
+
+    def test_the_report_has_a_view_per_week_and_one_for_the_season_and_the_html_is_self_contained(self):
+        import tempfile
+        pages = {"settings": SETTINGS.replace("Scoring Type", "League Name: My League League Logo: x Scoring Type"),
+                 "lhst=stand": '<table><tr><th>Team</th></tr><tr><td><a href="/nba/9/1">A</a></td></tr><tr><td><a href="/nba/9/2">B</a></td></tr></table>',
+                 "week=1": matchup(1, [(1, "A", ["5/10", ".5", "3/4", ".75", "4", "30", "2"]), (2, "B", ["4/10", ".4", "2/4", ".5", "6", "25", "5"])]),
+                 "week=2": matchup(2, [(1, "A", ["6/10", ".6", "1/4", ".25", "2", "10", "9"]), (2, "B", ["5/10", ".5", "4/4", "1", "1", "40", "1"])]),
+                 "week=3": matchup(3, [(1, "A", ["-/-", "-", "-/-", "-", "-", "-", "-"]), (2, "B", ["-/-", "-", "-/-", "-", "-", "-", "-"])])}
+        fx = Fake(pages)
+        orig = yr.Fetcher
+        yr.Fetcher = lambda **k: fx
+        try:
+            doc = yr.report("9")
+        finally:
+            yr.Fetcher = orig
+        self.assertEqual(sorted(doc["views"]), ["season", "w1", "w2"])
+        self.assertEqual(doc["inProgressWeek"], 2)
+        self.assertEqual(doc["leagueName"], "My League")
+        self.assertEqual([c["cat"] for c in doc["categories"]], ["FG%", "FT%", "3PTM", "PTS", "TO"])
+        v = doc["views"]["season"]
+        self.assertEqual(v["teams"]["1"]["values"]["PTS"], 40)
+        self.assertEqual(v["teams"]["1"]["values"]["FG%"], 0.55)                      # 11/20, not the mean of two percentages
+        self.assertEqual(len(v["matrix"]["1"]), 1)
+        with tempfile.TemporaryDirectory() as d:
+            path = yr.write_html(doc, d)
+            html = open(path, encoding="utf-8").read()
+            self.assertIn("window.__REPORT__=", html)
+            self.assertIn('"leagueName": "My League"', html)
+            self.assertTrue(os.path.exists(os.path.join(d, "report.json")))
+
+
 class Private(unittest.TestCase):
     def test_a_private_or_missing_league_gets_a_plain_message(self):
         fx = Fake({"settings": "<html><title>There was a problem | Fantasy Basketball</title><body>Sign in</body></html>"})
