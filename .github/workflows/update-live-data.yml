@@ -8,6 +8,9 @@ name: Update Live Data
 # GitHub cron is UTC and best-effort: scheduled runs often start 20-90 minutes late or not at all, so a 5-minute cron cannot keep a feed
 # fresh. Each run therefore loops for ~115 minutes (a build + publish every 4 minutes); an hourly cron starts the next run, which waits
 # in the queue until the previous one ends, so the feed has no gap. The page shows the feed's age and flags a stale one.
+# Why it also queues its own successor: in practice GitHub dropped most of these cron triggers (runs began 6-8 hours apart, so the feed was
+# fresh about 30% of the time). The first step therefore asks for the next run right away (workflow_dispatch is allowed with the job token);
+# it waits in the concurrency queue until this one ends, so there is no gap, and the cron stays as a backstop if the chain ever breaks.
 #   NBA games land about 22:00-07:00 UTC; weekend afternoons about 16:00-22:00 UTC; Yahoo's day and the waiver run roll over at
 #   12:00 am Pacific = 08:00 UTC (07:00 UTC during US daylight time), so both of those minutes get a run.
 
@@ -27,6 +30,7 @@ on:
 
 permissions:
   contents: write
+  actions: write             # to queue the next run (below)
 
 # Never cancel the loop that is running; one newer run waits its turn (GitHub keeps only the newest pending run).
 concurrency:
@@ -40,6 +44,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Queue the next run (it starts when this one ends; the cron is only the backstop)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update-live-data.yml --ref "${GITHUB_REF_NAME}" || echo "could not queue the next run (the cron will)"
 
       - name: Set up Python
         uses: actions/setup-python@v5

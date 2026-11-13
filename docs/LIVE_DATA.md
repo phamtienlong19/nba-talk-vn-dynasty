@@ -161,3 +161,10 @@ date, plus today against the last closed day. The latest closed day's rosters ar
 built before this existed is backfilled once from the day cache. A player whose slot reads `--` on the week-totals page (dropped or
 traded away, still counted in the totals) is listed apart on the matchup card as "Left this roster" and is not a roster member for
 today's comparison. Facts only: nothing here says whether a move was good, legal or disputed.
+
+## Keeping the feed continuous (2026-11-13)
+
+GitHub's cron is best-effort and was dropping most of this workflow's triggers: runs started 6-8 hours apart and the feed was fresh about
+30% of the time. Each run now queues its own successor with `workflow_dispatch` as its first step (it waits in the `update-live-data`
+concurrency group until the current run ends), so the loop no longer depends on the cron; the cron stays as a backstop. The roster workflow
+has its own concurrency group and does not block or delay the feed.
