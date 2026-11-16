@@ -548,7 +548,7 @@ class TestEmbeddedPageData(unittest.TestCase):
     def test_all_scenario_combinations_are_present(self):
         self.assertEqual(ls.selectable_trades(self.i), [])  # nothing pre-draft is actionable any more
         # the Trade Lab enumerates every combination of the in-season proposals (layer C)
-        self.assertEqual(sorted(self.data["scenarios"]), ["", "PROP-2026-004"])  # one staged trade (Long con / CrazyCat) is left to simulate
+        self.assertEqual(sorted(self.data["scenarios"]), [""])  # no staged trade is left to simulate
 
     def test_official_view_has_no_movement_and_scenario_view_has_it(self):
         view = self.data["scenarios"][""]
@@ -556,9 +556,9 @@ class TestEmbeddedPageData(unittest.TestCase):
         self.assertEqual(view["teams"][BZ]["fold"]["tradeIds"], [])  # Bz made no in-season move
         # the default (current-season) view folds only the completed in-season trades, for their teams
         self.assertEqual({f: v["fold"]["tradeIds"] for f, v in view["teams"].items() if v["fold"]["tradeIds"]},
-                         {"franchise-02": ["TXN-2026-001"], "franchise-05": ["TXN-2026-001"],
+                         {"franchise-02": ["TXN-2026-001", "PROP-2026-004"], "franchise-05": ["TXN-2026-001"],
                           "franchise-01": ["PROP-2026-001", "PROP-2026-002"], "franchise-12": ["PROP-2026-001"],
-                          "franchise-11": ["PROP-2026-002", "PROP-2026-003"], "franchise-04": ["PROP-2026-003"]})
+                          "franchise-11": ["PROP-2026-002", "PROP-2026-003"], "franchise-04": ["PROP-2026-003", "PROP-2026-004"]})
         self.assertEqual(self.data["history"]["tradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E", "TRADE-F", "TRADE-D-AMEND"])
 
     def test_legal_universe_is_larger_than_the_recommendation_board(self):
