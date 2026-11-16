@@ -587,11 +587,16 @@ class TestRenderedCards(unittest.TestCase):
         self.assertIn("window.addEventListener(\"popstate\"", self.static)                 # back / forward switch tabs
 
     # ---- search, my team, jump chips: driven through the page's own script -----------------------------------------------
-    def _drive(self, js, hash_="", wait=500):
-        """Run `js` (it fills R) inside the loaded page, after `wait` ms of page time; -> the parsed R."""
+    def _drive(self, js, hash_="", wait=500, now=None):
+        """Run `js` (it fills R) inside the loaded page, after `wait` ms of page time; -> the parsed R. `now` (an ISO time) freezes the page's clock
+        from before its first script, for a test whose result depends on the calendar (cooldowns end 14 days after an acquisition)."""
         import tempfile
         with open(INDEX, encoding="utf-8") as f:
             html = f.read()
+        if now:
+            freeze = ("<script>(function(){var T=Date.parse('%s'),R=Date;function F(){if(arguments.length)return new (Function.prototype.bind.apply(R,[null].concat([].slice.call(arguments))))();return new R(T);}"
+                      "F.now=function(){return T;};F.parse=R.parse;F.UTC=R.UTC;F.prototype=R.prototype;window.Date=F;})();</script>") % now
+            html = html.replace("<head>", "<head>" + freeze, 1)
         js = "var D=NBA_NAV.D,view=NBA_NAV.view,norm=NBA_NAV.norm,parseHash=NBA_NAV.parseHash,showTab=NBA_NAV.showTab;" + js
         script = ("<script>(function(){var R={};function done(){var p=document.createElement('pre');p.id='drive-out';"
                   "p.textContent=JSON.stringify(R);document.body.appendChild(p);}try{\n" + js + "\n}catch(e){R.error=String(e&&e.stack||e);}"
@@ -854,6 +859,11 @@ class TestRenderedCards(unittest.TestCase):
         self.assertTrue(r["tray"])
 
     def test_held_players_show_when_the_hold_lifts_not_the_date(self):
+        # Pills only exist while somebody is inside a cooldown, which depends on today's date: this test failed on main once the last trade's
+        # 14 days had passed. Freeze the page's clock one day after the newest acquisition in the data so it holds on any calendar day.
+        acq = json.loads(re.search(r'id="league-data">(.*?)</script>', open(INDEX, encoding="utf-8").read(), re.S).group(1).replace("<\\/", "</"))["trade"]["acq"]
+        newest = max(acq.values())[:10]
+        frozen = (datetime.date.fromisoformat(newest) + datetime.timedelta(days=1)).isoformat() + "T12:00:00Z"
         r = self._drive("""
           var q=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
           R.pills=q('#chk .hold').map(function(x){return x.textContent;});R.titles=q('#chk .hold').map(function(x){return x.title;});
@@ -861,7 +871,7 @@ class TestRenderedCards(unittest.TestCase):
           D2.teams.forEach(function(t){base[t.id].roster.forEach(function(p){if(!held&&NBA_NAV.D.trade.acq[p.k+'|'+t.id]){held={k:p.k,f:t.id};}});});
           var other=D2.teams.filter(function(t){return t.id!==held.f;})[0].id;
           var res=NBA_NAV.check([{key:held.k,from:held.f,to:other},{key:base[other].roster[base[other].roster.length-1].k,from:other,to:held.f}],'2026-10-21T00:00:00Z');
-          R.reason=(res.rules.filter(function(x){return x.rule==='cooldown'&&x.level==='blocked';})[0]||{}).reason||'';""")
+          R.reason=(res.rules.filter(function(x){return x.rule==='cooldown'&&x.level==='blocked';})[0]||{}).reason||'';""", now=frozen)
         self.assertTrue(r["pills"])
         for p in r["pills"]:
             self.assertRegex(p, r"^TRADABLE IN \d+ DAYS?$")                       # days left, not a date to count back from
