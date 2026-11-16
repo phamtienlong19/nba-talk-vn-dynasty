@@ -412,7 +412,7 @@ class TestWorkflowFile(unittest.TestCase):
 
     def test_scheduled_and_manual_only_with_a_serialized_least_privilege_job(self):
         self.assertTrue(self.yml.startswith("name: Update Yahoo Rosters"))
-        self.assertRegex(self.yml, r"\non:\n  schedule:\n    - cron: \"17 \*/3 \* \* \*\"\n  workflow_dispatch:")
+        self.assertRegex(self.yml, r"\non:\n  schedule:\n    - cron: \"17,47 \* \* \* \*\"\n  workflow_dispatch:")
         for trigger in ("pull_request", "push:", "issue_comment", "workflow_run"):
             self.assertNotIn(trigger + "\n", self.yml.split("jobs:")[0].replace("# ", ""), trigger)
         self.assertRegex(self.yml, r"permissions:\n  contents: write\n  pull-requests: write\n  actions: write\n  issues: write\n")

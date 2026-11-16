@@ -58,7 +58,7 @@ treat GitHub's datacenter addresses differently from yours, which is why the sig
 
 ## Schedule and auto-merge
 
-- `schedule: "17 */3 * * *"` runs the workflow with `engine=http` and *Open a PR* on. A `NO_CHANGE` run is silent. The site's roster pill
+- `schedule: "17,47 * * * *"` (two slots an hour; GitHub drops many scheduled triggers, measured 2026-11-16: 23 runs in 181 h against a nominal 3 h, so the real cadence was a median 8 h) runs the workflow with `engine=http` and *Open a PR* on. A `NO_CHANGE` run is silent. The site's roster pill
   turns amber after 12 h and red after 48 h without a newer snapshot, so a stalled schedule is visible to everyone.
 - **Auto-merge** is requested with `gh pr merge --auto --squash` only when `automerge_ok` (`scripts/update_yahoo_rosters.py`) says so:
   outcome `READY`, no ownership change, and at most 40 adds + drops + IL moves in one capture (a bigger swing looks like a broken
