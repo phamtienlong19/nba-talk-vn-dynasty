@@ -12,9 +12,10 @@ on:
 
 jobs:
   claude-review:
-    # The Update Yahoo Rosters workflow opens its draft PRs as github-actions[bot], which this action refuses to review
-    # ("non-human actor"). Those PRs are generated roster data with their own report, tests and human review, so skip them.
-    if: ${{ !startsWith(github.head_ref, 'automation/yahoo-rosters-') }}
+    # The scheduled workflows (Update Yahoo Rosters, Update Yahoo Standings) open their PRs as github-actions[bot], which this action refuses
+    # to review ("non-human actor") and which then showed a red check. Those PRs are generated data with their own report, tests and human
+    # review, so skip every automation/ branch.
+    if: ${{ !startsWith(github.head_ref, 'automation/') }}
 
     # Optional: Filter by PR author
     # if: |
