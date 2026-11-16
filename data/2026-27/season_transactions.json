@@ -238,7 +238,7 @@
     {
       "txnId": "PROP-2026-004",
       "type": "TRADE",
-      "status": "PROPOSED",
+      "status": "COMPLETED",
       "label": "LONG CON ↔ CRAZYCAT",
       "participants": [
         "franchise-02",
@@ -266,8 +266,21 @@
         "described": "Long con receives Cardwell; CrazyCat receives Jaxson Hayes",
         "verified": "Yahoo team pages read on 2026-11-12 (read-only): CrazyCat owns Dylan Cardwell (slot PF) and Long con owns Jaxson Hayes (BN). The latest imported snapshot (RS-2026-11-04-184c2108) predates Cardwell's move from the waiver wire to CrazyCat."
       },
-      "note": "Staged for the Trade Lab only; nothing is applied until the trade is processed in Yahoo and recorded COMPLETED. Cap, roster and cooldown results are computed by the Trade Lab, not decided here.",
-      "source": "League owner in chat, 2026-11-12: 'Cardwell to LC, Jaxson Hayes to CrazyCat'."
+      "note": "Distinct in-season trade, applied once on top of the latest verified snapshot until a Yahoo snapshot reflects it. Cap, roster and cooldown results are computed by the Trade Lab, not decided here.",
+      "source": "League owner in chat, 2026-11-12: 'Cardwell to LC, Jaxson Hayes to CrazyCat'.",
+      "statusHistory": [
+        {
+          "status": "PROPOSED",
+          "at": "2026-11-12T00:00:00Z"
+        },
+        {
+          "status": "COMPLETED",
+          "at": "2026-11-14",
+          "by": "league owner instruction",
+          "note": "promoted in place; no duplicate record. Owner in chat 2026-11-16: the trade went through on 2026-11-14; Yahoo team pages (2026-11-16 roster capture) show Cardwell on Long con and Jaxson Hayes on CrazyCat."
+        }
+      ],
+      "effectiveAt": "2026-11-14T12:00:00Z"
     }
   ]
 }

@@ -168,7 +168,7 @@ class TestLayers(unittest.TestCase):
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
         live = ss.enumerate_views(ss.load_season(ls.load_inputs()))          # the page renders the live state
         self.assertEqual(data["official"]["teams"], live[""]["teams"])
-        self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003"])      # the staged trade is not official
+        self.assertEqual(data["official"]["tradeIds"], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003", "PROP-2026-004"])      # every recorded trade is completed
         for done in ("TXN-2026-001", "PROP-2026-001", "PROP-2026-002"):
             with self.assertRaises(ls.StateError):
                 ss.season_state(self.si, [done])                               # completed is not a scenario
@@ -334,7 +334,7 @@ class TestBsyTradesCompleted(unittest.TestCase):
         data = json.loads(bls.re.search(r'id="league-data">(.*?)</script>', _read_html(), bls.re.S).group(1).replace("<\\/", "</"))
         by = {t["id"]: t for t in data["trades"]}
         self.assertEqual((by["PROP-2026-001"]["status"], by["PROP-2026-002"]["status"]), ("COMPLETED", "COMPLETED"))
-        self.assertEqual(sorted(data["scenarios"]), ["", "PROP-2026-004"])    # one staged trade (Long con / CrazyCat) is left to simulate
+        self.assertEqual(sorted(data["scenarios"]), [""])                     # no staged trade is left to simulate
         blob = json.dumps(data)
         for internal in ("statusHistory", "directionCheck", "not supplied", "relayed", "DISCREPANCY", "NOT specified", "RESOLVED_ASSUMED"):
             self.assertNotIn(internal, blob)
@@ -352,7 +352,7 @@ class TestVerifiedYahooImport(unittest.TestCase):
         snap = self.si["rosterSnapshot"]
         self.assertEqual(snap["kind"], "VERIFIED_IMPORT")
         self.assertIn("Yahoo Fantasy league 85092", snap["source"])
-        self.assertIn([t["txnId"] for t in ss.pending_completed(self.si)], ([], ["PROP-2026-003"]))   # until Yahoo shows the Long con / Thịnh trade
+        self.assertIn([t["txnId"] for t in ss.pending_completed(self.si)], ([], ["PROP-2026-004"]))   # until Yahoo shows the Long con / CrazyCat trade (completed 2026-11-14)
         self.assertEqual([t["txnId"] for t in ss.reflected_completed(self.si)][:3], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002"])
 
     def test_reflected_trades_are_history_not_reapplied(self):
@@ -645,7 +645,7 @@ class TestLongConThinhTradeCompleted(unittest.TestCase):
         for a in self.txn["assets"]:
             if a["playerKey"] in owner:                                                    # a player Yahoo has since dropped has no owner
                 self.assertEqual(owner[a["playerKey"]], a["to"], a["name"])
-        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], ["PROP-2026-004"])  # only the staged Long con / CrazyCat trade
+        self.assertEqual([t["txnId"] for t in ss.selectable(self.si)], [])  # nothing is staged any more
 
     def test_it_is_applied_once_whether_or_not_yahoo_shows_it_yet(self):
         res = {r["tradeId"]: r for r in ss.season_state(self.si)["tradeResults"]}
