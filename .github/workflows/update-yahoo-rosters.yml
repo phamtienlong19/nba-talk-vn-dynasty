@@ -7,9 +7,11 @@ name: Update Yahoo Rosters
 # automerge_ok); anything else, and every CONFLICT or FAILED run (which opens an issue), waits for a human.
 # Setup and usage: docs/YAHOO_ROSTER_WORKFLOW.md
 
+# Two slots an hour, not one every 3 hours: GitHub drops many scheduled triggers (23 scheduled runs in 181 h, median gap 8 h, worst 13 h, measured
+# 2026-11-16 against a nominal 3 h). A run is cheap (16 team pages, no change = silent), and runs are serialized, so extra slots cost nothing.
 on:
   schedule:
-    - cron: "17 */3 * * *"
+    - cron: "17,47 * * * *"
   workflow_dispatch:
     inputs:
       engine:
