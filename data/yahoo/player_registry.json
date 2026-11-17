@@ -121,7 +121,8 @@
     "PG",
     "SG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 52.0,
    "oRank": 8,
@@ -152,7 +153,8 @@
     "PG",
     "SG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 49.0,
    "oRank": 10,
@@ -333,7 +335,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 33.0,
    "oRank": 21,
@@ -395,7 +398,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 31.0,
    "oRank": 25,
@@ -427,7 +431,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 30.0,
    "oRank": 27,
@@ -443,7 +448,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 30.0,
    "oRank": 28,
@@ -475,7 +481,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 29.0,
    "oRank": 30,
@@ -507,7 +514,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 28.0,
    "oRank": 32,
@@ -521,7 +529,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 27.0,
    "oRank": 33,
@@ -537,7 +546,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 26.0,
    "oRank": 34,
@@ -587,7 +597,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 25.0,
    "oRank": 37,
@@ -647,7 +658,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 24.0,
    "oRank": 41,
@@ -663,7 +675,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 24.0,
    "oRank": 42,
@@ -724,9 +737,10 @@
    "playerKey": "478.p.4840",
    "name": "Kyrie Irving",
    "nbaTeam": "DAL",
-   "displayPosition": "PG",
+   "displayPosition": "PG,SG",
    "eligiblePositions": [
     "PG",
+    "SG",
     "G",
     "Util"
    ],
@@ -804,10 +818,11 @@
    "playerKey": "478.p.10592",
    "name": "Cameron Boozer",
    "nbaTeam": "MEM",
-   "displayPosition": "PF",
+   "displayPosition": "PF,C",
    "eligiblePositions": [
     "PF",
     "F",
+    "C",
     "Util"
    ],
    "projectedAuctionValue": 20.0,
@@ -823,7 +838,8 @@
    "eligiblePositions": [
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 19.0,
    "oRank": 52,
@@ -863,11 +879,13 @@
    "playerKey": "478.p.5660",
    "name": "Dejounte Murray",
    "nbaTeam": "NOP",
-   "displayPosition": "PG",
+   "displayPosition": "PG,SG",
    "eligiblePositions": [
     "PG",
+    "SG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 18.0,
    "oRank": 55,
@@ -1009,7 +1027,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 16.0,
    "oRank": 64,
@@ -1301,11 +1320,13 @@
    "playerKey": "478.p.10467",
    "name": "Dylan Harper",
    "nbaTeam": "SAS",
-   "displayPosition": "PG,SG",
+   "displayPosition": "PG,SG,SF",
    "eligiblePositions": [
     "PG",
     "SG",
     "G",
+    "SF",
+    "F",
     "Util"
    ],
    "projectedAuctionValue": 11.0,
@@ -1338,7 +1359,8 @@
    "eligiblePositions": [
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 10.0,
    "oRank": 85,
@@ -1401,8 +1423,7 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 7.0,
    "oRank": 89,
@@ -1461,7 +1482,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 5.0,
    "oRank": 93,
@@ -1804,8 +1826,9 @@
    "playerKey": "478.p.10590",
    "name": "Darryn Peterson",
    "nbaTeam": "UTA",
-   "displayPosition": "SG",
+   "displayPosition": "PG,SG",
    "eligiblePositions": [
+    "PG",
     "SG",
     "G",
     "Util"
@@ -2015,7 +2038,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 128,
@@ -2266,8 +2290,9 @@
    "playerKey": "478.p.10571",
    "name": "Yaxel Lendeborg",
    "nbaTeam": "GSW",
-   "displayPosition": "PF",
+   "displayPosition": "SF,PF",
    "eligiblePositions": [
+    "SF",
     "PF",
     "F",
     "Util"
@@ -2321,7 +2346,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 147,
@@ -2623,7 +2649,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 166,
@@ -2699,7 +2726,8 @@
     "PG",
     "SG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 171,
@@ -2749,8 +2777,7 @@
     "PF",
     "F",
     "C",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 174,
@@ -2887,7 +2914,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 183,
@@ -3113,8 +3141,7 @@
     "PF",
     "F",
     "C",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 197,
@@ -3304,8 +3331,7 @@
     "SF",
     "PF",
     "F",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 209,
@@ -3402,7 +3428,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 215,
@@ -3468,7 +3495,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 219,
@@ -3535,7 +3563,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 223,
@@ -3596,7 +3625,7 @@
    "playerId": "10469",
    "playerKey": "478.p.10469",
    "name": "Nique Clifford",
-   "nbaTeam": "SAC",
+   "nbaTeam": "OKC",
    "displayPosition": "SG,SF",
    "eligiblePositions": [
     "SG",
@@ -4048,7 +4077,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 255,
@@ -4064,7 +4094,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 256,
@@ -4278,7 +4309,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 269,
@@ -4295,7 +4327,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 270,
@@ -4457,7 +4490,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 280,
@@ -4471,7 +4505,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 281,
@@ -4531,7 +4566,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 285,
@@ -4579,7 +4615,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 288,
@@ -4690,7 +4727,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 295,
@@ -4804,7 +4842,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 302,
@@ -5073,7 +5112,7 @@
    "playerId": "10461",
    "playerKey": "478.p.10461",
    "name": "Walter Clayton Jr.",
-   "nbaTeam": "MEM",
+   "nbaTeam": "DAL",
    "displayPosition": "PG,SG",
    "eligiblePositions": [
     "PG",
@@ -5155,7 +5194,7 @@
    "playerId": "6704",
    "playerKey": "478.p.6704",
    "name": "Ochai Agbaji",
-   "nbaTeam": "NYK",
+   "nbaTeam": "OKC",
    "displayPosition": "SG,SF",
    "eligiblePositions": [
     "SG",
@@ -5209,7 +5248,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 327,
@@ -5375,7 +5415,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 337,
@@ -5583,7 +5624,8 @@
    "eligiblePositions": [
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 350,
@@ -5599,7 +5641,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 351,
@@ -5710,7 +5753,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 358,
@@ -5757,7 +5801,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 361,
@@ -5920,7 +5965,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 371,
@@ -6009,7 +6055,7 @@
    "playerId": "10291",
    "playerKey": "478.p.10291",
    "name": "Dalton Knecht",
-   "nbaTeam": "LAL",
+   "nbaTeam": "NYK",
    "displayPosition": "SG,SF",
    "eligiblePositions": [
     "SG",
@@ -6071,7 +6117,7 @@
    "playerId": "10497",
    "playerKey": "478.p.10497",
    "name": "Micah Peavy",
-   "nbaTeam": "MEM",
+   "nbaTeam": "OKC",
    "displayPosition": "SF,PF",
    "eligiblePositions": [
     "SF",
@@ -6087,7 +6133,7 @@
    "playerId": "6708",
    "playerKey": "478.p.6708",
    "name": "Dalen Terry",
-   "nbaTeam": "GSW",
+   "nbaTeam": "OKC",
    "displayPosition": "SG,SF",
    "eligiblePositions": [
     "SG",
@@ -6489,8 +6535,7 @@
     "PG",
     "SG",
     "G",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 407,
@@ -6730,7 +6775,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 422,
@@ -6851,7 +6897,7 @@
    "playerId": "5192",
    "playerKey": "478.p.5192",
    "name": "Mason Plumlee",
-   "nbaTeam": "SAS",
+   "nbaTeam": "SAC",
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
@@ -8097,7 +8143,8 @@
    "eligiblePositions": [
     "SG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 509,
@@ -8317,7 +8364,8 @@
     "PG",
     "SG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 523,
@@ -8372,7 +8420,7 @@
    "playerId": "10303",
    "playerKey": "478.p.10303",
    "name": "Kevin McCullar Jr.",
-   "nbaTeam": "NYK",
+   "nbaTeam": "TOR",
    "displayPosition": "SF,PF",
    "eligiblePositions": [
     "SF",
@@ -8625,7 +8673,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 543,
@@ -8678,7 +8727,7 @@
    "playerId": "10105",
    "playerKey": "478.p.10105",
    "name": "Kobe Bufkin",
-   "nbaTeam": "NOP",
+   "nbaTeam": "UTA",
    "displayPosition": "PG,SG",
    "eligiblePositions": [
     "PG",
@@ -8777,7 +8826,8 @@
    "eligiblePositions": [
     "SG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 553,
@@ -8881,7 +8931,7 @@
    "playerId": "10526",
    "playerKey": "478.p.10526",
    "name": "Norchad Omier",
-   "nbaTeam": "MIN",
+   "nbaTeam": "CLE",
    "displayPosition": "PF,C",
    "eligiblePositions": [
     "PF",
@@ -8961,8 +9011,7 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 565,
@@ -9091,7 +9140,7 @@
    "playerId": "10528",
    "playerKey": "478.p.10528",
    "name": "Lawson Lovering",
-   "nbaTeam": "MEM",
+   "nbaTeam": "LAL",
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
@@ -9496,5 +9545,5 @@
    "headshotUrl": "https://s.yimg.com/iu/api/res/1.2/6E3CiTDckykS8Ar3_Zph3A--~C/YXBwaWQ9eXNwb3J0cztjaD0yMzM2O2NyPTE7Y3c9MTc5MDtkeD04NTc7ZHk9MDtmaT11bGNyb3A7aD02MDtxPTEwMDt3PTQ2/https://s.yimg.com/xe/i/us/sp/v/nba_cutout/players_l/10172023/6752.png"
   }
  ],
- "metadataRefreshedAt": "2026-10-20T03:19:46Z"
+ "metadataRefreshedAt": "2026-11-17T15:38:03Z"
 }
