@@ -6,6 +6,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:                 # lets the Heal Generated Conflicts workflow start the checks on a branch it pushed (built-in-token pushes start none)
 
 concurrency:
   group: validate-${{ github.ref }}
