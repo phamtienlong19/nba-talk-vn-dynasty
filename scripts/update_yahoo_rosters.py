@@ -178,7 +178,7 @@ def checks_section(dc) -> list:
     else:
         L.append("- every team is within every limit")
     L += ["", "## Double checks", ""]
-    for key, title in (("metadataDrift", "Team / position eligibility differs from our data (run `refresh_player_metadata.py`)"),
+    for key, title in (("metadataDrift", "Team / position eligibility differs from our data (the Update Player Metadata workflow refreshes it daily; or run `refresh_player_metadata.py`)"),
                        ("slotIneligible", "Player in a lineup slot he is not eligible for"),
                        ("healthyOnIL", "Parked on IL but not IL-eligible"), ("injuredOffIL", "Injured (IL-eligible or Out) but not on IL"),
                        ("ilLabelsLost", "IL labels lost in the snapshot"), ("payrollMismatch", "Payroll mismatch")):

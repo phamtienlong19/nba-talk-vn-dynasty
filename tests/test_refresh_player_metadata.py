@@ -1,6 +1,7 @@
 """Player metadata refresh (scripts/refresh_player_metadata.py): display fields move, identity/rank/price never do."""
 import copy
 import json
+import re
 import os
 import sys
 import unittest
@@ -83,7 +84,12 @@ class TestMetadataRefresh(unittest.TestCase):
         self.assertEqual(len({p["playerKey"] for p in reg}), 600)
         with open(rp.STATUS, encoding="utf-8") as f:
             st = json.load(f)
-        self.assertTrue(set(st["statuses"]) <= set(i["registry"]) | {"478.p.10134", "478.p.10404"})
+        # The status table is league-wide for Yahoo's current 600 players, so it can name players the (fixed) registry does not hold (waiver pickups,
+        # newly signed rookies): the old test pinned two such keys and failed the day a third player got a status. Keys must be real Yahoo
+        # player keys, and the players outside the registry must stay a small minority.
+        outside = set(st["statuses"]) - set(i["registry"])
+        self.assertTrue(all(re.fullmatch(r"478\.p\.\d+", k) for k in st["statuses"]))
+        self.assertLessEqual(len(outside), 60, sorted(outside))
         for p in reg:                                                       # every player keeps a team, a position and eligibility
             self.assertTrue(p["nbaTeam"] and p["displayPosition"] and p["eligiblePositions"], p["name"])
         self.assertEqual(i["registry"]["478.p.5352"]["oRank"], 1)           # Jokić: preseason O-Rank 1, untouched by the refresh
