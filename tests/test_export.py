@@ -12,6 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import test_live_feed as tlf  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
+from _drive import drive_page  # noqa: E402
 
 INDEX = os.path.join(HERE, "..", "index.html")
 
@@ -19,27 +20,7 @@ INDEX = os.path.join(HERE, "..", "index.html")
 @unittest.skipUnless(tsr._chrome(), "no Chrome")
 class TestExportHub(unittest.TestCase):
     def drive(self, body_js, qs="", wait=2500):
-        with open(INDEX, encoding="utf-8") as f:
-            html = f.read()
-        # waitFor(cond, then, ms): poll for a snapshot export's preview instead of a fixed wait (a slow runner needs longer; virtual time races
-        # ahead of the real work). A test that uses it sets R.__done in `then`; the result is written as soon as that is set, or after `wait` ms.
-        script = ("<script>(function(){var R={},t0=Date.now();window.waitFor=function(c,cb,ms){var t=Date.now();(function p(){if(c()||Date.now()-t>ms)cb();else setTimeout(p,100);})();};"
-                  "setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
-                  "(function w(){if(R.__done||Date.now()-t0>%d){var p=document.createElement('pre');p.id='o';delete R.__done;p.textContent=JSON.stringify(R);document.body.appendChild(p);}else setTimeout(w,100);})();},400);})();</script>" % wait)
-        html = html[:html.rindex("</body>")] + script + html[html.rindex("</body>"):]
-        d = tempfile.mkdtemp()
-        try:
-            path = os.path.join(d, "index.html")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(html)
-            out = tsr._chrome_run(["--window-size=1000,1400", "--virtual-time-budget=60000", "--dump-dom", "file://" + path + qs], 150).stdout
-        finally:
-            shutil.rmtree(d)
-        m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
-        self.assertIsNotNone(m, out[-300:])
-        r = json.loads(html_lib.unescape(m.group(1)))
-        self.assertNotIn("error", r, r.get("error"))
-        return r
+        return drive_page(body_js, qs=qs, wait=wait, start=400, size="1000,1400", budget=60000)
 
     def test_the_hub_lists_exports_and_each_has_an_image_a_link_and_text(self):
         r = self.drive("""
@@ -210,7 +191,7 @@ class TestExportHub(unittest.TestCase):
             r = self.drive("""
               var T0=NBA_NAV.D.teams[2];var el=[].filter.call(document.querySelectorAll('section.team-card'),function(c){var t=c.querySelector('.identity-tag');return t&&t.textContent.trim()===T0.short;})[0];
               R.found=!!el;NBA_EXPORT.snap(NBA_EXPORT.snapEl(el,430,'x')).then(function(cv){R.size=cv?[cv.width,cv.height]:null;
-                if(cv){var c=cv.getContext('2d'),d=c.getImageData(0,0,cv.width,Math.min(cv.height,600)).data,seen={};for(var i=0;i<d.length;i+=40){seen[d[i]+','+d[i+1]+','+d[i+2]]=1;}R.colours=Object.keys(seen).length;}});""", qs=qs, wait=9000)
+                if(cv){var c=cv.getContext('2d'),d=c.getImageData(0,0,cv.width,Math.min(cv.height,600)).data,seen={};for(var i=0;i<d.length;i+=40){seen[d[i]+','+d[i+1]+','+d[i+2]]=1;}R.colours=Object.keys(seen).length;}R.__done=1;});""", qs=qs, wait=60000)
             self.assertTrue(r["found"], qs)
             self.assertIsNotNone(r["size"], qs)
             self.assertGreater(r["size"][1], 800, qs)                                 # a roster card is tall; a blank frame was ~150px

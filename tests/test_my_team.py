@@ -12,6 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import test_live_feed as tlf  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
+from _drive import drive_page  # noqa: E402
 
 INDEX = os.path.join(HERE, "..", "index.html")
 
@@ -19,26 +20,8 @@ INDEX = os.path.join(HERE, "..", "index.html")
 @unittest.skipUnless(tsr._chrome(), "no Chrome")
 class TestMyTeam(unittest.TestCase):
     def drive(self, body_js, qs="", wait=2500, me="franchise-04"):
-        with open(INDEX, encoding="utf-8") as f:
-            page = f.read()
         pre = "<script>try{localStorage.setItem('nbaTalkVN.myTeam','%s')}catch(e){}</script>" % me if me else "<script>try{localStorage.removeItem('nbaTalkVN.myTeam')}catch(e){}</script>"
-        page = page.replace("<head>", "<head>" + pre, 1)
-        script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
-                  "setTimeout(function(){var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},%d);},600);})();</script>" % wait)
-        page = page[:page.rindex("</body>")] + script + page[page.rindex("</body>"):]
-        d = tempfile.mkdtemp()
-        try:
-            path = os.path.join(d, "index.html")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(page)
-            out = tsr._chrome_run(["--window-size=1200,1400", "--virtual-time-budget=10000", "--dump-dom", "file://" + path + qs], 150).stdout
-        finally:
-            shutil.rmtree(d)
-        m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
-        self.assertIsNotNone(m, out[-300:])
-        r = json.loads(html_lib.unescape(m.group(1)))
-        self.assertNotIn("error", r, r.get("error"))
-        return r
+        return drive_page(body_js, qs=qs, wait=wait, start=600, size="1200,1400", budget=10000, head=pre)
 
     def test_the_star_opens_the_my_team_page_with_every_block(self):
         feed = json.dumps(tlf.feed()).replace("</", "<\\/")

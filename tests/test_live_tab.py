@@ -14,6 +14,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
 import test_live_feed as tlf  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
+from _drive import drive_page  # noqa: E402
 
 INDEX = os.path.join(HERE, "..", "index.html")
 
@@ -35,29 +36,14 @@ class TestLiveTab(unittest.TestCase):
         cls.feed["asOf"] = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def drive(self, body_js, qs="", wait=2000, rookies=None, extra_css=""):
-        with open(INDEX, encoding="utf-8") as f:
-            page = f.read()
-        script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
-                  "setTimeout(function(){var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},%d);},500);})();</script>" % wait)
-        if rookies is not None:
-            page = re.sub(r'"rookies":\[[^\]]*\]', '"rookies":' + json.dumps(rookies), page, count=1)
-        page = page.replace("https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/live-data/live.json", "http://127.0.0.1:9/live.json")   # never the real feed: the fetch fails fast
-        if extra_css:
-            page = page.replace("</head>", "<style>" + extra_css + "</style></head>", 1)
-        page = page[:page.rindex("</body>")] + script + page[page.rindex("</body>"):]
-        d = tempfile.mkdtemp()
-        try:
-            path = os.path.join(d, "index.html")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(page)
-            out = tsr._chrome_run(["--window-size=1500,1400", "--virtual-time-budget=12000", "--dump-dom", "file://" + path + qs], 150).stdout
-        finally:
-            shutil.rmtree(d)
-        m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
-        self.assertIsNotNone(m, out[-300:])
-        r = json.loads(html_lib.unescape(m.group(1)))
-        self.assertNotIn("error", r, r.get("error"))
-        return r
+        def mutate(page):
+            if rookies is not None:
+                page = re.sub(r'"rookies":\[[^\]]*\]', '"rookies":' + json.dumps(rookies), page, count=1)
+            page = page.replace("https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/live-data/live.json", "http://127.0.0.1:9/live.json")   # never the real feed: the fetch fails fast
+            if extra_css:
+                page = page.replace("</head>", "<style>" + extra_css + "</style></head>", 1)
+            return page
+        return drive_page(body_js, qs=qs, wait=wait, start=500, size="1500,1400", budget=12000, mutate=mutate)
 
     def feed_js(self, **over):
         f = dict(self.feed, **over)
