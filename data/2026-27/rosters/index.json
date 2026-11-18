@@ -1,6 +1,6 @@
 {
   "season": "2026-27",
-  "current": "snapshots/RS-2026-11-17-303bdce1.json",
+  "current": "snapshots/RS-2026-11-18-2d342ecb.json",
   "history": [
     {
       "snapshotId": "RS-2026-10-14-DRAFT-NIGHT",
@@ -360,6 +360,24 @@
       "digest": "303bdce1ce0ca4455e9a39cfbee1ce5b9c3df47f7b6f41f6df4d04955eedee23",
       "action": "COMMIT",
       "previous": "snapshots/RS-2026-11-16-03ecae9d.json"
+    },
+    {
+      "snapshotId": "RS-2026-11-17-99384f16",
+      "file": "snapshots/RS-2026-11-17-99384f16.json",
+      "verifiedAt": "2026-11-17T17:53:13Z",
+      "source": "Yahoo Fantasy league 85092 team pages, read-only http capture at 2026-11-17T17:53:13Z",
+      "digest": "99384f161dadf877990d6e8184a7788d3b1797129c782e65322b54f9c0a5d45f",
+      "action": "COMMIT",
+      "previous": "snapshots/RS-2026-11-17-303bdce1.json"
+    },
+    {
+      "snapshotId": "RS-2026-11-18-2d342ecb",
+      "file": "snapshots/RS-2026-11-18-2d342ecb.json",
+      "verifiedAt": "2026-11-18T00:56:26Z",
+      "source": "Yahoo Fantasy league 85092 team pages, read-only http capture at 2026-11-18T00:56:26Z",
+      "digest": "2d342ecb5f47f7fa58d30b1a5d7233f0101885ae941767aba8ffca922aa8830f",
+      "action": "COMMIT",
+      "previous": "snapshots/RS-2026-11-17-99384f16.json"
     }
   ]
 }
