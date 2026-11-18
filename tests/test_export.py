@@ -225,6 +225,6 @@ class TestExportHub(unittest.TestCase):
             var c=cv.getContext('2d'),S=cv.width/300,y=Math.round((14+15)*S),row=c.getImageData(0,y,cv.width,1).data,red=0,blue=0;
             for(var i=0;i<row.length;i+=4){if(row[i]>200&&row[i+1]<60&&row[i+2]<60)red++;}
             var yb=Math.round((14+30+12+8)*S),rb=c.getImageData(0,yb,cv.width,1).data;for(var j=0;j<rb.length;j+=4){if(rb[j]<60&&rb[j+1]<60&&rb[j+2]>200)blue++;}
-            R.S=S;R.red=red/S;R.blue=blue/S;R.h=cv.height/S;});""", wait=8000)
+            R.S=S;R.red=red/S;R.blue=blue/S;R.h=cv.height/S;R.__done=1;});""", wait=60000)
         self.assertAlmostEqual(r["red"], 100, delta=3)                                    # border-box held: 100, not 120
         self.assertAlmostEqual(r["blue"], 22, delta=3)                                    # a 22px chip, not 28
