@@ -1,0 +1,41 @@
+name: Heal Generated Conflicts
+
+# Every roster / standings / metadata refresh regenerates the one-line JSON data blocks of index.html, and the roster refresh merges every few
+# hours, so any other open PR that regenerates them is in conflict again within hours (it kept being fixed by hand). After every push to main
+# (and hourly as a backstop, since mergeability is computed lazily) this merges main into each conflicting same-repo PR whose ONLY conflict is
+# those generated blocks, re-runs the embeds and validation, and pushes the result to the PR branch. Real conflicts are left for a human.
+# It never pushes to main and never merges anything. Pushes made with the built-in token do not start PR checks, so it also starts validate.yml
+# on the branch. Details: docs/HEALING_CONFLICTS.md
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "50 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: heal-generated-conflicts
+  cancel-in-progress: false
+
+jobs:
+  heal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 -m pip install -r requirements.txt
+      - name: Heal conflicting PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/heal_open_prs.sh
