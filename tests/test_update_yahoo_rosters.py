@@ -494,7 +494,7 @@ class TestWorkflowFile(unittest.TestCase):
         names = [st.get("name") for st in doc["jobs"]["update"]["steps"]]
         self.assertEqual(names[0], "Checkout")
         self.assertEqual(names[0], "Checkout")
-        self.assertEqual(sum(1 for st in doc["jobs"]["update"]["steps"] if st.get("if") == "always()"), 3)  # report, session cleanup, artifact upload
+        self.assertEqual(sum(1 for st in doc["jobs"]["update"]["steps"] if st.get("if") == "always()"), 4)  # report, session cleanup, artifact upload, heal open PRs
         self.assertEqual(triggers["workflow_dispatch"]["inputs"]["engine"]["options"], ["browser", "http"])
         self.assertEqual(names[-3:], ["Open a pull request", 'Open or refresh the "needs attention" issue',
                                       'Close the "needs attention" issue once the refresh recovers'])

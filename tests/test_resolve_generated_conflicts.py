@@ -57,6 +57,10 @@ class TestWorkflow(unittest.TestCase):
         self.assertIn('cron: "50 * * * *"', head)
         self.assertIn("workflow_dispatch:", head)
 
+    def test_the_roster_run_starts_the_healer_because_bot_merges_do_not_trigger_it(self):
+        wf = open(os.path.join(ROOT, ".github", "workflows", "update-yahoo-rosters.yml"), encoding="utf-8").read()
+        self.assertIn("gh workflow run heal-generated-conflicts.yml", wf)
+
     def test_it_never_pushes_to_main_and_never_merges(self):
         steps = self.YML.split("jobs:")[1] + self.SH
         for forbidden in ("gh pr merge", "--auto", "HEAD:main", "heal:main", "--force"):
