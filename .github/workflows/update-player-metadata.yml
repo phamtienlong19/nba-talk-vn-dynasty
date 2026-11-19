@@ -50,6 +50,7 @@ jobs:
         if: steps.refresh.outputs.changed == 'true' && env.APPLY == 'true'
         run: |
           python3 -m pip install -r requirements.txt
+          python3 scripts/refresh_card_positions.py
           python3 scripts/build_league_state.py sync-ledger
           python3 scripts/build_league_state.py embed
           python3 scripts/what_if.py embed
