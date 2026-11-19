@@ -11,6 +11,7 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import test_scenario_rendering as tsr  # noqa: E402
+from _drive import drive_page  # noqa: E402
 
 INDEX = os.path.join(HERE, "..", "index.html")
 PLAYER, FROM, TO = "478.p.5432", None, "franchise-01"
@@ -25,26 +26,7 @@ FIND = """
 @unittest.skipUnless(tsr._chrome(), "no Chrome")
 class TestTradeSketch(unittest.TestCase):
     def drive(self, body_js, qs="", wait=2500):
-        with open(INDEX, encoding="utf-8") as f:
-            page = f.read()
-        # waitFor(cond, then, ms) polls instead of a fixed wait (a slow runner needs longer); a test that uses it sets R.__done in `then`
-        script = ("<script>(function(){var R={},t0=Date.now();window.waitFor=function(c,cb,ms){var t=Date.now();(function p(){if(c()||Date.now()-t>ms)cb();else setTimeout(p,100);})();};"
-                  "setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
-                  "(function w(){if(R.__done||Date.now()-t0>%d){var p=document.createElement('pre');p.id='o';delete R.__done;p.textContent=JSON.stringify(R);document.body.appendChild(p);}else setTimeout(w,100);})();},500);})();</script>" % wait)
-        page = page[:page.rindex("</body>")] + script + page[page.rindex("</body>"):]
-        d = tempfile.mkdtemp()
-        try:
-            path = os.path.join(d, "index.html")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(page)
-            out = tsr._chrome_run(["--window-size=1200,1400", "--virtual-time-budget=60000", "--dump-dom", "file://" + path + qs], 150).stdout
-        finally:
-            shutil.rmtree(d)
-        m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
-        self.assertIsNotNone(m, out[-300:])
-        r = json.loads(html_lib.unescape(m.group(1)))
-        self.assertNotIn("error", r, r.get("error"))
-        return r
+        return drive_page(body_js, qs=qs, wait=wait, start=500, size="1200,1400", budget=60000)
 
     def test_a_blocked_trade_cannot_be_stacked(self):
         r = self.drive("var b=document.getElementById('chk-stack');R.disabled=!!b&&b.disabled;R.status=document.getElementById('chk-top').textContent;", qs="?check=%s~%s" % (PLAYER, TO))

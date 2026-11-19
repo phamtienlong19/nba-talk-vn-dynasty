@@ -11,6 +11,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_scenario_rendering as tsr  # noqa: E402
+from _drive import drive_page  # noqa: E402
 
 INDEX = os.path.join(os.path.dirname(__file__), "..", "index.html")
 HTML = open(INDEX, encoding="utf-8").read()
@@ -19,23 +20,7 @@ HTML = open(INDEX, encoding="utf-8").read()
 @unittest.skipUnless(tsr._chrome(), "no Chrome")
 class TestQol(unittest.TestCase):
     def drive(self, body_js, head_js="", hash_="#trade-lab", wait=700):
-        script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
-                  "setTimeout(function(){var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},%d);},400);})();</script>" % wait)
-        html = HTML.replace("<head>", "<head><script>" + head_js + "</script>", 1) if head_js else HTML
-        html = html[:html.rindex("</body>")] + script + html[html.rindex("</body>"):]
-        d = tempfile.mkdtemp()
-        try:
-            path = os.path.join(d, "index.html")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(html)
-            out = tsr._chrome_run(["--window-size=900,1400", "--virtual-time-budget=8000", "--dump-dom", "file://" + path + hash_], 120).stdout
-        finally:
-            shutil.rmtree(d)
-        m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
-        self.assertIsNotNone(m, out[-300:])
-        r = json.loads(html_lib.unescape(m.group(1)))
-        self.assertNotIn("error", r, r.get("error"))
-        return r
+        return drive_page(body_js, qs=hash_, wait=wait, start=400, size="900,1400", budget=8000, head=("<script>" + head_js + "</script>") if head_js else "", page=HTML, timeout=120)
 
     def test_cooldown_lock_tags_match_the_acquisition_data(self):
         r = self.drive("""
