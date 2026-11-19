@@ -14,6 +14,7 @@ import league_state as ls  # noqa: E402
 import season_state as ss  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _proposed import proposed_inputs  # noqa: E402
+from _drive import drive_page  # noqa: E402
 import refresh_team_cap_summary as cap_summary  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -591,30 +592,12 @@ class TestRenderedCards(unittest.TestCase):
     def _drive(self, js, hash_="", wait=500, now=None):
         """Run `js` (it fills R) inside the loaded page, after `wait` ms of page time; -> the parsed R. `now` (an ISO time) freezes the page's clock
         from before its first script, for a test whose result depends on the calendar (cooldowns end 14 days after an acquisition)."""
-        import tempfile
-        with open(INDEX, encoding="utf-8") as f:
-            html = f.read()
+        head = ""
         if now:
-            freeze = ("<script>(function(){var T=Date.parse('%s'),R=Date;function F(){if(arguments.length)return new (Function.prototype.bind.apply(R,[null].concat([].slice.call(arguments))))();return new R(T);}"
-                      "F.now=function(){return T;};F.parse=R.parse;F.UTC=R.UTC;F.prototype=R.prototype;window.Date=F;})();</script>") % now
-            html = html.replace("<head>", "<head>" + freeze, 1)
+            head = ("<script>(function(){var T=Date.parse('%s'),R=Date;function F(){if(arguments.length)return new (Function.prototype.bind.apply(R,[null].concat([].slice.call(arguments))))();return new R(T);}"
+                    "F.now=function(){return T;};F.parse=R.parse;F.UTC=R.UTC;F.prototype=R.prototype;window.Date=F;})();</script>") % now
         js = "var D=NBA_NAV.D,view=NBA_NAV.view,norm=NBA_NAV.norm,parseHash=NBA_NAV.parseHash,showTab=NBA_NAV.showTab;" + js
-        script = ("<script>(function(){var R={};function done(){var p=document.createElement('pre');p.id='drive-out';"
-                  "p.textContent=JSON.stringify(R);document.body.appendChild(p);}try{\n" + js + "\n}catch(e){R.error=String(e&&e.stack||e);}"
-                  "setTimeout(function(){try{if(window.__after)window.__after();}catch(e){R.error=String(e);}done();}," + str(wait) + ");})();</script>")
-        d = tempfile.mkdtemp()
-        try:
-            path = os.path.join(d, "index.html")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(html.replace("</body>", script + "</body>", 1))
-            out = _chrome_run(["--virtual-time-budget=6000", "--dump-dom", "file://" + path + hash_], 120).stdout
-        finally:
-            shutil.rmtree(d)
-        m = re.search(r'<pre id="drive-out">(.*?)</pre>', out, re.S)
-        self.assertIsNotNone(m, out[-400:])
-        r = json.loads(html_lib.unescape(m.group(1)))
-        self.assertNotIn("error", r, r.get("error"))
-        return r
+        return drive_page(js, qs=hash_, wait=wait, start=0, size="800,600", budget=6000, head=head, timeout=120, pre_done="if(window.__after)window.__after();")
 
     def test_search_finds_players_teams_and_free_agents_without_accents(self):
         r = self._drive("""

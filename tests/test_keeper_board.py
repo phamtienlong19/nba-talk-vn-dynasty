@@ -14,6 +14,7 @@ sys.path.insert(0, HERE)
 import cap_model as cm  # noqa: E402
 import keeper_rank_salary as krs  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
+from _drive import drive_page  # noqa: E402
 
 ROOT = os.path.join(HERE, "..")
 CFG = os.path.join(ROOT, "config", "keeper_salary_by_rank.json")
@@ -70,26 +71,7 @@ class TestRankSalaryTable(unittest.TestCase):
 @unittest.skipUnless(tsr._chrome(), "no Chrome")
 class TestKeeperBoardPage(unittest.TestCase):
     def drive(self, body_js, hash_="", qs="?mode=whatif&view=keepers", head_js=""):
-        with open(INDEX, encoding="utf-8") as f:
-            html = f.read()
-        script = ("<script>(function(){var R={};setTimeout(function(){try{" + body_js + "}catch(e){R.error=String(e&&e.stack||e);}"
-                  "var p=document.createElement('pre');p.id='o';p.textContent=JSON.stringify(R);document.body.appendChild(p);},700);})();</script>")
-        if head_js:
-            html = html.replace("<head>", "<head><script>" + head_js + "</script>", 1)
-        html = html[:html.rindex("</body>")] + script + html[html.rindex("</body>"):]
-        d = tempfile.mkdtemp()
-        try:
-            path = os.path.join(d, "index.html")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(html)
-            out = tsr._chrome_run(["--window-size=1000,1600", "--virtual-time-budget=8000", "--dump-dom", "file://" + path + qs + (hash_ if qs == "" else "")], 120).stdout
-        finally:
-            shutil.rmtree(d)
-        m = re.search(r'<pre id="o">(.*?)</pre>', out, re.S)
-        self.assertIsNotNone(m, out[-300:])
-        r = json.loads(html_lib.unescape(m.group(1)))
-        self.assertNotIn("error", r, r.get("error"))
-        return r
+        return drive_page(body_js, qs=qs + (hash_ if qs == "" else ""), wait=0, start=700, size="1000,1600", budget=8000, head=("<script>" + head_js + "</script>") if head_js else "", timeout=120)
 
     SETUP = """
       var W=JSON.parse(document.getElementById('whatif-data').textContent).keeperBoard,cfgS=W.salaryByRank;
