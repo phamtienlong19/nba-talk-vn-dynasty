@@ -221,3 +221,12 @@ jobs:
           for n in $(gh issue list --label roster-refresh --state open --json number --jq '.[].number'); do
             gh issue close "$n" --comment "Recovered: the latest run ended ${{ steps.update.outputs.outcome }}."
           done
+
+      # A PR that GitHub auto-merges does not start the push-to-main trigger of the heal workflow (and the hourly cron is dropped as often as
+      # this one is), so any open PR whose generated blocks just went stale sat conflicted for hours. This run is the most frequent clock in
+      # the repo: use it to start the healer, which only ever touches conflicted PR branches.
+      - name: Heal open PRs that the last merge left conflicting
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run heal-generated-conflicts.yml --ref "${GITHUB_REF_NAME}" || true
