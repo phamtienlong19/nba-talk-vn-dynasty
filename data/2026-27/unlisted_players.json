@@ -32,6 +32,14 @@
       "displayPosition": "SG",
       "cap": 0.0,
       "firstSeen": "RS-2026-10-30-9ea2295d"
+    },
+    {
+      "playerKey": "478.p.5465",
+      "name": "Mario Hezonja",
+      "nbaTeam": "CLE",
+      "displayPosition": "SF,PF",
+      "cap": 0.0,
+      "firstSeen": "RS-2026-11-20-54817660"
     }
   ],
   "note": "Players rostered in-season who are not in salary_freeze.json. Salary 0 by league rule (config/cap_policy.json unlistedPlayerSalary). Added only by a reviewed roster import."
