@@ -553,11 +553,11 @@ class TestEmbeddedPageData(unittest.TestCase):
     def test_official_view_has_no_movement_and_scenario_view_has_it(self):
         view = self.data["scenarios"][""]
         self.assertEqual(sorted(view["teams"]), sorted(self.i["franchises"]))  # trade teams + every drafting team
-        self.assertEqual(view["teams"][BZ]["fold"]["tradeIds"], [])  # Bz made no in-season move
+        self.assertEqual(view["teams"][BZ]["fold"]["tradeIds"], ["PROP-2026-005"])  # Bz's only in-season move: the 2026-11-20 Barrett / Thybulle trade
         # the default (current-season) view folds only the completed in-season trades, for their teams
         self.assertEqual({f: v["fold"]["tradeIds"] for f, v in view["teams"].items() if v["fold"]["tradeIds"]},
                          {"franchise-02": ["TXN-2026-001", "PROP-2026-004"], "franchise-05": ["TXN-2026-001"],
-                          "franchise-01": ["PROP-2026-001", "PROP-2026-002"], "franchise-12": ["PROP-2026-001"],
+                          "franchise-01": ["PROP-2026-001", "PROP-2026-002", "PROP-2026-005"], "franchise-12": ["PROP-2026-001"], "franchise-15": ["PROP-2026-005"],
                           "franchise-11": ["PROP-2026-002", "PROP-2026-003"], "franchise-04": ["PROP-2026-003", "PROP-2026-004"]})
         self.assertEqual(self.data["history"]["tradeIds"], ["TRADE-A", "TRADE-B", "TRADE-C", "TRADE-D", "TRADE-E", "TRADE-F", "TRADE-D-AMEND"])
 

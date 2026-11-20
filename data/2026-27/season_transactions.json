@@ -281,6 +281,53 @@
         }
       ],
       "effectiveAt": "2026-11-14T12:00:00Z"
+    },
+    {
+      "txnId": "PROP-2026-005",
+      "type": "TRADE",
+      "status": "COMPLETED",
+      "label": "BSY ↔ BZ",
+      "participants": [
+        "franchise-01",
+        "franchise-15"
+      ],
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.6165",
+          "name": "RJ Barrett",
+          "from": "franchise-01",
+          "to": "franchise-15"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.6208",
+          "name": "Matisse Thybulle",
+          "from": "franchise-15",
+          "to": "franchise-01"
+        }
+      ],
+      "recordedAt": "2026-11-20T00:00:00Z",
+      "directionCheck": {
+        "status": "VERIFIED",
+        "described": "Barrett to Bz; Thybulle to Bsy",
+        "verified": "Roster snapshot RS-2026-11-20-99eb538e (Yahoo team pages, read-only, 2026-11-20T03:12:26Z): Bsy (franchise-01) owns RJ Barrett (BN, O) and Bz (franchise-15) owns Matisse Thybulle (SG), so the described direction is executable."
+      },
+      "note": "Distinct in-season trade, applied once on top of the latest verified snapshot until a Yahoo snapshot reflects it. Cap, roster and cooldown results are computed by the Trade Lab, not decided here.",
+      "source": "League owner in chat, 2026-11-20: 'newly completed trade on Fri Nov 20: Barrett to Bz, Thybulle to Bsy'. Exact Yahoo processing time and transaction id not supplied (dated to the report, same convention as the earlier trades).",
+      "statusHistory": [
+        {
+          "status": "PROPOSED",
+          "at": "2026-11-20T00:00:00Z"
+        },
+        {
+          "status": "COMPLETED",
+          "at": "2026-11-20",
+          "by": "league owner instruction",
+          "note": "owner reported the trade completed on Fri 2026-11-20; recorded directly as COMPLETED, no duplicate record"
+        }
+      ],
+      "effectiveAt": "2026-11-20T12:00:00Z"
     }
   ]
 }
