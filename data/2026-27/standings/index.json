@@ -1,6 +1,6 @@
 {
   "note": "Yahoo standings snapshots. `current` is the one the site shows; every earlier snapshot is kept.",
-  "current": "snapshots/ST-20261118T090300Z-253f5a7c.json",
+  "current": "snapshots/ST-20261119T090200Z-538e0359.json",
   "history": [
     {
       "snapshotId": "ST-20261020T032209Z-7c49a8e0",
@@ -56,6 +56,15 @@
       "digest": "253f5a7c73a5569ca57523659e7db90b12da148466ad0378b1baa2e093721d0b",
       "action": "IMPORT",
       "previous": "snapshots/ST-20261116T091000Z-c455f86a.json"
+    },
+    {
+      "snapshotId": "ST-20261119T090200Z-538e0359",
+      "file": "snapshots/ST-20261119T090200Z-538e0359.json",
+      "sourceUpdatedAt": "2026-11-19T09:02:00Z",
+      "capturedAt": "2026-11-19T18:10:07Z",
+      "digest": "538e035981140839a80e57ca5ff40617e2fda1dff3ae7bca10195de459bd49de",
+      "action": "IMPORT",
+      "previous": "snapshots/ST-20261118T090300Z-253f5a7c.json"
     }
   ]
 }
