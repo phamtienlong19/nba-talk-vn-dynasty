@@ -1771,7 +1771,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 3.0,
    "oRank": 111,
@@ -1974,7 +1975,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 124,
@@ -2982,7 +2984,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 187,
@@ -3221,8 +3224,7 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 202,
@@ -3618,7 +3620,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 226,
@@ -4519,7 +4522,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 282,
@@ -5414,7 +5418,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 337,
@@ -5718,7 +5723,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 356,
@@ -9006,7 +9012,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 565,
@@ -9066,7 +9073,8 @@
    "eligiblePositions": [
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 569,
@@ -9540,5 +9548,5 @@
    "headshotUrl": "https://s.yimg.com/iu/api/res/1.2/6E3CiTDckykS8Ar3_Zph3A--~C/YXBwaWQ9eXNwb3J0cztjaD0yMzM2O2NyPTE7Y3c9MTc5MDtkeD04NTc7ZHk9MDtmaT11bGNyb3A7aD02MDtxPTEwMDt3PTQ2/https://s.yimg.com/xe/i/us/sp/v/nba_cutout/players_l/10172023/6752.png"
   }
  ],
- "metadataRefreshedAt": "2026-11-19T18:25:21Z"
+ "metadataRefreshedAt": "2026-11-20T17:54:10Z"
 }
