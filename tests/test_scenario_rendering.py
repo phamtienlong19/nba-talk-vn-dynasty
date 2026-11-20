@@ -268,7 +268,7 @@ class TestRenderedCards(unittest.TestCase):
         self.assertNotIn("DIRECTION CHECK", lab)                       # internal notes are never published
         self.assertNotIn("AMENDMENT", lab)                             # withdrawn: not actionable
         done = re.search(r'id="lab-done">(.*?)</details>', self.official, re.S).group(1)
-        self.assertEqual(done.count('class="tcard done'), 5)
+        self.assertEqual(done.count('class="tcard done'), 6)
         self.assertIn("Jaxson Hayes", done)                           # the Long con / CrazyCat trade (completed 2026-11-14)
         self.assertIn("OG Anunoby", done)                             # the Long con / Thịnh trade, once official
         self.assertIn("Morez Johnson Jr.", done)
