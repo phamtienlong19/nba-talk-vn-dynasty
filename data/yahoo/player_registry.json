@@ -481,8 +481,7 @@
     "G",
     "SF",
     "F",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 29.0,
    "oRank": 30,
@@ -709,8 +708,7 @@
     "SF",
     "PF",
     "F",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 23.0,
    "oRank": 44,
@@ -1394,7 +1392,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 9.0,
    "oRank": 87,
@@ -1817,8 +1816,7 @@
     "PG",
     "SG",
     "G",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 2.0,
    "oRank": 114,
@@ -1974,7 +1972,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 124,
@@ -3128,7 +3127,8 @@
     "G",
     "SF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 196,
@@ -3221,8 +3221,7 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 202,
@@ -3567,7 +3566,8 @@
     "PF",
     "F",
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 223,
@@ -3618,7 +3618,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 226,
@@ -3696,7 +3697,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 231,
@@ -3886,7 +3888,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 243,
@@ -4311,7 +4314,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 269,
@@ -4410,8 +4414,7 @@
     "PF",
     "F",
     "C",
-    "Util",
-    "IL"
+    "Util"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 275,
@@ -4519,7 +4522,8 @@
    "displayPosition": "C",
    "eligiblePositions": [
     "C",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 282,
@@ -5414,7 +5418,8 @@
     "SF",
     "PF",
     "F",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 337,
@@ -9006,7 +9011,8 @@
    "eligiblePositions": [
     "PG",
     "G",
-    "Util"
+    "Util",
+    "IL"
    ],
    "projectedAuctionValue": 0.0,
    "oRank": 565,
@@ -9540,5 +9546,5 @@
    "headshotUrl": "https://s.yimg.com/iu/api/res/1.2/6E3CiTDckykS8Ar3_Zph3A--~C/YXBwaWQ9eXNwb3J0cztjaD0yMzM2O2NyPTE7Y3c9MTc5MDtkeD04NTc7ZHk9MDtmaT11bGNyb3A7aD02MDtxPTEwMDt3PTQ2/https://s.yimg.com/xe/i/us/sp/v/nba_cutout/players_l/10172023/6752.png"
   }
  ],
- "metadataRefreshedAt": "2026-11-19T18:25:21Z"
+ "metadataRefreshedAt": "2026-11-22T17:14:53Z"
 }
