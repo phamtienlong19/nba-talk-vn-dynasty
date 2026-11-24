@@ -27,7 +27,7 @@ import yahoo_standings as ys  # noqa: E402
 HERE = os.path.dirname(os.path.abspath(__file__))
 APP_JS, APP_CSS = os.path.join(HERE, "live_app.js"), os.path.join(HERE, "live.css")
 ROTO_JS = os.path.join(HERE, "live_roto.js")
-INDEX_HTML = os.path.join(ls.REPO_ROOT, "index.html")
+INDEX_HTML = os.environ.get("NBA_INDEX_HTML") or os.path.join(ls.REPO_ROOT, "index.html")
 BEGIN, END = "<!--LIVE-BEGIN-->", "<!--LIVE-END-->"
 LEAGUE_BEGIN = "<!--LEAGUE-DATA-BEGIN-->"
 WHATIF_BEGIN = "<!--WHATIF-BEGIN-->"

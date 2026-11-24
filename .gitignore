@@ -12,3 +12,4 @@ __pycache__/
 
 # workflow run output (reports, observations): uploaded as artifacts, never committed
 /artifacts/
+site/
