@@ -207,7 +207,8 @@ class TradeChecker(unittest.TestCase):
             self.assertEqual([x["level"] for x in res["rules"] if x["rule"] == "drop"], [want], (want, r["n"], r["c"]))
 
     def _cheap_player(self, f, below):
-        return next(r for r in ss.ranked_roster(self.si, self.state, f) if r["c"] < below and r["c"] >= 0)
+        # in the Yahoo registry: a provisional player (not yet linked, e.g. 'provisional:bennett-stirtz') has no registry row to re-rank
+        return next(r for r in ss.ranked_roster(self.si, self.state, f) if r["c"] < below and r["c"] >= 0 and r["k"] in self.si["registry"])
 
     def test_top_50_preseason_players_cannot_be_dropped_even_when_cheap(self):
         """The rule is 'paid 20+ OR preseason top 50'. No live player is both cheap and top 50 today, so make one."""
