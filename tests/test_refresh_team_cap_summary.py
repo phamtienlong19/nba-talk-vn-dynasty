@@ -1,3 +1,5 @@
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import os
 import re
 import sys
@@ -119,7 +121,7 @@ class TestRefreshTeamCapSummary(unittest.TestCase):
 
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
-INDEX_HTML = os.path.join(REPO_ROOT, "index.html")
+INDEX_HTML = _site.INDEX
 
 
 class TestIndexHtmlCapConsistencyRegressions(unittest.TestCase):

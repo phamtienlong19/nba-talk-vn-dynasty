@@ -2,6 +2,8 @@
 
 No test touches the network or a real Yahoo session. Data tests use a private copy of data/2026-27 pinned to the draft-night
 snapshot (TempData), the real 2026-10-19 capture as the Yahoo side, and a fetcher that renders it as team pages."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import copy
 import io
 import json
@@ -398,7 +400,7 @@ class TestAutoMergeGuard(unittest.TestCase):
 
 class TestFreshnessPill(unittest.TestCase):
     def test_the_roster_pill_says_how_old_the_snapshot_is_without_changing_its_text(self):
-        with open(os.path.join(ROOT, "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             html = f.read()
         self.assertIn('hrs>=48?Math.floor(hrs/24)+"D OLD":hrs>=12?Math.floor(hrs)+"H OLD":""', html)   # silent under 12h, amber to 48h, red after
         self.assertIn('.roster-verified[data-age]::after{content:" · " attr(data-age)', html)          # CSS adds the age: textContent stays "✓ ROSTERS <date>"

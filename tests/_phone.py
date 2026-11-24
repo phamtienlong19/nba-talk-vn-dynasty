@@ -1,5 +1,7 @@
 """Run a script inside the real page at a true phone width. Headless Chrome will not make a window narrower than 500px, so the page is
 loaded into a 390px-wide iframe (srcdoc keeps it same-origin) and the script runs in that frame, where the phone media queries apply."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import html as html_lib
 import json
 import os
@@ -12,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import test_scenario_rendering as tsr  # noqa: E402
 
-INDEX = os.path.join(HERE, "..", "index.html")
+INDEX = _site.INDEX
 
 
 def phone_run(body_js, width=390, height=844, pre_js="", wait_ms=2500, budget=12000):

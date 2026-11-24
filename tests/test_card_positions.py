@@ -1,3 +1,5 @@
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import json
 import os
 import sys
@@ -25,7 +27,7 @@ class TestCardPositions(unittest.TestCase):
         """The registry is refreshed daily; a card that disagrees is the 'eligibility never updated' bug. Fix: python3 scripts/refresh_card_positions.py"""
         with open(os.path.join(ROOT, "data", "yahoo", "player_registry.json"), encoding="utf-8") as f:
             reg = json.load(f)["players"]
-        with open(os.path.join(ROOT, "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             _, changed = rcp.refresh(f.read(), reg)
         self.assertEqual(changed, [])
 

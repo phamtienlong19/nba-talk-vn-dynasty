@@ -1,5 +1,7 @@
 """Regular-season operations: layer separation (history / current season / Trade Lab), the in-season ledger, cap
 checkpoints, the roster import workflow and provisional Yahoo identities. Write paths run on a temp copy of the data."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import copy
 import csv
 import json
@@ -23,7 +25,7 @@ MOREZ, ZION = "478.p.10572", "478.p.6163"
 
 
 def _read_html():
-    with open(bls.INDEX_HTML, encoding="utf-8") as f:
+    with open(_site.INDEX, encoding="utf-8") as f:
         return f.read()
 
 

@@ -1,4 +1,6 @@
 """Export hub: every view can be exported as an image, a link and chat-ready text. Driven in headless Chrome; expectations come from the data."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import html as html_lib
 import json
 import os
@@ -14,7 +16,7 @@ import test_live_feed as tlf  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
 from _drive import drive_page  # noqa: E402
 
-INDEX = os.path.join(HERE, "..", "index.html")
+INDEX = _site.INDEX
 
 
 @unittest.skipUnless(tsr._chrome(), "no Chrome")

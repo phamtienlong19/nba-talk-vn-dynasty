@@ -153,11 +153,8 @@ def run(cfg, source, out_dir, data_dir=ss.DATA_DIR, apply=False, allow_restore=F
     sid = ys.commit(snap, standings_dir, "RESTORE" if restore else "IMPORT", reason if restore else None)
     if tree_digest(data_dir) != before_hash:
         raise RuntimeError("a standings import changed data outside data/2026-27/standings/ (this must never happen)")
-    if regenerate:
-        for cmd in (["build_league_state.py", "embed"], ["what_if.py", "embed"], ["live_page.py", "embed"]):
-            subprocess.run([sys.executable, os.path.join(ROOT, "scripts", cmd[0])] + cmd[1:], check=True, cwd=ROOT, stdout=subprocess.DEVNULL)
     return finish(outcome, snap, warn=warn, moves=moves, sid=sid,
-                  note=f"Applied: `data/2026-27/standings/snapshots/{sid}.json` is now current; the previous snapshot is kept. Site regenerated: {bool(regenerate)}.")
+                  note=f"Applied: `data/2026-27/standings/snapshots/{sid}.json` is now current; the previous snapshot is kept. The page is rebuilt from the data at deploy (scripts/build_site.py).")
 
 
 def main(argv=None, fetcher=None) -> int:

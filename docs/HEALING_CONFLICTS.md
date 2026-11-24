@@ -17,3 +17,9 @@ by hand (take main's `index.html`, re-run the embeds, validate, push).
 
 Limit: it fixes the conflict, not the cause. Two PRs that both regenerate the blocks still collide each time the other merges; the workflow heals the
 second one right after the first merges.
+
+## After plan A piece 3c (2026-11)
+`index.html` in git no longer carries the three generated data lines (`league-data`, `whatif-data`, `live-data`): they are `{}` and
+`scripts/build_site.py` embeds them from `data/` when the site is built and deployed (`.github/workflows/pages.yml`). Bot PRs therefore stop
+touching `index.html`, and this healer only has old PR branches (still carrying full blocks) to fix: it takes main's `{}` and no longer
+re-embeds. Tests read the built page through `tests/_site.py`.

@@ -1,3 +1,5 @@
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import os
 import re
 import sys
@@ -10,7 +12,7 @@ from _proposed import predraft_index_html  # noqa: E402
 import build_fa_draft_pool as pool  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
-INDEX_HTML = os.path.join(REPO_ROOT, "index.html")
+INDEX_HTML = _site.INDEX
 
 # Small deterministic Yahoo fixture -- unit tests must not depend on the
 # developer-local, gitignored local_data/yahoo/players_normalized.json

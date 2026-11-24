@@ -1,4 +1,6 @@
 """Post-freeze WHAT-IF layer: official protection, Scenario A, Scenario B, hypothetical FA 60, UI."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import copy
 import glob
 import hashlib
@@ -20,7 +22,7 @@ import league_state as ls  # noqa: E402
 import season_state as ss  # noqa: E402
 import what_if as wi  # noqa: E402
 
-INDEX = os.path.join(ROOT, "index.html")
+INDEX = _site.INDEX
 SNAP = "2026-10-08"
 _CACHE = {}
 

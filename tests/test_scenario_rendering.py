@@ -1,3 +1,5 @@
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import html as html_lib
 import os
 import re
@@ -18,7 +20,7 @@ from _drive import drive_page  # noqa: E402
 import refresh_team_cap_summary as cap_summary  # noqa: E402
 
 REPO_ROOT = os.path.join(os.path.dirname(__file__), "..")
-INDEX = os.path.join(REPO_ROOT, "index.html")
+INDEX = _site.INDEX
 SUP, BSY, DUNG, BZ = "franchise-12", "franchise-01", "franchise-06", "franchise-15"
 ABC = ["TRADE-A", "TRADE-B", "TRADE-C"]
 

@@ -1,3 +1,5 @@
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import os
 import sys
 import tempfile
@@ -240,7 +242,7 @@ class TestCommittedExportArtifacts(unittest.TestCase):
         wb.close()
 
     def test_board_links_the_stable_xlsx_and_md_paths(self):
-        with open(os.path.join(REPO_ROOT, "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             html = f.read()
         self.assertIn('href="exports/yahoo_top300_proj_dollar_rank.xlsx"', html)
         self.assertIn('href="exports/yahoo_top300_proj_dollar_rank.md"', html)

@@ -1,5 +1,7 @@
 """Quality-of-life features of index.html, driven in headless Chrome: cooldown lock tags, what-changed strip, Trade Machine filters,
 the not-checked note and the deadline calendar. Every expectation is derived from the embedded data, none pins today's rosters."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import html as html_lib
 import json
 import os
@@ -13,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import test_scenario_rendering as tsr  # noqa: E402
 from _drive import drive_page  # noqa: E402
 
-INDEX = os.path.join(os.path.dirname(__file__), "..", "index.html")
+INDEX = _site.INDEX
 HTML = open(INDEX, encoding="utf-8").read()
 
 

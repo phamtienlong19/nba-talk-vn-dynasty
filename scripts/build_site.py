@@ -29,7 +29,7 @@ def build(out):
         if os.path.isdir(src):
             shutil.copytree(src, os.path.join(out, d), dirs_exist_ok=True)
     env = dict(os.environ, NBA_INDEX_HTML=os.path.join(out, "index.html"))
-    for script, arg in (("build_league_state.py", "embed"), ("what_if.py", "embed"), ("live_page.py", "embed")):
+    for script, arg in (("build_league_state.py", "sync-ledger"), ("build_league_state.py", "embed"), ("what_if.py", "embed"), ("live_page.py", "embed")):
         subprocess.run([sys.executable, os.path.join(ROOT, "scripts", script), arg], check=True, env=env, stdout=subprocess.DEVNULL)
     return os.path.join(out, "index.html")
 

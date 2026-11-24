@@ -4,6 +4,8 @@ Timing uses performance.now() so a test may freeze Date. The page runs `body_js`
 body ran, whichever comes first. A test that waits for real async work (an image drawing, fonts, a promise) must set R.__done in its callback and
 pass a generous `wait`: a fixed wait races a slow CI runner, which is where the flaky `KeyError` / `[] is not true` failures came from.
 A test that only uses timers can ignore all of this (virtual time makes them exact). `waitFor(cond, then, ms)` polls for a condition."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import html as html_lib
 import json
 import os
@@ -11,7 +13,7 @@ import re
 import shutil
 import tempfile
 
-INDEX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "index.html")
+INDEX = _site.INDEX
 
 
 def drive_page(body_js, qs="", wait=2500, start=500, size="1000,1400", budget=60000, head="", page=None, mutate=None, out_id="o", timeout=150, pre_done=""):
