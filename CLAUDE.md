@@ -65,7 +65,10 @@ Do not autonomously decide:
 
 Exception (owner decision, 2026-10-30): the scheduled **Update Yahoo Rosters** workflow may auto-merge its own PR when it is `READY`,
 only changes roster data / the generated page, has no ownership change and passes validation and tests
-(`docs/YAHOO_ROSTER_WORKFLOW.md`). Agents in a session still never merge.
+(`docs/YAHOO_ROSTER_WORKFLOW.md`). Extended (owner decision, 2026-11-24) to the scheduled **Update Yahoo Standings** and **Update Player Metadata**
+workflows under the same conditions (`READY`/changed, only their own data files and the generated page, validation and
+tests passed, PR checks green; `docs/BOT_PRS.md`). Anything else (ownership change, CONFLICT, a newly changed Yahoo cap
+snapshot promoted to official) still waits for a human. Agents in a session still never merge.
 
 Software/agents may surface evidence and propose changes. Humans
 approve governance/state changes.

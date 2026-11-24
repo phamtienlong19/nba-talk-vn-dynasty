@@ -61,6 +61,11 @@ class TestWorkflow(unittest.TestCase):
         wf = open(os.path.join(ROOT, ".github", "workflows", "update-yahoo-rosters.yml"), encoding="utf-8").read()
         self.assertIn("gh workflow run heal-generated-conflicts.yml", wf)
 
+    def test_a_new_standings_pr_closes_the_older_open_ones_which_would_conflict_on_the_index(self):
+        wf = open(os.path.join(ROOT, ".github", "workflows", "update-yahoo-standings.yml"), encoding="utf-8").read()
+        self.assertIn('startswith("automation/yahoo-standings-")', wf)
+        self.assertIn("gh pr close", wf)
+
     def test_it_never_pushes_to_main_and_never_merges(self):
         steps = self.YML.split("jobs:")[1] + self.SH
         for forbidden in ("gh pr merge", "--auto", "HEAD:main", "heal:main", "--force"):
