@@ -33,7 +33,10 @@ bot_pr_merge() {
   fi
   if timeout 1800 gh pr checks "$pr" --watch --interval 20 >/dev/null 2>&1; then
     if gh pr merge "$pr" --squash --delete-branch; then
-      echo "Merged #$pr after its checks passed" >> "$GITHUB_STEP_SUMMARY"; return 0
+      echo "Merged #$pr after its checks passed" >> "$GITHUB_STEP_SUMMARY"
+      # a PR merged by a bot does not start the deploy's push trigger: ask for it now (the 30-minute clock is only the backstop)
+      GH_TOKEN="${DEFAULT_TOKEN:-}" gh workflow run pages.yml --ref main >/dev/null 2>&1 || true
+      return 0
     fi
   fi
   echo "::warning title=Not merged::#$pr stays open: its checks did not all pass in 30 minutes, or the merge was refused."

@@ -31,8 +31,19 @@ jobs:
       - name: Validate site
         run: ./validate.sh
 
+      # A roster PR only adds a roster snapshot; its run already passed validate + the roster/ownership tests, and the bot waits for THIS check before it
+      # merges, so the browser UI suite (many minutes) would be most of the time a roster change takes to reach the site. main (after the merge) and the nightly
+      # run still run everything.
       - name: Run tests
+        if: ${{ !startsWith(github.head_ref, 'automation/yahoo-rosters-') }}
         run: python3 -m unittest discover -s tests -v
+
+      - name: Run the roster tests (roster PRs; the full suite runs on main and nightly)
+        if: ${{ startsWith(github.head_ref, 'automation/yahoo-rosters-') }}
+        run: |
+          python3 -m unittest discover -s tests -p "test_*roster*.py"
+          python3 -m unittest discover -s tests -p "test_season_ops.py"
+          python3 -m unittest discover -s tests -p "test_league_state_data.py"
 
       - name: Check for proprietary font binaries
         run: |
