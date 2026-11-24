@@ -132,12 +132,8 @@ jobs:
           SNAPSHOT: ${{ steps.update.outputs.snapshot }}
           AUTOMERGE: ${{ steps.update.outputs.automerge }}
         run: |
-          if [ -n "$ROSTER_PR_TOKEN" ] && GH_TOKEN="$ROSTER_PR_TOKEN" gh api user --silent 2>/dev/null; then
-            export GH_TOKEN="$ROSTER_PR_TOKEN"; opener="your token"
-          else
-            export GH_TOKEN="$DEFAULT_TOKEN"; opener="the built-in token"
-            echo "::warning title=PR opened by the bot::ROSTER_PR_TOKEN is not set or no longer valid, so GitHub may hold the PR's checks for a maintainer approval. See docs/YAHOO_ROSTER_WORKFLOW.md."
-          fi
+          source scripts/bot_pr.sh
+          bot_pr_token; opener="$BOT_PR_OPENER"
           branch="automation/yahoo-rosters-$(date -u +%Y%m%d-%H%M%S)"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -168,30 +164,10 @@ jobs:
             fi
           done
 
-          # GitHub holds the checks of a PR opened by the built-in bot until a maintainer approves them. Approving them
-          # here is safe: the guard step above proved this PR changes only roster data and the generated page, so no
-          # workflow or script in it can differ from main. Runs appear a few seconds after the PR opens; poll for them.
-          sha=$(git rev-parse HEAD)
-          for attempt in 1 2 3 4 5 6 7 8; do
-            for id in $(gh run list --commit "$sha" --json databaseId,conclusion --jq '.[] | select(.conclusion == "action_required") | .databaseId'); do
-              if gh api -X POST "repos/$GITHUB_REPOSITORY/actions/runs/$id/approve" --silent; then
-                echo "Approved workflow run $id" >> "$GITHUB_STEP_SUMMARY"
-              else
-                echo "::warning title=Could not approve run $id::The PR's checks are waiting for a maintainer. Set ROSTER_PR_TOKEN (docs/YAHOO_ROSTER_WORKFLOW.md) or click Approve and run workflows."
-              fi
-            done
-            sleep 10
-          done
-
           # Safe class only (READY, no ownership change, a plausible number of changes; the path guard above already passed):
-          # ask GitHub to merge once the required checks are green. If auto-merge is not enabled for the repository this
-          # only warns and the PR stays open for you.
+          # merge once the PR's checks are green (scripts/bot_pr.sh). Without ROSTER_PR_TOKEN the checks wait for an approval, so it stays open.
           if [ "$AUTOMERGE" = "true" ]; then
-            if gh pr merge "$new_pr" --auto --squash --delete-branch; then
-              echo "Auto-merge queued for #$new_pr" >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "::warning title=Auto-merge not queued::Enable Allow auto-merge in the repository settings (docs/YAHOO_ROSTER_WORKFLOW.md). #$new_pr stays open for you to merge."
-            fi
+            bot_pr_merge "$new_pr"
           fi
 
       - name: Open or refresh the "needs attention" issue

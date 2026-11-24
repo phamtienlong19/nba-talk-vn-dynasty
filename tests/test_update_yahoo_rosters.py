@@ -424,38 +424,35 @@ class TestWorkflowFile(unittest.TestCase):
 
     def test_never_pushes_to_main_and_only_queues_auto_merge_for_the_safe_class(self):
         for bad in ("--admin", "--squash --admin", "push origin main", "push origin HEAD:main", "--force", "pull_request_target",
-                    "gh pr review", "--approve", "/reviews", "pulls/", "/merge"):
-            self.assertNotIn(bad, self.yml, bad)                                                    # no merging, no approving a PR review
-        approvals = [l for l in self.yml.splitlines() if "approve" in l and not l.lstrip().startswith("#") and "echo" not in l]
-        self.assertTrue(all("actions/runs/$id/approve" in l or "Approve" in l or "approve" in l.lower() for l in approvals))
-        self.assertEqual([l.strip() for l in self.yml.splitlines() if "/approve" in l],
-                         ['if gh api -X POST "repos/$GITHUB_REPOSITORY/actions/runs/$id/approve" --silent; then'])   # the only approval: a held workflow run
+                    "gh pr review", "--approve", "/reviews", "pulls/", "/merge", "/approve"):
+            self.assertNotIn(bad, self.yml, bad)                                                    # no approving anything, no merge API call
         self.assertIn('gh pr create --base main --head "$branch"', self.yml)
         self.assertNotIn("--draft", self.yml)                                                       # opened ready for review (owner, 2026-10-21)
         self.assertIn('git push origin "$branch"', self.yml)
         self.assertIn("github.ref == 'refs/heads/main'", self.yml)                                # PRs only from main
 
-    def test_pr_checks_are_approved_and_stale_roster_prs_superseded(self):
-        step = self.yml.split("- name: Open a pull request")[1]
-        self.assertIn('select(.conclusion == "action_required")', step)                            # only runs GitHub is holding
-        self.assertIn('actions/runs/$id/approve', step)
-        self.assertLess(step.index("gh pr create"), step.index("approve"))                         # approve after the PR exists
+    def test_stale_roster_prs_are_superseded_and_only_the_safe_class_is_merged_through_the_shared_helper(self):
+        step = self.yml.split("- name: Open a pull request")[1].split('- name: Open or refresh the "needs attention" issue')[0]
         self.assertIn('startswith("automation/yahoo-rosters-")', step)                             # only this workflow's own branches
         self.assertIn('gh pr close "$old" --delete-branch --comment "Superseded by #$new_pr', step)
-        self.assertEqual(step.count("gh pr merge"), 1)
-        self.assertIn('gh pr merge "$new_pr" --auto --squash --delete-branch', step)               # GitHub merges only after the required checks pass
-        self.assertIn('if [ "$AUTOMERGE" = "true" ]; then\n            if gh pr merge', step)         # and only for the safe class
-        self.assertLess(step.index("actions/runs/$id/approve"), step.index("gh pr merge"))
+        self.assertEqual(step.count("gh pr merge"), 0)                                              # merging lives in scripts/bot_pr.sh only
+        self.assertIn('if [ "$AUTOMERGE" = "true" ]; then\n            bot_pr_merge "$new_pr"', step)    # and only for the safe class
         guard = self.yml.index("Only roster data and the generated site may have changed")
-        self.assertLess(guard, self.yml.index("actions/runs/$id/approve"))                         # approval only after the path guard passed
+        self.assertLess(guard, self.yml.index("bot_pr_merge"))                                     # merge only after the path guard passed
+        helper = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "bot_pr.sh"), encoding="utf-8").read()
+        self.assertIn('gh pr merge "$pr" --auto --squash --delete-branch', helper)
+        self.assertIn('if [ "$BOT_PR_CHECKS" != "yes" ]', helper)                                   # no token: checks need approval, so nothing is merged
+        self.assertNotIn("--admin", helper)
 
     def test_secret_handling(self):
         self.assertEqual(self.yml.count("secrets."), 2)                                           # the session and the optional PR token
         self.assertIn("YAHOO_STORAGE_STATE: ${{ secrets.YAHOO_STORAGE_STATE }}", self.yml)
         self.assertIn("ROSTER_PR_TOKEN: ${{ secrets.ROSTER_PR_TOKEN }}", self.yml)
         self.assertNotRegex(self.yml, r"echo[^\n]*\$(ROSTER_PR_TOKEN|GH_TOKEN|DEFAULT_TOKEN)")        # tokens are never echoed
-        self.assertIn('GH_TOKEN="$ROSTER_PR_TOKEN" gh api user --silent', self.yml)                # validated first; falls back if invalid
-        self.assertIn("::warning title=PR opened by the bot", self.yml)
+        helper = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "bot_pr.sh"), encoding="utf-8").read()
+        self.assertIn('GH_TOKEN="$ROSTER_PR_TOKEN" gh api user --silent', helper)                  # validated first; falls back if invalid
+        self.assertIn("::warning title=PR opened by the bot", helper)
+        self.assertNotRegex(helper, r"echo[^\n]*\$(ROSTER_PR_TOKEN|GH_TOKEN|DEFAULT_TOKEN)")
         self.assertNotIn("git push origin main", self.yml)
         self.assertNotRegex(self.yml, r"echo[^\n]*\$YAHOO_STORAGE_STATE[^_]")                      # never echoed
         self.assertNotIn("set -x", self.yml)
