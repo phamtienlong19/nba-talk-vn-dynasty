@@ -36,7 +36,8 @@ class TestBuildSite(unittest.TestCase):
     def test_the_deploy_workflow_is_a_noop_until_pages_is_switched_and_cannot_run_from_a_pr(self):
         wf = open(os.path.join(ROOT, ".github", "workflows", "pages.yml"), encoding="utf-8").read()
         self.assertIn("build_type", wf)
-        self.assertEqual(wf.count("if: steps.mode.outputs.build_type == 'workflow'"), 6)   # every step after the check is guarded
+        self.assertEqual(wf.count("if: steps.mode.outputs.build_type == 'workflow'"), 5)   # every build step after the check is guarded
+        self.assertIn("if: needs.build.outputs.build_type == 'workflow'", wf)              # and the deploy job only runs when Pages is set to Actions
         self.assertIn("python3 scripts/build_site.py", wf)
         self.assertNotIn("pull_request", wf)                                                # a PR never deploys
         self.assertIn("schedule:", wf)                                                      # bot merges do not start the push trigger
