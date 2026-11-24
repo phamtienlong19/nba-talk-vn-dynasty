@@ -34,7 +34,7 @@ import violations
 import season_state as ss  # noqa: E402
 
 REPO_ROOT = ls.REPO_ROOT
-INDEX_HTML = os.path.join(REPO_ROOT, "index.html")
+INDEX_HTML = os.environ.get("NBA_INDEX_HTML") or os.path.join(REPO_ROOT, "index.html")
 DATA_DIR = ls.DATA_DIR
 DATA_BEGIN = "<!--LEAGUE-DATA-BEGIN-->"
 DATA_END = "<!--LEAGUE-DATA-END-->"
