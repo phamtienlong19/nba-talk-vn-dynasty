@@ -468,9 +468,18 @@ class TestWorkflowFile(unittest.TestCase):
     def test_only_roster_data_and_site_may_change_and_checks_run_first(self):
         guard = self.yml.index("Only roster data and the generated site may have changed")
         self.assertLess(self.yml.index("./validate.sh"), guard)
-        self.assertLess(self.yml.index("python3 -m unittest discover -s tests"), guard)
+        self.assertLess(self.yml.index("python3 -m unittest tests.test_update_yahoo_rosters"), guard)
+        self.assertNotIn("unittest discover", self.yml)   # the full suite is not the gate for refreshing data (validate.yml / nightly run it)
         self.assertLess(guard, self.yml.index("Open a pull request"))
         self.assertIn("data/2026-27/rosters/", self.yml)
+
+    def test_a_failure_in_any_step_raises_the_needs_attention_issue_and_a_nightly_run_watches_the_full_suite(self):
+        step = self.yml.split('name: Open or refresh the "needs attention" issue')[1].split("env:")[0]
+        self.assertIn("failure()", step)
+        nightly = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".github", "workflows", "nightly-tests.yml"), encoding="utf-8").read()
+        self.assertIn("python3 -m unittest discover -s tests", nightly)
+        self.assertIn("tests-red", nightly)
+        self.assertIn("schedule:", nightly)
 
     def test_installs_only_what_the_scraper_needs(self):
         with open(os.path.join(ROOT, "requirements-yahoo-rosters.txt"), encoding="utf-8") as f:

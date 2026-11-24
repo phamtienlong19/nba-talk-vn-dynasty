@@ -110,7 +110,10 @@ jobs:
         run: |
           python3 -m pip install -r requirements.txt
           ./validate.sh
-          python3 -m unittest discover -s tests
+          # The gate for REFRESHING DATA is validation + the roster / ownership tests. The whole suite (browser UI tests included) runs on the PR's
+          # checks (validate.yml) and nightly (nightly-tests.yml): a UI test that happens to trip on today's data must not stop rosters from updating
+          # (it did, every run from 2026-11-23, because of one test that picked a provisional player).
+          python3 -m unittest tests.test_update_yahoo_rosters tests.test_yahoo_rosters tests.test_season_ops tests.test_league_state_data tests.test_roster_baseline
 
       - name: Only roster data and the generated site may have changed
         if: steps.update.outputs.outcome == 'READY' && env.APPLY == 'true'
@@ -195,7 +198,7 @@ jobs:
           fi
 
       - name: Open or refresh the "needs attention" issue
-        if: always() && (steps.update.outputs.outcome == 'CONFLICT' || steps.update.outcome == 'failure' || steps.update.outputs.outcome == 'FAILED')
+        if: always() && (steps.update.outputs.outcome == 'CONFLICT' || steps.update.outputs.outcome == 'FAILED' || failure())   # failure(): any step, not just the fetch
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
