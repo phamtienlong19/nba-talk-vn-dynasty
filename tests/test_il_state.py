@@ -30,8 +30,12 @@ class TestIlState(unittest.TestCase):
                 self.assertEqual(self.st("IL", status, ok), "injured", (status, ok))              # the registry lags a day; Yahoo's status wins
 
     def test_ineligible_statuses_are_healthy_on_il(self):
-        for status in ("P", "Q", "D", "GTD", "DTD"):
+        for status in ("P", "Q", "GTD", "DTD"):
             self.assertEqual(self.st("IL+", status, True), "healthy_on_il", status)
+
+    def test_doubtful_is_il_eligible_per_the_league_settings(self):
+        for ok in (True, False, None):
+            self.assertEqual(self.st("IL", "D", ok), "injured", ok)
 
     def test_no_status_follows_the_registry_il_token(self):
         self.assertEqual(self.st("IL", None, True), "injured")             # Out stays eligible until the next morning / 3+ games: no status can still be legitimate

@@ -186,7 +186,7 @@ snapshot's date when it is more than 3 hours old or cannot be fetched. A page op
 ## IL states and the lineup log (evidence, never a verdict)
 
 **IL states** (`season_state.il_state`, mirrored by `ilKind` on the page): a player in an IL slot is `injured` (Yahoo lists him Out / INJ / OFS, or no status and the
-registry still shows the IL token), `healthy_on_il` (an ineligible status P / Q / D / GTD / DTD, or no status and the registry says he is not IL-eligible) or
+registry still shows the IL token), `healthy_on_il` (an ineligible status P / Q / GTD / DTD (Doubtful is IL-eligible per the league settings), or no status and the registry says he is not IL-eligible) or
 `unverified` (no registry entry, or an unknown status code). The page shows three different chips ("IL", a solid red "HEALTHY", a grey "IL ?") and a per-team
 "N injured · N HEALTHY" count. Team rows carry `ie` (1 / 0, the registry's IL token; absent when unknown). The registry refreshes every 4 hours.
 

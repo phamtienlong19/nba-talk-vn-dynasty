@@ -3917,14 +3917,14 @@ function renderTeamCards(){
 }
 var STATUS={P:["P","Probable","p"],Q:["Q","Questionable","q"],D:["D","Doubtful","d"],GTD:["GTD","Game-time decision","q"],DTD:["DTD","Day-to-day","q"],
  O:["OUT","Out","out"],OUT:["OUT","Out","out"],INJ:["INJ","Injured","inj"],OFS:["OFS","Out for the season","ofs"],SUSP:["SUSP","Suspended","ofs"],NA:["NA","Not active · no NBA team","na"]};
-/* an IL slot is one fact, Yahoo's status another. out = Yahoo says Out / INJ / OFS (a real absence); soft = Q / D / P / GTD / DTD (may play); no status = Yahoo's IL rule: a player in an IL slot is hurt unless a status says otherwise, so he counts as out;
+/* an IL slot is one fact, Yahoo's status another. out = Yahoo says Out / INJ / OFS (a real absence); soft = Q / D / P / GTD / DTD (may play; D is still IL-eligible); no status = Yahoo's IL rule: a player in an IL slot is hurt unless a status says otherwise, so he counts as out;
    other = SUSP / NA / a code we do not know (shown as-is, never assumed out). Yahoo changes these daily, so this is recomputed from each snapshot. */
 /* what an IL slot means (mirrors season_state.il_state): out = a legitimate IL spot (Yahoo lists him out, or no status and the registry still shows him IL-eligible);
    inel = HEALTHY on IL (an ineligible status, or no status and the registry says he is not IL-eligible); unk = unverified (no registry entry, or an unknown status code) */
-function ilKind(r){var o=TKR.longTermInjured;if(r.st&&o.outStatuses.indexOf(r.st)>=0)return "out";if(r.st)return o.ineligibleStatuses.indexOf(r.st)>=0?"inel":"unk";return r.ie===1?"out":r.ie===0?"inel":"unk";}
+function ilKind(r){var o=TKR.longTermInjured;if(r.st&&(o.outStatuses.indexOf(r.st)>=0||(o.ilEligibleStatuses||[]).indexOf(r.st)>=0))return "out";if(r.st)return o.ineligibleStatuses.indexOf(r.st)>=0?"inel":"unk";return r.ie===1?"out":r.ie===0?"inel":"unk";}
 function ilWord(k){return k==="out"?"IL":k==="inel"?"HEALTHY":"IL ?";}
 function ilTitle(r,k,slot){var sn=(STATUS[r.st]||[])[1]||r.st;
- return (slot||"Injured list")+(k==="out"?(r.st?" · Yahoo lists him out":" · no Yahoo status, but still IL-eligible in Yahoo's list: a legitimate IL spot"):k==="inel"?(r.st?" · HEALTHY ON IL: Yahoo status "+sn+" is not IL-eligible (Yahoo allows only Out / Out for season)":" · HEALTHY ON IL: no Yahoo injury status and Yahoo's list no longer shows him IL-eligible"):" · unverified: "+(r.st?"Yahoo status "+r.st+" is neither Out nor a known ineligible status":"no status and no Yahoo eligibility on file for him yet"));}
+ return (slot||"Injured list")+(k==="out"?(r.st?" · Yahoo lists him out":" · no Yahoo status, but still IL-eligible in Yahoo's list: a legitimate IL spot"):k==="inel"?(r.st?" · HEALTHY ON IL: Yahoo status "+sn+" is not IL-eligible (Yahoo allows Out / Injured / Out for season / Doubtful)":" · HEALTHY ON IL: no Yahoo injury status and Yahoo's list no longer shows him IL-eligible"):" · unverified: "+(r.st?"Yahoo status "+r.st+" is neither Out nor a known ineligible status":"no status and no Yahoo eligibility on file for him yet"));}
 function statusChip(code){if(!code)return null;var s=STATUS[code]||[code,"Yahoo status "+code,"na"];
  return h("span",{class:"st-chip st-"+s[2],title:s[1]+" (Yahoo)","aria-label":s[1],text:s[0]});}
 /* My team first in the cap grid */

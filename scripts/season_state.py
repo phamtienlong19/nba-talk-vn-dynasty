@@ -262,8 +262,8 @@ def il_state(slot, status, il_ok, rules=None):
     """What a player's IL slot means, for the roster views, the lineup log and the commissioner list.
 
     None            not in an IL slot
-    "injured"       Yahoo lists him Out / INJ / OFS, or (no status) the registry still shows him IL-eligible: a legitimate IL spot
-    "healthy_on_il" an ineligible status (P / Q / D / GTD / DTD), or no status and the registry says he is NOT IL-eligible: Yahoo no longer lets him
+    "injured"       Yahoo lists him Out / INJ / OFS / Doubtful (all IL-eligible in the league settings), or (no status) the registry still shows him IL-eligible: a legitimate IL spot
+    "healthy_on_il" an ineligible status (P / Q / GTD / DTD), or no status and the registry says he is NOT IL-eligible: Yahoo no longer lets him
                     be there; evidence for the commissioner, never a verdict
     "unverified"    no status and no registry entry (provisional / unlisted player), or a status code that is neither out nor ineligible
 
@@ -273,7 +273,7 @@ def il_state(slot, status, il_ok, rules=None):
         return None
     rules = rules or _load(RULES_PATH)["longTermInjured"]
     st = (status or "").upper() or None
-    if st in rules["outStatuses"]:
+    if st in rules["outStatuses"] or st in rules.get("ilEligibleStatuses", ()):
         return "injured"
     if st in rules["ineligibleStatuses"]:
         return "healthy_on_il"
