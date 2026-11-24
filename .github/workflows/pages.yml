@@ -1,0 +1,70 @@
+name: Deploy site
+
+# Builds the served page (scripts/build_site.py: index.html + the generated data blocks, embedded from data/) and deploys it with GitHub Pages
+# "GitHub Actions" as the source. Why: the data bots used to commit those blocks into index.html, so any two open data PRs conflicted there.
+# Once the blocks are no longer committed (plan A piece 3c) the served page is exactly what this builds.
+#
+# It is a no-op while the repository's Pages source is still "Deploy from a branch" (one owner action switches it, docs/BOT_PRS.md), so it is
+# safe to merge before the switch.
+#
+# Triggers: a push to main; every 30 minutes (a PR that GitHub or a bot merges does NOT start the push trigger, as the heal workflow found out,
+# so the clock is what guarantees a merged roster / standings / metadata change reaches the site); on demand; and the roster run starts it.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "12,42 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Is Pages set to deploy from Actions?
+        id: mode
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          t=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .build_type 2>/dev/null || echo unknown)
+          echo "build_type=$t" >> "$GITHUB_OUTPUT"
+          if [ "$t" != "workflow" ]; then echo "Pages source is '$t', not 'workflow': nothing to deploy (see docs/BOT_PRS.md)." >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - uses: actions/checkout@v4
+        if: steps.mode.outputs.build_type == 'workflow'
+
+      - uses: actions/setup-python@v5
+        if: steps.mode.outputs.build_type == 'workflow'
+        with:
+          python-version: "3.x"
+
+      - name: Build the page
+        if: steps.mode.outputs.build_type == 'workflow'
+        run: |
+          python3 -m pip install -r requirements.txt
+          python3 scripts/build_site.py --out site
+          touch site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+        if: steps.mode.outputs.build_type == 'workflow'
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.mode.outputs.build_type == 'workflow'
+        with:
+          path: site
+
+      - name: Deploy
+        id: deployment
+        if: steps.mode.outputs.build_type == 'workflow'
+        uses: actions/deploy-pages@v4
