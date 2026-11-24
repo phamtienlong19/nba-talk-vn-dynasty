@@ -12,6 +12,20 @@ pick() {  # seconds between builds now
   if [ "$h" -ge 22 ] || [ "$h" -le 7 ] || { [ "$h" -ge 16 ] && [ "$d" -ge 6 ]; }; then echo "$game_every"; else echo 900; fi
 }
 end=$(( $(date +%s) + total )); fails=0
+# Lock evidence (scripts/lineup_log.py): append what each lineup looked like when each game locked to the APPEND-ONLY lineup-log branch (one file per
+# day, ordinary commits, never force-pushed, never rewritten). A failure here never stops the feed.
+log_dir="lineup-log-work"; log_remote="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+lineup_log() {
+  if [ ! -d "$log_dir/.git" ]; then
+    rm -rf "$log_dir"
+    git clone -q --depth 1 --branch lineup-log "$log_remote" "$log_dir" 2>/dev/null || {
+      mkdir -p "$log_dir" && ( cd "$log_dir" && git init -q -b lineup-log && git remote add origin "$log_remote" ); }
+    ( cd "$log_dir" && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com" )
+  fi
+  python3 scripts/lineup_log.py --feed live.json --log-dir "$log_dir" || { echo "lineup log failed"; return 0; }
+  ( cd "$log_dir" && [ -n "$(git status --porcelain)" ] && git add -A && git commit -q -m "lineup log $(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    && { git push -q origin lineup-log 2>/dev/null || { git pull -q --rebase origin lineup-log && git push -q origin lineup-log; }; } ) || true
+}
 # the last published feed carries the closed days' lineup evidence, so a new run does not capture those days again
 curl -sf --max-time 20 "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/live-data/live.json" -o live.json || rm -f live.json
 while [ "$(date +%s)" -lt "$end" ]; do
@@ -23,6 +37,7 @@ while [ "$(date +%s)" -lt "$end" ]; do
       && git config user.email "41898282+github-actions[bot]@users.noreply.github.com" && git add live.json \
       && git commit -q -m "live feed $(date -u +%Y-%m-%dT%H:%M:%SZ)" \
       && git push -q --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" live-data ) || echo "publish failed"
+    lineup_log
     wait_for="$(pick)"
   else
     fails=$((fails + 1)); echo "build failed ($fails in a row)"

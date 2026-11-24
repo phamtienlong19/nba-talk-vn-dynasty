@@ -182,3 +182,17 @@ and the verified rosters do not yet have ("N moves on Yahoo not yet in the verif
 Yahoo id. It never changes ownership, cap, keepers or the trade checker: a roster change becomes official only through the audited PR
 (`update-yahoo-rosters.yml`). The roster label shows "ROSTERS hh:mm · N MIN AGO", warns when the feed is old, and falls back to the verified
 snapshot's date when it is more than 3 hours old or cannot be fetched. A page opened from disk never fetches it.
+
+## IL states and the lineup log (evidence, never a verdict)
+
+**IL states** (`season_state.il_state`, mirrored by `ilKind` on the page): a player in an IL slot is `injured` (Yahoo lists him Out / INJ / OFS, or no status and the
+registry still shows the IL token), `healthy_on_il` (an ineligible status P / Q / D / GTD / DTD, or no status and the registry says he is not IL-eligible) or
+`unverified` (no registry entry, or an unknown status code). The page shows three different chips ("IL", a solid red "HEALTHY", a grey "IL ?") and a per-team
+"N injured · N HEALTHY" count. Team rows carry `ie` (1 / 0, the registry's IL token; absent when unknown). The registry refreshes every 4 hours.
+
+**Lineup log** (`scripts/lineup_log.py`, called by `scripts/live_feed_loop.sh` after every build): a Yahoo lineup locks per player at tip-off, so a status that
+changes afterwards used to erase the proof of what counted. For every player whose game turns live or final the loop appends one lock record (slot, status,
+registry IL token, IL state, flags `healthy_on_il` / `out_starter` / `star_benched`) to `<Pacific game date>.jsonl` on the **append-only `lineup-log`
+branch** (ordinary commits, never force-pushed; the live feed branch is force-pushed and keeps no history), plus one `first_tip` snapshot of every team's
+lineup per day. A player is recorded once per day and an existing line is never rewritten. Precision is the polling interval (4 minutes in game hours).
+Tank intent, AFK verdicts and points stay with the commissioner (`data/2026-27/violations.json`).
