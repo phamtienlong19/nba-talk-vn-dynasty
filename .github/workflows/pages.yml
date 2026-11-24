@@ -26,11 +26,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  # Two jobs, the documented layout: deploy-pages looked for the artifact in the same job right after the upload and twice failed with "No artifacts
+  # named github-pages were found" (2026-11-24) although the upload had succeeded; a separate job starts after the artifact is registered.
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      build_type: ${{ steps.mode.outputs.build_type }}
     steps:
       - name: Is Pages set to deploy from Actions?
         id: mode
@@ -47,7 +48,7 @@ jobs:
       - uses: actions/setup-python@v5
         if: steps.mode.outputs.build_type == 'workflow'
         with:
-          python-version: "3.x"
+          python-version: "3.12"
 
       - name: Build the page
         if: steps.mode.outputs.build_type == 'workflow'
@@ -64,7 +65,14 @@ jobs:
         with:
           path: site
 
+  deploy:
+    needs: build
+    if: needs.build.outputs.build_type == 'workflow'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy
         id: deployment
-        if: steps.mode.outputs.build_type == 'workflow'
         uses: actions/deploy-pages@v4

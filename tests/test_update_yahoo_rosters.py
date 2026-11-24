@@ -442,7 +442,9 @@ class TestWorkflowFile(unittest.TestCase):
         guard = self.yml.index("Only roster data and the generated site may have changed")
         self.assertLess(guard, self.yml.index("bot_pr_merge"))                                     # merge only after the path guard passed
         helper = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts", "bot_pr.sh"), encoding="utf-8").read()
-        self.assertIn('gh pr merge "$pr" --auto --squash --delete-branch', helper)
+        self.assertNotIn('--auto', helper.split('bot_pr_merge() {')[1])                                # --auto merges at once when no check is required
+        self.assertIn('gh pr checks "$pr" --watch', helper)                                       # waits for the checks, then merges
+        self.assertLess(helper.index('gh pr checks "$pr" --watch'), helper.index('gh pr merge "$pr" --squash'))
         self.assertIn('if [ "$BOT_PR_CHECKS" != "yes" ]', helper)                                   # no token: checks need approval, so nothing is merged
         self.assertNotIn("--admin", helper)
 

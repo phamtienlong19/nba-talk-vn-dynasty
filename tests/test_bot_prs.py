@@ -5,7 +5,7 @@ import unittest
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 WF = {n: open(os.path.join(ROOT, ".github", "workflows", f), encoding="utf-8").read() for n, f in
       (("rosters", "update-yahoo-rosters.yml"), ("standings", "update-yahoo-standings.yml"), ("metadata", "update-player-metadata.yml"))}
-HELPER = open(os.path.join(ROOT, "scripts", "bot_pr.sh"), encoding="utf-8").read()
+HELPER = "\n".join(l for l in open(os.path.join(ROOT, "scripts", "bot_pr.sh"), encoding="utf-8").read().splitlines() if not l.lstrip().startswith("#"))
 
 
 class TestBotPrs(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestBotPrs(unittest.TestCase):
             self.assertNotIn("gh pr merge", yml, name)
             self.assertNotIn("--admin", yml, name)
             self.assertNotIn("push origin main", yml, name)
-        self.assertEqual(len(re.findall(r"gh pr merge", HELPER)), 2)                    # auto-merge, then the wait-for-checks squash
+        self.assertEqual(len(re.findall(r"gh pr merge", HELPER)), 1)                    # one squash, only after the checks passed
         self.assertLess(HELPER.index('"$BOT_PR_CHECKS" != "yes"'), HELPER.index("gh pr merge"))   # no token -> return before any merge
         self.assertNotIn("--admin", HELPER)
 
