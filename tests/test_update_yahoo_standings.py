@@ -4,6 +4,8 @@ Fixtures (tests/fixtures/yahoo/): `yahoo_standings_2026-10-26_real_sanitized.htm
 Yahoo's update time (scripts, ads, cookies and unrelated page material removed by the owner); `NBA_Talk_Dynasty_Standings_2026-10-26.json`
 is the normalized capture of the same page. Every malformed variant below is a MUTATION of that real HTML, made in the test, and is
 named as such. Expectations are keyed on Yahoo team ids, names and ranks; nothing pins today's published standings."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import copy
 import hashlib
 import io
@@ -563,7 +565,7 @@ class TestPublishedOrder(Base):
             self.assertIsNone(self.view(d))
 
     def test_the_embedded_page_data_is_the_published_view_and_the_ui_is_intact(self):
-        html = read(os.path.join(os.path.dirname(__file__), "..", "index.html"))
+        html = read(_site.INDEX)
         data = json.loads(re.search(r'id="league-data">(.*?)</script>', html, re.S).group(1).replace("<\\/", "</"))
         self.assertEqual(data["standings"], bls.standings_view(ss.load_season(ls.load_inputs())))
         self.assertIn("function renderStandings()", html)

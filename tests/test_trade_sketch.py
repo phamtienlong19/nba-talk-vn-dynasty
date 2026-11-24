@@ -1,4 +1,6 @@
 """The Trade Machine starts from the page's league and stacks "your sketch" trades: trade 2 is checked against the league after trade 1."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import html as html_lib
 import json
 import os
@@ -13,7 +15,7 @@ sys.path.insert(0, HERE)
 import test_scenario_rendering as tsr  # noqa: E402
 from _drive import drive_page  # noqa: E402
 
-INDEX = os.path.join(HERE, "..", "index.html")
+INDEX = _site.INDEX
 PLAYER, FROM, TO = "478.p.5432", None, "franchise-01"
 FIND = """
   var D=NBA_NAV.D,ts=D.teams.map(function(t){return t.id;}),found=null;

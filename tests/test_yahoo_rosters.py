@@ -4,6 +4,8 @@ counted payroll = the nine highest frozen salaries, IL included; IL is a lineup 
 
 The HTML fixtures are trimmed copies of real public Yahoo team pages fetched 2026-10-19; the reference observation is
 the full 16-team capture taken the same day. No test touches the network."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import copy
 import hashlib
 import io
@@ -440,7 +442,7 @@ class TestTeamNames(unittest.TestCase):
 
     def test_page_labels_follow_the_current_names(self):
         import build_league_state as bls
-        with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             html = f.read()
         i = ls.load_inputs()
         self.assertEqual(bls.sync_team_names(html, i), html)                     # already in sync (idempotent)
@@ -606,7 +608,7 @@ class TestRosterChecks(unittest.TestCase):
             self.assertEqual(ss.snapshot_owner(snap)["478.p.5464"], THINH)          # status never moves ownership
 
     def test_cards_show_the_checks_quietly(self):
-        with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             html = f.read()
         self.assertIn('class:"tp-l "', html)                                         # each limit is a sentence in the team's detail panel
         self.assertIn('"Roster limits"', html)
@@ -753,7 +755,7 @@ class TestInjuredList(unittest.TestCase):
             self.assertEqual((row["s"], view["il"]), ("IL", 1))              # what the team card renders as an IL tag
             rec = yr.reconcile(si, reference(), td.dir)
             self.assertIn(("Nikola Jokić", "IL", "BN"), {(x["player"], x["from"], x["to"]) for x in rec["diff"]["ilMoves"]})
-        with open(os.path.join(os.path.dirname(__file__), "..", "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             html = f.read()
         self.assertIn('sc=il?h("span",{class:"st-chip il"', html)   # status (or IL) chip left of the name
         self.assertIn('h("div",{class:"il-head"}', html)

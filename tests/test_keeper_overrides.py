@@ -1,3 +1,5 @@
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import os
 import re
 import sys
@@ -36,7 +38,7 @@ class TestExplicitKeeperOverrides(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        with open(os.path.join(REPO_ROOT, "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             cls.html = f.read()
         cls.pool = _pool(predraft_index_html())  # pre-draft board: drafted players are excluded from the published one
 

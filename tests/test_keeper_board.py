@@ -1,4 +1,6 @@
 """Keeper board (What-If KEEPERS view): the stored rank -> salary table and the page behaviour, both derived from data."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import html as html_lib
 import json
 import os
@@ -19,7 +21,7 @@ from _drive import drive_page  # noqa: E402
 ROOT = os.path.join(HERE, "..")
 CFG = os.path.join(ROOT, "config", "keeper_salary_by_rank.json")
 PLAYERS = os.path.join(ROOT, "data", "yahoo", "players_normalized.json")
-INDEX = os.path.join(ROOT, "index.html")
+INDEX = _site.INDEX
 
 
 def load(path):

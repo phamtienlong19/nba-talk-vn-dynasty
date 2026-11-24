@@ -16,7 +16,7 @@ class TestPlayerMetadataWorkflow(unittest.TestCase):
 
     def test_it_refreshes_then_regenerates_validates_and_opens_a_pr_it_never_merges(self):
         self.assertIn("scripts/refresh_player_metadata.py --write", YML)
-        for step in ("sync-ledger", "build_league_state.py embed", "what_if.py embed", "live_page.py embed", "./validate.sh", "unittest discover -s tests"):
+        for step in ("refresh_card_positions.py", "./validate.sh", "unittest discover -s tests"):
             self.assertIn(step, YML)
         self.assertIn("gh pr create --base main", YML)
         steps = YML.split("jobs:")[1].lower()                                  # the steps, not the comments that say there is no sign-in

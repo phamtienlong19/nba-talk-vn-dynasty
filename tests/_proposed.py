@@ -3,6 +3,8 @@
 Production data now has all trades OFFICIAL (replayed over the keeper freeze). Scenario-engine tests still need
 the original selectable-trade behaviour (chains, dependencies, toggling), so they run over this copy.
 """
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import copy
 import os
 import sys
@@ -28,7 +30,7 @@ def predraft_index_html(path=None):
     The published board now excludes drafted players; regression tests about keeper/cut/ranking logic assert on the
     pre-draft board, which is the same pipeline minus the drafted-exclusion."""
     import build_fa_draft_pool as pool
-    path = path or os.path.join(os.path.dirname(__file__), "..", "index.html")
+    path = path or _site.INDEX
     with open(path, encoding="utf-8") as f:
         html = f.read()
     yahoo = os.path.join(os.path.dirname(__file__), "..", "data", "yahoo", "players_normalized.json")

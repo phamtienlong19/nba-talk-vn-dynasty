@@ -1,3 +1,5 @@
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import json
 import os
 import re
@@ -74,7 +76,7 @@ class TestKeeperLockWorkflow(unittest.TestCase):
             self.assertTrue(ls.verify_lock(after))
 
     def test_baseline_rebuild_is_deterministic(self):
-        with open(os.path.join(REPO_ROOT, "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             html = f.read()
         r = ls._load(ls.REGISTRY_PATH)
         fr = ls._load(os.path.join(ls.DATA_DIR, "franchises.json"))["franchises"]
@@ -94,7 +96,7 @@ class TestPageScript(unittest.TestCase):
         node = shutil.which("node")
         if not node:
             self.skipTest("node not available")
-        with open(os.path.join(REPO_ROOT, "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             js = re.search(r'<script id="league-app">(.*?)</script>', f.read(), re.S).group(1)
         with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as t:
             t.write(js)

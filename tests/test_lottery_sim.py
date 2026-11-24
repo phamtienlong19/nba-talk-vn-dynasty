@@ -1,4 +1,6 @@
 """Lottery simulator in index.html: the page's own draw functions run under node against the embedded provisional data."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import json
 import os
 import re
@@ -8,7 +10,7 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-INDEX = os.path.join(os.path.dirname(__file__), "..", "index.html")
+INDEX = _site.INDEX
 HTML = open(INDEX, encoding="utf-8").read()
 DATA = json.loads(re.search(r'id="league-data">(.*?)</script>', HTML, re.S).group(1).replace("<\\/", "</"))
 FUNCS = re.search(r"(function lotPick\(.*?)function renderLottery\(\)", HTML, re.S).group(1)

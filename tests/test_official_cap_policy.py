@@ -1,3 +1,5 @@
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import json
 import os
 import re
@@ -59,7 +61,7 @@ class TestOfficialCapPolicy(unittest.TestCase):
 
 class TestOfficialBandEverywhereCurrent(unittest.TestCase):
     def test_board_pills_and_denominators_show_131_178(self):
-        with open(os.path.join(REPO_ROOT, "index.html"), encoding="utf-8") as f:
+        with open(_site.INDEX, encoding="utf-8") as f:
             html = f.read()
         self.assertEqual(set(re.findall(r'class="pill-v">(\d+)–(\d+)</span>', html)), {("131", "178")})
         self.assertEqual(set(re.findall(r'<span>/(\d+)</span>', html)), {"178"})

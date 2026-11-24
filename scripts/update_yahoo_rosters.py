@@ -335,10 +335,7 @@ def run(cfg, fetcher, out_dir, data_dir=ss.DATA_DIR, apply=False, regenerate=Fal
         changed = [k for k in before if before[k] != after.get(k)]
         if changed or set(after) - set(before) != {os.path.join("rosters", rel)}:
             raise CheckFailed(f"protected canonical data changed: {changed}")
-        if regenerate:
-            for cmd in (["build_league_state.py", "sync-ledger"], ["build_league_state.py", "embed"], ["what_if.py", "embed"], ["live_page.py", "embed"]):
-                subprocess.run([sys.executable, os.path.join(ROOT, "scripts", cmd[0])] + cmd[1:], check=True, cwd=ROOT, stdout=subprocess.DEVNULL)
-        report += f"\nApplied: `data/2026-27/rosters/{rel}` ({snap['snapshotId']}); site regenerated: {bool(regenerate)}.\n"
+        report += f"\nApplied: `data/2026-27/rosters/{rel}` ({snap['snapshotId']}); the page is rebuilt from the data at deploy (scripts/build_site.py).\n"
         result["snapshot"] = snap["snapshotId"]
     return finish(outcome, report, 0)
 

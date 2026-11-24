@@ -1,4 +1,6 @@
 """The LIVE tab in headless Chrome: the official fallback, a live feed handed in, staleness, the Teams-tab live order and the exports."""
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import _site  # noqa: E402  (the built page: index.html + the generated data blocks)
 import datetime
 import html as html_lib
 import json
@@ -16,7 +18,7 @@ import test_live_feed as tlf  # noqa: E402
 import test_scenario_rendering as tsr  # noqa: E402
 from _drive import drive_page  # noqa: E402
 
-INDEX = os.path.join(HERE, "..", "index.html")
+INDEX = _site.INDEX
 
 
 def contrast(fg, bg):
