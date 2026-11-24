@@ -1,0 +1,49 @@
+name: Nightly tests
+
+# The whole suite on main once a day. The data bots refresh rosters / standings / metadata many times a day, and a test that depends on today's data
+# can start failing without any code change (2026-11-23: a trade-checker test picked a provisional player). This finds it the next night and opens
+# an issue instead of waiting for a human to notice.
+on:
+  schedule:
+    - cron: "40 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python3 -m pip install -r requirements.txt
+      - name: Validate and run every test
+        run: |
+          ./validate.sh
+          python3 -m unittest discover -s tests 2>&1 | tee test-output.txt
+          exit "${PIPESTATUS[0]}"
+      - name: Open or refresh the "tests red" issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create tests-red --color B60205 --description "Nightly full test run failed on main" 2>/dev/null || true
+          {
+            echo "The nightly full test run on main failed ([run $GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID))."
+            echo
+            echo '```'
+            grep -E "^(FAIL|ERROR):|^Ran |^FAILED" test-output.txt | head -40 || true
+            echo '```'
+          } > issue-body.md
+          n=$(gh issue list --label tests-red --state open --json number --jq '.[0].number')
+          if [ -n "$n" ]; then gh issue edit "$n" --body-file issue-body.md; else gh issue create --title "Nightly tests are failing on main" --label tests-red --body-file issue-body.md; fi
+      - name: Close the issue once it is green again
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --label tests-red --state open --json number --jq '.[].number'); do gh issue close "$n" --comment "Green again on $GITHUB_SHA."; done
