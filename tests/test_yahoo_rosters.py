@@ -681,6 +681,12 @@ class TestGovernance(unittest.TestCase):
                 self.assertIn("workflow_dispatch:", head)
                 for trigger in ("push:", "pull_request:", "pull_request_target:"):
                     self.assertNotIn("\n  " + trigger, head, trigger)
+            elif wf == "update-roster-feed.yml":                         # the runtime roster feed (owner decision 2026-11-24): anonymous read-only, display only
+                head = text.split("jobs:")[0]
+                for trigger in ("pull_request:", "pull_request_target:"):
+                    self.assertNotIn("\n  " + trigger, head, trigger)
+                self.assertNotIn("secrets.", text)                         # no credential of any kind
+                self.assertNotIn("data/", text.split("jobs:")[1])          # it never writes canonical data (it publishes to its own branch)
             else:
                 self.assertNotIn("yahoo_rosters", text, wf)               # no scheduled or CI fetch anywhere else
 

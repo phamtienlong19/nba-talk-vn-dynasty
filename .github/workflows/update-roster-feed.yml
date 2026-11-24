@@ -1,0 +1,49 @@
+name: Update Roster Feed
+
+# Yahoo's CURRENT rosters (slots, injury statuses, adds, drops, trades) every ~5 minutes, as one small file the page overlays on its roster views.
+# Read-only anonymous GETs of the 16 public team pages (the same parser as the audited roster import). It writes ONE file, rosters.json, to the
+# `roster-data` branch as a single orphan commit (force-pushed, so that branch never grows). It never pushes to main, never opens a PR and never
+# touches data/: the feed is for the eye, and a roster change becomes OFFICIAL only through the audited PR of update-yahoo-rosters.yml.
+# Why a feed at all: that path (cron -> PR -> checks -> merge -> deploy) takes 15-60 minutes and hours when GitHub drops a cron.
+# Like update-live-data.yml it queues its own successor first (GitHub drops most cron triggers); the cron is only the backstop.
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/update-roster-feed.yml"
+      - "scripts/roster_feed_loop.sh"
+      - "scripts/build_roster_feed.py"
+      - "scripts/yahoo_rosters.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: roster-feed
+  cancel-in-progress: false
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 125
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Queue the next run (it starts when this one ends; the cron is only the backstop)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update-roster-feed.yml --ref "${GITHUB_REF_NAME}" || echo "could not queue the next run (the cron will)"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build and publish the feed every 5 minutes (roster-data branch only; main is untouched)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash scripts/roster_feed_loop.sh 6900 300

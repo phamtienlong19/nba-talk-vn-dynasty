@@ -731,7 +731,7 @@ details.avail>summary::-webkit-details-marker{display:none}
 .cmp td.st-ceiling{background:#ffe0bd;color:#9c4300}.cmp td.st-over{background:#ffd9d6;color:#8c1d17}.cmp td.st-range{color:#5a6a8c}
 .in-tag{margin-left:6px;font:800 8.5px/1 "Inter",Arial,sans-serif;letter-spacing:.07em;background:#fff;border:1px solid #a9d6bd;color:#17734c;border-radius:4px;padding:1px 4px;vertical-align:1px}
 .roster-verified[data-age]{border-color:#f0cf8a;background:#fff8e6;color:#8a5a00}.roster-verified[data-age]::after{content:" · " attr(data-age);font-weight:800}.roster-verified.age-bad{border-color:#e6a9a4;background:#fdf1f0;color:#a62f29}
-.meta-pill.roster-verified,#lab-keeper-status{white-space:normal;text-align:center;line-height:1.35}
+.rf-pend{margin:8px 0 10px;padding:8px 12px;border:1px solid #cfd8e3;border-left:4px solid #6a58d6;border-radius:8px;background:#f7f6ff;font:12px/1.4 Inter,Arial,sans-serif;color:#2c2f4a}.rf-pend summary{cursor:pointer}.rf-pend ul{margin:6px 0 4px 18px;padding:0}.rf-pend .rf-note{font-size:11px;color:#667}.meta-pill.roster-verified,#lab-keeper-status{white-space:normal;text-align:center;line-height:1.35}
 /* not counted toward the cap: nothing is faded (a fade also dims the status chips); the salary sits in a dashed "ghost" outline */
 .player-row.nc .pname{color:#59627a}
 .player-row.nc.rookie-row .pname{color:#7a52a8}
@@ -3970,6 +3970,8 @@ function renderSeasonMeta(){
  var sn=D.season.snapshot,d=(sn.verifiedAt||"").slice(0,10),tx=D.season.appliedAfterSnapshot.length;
  var txt="✓ ROSTERS "+shortDate(d)+(tx?" · +"+tx+" TRADE"+(tx>1?"S":""):"");
  var hrs=Date.parse(sn.verifiedAt)?(Date.now()-Date.parse(sn.verifiedAt))/36e5:0,age=hrs>=48?Math.floor(hrs/24)+"D OLD":hrs>=12?Math.floor(hrs)+"H OLD":"";  /* rosters refresh every few hours: say so when they have not */
+ var fa=typeof rfAgeMin==="function"?rfAgeMin():null,fresh=fa!==null&&fa<=15,live=fa!==null&&fa<=180;  /* the roster feed: Yahoo's rosters as of a few minutes ago */
+ if(live){txt="✓ ROSTERS "+rfClock(rfOldest(RF.feed))+(fa>=1?" · "+(fa<60?fa+" MIN":Math.floor(fa/60)+" H")+" AGO":" · NOW")+(rfCount()?" · "+rfCount()+" UNVERIFIED":"")+(tx?" · +"+tx+" TRADE"+(tx>1?"S":""):"");age=fresh?"":(fa<60?fa+" MIN OLD":Math.floor(fa/60)+"H OLD");hrs=fresh?0:fa/60;}
  document.querySelectorAll(".roster-verified").forEach(function(e){e.textContent=txt;e.title=sn.source+(age?" · verified "+age.toLowerCase().replace(" old"," ago"):"");
   if(age){e.setAttribute("data-age",age);e.classList.toggle("age-bad",hrs>=48);}else{e.removeAttribute("data-age");e.classList.remove("age-bad");}});
  var ks=document.getElementById("lab-keeper-status");if(ks){ks.textContent=txt;ks.title=sn.source;}
@@ -4001,7 +4003,55 @@ function renderAvail(){
  f.slice(0,60).forEach(function(r){body.appendChild(h("tr",null,[h("td",{class:"n",text:r[6]?String(r[6]):"—"}),h("td",{class:"p",text:r[1]}),h("td",{text:r[2]||""}),h("td",{class:"hide-m",text:r[3]||""}),h("td",{class:"n",text:String(r[4])}),h("td",{class:"n",text:r[5]?"Y! "+r[5]:"—"}),h("td",null,[h("span",{class:"chip",text:r[7]})])]));});
  document.getElementById("avail-more").textContent=f.length>60?"Showing 60 of "+f.length+" — keep typing to narrow.":f.length+" match"+(f.length===1?"":"es");
 }
-function renderAll(){if(window.NBA_WHATIF)window.NBA_WHATIF.setActive(S.mode==="WHATIF");renderMode();renderSeasonMeta();renderWhatsNew();renderFindings();renderTrades();renderDone();renderFolds();renderCompare();renderPicks();renderTeamCards();renderStandings();renderLottery();renderCapPage();if(typeof renderCheck==="function"&&CHK.teams.length)renderCheck();paintMe();syncUrl();monoDigits(document.body);if(typeof wirePlayers==="function")wirePlayers();}
+/* ---------- roster feed: Yahoo's CURRENT rosters, published every few minutes (display only; the verified snapshot above stays the record) ---------- */
+/* Overlays slots and statuses on players already on a team and lists adds / drops / trades Yahoo shows that the verified rosters do not yet have.
+   It never changes who owns whom, the cap, the keepers or the trade checker: those keep using the verified rosters until the audited PR lands. */
+var RF={o:{},url:"https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/roster-data/rosters.json",feed:null,pend:null,sig:"",t:0};
+function rfNm(n){return String(n==null?"":n).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/gi,"").toLowerCase();}
+function rfProv(k){return String(k).indexOf("provisional:")===0;}
+function rfOk(f){return !!(f&&f.schema==="roster-feed/1"&&f.teams&&typeof f.teams==="object"&&Date.parse(f.asOf));}
+function rfOldest(f){var m=Date.parse(f.asOf);Object.keys(f.teams).forEach(function(id){var a=Date.parse(f.teams[id].asOf);if(a&&a<m)m=a;});return m;}
+function rfAgeMin(){return RF.feed?Math.max(0,Math.floor((Date.now()-rfOldest(RF.feed))/6e4)):null;}
+function rfClock(ms){var d=new Date(ms);return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);}
+function rfApply(f){
+ var pend={add:[],drop:[],moved:[]},off=D.scenarios[""];
+ Object.keys(D.scenarios).forEach(function(sk){var sc=D.scenarios[sk];Object.keys(sc.teams).forEach(function(id){var ft=f.teams[id];if(!ft)return;var by={},bn={};ft.players.forEach(function(p){by[p.k]=p;bn[rfNm(p.n)]=p;});
+  sc.teams[id].roster.forEach(function(r){var ok=sk+"|"+id+"|"+r.k;if(!RF.o[ok])RF.o[ok]={s:r.s,st:r.st};var p=by[r.k]||(rfProv(r.k)?bn[rfNm(r.n)]:null),o=RF.o[ok];   /* originals kept on the side: the overlay is reversible and the rows keep their shape */
+   if(p){r.s=p.s;if(p.st)r.st=p.st;else delete r.st;}else{r.s=o.s;if(o.st)r.st=o.st;else delete r.st;}});});});
+ var gone={},came={};
+ Object.keys(off.teams).forEach(function(id){var ft=f.teams[id];if(!ft)return;var have={},now={};off.teams[id].roster.forEach(function(r){have[r.k]=r;});
+  var nmOff={};off.teams[id].roster.forEach(function(r){if(rfProv(r.k))nmOff[rfNm(r.n)]=r;});   /* a provisional identity (not yet linked to Yahoo's id) is the same player */
+  ft.players.forEach(function(p){now[p.k]=1;if(!have[p.k]&&!nmOff[rfNm(p.n)])came[p.k]={t:id,k:p.k,n:p.n,s:p.s};});
+  var nmNow={};ft.players.forEach(function(p){nmNow[rfNm(p.n)]=1;});
+  off.teams[id].roster.forEach(function(r){if(!now[r.k]&&!(rfProv(r.k)&&nmNow[rfNm(r.n)]))gone[r.k]={t:id,k:r.k,n:r.n};});});
+ Object.keys(came).forEach(function(k){if(gone[k]){pend.moved.push({k:k,n:came[k].n,from:gone[k].t,to:came[k].t});delete gone[k];}else pend.add.push(came[k]);});
+ Object.keys(gone).forEach(function(k){if(!came[k])pend.drop.push(gone[k]);});
+ return pend;}
+function rfCount(){var p=RF.pend;return p?p.add.length+p.drop.length+p.moved.length:0;}
+function rfRenderPending(){
+ var page=document.getElementById("rosters-a");if(!page)return;var old=page.querySelector(".rf-pend");if(old)old.remove();
+ var p=RF.pend,n=rfCount();if(!n)return;
+ var sh=function(id){var t=D.teams.filter(function(x){return x.id===id;})[0];return t?t.short:id;};
+ var box=h("details",{class:"rf-pend"}),ul=h("ul");
+ box.appendChild(h("summary",null,[h("b",{text:n+" move"+(n>1?"s":"")+" on Yahoo not yet in the verified rosters"}),h("span",{class:"rf-as",text:" · as of "+rfClock(rfOldest(RF.feed))})]));
+ p.moved.forEach(function(m){ul.appendChild(h("li",{text:m.n+": "+sh(m.from)+" → "+sh(m.to)}));});
+ p.add.forEach(function(a){ul.appendChild(h("li",{text:"+ "+a.n+" → "+sh(a.t)+(a.s?" ("+a.s+")":"")}));});
+ p.drop.forEach(function(d){ul.appendChild(h("li",{text:"− "+d.n+" (left "+sh(d.t)+")"}));});
+ box.appendChild(ul);box.appendChild(h("div",{class:"rf-note",text:"Slots and statuses above already follow Yahoo. Cap, keepers and the trade checker use the verified rosters until these are confirmed."}));
+ var t=page.querySelector(".title");t.parentNode.insertBefore(box,t.nextSibling);}
+function rfSet(f){
+ if(!rfOk(f))return false;RF.feed=f;RF.t=Date.now();
+ var sig=f.digest||JSON.stringify(f.teams);
+ if(sig!==RF.sig){RF.sig=sig;RF.pend=rfApply(f);renderAll();}else renderSeasonMeta();
+ return true;}
+function rfLoad(){
+ if(location.protocol!=="https:"&&location.protocol!=="http:")return;   /* a saved copy or a test page opened from disk never reaches for the network */
+ var c=window.AbortController?new AbortController():null,to=setTimeout(function(){if(c)c.abort();},8000);
+ fetch(RF.url+"?t="+Math.floor(Date.now()/6e4),{cache:"no-store",signal:c?c.signal:undefined}).then(function(r){return r.ok?r.json():Promise.reject();}).then(function(f){clearTimeout(to);rfSet(f);}).catch(function(){clearTimeout(to);});}
+window.NBA_ROSTERS={set:rfSet,feed:function(){return RF.feed;},pending:function(){return RF.pend;},ageMin:rfAgeMin};
+setInterval(function(){if(!document.hidden)rfLoad();},120000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&(!RF.t||Date.now()-RF.t>6e4))rfLoad();});
+function renderAll(){if(window.NBA_WHATIF)window.NBA_WHATIF.setActive(S.mode==="WHATIF");renderMode();renderSeasonMeta();renderWhatsNew();rfRenderPending();renderFindings();renderTrades();renderDone();renderFolds();renderCompare();renderPicks();renderTeamCards();renderStandings();renderLottery();renderCapPage();if(typeof renderCheck==="function"&&CHK.teams.length)renderCheck();paintMe();syncUrl();monoDigits(document.body);if(typeof wirePlayers==="function")wirePlayers();}
 /* ---------- standings: once the season starts the team pages run worst record first (toggle back to team #) ---------- */
 function ordinal(n){var s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
 /* ---- lottery simulator: PROVISIONAL, display only. Tickets / draw order / eligibility / bonus come from D.lottery (config/draft_lottery_rules.json). */
@@ -5352,7 +5402,7 @@ function init(){
   else if(location.hash==="#keepers"&&window.NBA_WHATIF&&window.NBA_WHATIF.openKeepers())S.mode="WHATIF";
   if(qs.get("order")==="team"||qs.get("order")==="live")S.order=qs.get("order");
   if(qs.get("mode")==="scenario"){S.mode="SCENARIO";(qs.get("trades")||"").split(",").forEach(function(k){if(TR[k])S.sel[k]=true;});}
- initChecker(qs);renderAvail();renderAll();
+ initChecker(qs);renderAvail();renderAll();rfLoad();
  var want=qs.get("player")||(/^#player\//.test(location.hash)?location.hash.slice(8):"");if(want)setTimeout(function(){plSheet(NBA_PLAYER.keyOf(want));},200);
 }
 capturePristine();

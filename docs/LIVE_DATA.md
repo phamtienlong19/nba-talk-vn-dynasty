@@ -168,3 +168,17 @@ GitHub's cron is best-effort and was dropping most of this workflow's triggers: 
 30% of the time. Each run now queues its own successor with `workflow_dispatch` as its first step (it waits in the `update-live-data`
 concurrency group until the current run ends), so the loop no longer depends on the cron; the cron stays as a backstop. The roster workflow
 has its own concurrency group and does not block or delay the feed.
+
+## Roster feed (`roster-data/rosters.json`)
+
+Yahoo's CURRENT rosters (slot, injury status, NBA team per player) for the 16 teams, rebuilt about every 5 minutes by
+`update-roster-feed.yml` (`scripts/build_roster_feed.py`, `scripts/roster_feed_loop.sh`) and force-pushed as one orphan commit to the `roster-data`
+branch, like the live feed. Anonymous read-only GETs, the same parser as the audited import. Schema `roster-feed/1`: `asOf`, `digest`, `complete`,
+`teams{franchiseId: {teamId, name, asOf, players[{k, n, s, st?, t?}]}}`. A team whose page failed keeps its previous entry with its own older `asOf`;
+the page reports the oldest team's time as the feed's age.
+
+The page (`NBA_ROSTERS` in `index.html`) overlays slots and statuses on players already on a team and lists adds / drops / trades that Yahoo shows
+and the verified rosters do not yet have ("N moves on Yahoo not yet in the verified rosters"). A provisional identity counts as the same player as his
+Yahoo id. It never changes ownership, cap, keepers or the trade checker: a roster change becomes official only through the audited PR
+(`update-yahoo-rosters.yml`). The roster label shows "ROSTERS hh:mm · N MIN AGO", warns when the feed is old, and falls back to the verified
+snapshot's date when it is more than 3 hours old or cannot be fetched. A page opened from disk never fetches it.
