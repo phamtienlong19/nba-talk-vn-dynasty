@@ -1,5 +1,5 @@
 {
- "capturedAt": "2026-11-24T12:40:52Z",
+ "capturedAt": "2026-11-24T20:15:51Z",
  "source": "Yahoo public draft-analysis endpoint (config/yahoo_source.json registryUrl)",
  "note": "Yahoo player status as observed for the 600-player registry (O, Q, P, D, DTD, INJ, OFS, NA ...); healthy players have no entry. Display / evidence only. Rostered players' status on the cards comes from the verified roster snapshot.",
  "statuses": {
@@ -25,7 +25,6 @@
   "478.p.10281": "NA",
   "478.p.10284": "NA",
   "478.p.10301": "O",
-  "478.p.10305": "O",
   "478.p.10307": "NA",
   "478.p.10317": "OFS",
   "478.p.10323": "NA",
@@ -141,6 +140,7 @@
   "478.p.6315": "NA",
   "478.p.6355": "O",
   "478.p.6399": "NA",
+  "478.p.6402": "Q",
   "478.p.6404": "O",
   "478.p.6406": "Q",
   "478.p.6407": "NA",
@@ -150,6 +150,7 @@
   "478.p.6512": "P",
   "478.p.6514": "O",
   "478.p.6556": "O",
+  "478.p.6560": "Q",
   "478.p.6569": "NA",
   "478.p.6574": "NA",
   "478.p.6578": "Q",
