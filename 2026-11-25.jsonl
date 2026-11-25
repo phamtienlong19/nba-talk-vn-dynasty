@@ -88,3 +88,5 @@
 {"kind":"lock","date":"2026-11-25","capturedAt":"2026-11-25T22:13:16Z","team":"franchise-07","teamName":"Maxfixe","k":"478.p.5294","n":"Joel Embiid","slot":"BN","st":"O","il":null,"game":"Q1 11:41, 0-0 vs MIA","gs":"live","pos":["C"],"flags":[],"pre":{"st":"O","at":"2026-11-25T22:12:47Z"},"ie":0}
 {"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T22:41:15Z","p":"5324","n":"Zach LaVine","team":"franchise-02","slot":"SF","st":"O","g":"10:00 pm @ GSW","pos":["PG","SG","SF"]}
 {"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T23:01:15Z","p":"6044","n":"Jalen Brunson","team":"franchise-06","slot":"PG","st":null,"g":"7:30 pm vs CLE","pos":["PG"]}
+{"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T23:13:16Z","p":"5432","n":"Karl-Anthony Towns","team":"franchise-04","slot":"PF","st":null,"g":"7:30 pm vs CLE","pos":["PF","C"]}
+{"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T23:13:16Z","p":"5843","n":"Josh Hart","team":"franchise-06","slot":"FC","st":null,"g":"7:30 pm vs CLE","pos":["SG","SF"]}
