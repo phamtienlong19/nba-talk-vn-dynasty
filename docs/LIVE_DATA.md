@@ -120,12 +120,23 @@ The same workflow (`update-player-stats.yml`, daily 09:40 UTC) also runs `script
 it reads each team's page for that day (`yahoo_teamday`, `?date=`; one request per team per day, 1.5 s apart) and keeps one compact line per
 player who played: date, slot, opponent, minutes, FGM/A, FTM/A, 3PM, PTS, REB, AST, STL, BLK, TO and the Yahoo team id. The first run walks
 the whole season (about 10 minutes, at most 45 days a run); after that only new days are fetched. A day that fails is skipped and retried
-next run, never invented; the previous file stays unless something new was captured. Only rostered players appear (team pages), so a free
-agent has no log. Minutes are kept as Yahoo shows them (some pages give 36:07, others 36). The file goes to the `stats-data` branch with
-`player_stats.json` as one orphan commit; it never touches main or `data/`.
+next run, never invented; the previous file stays unless something new was captured. Minutes are kept as Yahoo shows them (some pages give 36:07,
+others 36). The files go to the `stats-data` branch as one orphan commit; it never touches main or `data/`.
 
-The player card shows the last 10 games as plain lines (`13-7-1-1-1` = PTS-REB-AST-STL-BLK, `5/7 FG`, `2 3PM`, `1/2 FT`, `3 TO`), newest
-first, with "Show all"; the feed's current day is added on top until the file has it. No totals anywhere. Display data only.
+**Full-season coverage (`scripts/backfill_player_log.py`).** Team pages only know the players a team held that day. After the team-page step the
+workflow reads Yahoo's public player list for each closed day (`/players?status=ALL&stat1=S_D&date=YYYY-MM-DD`, anonymous, about 32 requests a
+day), keeps every player's line in `player_days.json`, and adds the missing games of everyone on a roster in the current snapshot (or already in the
+log) to `player_log.json`, with slot `null` and team 0. A player picked up later gets the whole season from the kept file, with no new requests.
+Each fetched day must match the team-page lines of that day (90% of 10 or more shared lines; minutes aside) or it is refused, and a page that is not
+a one-day view is refused. A run fetches at most 20 days, so the first backfill takes two or three runs. A team-page line replaces a list line of
+the same day.
+
+A line is a game actually played: a team page's 0-minute row for a player who sat out is not kept (lines like that stored earlier are dropped on the next
+run, and the page hides them).
+
+The player card shows the last 10 games, one line each, under `DATE · OPP · MIN · P-R-A-S-B · FG · 3PM · FT · TO` (`13-7-1-1-1` =
+PTS-REB-AST-STL-BLK), newest first, with "Show all"; bench and IL days are dimmed with the slot as a tag; the feed's current day is added on top
+until the file has it. No totals anywhere. Display data only.
 
 ## Roster changes and departed players (live feed `moves`)
 

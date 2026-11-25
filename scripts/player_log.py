@@ -5,6 +5,9 @@ touches rosters, salaries, the Trade Lab, the draft or the ledger (docs/LIVE_DAT
 
     {"capturedAt": ..., "days": ["2026-11-02", ...],                       # the days already captured
      "p": {"6167": [[date, slot, opp, min, fgm, fga, ftm, fta, tpm, pts, reb, ast, st, blk, to, yahooTeamId], ...]}}   # newest last
+
+A team page only knows the players a fantasy team held that day. The other games of a rostered player come from Yahoo's one-day player list
+(scripts/backfill_player_log.py) with slot null and team 0; a team-page line for the same day replaces such a line.
 """
 from __future__ import annotations
 
@@ -21,8 +24,26 @@ def opponent(game):
     return m.group(1).strip() if m else None
 
 
+NO_TIME = (None, "", "0", "0:00")          # a team page prints 0 minutes for a player who sat out: not a game played
+
+
 def played(r) -> bool:
-    return bool(r.get("min")) or bool(r.get("fg") and r["fg"][1])
+    line = r.get("line") or {}
+    return r.get("min") not in NO_TIME or bool(r.get("fg") and r["fg"][1]) or bool(r.get("ft") and r["ft"][1]) \
+        or any(line.get(k) for k in ("tpm", "pts", "reb", "ast", "st", "blk", "to"))
+
+
+def prune(doc) -> int:
+    """Drop stored lines of games not played (kept by an earlier version: no minutes and nothing recorded). -> lines dropped."""
+    n = 0
+    for pid, rows in list(doc["p"].items()):
+        keep = [r for r in rows if r[3] not in NO_TIME or any(r[4:15])]
+        n += len(rows) - len(keep)
+        if keep:
+            doc["p"][pid] = keep
+        else:
+            del doc["p"][pid]
+    return n
 
 
 def row_for(date, team_id, r):
@@ -41,10 +62,43 @@ def add_day(doc, date, rows_by_team):
         for r in rows:
             if r.get("playerId") is None or not played(r):
                 continue
-            doc["p"].setdefault(str(r["playerId"]), []).append(row_for(date, tid, r))
+            have = doc["p"].setdefault(str(r["playerId"]), [])
+            have[:] = [x for x in have if not (x[0] == date and x[1] is None)]     # the team page knows his lineup slot: it replaces a list line
+            have.append(row_for(date, tid, r))
+            have.sort(key=lambda x: x[0])
             n += 1
     doc["days"] = sorted(doc["days"] + [date])
     return n
+
+
+def fill(doc, full, ids) -> int:
+    """Add to `doc` the games of the players `ids` that `full` (every player, from the one-day list) has and `doc` lacks. -> lines added."""
+    n = 0
+    for pid in ids:
+        rows = full["p"].get(str(pid))
+        if not rows:
+            continue
+        have = doc["p"].setdefault(str(pid), [])
+        dates = {x[0] for x in have}
+        new = [r for r in rows if r[0] not in dates]
+        if new:
+            have.extend(new)
+            have.sort(key=lambda x: x[0])
+            n += len(new)
+    return n
+
+
+def agreement(doc, date, rows) -> tuple:
+    """(lines compared, lines equal) between the team-page lines `doc` holds for a day and the one-day list's rows for it. Minutes are left out
+    (the two pages round them differently)."""
+    mine = {str(r["playerId"]): row_for(date, 0, r) for r in rows if r.get("playerId") is not None and played(r)}
+    total = same = 0
+    for pid, have in doc["p"].items():
+        for x in have:
+            if x[0] == date and x[1] is not None and pid in mine:
+                total += 1
+                same += x[4:15] == mine[pid][4:15]
+    return total, same
 
 
 def empty():
