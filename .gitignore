@@ -13,3 +13,7 @@ __pycache__/
 # workflow run output (reports, observations): uploaded as artifacts, never committed
 /artifacts/
 site/
+
+# local test-run bookkeeping (scripts/run_tests.py)
+ai_exchange/.last_test_run
+ai_exchange/.test_timings.json

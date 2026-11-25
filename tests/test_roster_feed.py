@@ -91,8 +91,8 @@ class TestBuilder(unittest.TestCase):
 
     def test_roster_prs_skip_the_browser_suite_but_everything_else_still_runs_it(self):
         v = open(os.path.join(ROOT, ".github", "workflows", "validate.yml"), encoding="utf-8").read()
-        self.assertIn("if: ${{ !startsWith(github.head_ref, 'automation/yahoo-rosters-') }}\n        run: python3 -m unittest discover -s tests -v", v)
-        self.assertIn("startsWith(github.head_ref, 'automation/yahoo-rosters-') }}\n        run: |\n          python3 -m unittest discover -s tests -p \"test_*roster*.py\"", v)
+        self.assertIn("if: ${{ !startsWith(github.head_ref, 'automation/yahoo-rosters-') }}\n        run: python3 scripts/run_tests.py -j 4 --chrome 2\n", v)
+        self.assertIn("startsWith(github.head_ref, 'automation/yahoo-rosters-') }}\n        run: python3 scripts/run_tests.py -j 4 --chrome 2 tests/test_*roster*.py test_season_ops test_league_state_data\n", v)
         self.assertIn("./validate.sh", v)                                                 # the site validation still runs for every PR
         helper = open(os.path.join(ROOT, "scripts", "bot_pr.sh"), encoding="utf-8").read()
         self.assertIn("gh workflow run pages.yml --ref main", helper)                      # a bot merge asks for the deploy right away

@@ -34,16 +34,15 @@ jobs:
       # A roster PR only adds a roster snapshot; its run already passed validate + the roster/ownership tests, and the bot waits for THIS check before it
       # merges, so the browser UI suite (many minutes) would be most of the time a roster change takes to reach the site. main (after the merge) and the nightly
       # run still run everything.
+      # scripts/run_tests.py: the same tests as `unittest discover`, several processes at once, only failures printed. At most 2 Chrome classes at once:
+      # the runners have 3-4 vCPUs. The nightly run stays on plain discover.
       - name: Run tests
         if: ${{ !startsWith(github.head_ref, 'automation/yahoo-rosters-') }}
-        run: python3 -m unittest discover -s tests -v
+        run: python3 scripts/run_tests.py -j 4 --chrome 2
 
       - name: Run the roster tests (roster PRs; the full suite runs on main and nightly)
         if: ${{ startsWith(github.head_ref, 'automation/yahoo-rosters-') }}
-        run: |
-          python3 -m unittest discover -s tests -p "test_*roster*.py"
-          python3 -m unittest discover -s tests -p "test_season_ops.py"
-          python3 -m unittest discover -s tests -p "test_league_state_data.py"
+        run: python3 scripts/run_tests.py -j 4 --chrome 2 tests/test_*roster*.py test_season_ops test_league_state_data
 
       - name: Check for proprietary font binaries
         run: |

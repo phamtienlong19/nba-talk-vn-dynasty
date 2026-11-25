@@ -178,16 +178,17 @@ fi
 stage "revalidate-and-commit"
 # SYNC_AFTER_MERGE_{VALIDATE,TEST,HANDOFF}_CMD are the injectable test-mode
 # seams for this step: production never sets them, so the real
-# ./validate.sh, full `python3 -m unittest discover -s tests`, and
-# ./handoff.sh run unchanged below. Unit tests (tests/test_sync_after_merge.py)
+# ./validate.sh, the full suite (scripts/run_tests.py), and ./handoff.sh (which
+# reports that run) run unchanged below. Unit tests (tests/test_sync_after_merge.py)
 # run this script end-to-end via subprocess and must not re-enter the outer
-# `python3 -m unittest discover -s tests` invocation that is already running
-# them -- both this step's own test run and handoff.sh's internal test run
-# (see scripts/handoff.sh) would otherwise recursively re-execute the whole
-# suite, including this very test, from inside itself. Tests substitute
-# deterministic fakes here instead (see tests/_workflow_test_utils.py).
+# test run that is already running them: this step's own test run would
+# otherwise recursively re-execute the whole suite, including this very test,
+# from inside itself. Tests substitute deterministic fakes here instead (see
+# tests/_workflow_test_utils.py).
 VALIDATE_CMD="${SYNC_AFTER_MERGE_VALIDATE_CMD:-./validate.sh}"
-TEST_CMD="${SYNC_AFTER_MERGE_TEST_CMD:-python3 -m unittest discover -s tests}"
+DEFAULT_TEST_CMD="python3 -m unittest discover -s tests"
+[ -f scripts/run_tests.py ] && DEFAULT_TEST_CMD="python3 scripts/run_tests.py" # parallel, and records the run for handoff.sh
+TEST_CMD="${SYNC_AFTER_MERGE_TEST_CMD:-$DEFAULT_TEST_CMD}"
 HANDOFF_CMD="${SYNC_AFTER_MERGE_HANDOFF_CMD:-./handoff.sh}"
 
 VALIDATION="FAIL"
