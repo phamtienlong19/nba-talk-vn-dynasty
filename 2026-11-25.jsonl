@@ -87,3 +87,4 @@
 {"kind":"lock","date":"2026-11-25","capturedAt":"2026-11-25T22:13:16Z","team":"franchise-07","teamName":"Maxfixe","k":"478.p.10312","n":"Pelle Larsson","slot":"F","st":null,"il":null,"game":"Q1 11:41, 0-0 @ PHI","gs":"live","pos":["SG","SF"],"flags":[],"pre":{"st":null,"at":"2026-11-25T22:12:47Z"},"ie":0}
 {"kind":"lock","date":"2026-11-25","capturedAt":"2026-11-25T22:13:16Z","team":"franchise-07","teamName":"Maxfixe","k":"478.p.5294","n":"Joel Embiid","slot":"BN","st":"O","il":null,"game":"Q1 11:41, 0-0 vs MIA","gs":"live","pos":["C"],"flags":[],"pre":{"st":"O","at":"2026-11-25T22:12:47Z"},"ie":0}
 {"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T22:41:15Z","p":"5324","n":"Zach LaVine","team":"franchise-02","slot":"SF","st":"O","g":"10:00 pm @ GSW","pos":["PG","SG","SF"]}
+{"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T23:01:15Z","p":"6044","n":"Jalen Brunson","team":"franchise-06","slot":"PG","st":null,"g":"7:30 pm vs CLE","pos":["PG"]}
