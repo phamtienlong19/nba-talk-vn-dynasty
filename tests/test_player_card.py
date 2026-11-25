@@ -51,7 +51,7 @@ class TestPlayerCard(unittest.TestCase):
         self.assertIsNone(r.get("error"), r)
         self.assertTrue(r["shown"])
         self.assertEqual(len(r["lines"]), 10)                                               # the last 10 games first
-        self.assertEqual(r["cells"], ["11/12", "vs TOR", "30", "13-7-1-1-1", "5/7", "2", "1/2", "3"])  # one line: the eight cells, newest first
+        self.assertEqual(r["cells"], ["11/12", "TOR", "30", "13-7-1-1-1", "5/7", "2", "1/2", "3"])  # one line: the eight cells, newest first
         self.assertEqual(r["head"], ["DATE", "OPP", "MIN", "P-R-A-S-B", "FG", "3PM", "FT", "TO"])
         self.assertEqual(r["off"], 1)                                                       # a bench game is dimmed and says BN
         self.assertEqual(r["boxes"], 0)                                                     # no stat boxes
@@ -68,7 +68,7 @@ class TestPlayerCard(unittest.TestCase):
           window.NBA_LIVE={source:function(){return 'live';},feed:function(){return {week:6,dayDate:'2026-11-25',matchups:[{teams:[{team:'franchise-05',roster:[row]}]}]};}};
           NBA_PLAYER.logSet({capturedAt:'x',days:[],p:{}});var c=NBA_PLAYER.card('%s');document.body.appendChild(c);
           R.cells=[].map.call(c.querySelectorAll('.plc-gl li:first-child > *'),function(x){return x.textContent});""" % TRADED, pre_js=PRE, wait_ms=2500)
-        self.assertEqual(r["cells"][:3], ["11/25", "vs TOR", "30"])
+        self.assertEqual(r["cells"][:3], ["11/25", "TOR", "30"])
 
     def test_a_game_line_fits_every_phone_width_without_widening_the_page(self):
         for width, bar in ((320, 0), (360, 0), (390, 0), (430, 0), (360, 15), (390, 15)):   # 15 = the classic scrollbar headless Linux draws (CI)
@@ -84,13 +84,18 @@ class TestPlayerCard(unittest.TestCase):
           NBA_PLAYER.logSet(%s);NBA_PLAYER.open('%s');var sec=document.querySelector('#pl-sheet .plc-log'),card=document.querySelector('#pl-sheet .plc');
           var cr=card.getBoundingClientRect();R.over=0;[].forEach.call(sec.querySelectorAll('.plc-gl li > *'),function(x){if(x.getBoundingClientRect().right>cr.right+1)R.over++;});
           R.lines=sec.querySelectorAll('.plc-gl li').length;R.h=Math.max.apply(null,[].map.call(sec.querySelectorAll('.plc-gl li'),function(x){return x.getBoundingClientRect().height}));
-          R.cut=[].filter.call(sec.querySelectorAll('.plc-gl li > *, .plc-gh > *'),function(x){return x.scrollWidth>x.clientWidth+1}).map(function(x){return x.textContent});R.sw=document.documentElement.scrollWidth;R.cw=document.documentElement.clientWidth;""" % (bar, bar, doc, TRADED),
+          R.cut=[].filter.call(sec.querySelectorAll('.plc-gl li > *, .plc-gh > *'),function(x){return x.scrollWidth>x.clientWidth+1}).map(function(x){return x.textContent});
+          var cs=[].map.call(sec.querySelector('.plc-gl li').children,function(x){return x.getBoundingClientRect()});R.gaps=cs.slice(1).map(function(b,i){return Math.round((b.left-cs[i].right)*10)/10});R.sw=document.documentElement.scrollWidth;R.cw=document.documentElement.clientWidth;""" % (bar, bar, doc, TRADED),
                              pre_js=PRE, wait_ms=2500, width=width)
         self.assertIsNone(r.get("error"), r)
         self.assertEqual(r["over"], 0, r)
         self.assertLessEqual(r["sw"], r["cw"])
         self.assertLess(r["h"], 32)                                                         # one line per game
         self.assertEqual(r["cut"], [])                                                      # and nothing is cut off in it
+        self.assertGreaterEqual(min(r["gaps"]), 2.5, r["gaps"])                             # columns never touch ...
+        if width >= 360 and not bar:
+            self.assertGreaterEqual(min(r["gaps"]), 5, r["gaps"])
+        self.assertLessEqual(max(r["gaps"]) - min(r["gaps"]), 1.5, r["gaps"])               # ... and are spaced evenly
 
     def test_without_the_log_file_the_card_says_so_and_a_player_with_no_games_has_no_section(self):
         r = _phone.phone_run("""NBA_PLAYER.logSet(null);var c=NBA_PLAYER.card('%s');document.body.appendChild(c);var s=c.querySelector('.plc-log');R.failed=!s.hidden;R.msg=s.textContent;

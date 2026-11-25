@@ -94,6 +94,29 @@ class TestLiveTab(unittest.TestCase):
         self.assertEqual(r["count"], "3 to check")
         self.assertEqual(r["first"], t["team"])                                        # teams with something to check come first
 
+    def test_players_with_a_game_stand_apart_from_those_without(self):
+        f = self.copy()
+        t = side(f)
+        players = [p for p in t["roster"] if p.get("n") and p["s"] in ("PG", "SG", "G", "SF", "PF", "F", "C", "FC", "Util")]
+        for p in t["roster"]:
+            p.update(g=None, gs=None, st="")
+        players[0].update(g="7:30 pm vs BOS", gs="upcoming")
+        players[1].update(g="W, 104-86 @ ORL", gs="final")
+        players[2].update(g="55-50 Q3", gs="live")
+        r = self.drive(self.feed_js(f) + """
+          NBA_LIVE.set(FEED);var c=document.querySelector('#live-root .lv-team[data-team="%s"]');c.open=true;
+          R.head=c.querySelector('summary small').textContent;R.plays=c.querySelectorAll('tr.plays').length;R.none=c.querySelectorAll('tr.nogame').length;
+          R.chips=[].map.call(c.querySelectorAll('tr.plays .lv-g'),function(e){return [e.className,e.textContent];});R.off=c.querySelector('tr.nogame .lv-g').textContent;
+          var col=function(q){return getComputedStyle(c.querySelector(q)).color;};R.a=col('tr.plays td.nm b');R.b=col('tr.nogame td.nm b');
+          R.edge=getComputedStyle(c.querySelector('tr.plays td.sl')).boxShadow;""" % t["team"])
+        starting = sum(1 for p in t["roster"] if p["s"] in ("PG", "SG", "G", "SF", "PF", "F", "C", "FC", "Util"))
+        self.assertTrue(r["head"].startswith("3 of %d starters play" % starting), r["head"])
+        self.assertEqual((r["plays"], r["off"]), (3, "no game"))
+        self.assertGreater(r["none"], 5)
+        self.assertEqual(r["chips"], [["lv-g upcoming", "7:30 pm vs BOS"], ["lv-g final", "W 104-86 @ ORL"], ["lv-g live", "55-50 Q3"]])
+        self.assertNotEqual(r["a"], r["b"])
+        self.assertNotEqual(r["edge"], "none")
+
     def test_my_team_is_first_and_open_and_expand_all_works(self):
         mine = self.feed["matchups"][-1]["teams"][1]["team"]
         r = self.drive(self.feed_js() + """
@@ -159,11 +182,14 @@ class TestLiveTab(unittest.TestCase):
         self.assertIn("1 fault day", r["head"])
 
     def test_rookies_get_the_purple_name_and_an_r_tag(self):
-        pid = next(p["p"] for m in self.feed["matchups"] for t in m["teams"] for p in t["roster"] if p.get("n") and p.get("p") and p["s"] not in ("--", "BN", "IL"))
-        r = self.drive(self.feed_js() + """
+        f = self.copy()
+        row = next(p for m in f["matchups"] for t in m["teams"] for p in t["roster"] if p.get("n") and p.get("p") and p["s"] not in ("--", "BN", "IL"))
+        row.update(g="7:30 pm vs BOS", gs="upcoming")                                  # a rookie with a game: full purple (without one the row fades)
+        pid = row["p"]
+        r = self.drive(self.feed_js(f) + """
           NBA_LIVE.set(FEED);document.getElementById('lv-all').click();
           R.rk=document.querySelectorAll('#live-root .lv-r tr.rk').length;R.tags=document.querySelectorAll('#live-root .lv-rk').length;
-          R.color=getComputedStyle(document.querySelector('#live-root .lv-r tr.rk td.nm b')).color;""", rookies=[pid])
+          R.color=getComputedStyle(document.querySelector('#live-root .lv-r tr.rk.plays td.nm b')).color;""", rookies=[pid])
         self.assertGreaterEqual(r["rk"], 1)
         self.assertEqual(r["rk"], r["tags"])
         self.assertEqual(r["color"], "rgb(93, 39, 150)")

@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-25T08:59:46Z
+Generated: 2026-11-25T09:24:29Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/game-log
-Commit: d3f07f4
+Branch: fix/gamelog-live-games
+Commit: 3f70766
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/245 (OPEN)
-CI: validate: completed/failure
+PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/246 (OPEN)
+CI: Claude Code Review: completed/success
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -40,8 +40,8 @@ Fingerprint: FRESH
  .github/workflows/validate.yml                     |   13 +-
  .gitignore                                         |    5 +
  CLAUDE.md                                          |   19 +-
- ai_exchange/IMPLEMENTATION_REPORT.md               |   10 +-
- ai_exchange/REVIEW_PACKET.md                       |  412 +++++--
+ ai_exchange/IMPLEMENTATION_REPORT.md               |    9 +-
+ ai_exchange/REVIEW_PACKET.md                       |  418 +++++--
  config/draft_lottery_rules.json                    |   25 +-
  config/roster_rules.json                           |   28 +-
  config/trade_rules.json                            |   14 +-
@@ -100,7 +100,7 @@ Fingerprint: FRESH
  docs/SEASON_STATE_MODEL.md                         |    2 +-
  docs/YAHOO_DATA_SOURCE.md                          |    2 +-
  docs/YAHOO_ROSTER_WORKFLOW.md                      |    2 +-
- index.html                                         |  832 +++++++++++--
+ index.html                                         |  836 +++++++++++--
  scripts/backfill_player_log.py                     |  125 ++
  scripts/bot_pr.sh                                  |   44 +
  scripts/build_league_state.py                      |    4 +-
@@ -111,8 +111,8 @@ Fingerprint: FRESH
  scripts/heal_open_prs.sh                           |   31 +
  scripts/lineup_log.py                              |  239 ++++
  scripts/lineup_review.py                           |  429 +++++++
- scripts/live.css                                   |  215 +---
- scripts/live_app.js                                |  406 ++-----
+ scripts/live.css                                   |  226 +---
+ scripts/live_app.js                                |  414 ++-----
  scripts/live_days.py                               |   51 +-
  scripts/live_feed_loop.sh                          |   19 +
  scripts/live_page.py                               |   47 +-
@@ -167,7 +167,7 @@ Fingerprint: FRESH
  tests/test_live_feed.py                            |   38 +-
  tests/test_live_moves.py                           |   63 +
  tests/test_live_standings.py                       |  220 ----
- tests/test_live_tab.py                             |  462 +++-----
+ tests/test_live_tab.py                             |  492 +++-----
  tests/test_lottery_eligibility.py                  |    5 +-
  tests/test_lottery_order.py                        |   10 +-
  tests/test_lottery_sim.py                          |   10 +-
@@ -175,7 +175,7 @@ Fingerprint: FRESH
  tests/test_my_team.py                              |   67 ++
  tests/test_official_cap_policy.py                  |    4 +-
  tests/test_phone.py                                |   44 +
- tests/test_player_card.py                          |  134 +++
+ tests/test_player_card.py                          |  145 +++
  tests/test_player_log.py                           |  144 +++
  tests/test_player_metadata_workflow.py             |   37 +
  tests/test_player_stats.py                         |  138 +++
@@ -205,12 +205,12 @@ Fingerprint: FRESH
  tools/yahoo-roto/roto-live.yml                     |   71 ++
  tools/yahoo-roto/tests/test_yahoo_roto.py          |  184 +++
  tools/yahoo-roto/yahoo_roto.py                     |  571 +++++++++
- 178 files changed, 51693 insertions(+), 2063 deletions(-)
+ 178 files changed, 51758 insertions(+), 2067 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
-- tests: PASS (full run, 1006 ran, 2 skipped, at d3f07f4 with uncommitted changes)
+- tests: PASS (full run, 1007 ran, 2 skipped, at 3f70766 with uncommitted changes)
 - Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
 - live HTTP: OK
 
@@ -410,4 +410,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/game-log` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `fix/gamelog-live-games` if not already done, then request human/ChatGPT review of this packet.
