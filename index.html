@@ -1119,6 +1119,9 @@ body{background:var(--canvas);color:var(--text)}
 .navlink:hover{background:#ffffff14;color:#fff}
 .navlink.on{background:#ffffff1f;color:#fff;box-shadow:none}
 .tb-btn{border-color:#ffffff1f;background:#ffffff0d}
+/* seven sections: below a wide desktop the header tightens so the mode switch stays on screen */
+@media(min-width:681px) and (max-width:1439px){.topbar-inner{gap:5px;padding-left:10px;padding-right:10px}.topbar .brand{font-size:14px}.navlink{padding:8px 7px;font-size:12px}.tb-btn kbd{display:none}.tb-btn{padding:0 9px}.modeswitch button{padding-left:8px;padding-right:8px}}
+@media(min-width:681px) and (max-width:1279px){.tb-btn .tb-lbl{display:none}.tb-btn.me.set .tb-lbl{display:inline}.topbar .brand{font-size:12px}}
 /* team cards */
 .team-card{border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:inset 0 3px 0 var(--team-color),var(--shadow);min-height:0}
 .team-card:hover{transform:none;box-shadow:inset 0 3px 0 var(--team-color),0 1px 2px rgba(15,27,52,.05),0 14px 34px rgba(15,27,52,.09)}
@@ -1196,6 +1199,21 @@ body{background:var(--canvas);color:var(--text)}
 .tc-info:hover,.team-card.info-open .tc-info{background:var(--ink);border-color:var(--ink);color:#fff}
 .tc-info:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .tc-info.watch::after,.tc-info.over::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;border:2px solid #fff;background:#e0a020}
+/* ---------- COMMISSIONER ---------- */
+.com-top{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #e5eaf1}.com-top p{margin:0 0 8px;font:600 13.5px/1.45 "Inter",Arial,sans-serif;color:var(--ink)}
+.com-top dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 14px;margin:0;font:500 12px/1.45 "Inter",Arial,sans-serif}.com-top dt{color:var(--muted)}.com-top dd{margin:0;color:var(--ink)}
+.com-lg .me-r{justify-content:flex-start;align-items:flex-start}.com-lg .tchip,.com-lg .k{white-space:nowrap}.com-lg .me-r .v{margin-left:auto;text-align:right}.com-cd summary{cursor:pointer;font:600 13px/2 "Inter",Arial,sans-serif}
+.com-h{margin:6px 0 10px;font:800 13px/1.3 "Inter",Arial,sans-serif;color:var(--ink)}
+.com-teams{display:flex;flex-direction:column;gap:8px}.com-t{background:#fff;border:1px solid #e5eaf1;border-radius:14px}.com-t.me{border-color:#ffcf33}
+.com-t>summary{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;min-height:24px;cursor:pointer;list-style:none}.com-t>summary::-webkit-details-marker{display:none}
+.com-t>summary::after{content:"+";margin-left:auto;font:700 16px/1 "Inter",Arial,sans-serif;color:var(--muted)}.com-t[open]>summary::after{content:"\2212"}
+.com-c{padding:3px 8px;border-radius:999px;background:#fff6e0;color:#7a5200;font:700 11px/1.3 "Inter",Arial,sans-serif;white-space:nowrap}.com-c.bad{background:#fdecef;color:#a1233a}.com-c.mute{background:#eef2f8;color:#5b6678}
+.com-b{display:flex;flex-direction:column;gap:8px;padding:0 12px 12px}.com-b .viol{margin:0}
+.com-i{padding:8px 10px;border-radius:10px;border-left:3px solid #d99a1b;background:#fffaf0;font:500 12.5px/1.45 "Inter",Arial,sans-serif;color:var(--ink);overflow-wrap:anywhere}.com-i.bad{border-left-color:#c0392b;background:#fdf6f6}
+.com-i b{display:block;font-weight:800}.com-i .com-f{display:block}.com-i ul{margin:4px 0;padding-left:18px}.com-i small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.com-k{font:700 10px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.com-ft{display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 11.5px/1.4 "Inter",Arial,sans-serif;color:var(--muted)}
+.com-clean{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px;font:600 12px/1.4 "Inter",Arial,sans-serif;color:var(--muted)}.com-more{margin-top:14px}
 .viol-tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;background:#fdecef;color:#a1233a;font:800 10.5px/1.2 "Inter",Arial,sans-serif;letter-spacing:.02em;white-space:nowrap}
 .viol{margin:0 0 4px;padding:10px 12px;border-radius:12px;background:#fdf3f5;border:1px solid #f4cdd5}.viol .tp-h{margin:0 0 6px;color:#a1233a}
 .viol-i b{font:800 12.5px "Inter",Arial,sans-serif;color:#7d1a2c}.viol-i p{margin:4px 0;font:500 12.5px/1.45 "Inter",Arial,sans-serif;color:var(--ink)}.viol-i small{display:block;margin-top:3px;font:500 11.5px/1.4 "Inter",Arial,sans-serif;color:var(--muted)}
@@ -1269,6 +1287,7 @@ body{background:var(--canvas);color:var(--text)}
 <a class="navlink" href="#draft" data-tab="draft">DRAFT</a>
 <a class="navlink navlive" href="#live" data-tab="live" title="This week's matchups and the standings if the week ended now">LIVE</a>
 <a class="navlink navkeep" href="#keepers" data-tab="keepers" title="Opens What If: re-rank players and preview next year's keepers (your assumption, not official)">KEEPERS</a>
+<a class="navlink navcom" href="#commissioner" data-tab="commissioner" title="Commissioner review: everything waiting, with the time each fact was read">REVIEW</a>
 <div class="modeswitch" role="group" aria-label="State mode"><button type="button" data-mode="OFFICIAL" class="on" title="The league as it stands now">OFFICIAL</button><button type="button" data-mode="SCENARIO" title="Apply the recorded trade proposals to see the league after them">SCENARIO</button><button type="button" data-mode="WHATIF" title="Simulations (Giả định): next year's keepers and what-if history. Not official.">WHAT IF</button></div>
 </div><div class="scn-banner" id="scn-banner" hidden></div></div>
 <section class="page" id="rosters-a"><div class="title">TEAMS 1–8</div>
@@ -4049,7 +4068,7 @@ function rfRenderPending(){
 function rfSet(f){
  if(!rfOk(f))return false;RF.feed=f;RF.t=Date.now();
  var sig=f.digest||JSON.stringify(f.teams);
- if(sig!==RF.sig){RF.sig=sig;RF.pend=rfApply(f);renderAll();}else renderSeasonMeta();
+ if(sig!==RF.sig){RF.sig=sig;RF.pend=rfApply(f);renderAll();}else{renderSeasonMeta();if(cmShown())cmRender();}
  return true;}
 function rfLoad(){
  if(location.protocol!=="https:"&&location.protocol!=="http:")return;   /* a saved copy or a test page opened from disk never reaches for the network */
@@ -4058,7 +4077,7 @@ function rfLoad(){
 window.NBA_ROSTERS={set:rfSet,feed:function(){return RF.feed;},pending:function(){return RF.pend;},ageMin:rfAgeMin};
 setInterval(function(){if(!document.hidden)rfLoad();},120000);
 document.addEventListener("visibilitychange",function(){if(!document.hidden&&(!RF.t||Date.now()-RF.t>6e4))rfLoad();});
-function renderAll(){if(window.NBA_WHATIF)window.NBA_WHATIF.setActive(S.mode==="WHATIF");renderMode();renderSeasonMeta();renderWhatsNew();rfRenderPending();renderFindings();renderTrades();renderDone();renderFolds();renderCompare();renderPicks();renderTeamCards();renderStandings();renderLottery();renderCapPage();if(typeof renderCheck==="function"&&CHK.teams.length)renderCheck();paintMe();syncUrl();monoDigits(document.body);if(typeof wirePlayers==="function")wirePlayers();}
+function renderAll(){if(window.NBA_WHATIF)window.NBA_WHATIF.setActive(S.mode==="WHATIF");renderMode();renderSeasonMeta();renderWhatsNew();rfRenderPending();renderFindings();renderTrades();renderDone();renderFolds();renderCompare();renderPicks();renderTeamCards();renderStandings();renderLottery();renderCapPage();if(typeof renderCheck==="function"&&CHK.teams.length)renderCheck();paintMe();if(cmShown())cmRender();syncUrl();monoDigits(document.body);if(typeof wirePlayers==="function")wirePlayers();}
 /* ---------- standings: once the season starts the team pages run worst record first (toggle back to team #) ---------- */
 function ordinal(n){var s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
 /* ---- lottery simulator: PROVISIONAL, display only. Tickets / draw order / eligibility / bonus come from D.lottery (config/draft_lottery_rules.json). */
@@ -4140,7 +4159,7 @@ document.addEventListener("nba:live",function(){try{renderStandings();}catch(e){
 function syncUrl(){try{var ks=key();var q=S.mode==="SCENARIO"?"?mode=scenario"+(ks?"&trades="+ks:""):S.mode==="WHATIF"&&window.NBA_WHATIF?window.NBA_WHATIF.query():location.pathname;
  if((S.order==="team"||S.order==="live")&&S.mode!=="WHATIF")q+=(q.indexOf("?")>=0?"&":"?")+"order="+S.order;history.replaceState(null,"",q+location.hash);}catch(e){}chkUrl();}
 /* ---------- tabs: TEAMS / CAP / TRADE LAB / DRAFT show one view at a time; the Draft Archive has a tab per round ---------- */
-var TABS=[{id:"teams",sec:["rosters-a","rosters-b"]},{id:"cap",sec:["cap"]},{id:"trade-lab",sec:["trade-lab"]},{id:"draft",sec:["draft-order"]},{id:"live",sec:["live"]},{id:"me",sec:["me-page"]}];
+var TABS=[{id:"teams",sec:["rosters-a","rosters-b"]},{id:"cap",sec:["cap"]},{id:"trade-lab",sec:["trade-lab"]},{id:"draft",sec:["draft-order"]},{id:"live",sec:["live"]},{id:"me",sec:["me-page"]},{id:"commissioner",sec:["com-page"]}];
 var TAB_ALIAS={"rosters-a":"teams","rosters-b":"teams","draft-order":"draft","draft-pool":"draft"};  /* old anchors keep working */
 var ROUNDS=["r1","r2","r3"];
 function parseHash(){
@@ -4157,6 +4176,7 @@ function showTab(id,sub){
  document.querySelectorAll(".navlink").forEach(function(a){var on=a.dataset.tab===id;a.classList.toggle("on",on);if(on)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});
  if(id==="draft")showRound(sub);
  if(id==="me"){meEnsure().classList.remove("tab-off");renderMePage();}
+ if(id==="commissioner"){cmEnsure().classList.remove("tab-off");cmRender();cmLoad();}
  try{document.dispatchEvent(new CustomEvent("nba:tab",{detail:id}));}catch(e){}}
 /* KEEPERS is a simulator that lives in What If; this link is its front door */
 function openKeepers(){if(!window.NBA_WHATIF||!window.NBA_WHATIF.openKeepers())return;S.mode="WHATIF";try{history.pushState(null,"","#keepers");}catch(e){}renderAll();window.scrollTo(0,0);}
@@ -4970,6 +4990,7 @@ function exCatalog(){
  function rosterLines(t){var tm=v.teams[t.id];return tm.roster.slice().sort(function(a,b){return b.c-a.c;}).map(function(r){return {l:r.n+(r.s==="IL"||r.s==="IL+"?" · "+r.s:r.st?" · "+r.st:""),r:r.c,tone:(r.s==="IL"||r.s==="IL+")?"mute":r.x?"mute":""};});}
  function rosterCard(t){var tm=v.teams[t.id];return {team:t.id,head:String(tm.cap),sub:stText(tm)+" · "+tm.count+" players",tone:tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR"?"bad":"",lines:rosterLines(t)};}
  function rostersDoc(list,title,part){return {title:title,sub:mode+" · cap band "+D.cap.floor+"–"+D.cap.ceiling+" · top "+D.season.counting.n+" salaries count"+(part?" · "+part:""),tag:S.mode==="SCENARIO"?"SCENARIO · NOT OFFICIAL":"",blocks:[{t:"cards",cols:2,cards:list.map(rosterCard)}],foot:exFoot(),link:exLinkHere("#teams")};}
+ items.push({id:"commissioner",label:"Commissioner review",desc:"Every open item by team, with the time each fact was read",pages:cmExportPages,link:function(){return exLinkHere("#commissioner");}});
  items.push({id:"rosters",label:"All 16 rosters",desc:"Every team's players and salaries, four images (four teams each)",pages:function(){return [0,4,8,12].map(function(i){var a=D.teams.slice(i,i+4),r=(i+1)+"–"+(i+4);return {label:"Teams "+r,name:"rosters-"+(i+1)+"-"+(i+4)+".png",alt:"Rosters of teams "+(i+1)+" to "+(i+4),snap:function(){var cards=a.map(function(t){return exCardOf(t.short);}),host=cards[0]&&cards[0].parentElement;return host?exSnapGroup(cards,host,860):null;},doc:rostersDoc(a,"League rosters","teams "+r)};});},link:function(){return exLinkHere("#teams");}});
  if(me&&T[me])items.push({id:"myroster",label:"My roster ("+T[me].short+")",desc:"Your team on one image",pages:function(){return [{label:T[me].short,name:"roster-"+T[me].short+".png",alt:"Roster of "+T[me].short,snap:function(){return exSnapEl(exCardOf(T[me].short),430,exSnapFoot());},doc:rostersDoc([T[me]],T[me].name||T[me].short)}];},link:function(){return exLinkHere("#teams");}});
  items.push({id:"cap",label:"Cap table",desc:"Payroll, room and roster size for all 16 teams",pages:function(){var rows=D.teams.map(function(t){var tm=v.teams[t.id],bad=tm.status==="OVER_CEILING"||tm.status==="UNDER_FLOOR",near=tm.status==="NEAR_CEILING",k=bad?"bad":near?"warn":"ok";return {c:[{team:t.id},exB(tm.cap,tm.cap/(D.cap.ceiling*1.08),bad?["rgba(216,69,61,.10)","rgba(216,69,61,.34)"]:near?["rgba(232,162,29,.12)","rgba(232,162,29,.38)"]:["rgba(47,165,100,.10)","rgba(47,165,100,.32)"]),exP(stText(tm),k),String(tm.count),tm.il?exP(tm.il,"mute"):"0"]};}).sort(function(a,b){return +exCell(b.c[1]).t-+exCell(a.c[1]).t;});
@@ -5009,8 +5030,8 @@ function exCatalog(){
  if(S.mode==="WHATIF"&&window.NBA_WHATIF&&window.NBA_WHATIF.exports){try{window.NBA_WHATIF.exports().forEach(function(it){items.unshift(it);});}catch(e){EX.failed.push("keepers");}}
  return items;}
 /* which part of the site an export belongs to; the hub lists the part you are looking at first */
-var EX_GROUPS=[["teams","Teams and cap"],["trade","Trades"],["draft","Draft"],["live","Live"],["keepers","Keepers"]];
-function exGroup(id){return /^kb-/.test(id)?"keepers":/^live-/.test(id)?"live":/^(trade|trades)$/.test(id)?"trade":/^(standings|lottery|picks)$/.test(id)?"draft":"teams";}
+var EX_GROUPS=[["commissioner","Commissioner"],["teams","Teams and cap"],["trade","Trades"],["draft","Draft"],["live","Live"],["keepers","Keepers"]];
+function exGroup(id){return id==="commissioner"?"commissioner":/^kb-/.test(id)?"keepers":/^live-/.test(id)?"live":/^(trade|trades)$/.test(id)?"trade":/^(standings|lottery|picks)$/.test(id)?"draft":"teams";}
 function exHere(){var a=document.querySelector(".navlink.on"),t=a&&a.dataset.tab||"";if(S.mode==="WHATIF")return "keepers";return t==="cap"?"teams":t==="lab"?"trade":t||"teams";}
 function exOpen(item){
  var pages;try{pages=item.pages();}catch(e){exToast("Could not build “"+item.label+"”. Please report it.",null,5000);return;}
@@ -5212,6 +5233,130 @@ function violNode(vs){
   box.appendChild(h("div",{class:"viol-i"},[h("b",{text:v.label+" · week "+v.week}),h("p",{text:v.summary+". "+v.detail}),ev?h("small",{text:"Evidence: "+ev}):null,
    h("small",{text:v.priorWarnings||""}),h("small",{text:v.points==null?(v.pointsNote||"Points not set."):"Points: "+v.points})]));});
  return box;}
+/* ---------- COMMISSIONER: every fact waiting for review in one place, each with the time it was read. It states what the data shows; it never rules.
+   Sources: the commissioner's own record (data), the current rosters (verified snapshot, or the roster feed when the page has it), the roster and cap
+   rules computed at build time, the live feed's closed-day lineup checks, and the append-only lineup-lock log (one file per US game day). */
+var CM={url:"https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/lineup-log/",span:7,days:{},busy:0,open:{}};
+var CM_FLAG={healthy_on_il:"On IL, not IL-eligible",out_starter:"Listed out, in a starting slot",star_benched:"Top-50 player on the bench with a game"};
+var CM_DAY={out_starter:"Out player in a starting slot while an eligible bench player had a game",empty_slot:"Starting slot empty while an eligible bench player had a game",star_benched:"Top-50 player on the bench with a game"};
+function cmTime(iso){if(!iso)return "time unknown";try{return new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Bangkok",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso))+" ICT";}catch(e){return iso;}}
+function cmDay(d){return shortDate(d)+" (US)";}
+function cmEnsure(){var sec=document.getElementById("com-page");if(sec)return sec;sec=h("section",{class:"page tab-off",id:"com-page"},[h("div",{class:"title",text:"COMMISSIONER"}),h("div",{id:"com-root"})]);
+ var anchor=document.getElementById("me-page")||document.getElementById("live")||document.querySelector("main")||document.body.lastElementChild;anchor.parentNode.insertBefore(sec,anchor.nextSibling);return sec;}
+function cmShown(){var s=document.getElementById("com-page");return !!s&&!s.classList.contains("tab-off");}
+/* the last n US (Pacific) game days, newest first: the log's file names */
+function cmDates(n,now){var t;try{t=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).format(now||new Date());}catch(e){t=(now||new Date()).toISOString().slice(0,10);}
+ var out=[];for(var i=0;i<n;i++)out.push(new Date(Date.parse(t+"T12:00:00Z")-i*864e5).toISOString().slice(0,10));return out;}
+function cmParse(text){var out=[];String(text||"").split("\n").forEach(function(l){if(!l.trim())return;try{var r=JSON.parse(l);if(r&&r.kind)out.push(r);}catch(e){}});return out;}
+function cmLoad(force){
+ if(!force&&location.protocol!=="https:"&&location.protocol!=="http:")return;   /* a saved copy or a test page opened from disk never reaches for the network */
+ var fresh=cmDates(2);
+ cmDates(CM.span).forEach(function(d){var have=CM.days[d];if(have&&(have.state==="loading"||(have.state!=="error"&&fresh.indexOf(d)<0)||Date.now()-have.t<12e4))return;
+  CM.days[d]={state:"loading",rows:have?have.rows:[],t:Date.now()};CM.busy++;
+  var done=function(state,rows){CM.days[d]={state:state,rows:rows,t:Date.now()};CM.busy--;if(!CM.busy&&cmShown())cmRender();};
+  var c=window.AbortController?new AbortController():null,to=setTimeout(function(){if(c)c.abort();},10000);
+  fetch(CM.url+d+".jsonl?t="+Math.floor(Date.now()/12e4),{cache:"no-store",signal:c?c.signal:undefined}).then(function(r){clearTimeout(to);if(r.status===404)return done("none",[]);if(!r.ok)throw 0;return r.text().then(function(x){done("ok",cmParse(x));});}).catch(function(){clearTimeout(to);done("error",have?have.rows:[]);});});
+ if(CM.busy&&cmShown())cmRender();}
+/* one lock record's flags as items. A Doubtful player is IL-eligible (league settings): a flag written before that was fixed is not repeated here */
+function cmLockItems(rec){
+ var ok=TKR.longTermInjured.ilEligibleStatuses||[];
+ return (rec.flags||[]).filter(function(f){return CM_FLAG[f]&&!(f==="healthy_on_il"&&ok.indexOf(rec.st)>=0);}).map(function(f){
+  var when=rec.gs==="final"?"read after the game had ended":"read while the game was on";
+  return {kind:"lock",flag:f,sev:"bad",text:rec.n+" · "+CM_FLAG[f],date:rec.date,
+   fact:"Game day "+cmDay(rec.date)+" · slot "+rec.slot+" · "+(rec.st?"Yahoo status "+rec.st:"no Yahoo status")+(rec.game?" · "+rec.game:""),at:"Captured "+cmTime(rec.capturedAt)+", "+when};});}
+function cmData(){
+ var base=D.scenarios[""].teams,feed=RF.feed,rosterAt=feed?new Date(rfOldest(feed)).toISOString():D.season.snapshot.verifiedAt,snapAt=D.season.snapshot.verifiedAt;
+ var rosterSrc=(feed?"Yahoo rosters read ":"Verified roster snapshot ")+cmTime(rosterAt),snapSrc="Verified roster snapshot "+cmTime(snapAt);
+ var teams={};D.teams.forEach(function(t){teams[t.id]={id:t.id,items:[],notes:[]};});
+ /* the commissioner's own record */
+ (D.violations||[]).forEach(function(v){if(teams[v.team])teams[v.team].items.push({kind:"record",sev:"bad",v:v,text:v.label+" · week "+v.week+" · "+v.summary,fact:v.points==null?(v.pointsNote||"Points not set."):"Points: "+v.points,at:"Recorded by the commissioner"});});
+ /* lineup-lock log */
+ var days=cmDates(CM.span),latest="",loaded=0,failed=0,withFile=0;
+ days.forEach(function(d){var x=CM.days[d];if(!x)return;if(x.state==="error")failed++;if(x.state==="ok"||x.state==="none")loaded++;if(x.state==="ok")withFile++;});
+ Object.keys(CM.days).sort().reverse().forEach(function(d){if(days.indexOf(d)<0)return;CM.days[d].rows.forEach(function(r){if(r.capturedAt>latest)latest=r.capturedAt;if(r.kind==="lock"&&teams[r.team])cmLockItems(r).forEach(function(i){teams[r.team].items.push(i);});});});
+ /* closed days of the current week, from the live feed */
+ var F=window.NBA_LIVE&&NBA_LIVE.source()==="live"?NBA_LIVE.feed():null,LC=F&&F.lineupChecks;
+ if(LC)(LC.teams||[]).forEach(function(t){var tm=teams[t.team];if(!tm||!t.missetDays)return;var rule=LC.rule||{days:2,players:3,stars:2},lines=[];
+  (t.days||[]).forEach(function(d){d.issues.forEach(function(i){lines.push(shortDate(d.date)+": "+(CM_DAY[i.k]||i.k)+": "+(i.k==="empty_slot"?i.s+" slot":(i.p||"?")+(i.s&&i.s!=="BN"?" ("+i.s+")":""))+(i.r?"; bench: "+i.r:""));});});
+  tm.items.push({kind:"week",sev:t.meetsCount?"bad":"warn",text:"Week "+LC.week+": "+t.missetDays+" day"+(t.missetDays>1?"s":"")+", "+t.players+" player"+(t.players>1?"s":"")+" misset"+(t.meetsCount?" · at the rule's count":""),
+   fact:"Rule count: "+rule.days+"+ days or "+rule.players+"+ players in a week, or "+rule.stars+" stars",lines:lines,at:"Closed days only, statuses read after each day ended · feed "+cmTime(F.asOf)});});
+ /* the rosters as they are now */
+ var YH=TKL.yahoo,spots=TKL.roster.spots;
+ D.teams.forEach(function(t){var tm=base[t.id],items=teams[t.id].items,notes=teams[t.id].notes,onIl=tm.roster.filter(function(r){return r.s==="IL"||r.s==="IL+";});
+  onIl.forEach(function(r){var k=ilKind(r);if(k==="out")return;
+   items.push({kind:"il",sev:k==="inel"?"bad":"warn",text:r.n+" · "+(k==="inel"?"On IL, not IL-eligible":"On IL, eligibility unverified"),fact:"Slot "+r.s+" · "+(r.st?"Yahoo status "+r.st:"no Yahoo status"),at:rosterSrc});});
+  if(onIl.length>YH.ilSlots)items.push({kind:"size",sev:"bad",text:onIl.length+" players on IL, "+YH.ilSlots+" IL slots",fact:"",at:rosterSrc});
+  if(tm.roster.length>spots)items.push({kind:"size",sev:"bad",text:tm.roster.length+" players, "+spots+" roster spots",fact:"",at:rosterSrc});
+  if(tm.status==="OVER_CEILING")items.push({kind:"cap",sev:"bad",text:"Payroll over the ceiling by "+(-tm.room),fact:"Payroll "+tm.cap+" · ceiling "+D.cap.ceiling,at:snapSrc});
+  if(tm.status==="UNDER_FLOOR")items.push({kind:"cap",sev:"bad",text:"Payroll under the floor by "+tm.toFloor,fact:"Payroll "+tm.cap+" · floor "+D.cap.floor,at:snapSrc});
+  var c=tm.checks;if(!c)return;
+  var put=function(level,text,fact){(level==="over"?items:notes).push({kind:"roster",sev:level==="over"?"bad":"warn",text:text,fact:fact,at:snapSrc});};
+  if(c.injured.level!=="ok")put(c.injured.level,"Injured players "+c.injured.count+", limit "+c.injured.max,c.injured.players.join(", "));
+  if(c.singlePosition.level!=="ok")put(c.singlePosition.level,"Single-position players "+c.singlePosition.count+", limit "+c.singlePosition.max+" ("+c.singlePosition.maxWithCombo+" with combo tags)",c.singlePosition.players.join(", "));
+  var sh=(c.coverage.short||[]).map(function(p){return p+" "+c.coverage.byPosition[p]+" of "+c.coverage.min;}).concat((c.coverage.shortCombo||[]).map(function(p){return p+" "+c.coverage.byCombo[p]+" of "+c.coverage.comboMin;}));
+  if(sh.length)put("over","Too few healthy players at a position",sh.join(", "));
+  if(c.lineup.level!=="ok")put("over","Lineup cannot be filled: "+c.lineup.filled+" of "+c.lineup.slots+" slots","Empty: "+c.lineup.empty.join(", "));});
+ (D.season.findings||[]).forEach(function(f){if(teams[f.franchiseId])teams[f.franchiseId].items.push({kind:"floor",sev:"warn",text:"Under the floor at the "+(f.checkpoint==="POST_DRAFT"?"post-draft":"post-trade-deadline")+" check",
+  fact:"Payroll then "+f.capAtCheckpoint+" · floor "+f.floor+" · now "+f.currentCap+" · "+(f.penalty?String(f.penalty):"no penalty recorded"),at:f.checkpointDate?"Checkpoint "+shortDate(f.checkpointDate):"Checkpoint"});});
+ /* league-wide */
+ var nameOf={},ownerOf={};D.teams.forEach(function(t){base[t.id].roster.forEach(function(r){nameOf[r.k]=r.n;ownerOf[r.k]=t.id;});});
+ var trades=D.trades.filter(function(x){return x.status!=="VOID"&&x.phase==="IN_SEASON"&&(x.status==="PROPOSED"||x.status==="AGREED"||x.pending);});
+ var locks=[];D.teams.forEach(function(t){base[t.id].roster.forEach(function(r){var l=lockInfo(r.k,t.id);if(l)locks.push({team:t.id,n:r.n,l:l});});});locks.sort(function(a,b){return a.l.end<b.l.end?-1:1;});
+ var pend=RF.pend,moves=[];if(pend){(pend.add||[]).forEach(function(x){moves.push({team:x.t,text:x.n+" added"});});(pend.drop||[]).forEach(function(x){moves.push({team:x.t,text:x.n+" dropped"});});(pend.moved||[]).forEach(function(x){moves.push({team:x.to||x.t,text:x.n+" changed team"});});}
+ var unlinked=(D.season.provisional||[]).filter(function(k){return nameOf[k];}).map(function(k){return {n:nameOf[k],team:ownerOf[k]};});
+ return {teams:D.teams.map(function(t){return teams[t.id];}),trades:trades,locks:locks,moves:moves,unlinked:unlinked,unreflected:D.season.appliedAfterSnapshot||[],
+  at:{roster:rosterSrc,snapshot:snapSrc,log:latest,live:F?F.asOf:null},log:{span:CM.span,loaded:loaded,failed:failed,files:withFile,busy:CM.busy}};}
+function cmItemNode(i){
+ if(i.kind==="record")return violNode([i.v]);
+ var kids=[h("b",{text:i.text})];if(i.fact)kids.push(h("span",{class:"com-f",text:i.fact}));
+ if(i.lines){kids.push(h("ul",{},i.lines.map(function(l){return h("li",{text:l});})));}
+ kids.push(h("small",{text:i.at}));return h("div",{class:"com-i "+i.sev},kids);}
+var CM_KIND=[["record","recorded"],["lock","at lineup lock"],["week","week lineup check"],["il","IL now"],["size","roster size"],["cap","cap"],["roster","roster rule","roster rules"],["floor","floor check"]];
+function cmCounts(items){return CM_KIND.map(function(k){var n=items.filter(function(i){return i.kind===k[0];}).length;return n?{k:k[0],t:n+" "+(n>1&&k[2]||k[1]),bad:items.some(function(i){return i.kind===k[0]&&i.sev==="bad";})}:null;}).filter(Boolean);}
+function cmRender(){
+ cmEnsure();var root=document.getElementById("com-root"),d=cmData(),me=getMe();root.textContent="";
+ var logLine=d.log.busy?"loading…":!d.log.loaded&&!d.log.failed?"not loaded yet":(d.at.log?"last capture "+cmTime(d.at.log):"no capture")+" in the last "+d.log.span+" game days"+(d.log.failed?" · "+d.log.failed+" day"+(d.log.failed>1?"s":"")+" could not be read":"");
+ root.appendChild(h("div",{class:"com-top"},[h("p",{text:"What the data shows, with the time each fact was read. Nothing here is a ruling: the commissioner decides."}),
+  h("dl",{},[["Rosters",d.at.roster],["Lineup-lock log",logLine],["Week lineup checks",d.at.live?"live feed "+cmTime(d.at.live):"the live feed has not loaded yet"],["Cap and roster rules",d.at.snapshot]].reduce(function(a,x){a.push(h("dt",{text:x[0]}),h("dd",{text:x[1]}));return a;},[]))]));
+ var team=function(f){return tchip(f);};
+ var row=function(f,text,tone){return h("div",{class:"me-r"+(tone?" "+tone:"")},[h("span",{class:"k"},f?[team(f)]:[]),h("span",{class:"v",text:text})]);};
+ var grid=h("div",{class:"me-g com-lg"});
+ grid.appendChild(meCard("Trades waiting",null,null,d.trades.length||d.unreflected.length?d.trades.map(function(x){return meRow(x.label,x.status+(x.pending?" · awaiting confirmation":"")+" · "+x.participants.map(function(f){return T[f]?T[f].short:f;}).join(" and "),"warn");}).concat(d.unreflected.map(function(id){return meRow(id,"recorded here, not yet on the verified Yahoo rosters","warn");})):[meRow("Trades","none waiting")]));
+ grid.appendChild(meCard("Yahoo changes not yet verified",null,null,d.moves.length?d.moves.map(function(m){return row(m.team,m.text,"warn");}):[meRow("Rosters",RF.feed?"match the verified snapshot":"live roster read not loaded")]));
+ grid.appendChild(meCard("Open record items",null,null,(d.unlinked.map(function(u){return row(u.team,u.n+": no Yahoo player id linked yet");})).concat((D.violations||[]).filter(function(v){return v.points==null;}).map(function(v){return row(v.team,v.label+" week "+v.week+": points not set","warn");})).concat(d.unlinked.length||(D.violations||[]).some(function(v){return v.points==null;})?[]:[meRow("Record","nothing open")])));
+ var lockBox=h("details",{class:"com-cd"},[h("summary",{text:d.locks.length+" player"+(d.locks.length===1?"":"s")+" in a trade cooldown"})].concat(d.locks.map(function(x){return row(x.team,x.n+": until "+shortDate(x.l.end.slice(0,10)));})));
+ if(CM.open.locks)lockBox.open=true;lockBox.addEventListener("toggle",function(){CM.open.locks=lockBox.open;});
+ grid.appendChild(meCard("Trade cooldowns",null,null,[lockBox]));
+ root.appendChild(grid);
+ var flagged=d.teams.filter(function(t){return t.items.length;}).sort(function(a,b){var bad=function(t){return t.items.filter(function(i){return i.sev==="bad";}).length;};return bad(b)-bad(a)||b.items.length-a.items.length;});
+ root.appendChild(h("h3",{class:"com-h",text:flagged.length?flagged.length+" of "+d.teams.length+" teams have items":"No team has an open item"}));
+ var list=h("div",{class:"com-teams"});
+ flagged.concat(d.teams.filter(function(t){return !t.items.length&&t.notes.length;})).forEach(function(t){
+  var det=h("details",{class:"com-t"+(t.id===me?" me":""),"data-team":t.id});if(CM.open[t.id])det.open=true;
+  det.addEventListener("toggle",function(){CM.open[t.id]=det.open;});
+  var chips=cmCounts(t.items).map(function(c){return h("span",{class:"com-c"+(c.bad?" bad":""),text:c.t});});if(!t.items.length)chips=[h("span",{class:"com-c mute",text:"at a limit"})];
+  det.appendChild(h("summary",{},[team(t.id)].concat(chips)));
+  var body=h("div",{class:"com-b"});
+  CM_KIND.forEach(function(k){t.items.filter(function(i){return i.kind===k[0];}).forEach(function(i){body.appendChild(cmItemNode(i));});});
+  if(t.notes.length){body.appendChild(h("div",{class:"com-k",text:"At a limit, within the rules"}));t.notes.forEach(function(i){body.appendChild(cmItemNode(i));});}
+  var go=h("button",{type:"button",class:"me-go",text:"Open "+(T[t.id]?T[t.id].short:t.id)+" roster"});go.addEventListener("click",function(){goTeam(t.id);});
+  body.appendChild(h("div",{class:"com-ft"},[h("span",{text:"The commissioner decides."}),go]));det.appendChild(body);list.appendChild(det);});
+ root.appendChild(list);
+ var clean=d.teams.filter(function(t){return !t.items.length&&!t.notes.length;});
+ if(clean.length)root.appendChild(h("div",{class:"com-clean"},[h("span",{text:"Nothing found:"})].concat(clean.map(function(t){return team(t.id);}))));
+ var more=h("button",{type:"button",class:"me-go com-more",text:"Show 7 earlier days of the lineup-lock log"});more.addEventListener("click",function(){CM.span+=7;cmLoad();cmRender();});
+ if(CM.span<56)root.appendChild(more);
+ monoDigits(root);}
+function cmExportPages(){
+ var d=cmData(),cards=d.teams.filter(function(t){return t.items.length;}).map(function(t){var n=t.items.length;
+  return {team:t.id,head:String(n),sub:"item"+(n>1?"s":""),lines:t.items.slice(0,8).map(function(i){return {l:i.text+(i.date?" · "+shortDate(i.date):""),r:"",tone:i.sev==="bad"?"bad":""};}).concat(n>8?[{l:"+"+(n-8)+" more on the page",r:"",tone:"mute"}]:[])};});
+ var sub=d.at.roster+(d.at.log?" · lock log "+cmTime(d.at.log):"")+" · the commissioner decides";
+ if(!cards.length)cards=[{team:D.teams[0].id,head:"",sub:"",lines:[{l:"No team has an open item",r:""}]}];
+ var pages=[];for(var i=0;i<cards.length;i+=6)pages.push(cards.slice(i,i+6));
+ return pages.map(function(c,i){var part=pages.length>1?" "+(i+1)+" of "+pages.length:"";return {label:"Review"+part,name:"commissioner-"+(i+1)+".png",alt:"Commissioner review"+part,doc:{title:"Commissioner review"+(part?" ·"+part:""),sub:sub,blocks:[{t:"cards",cols:1,cards:c}],foot:exFoot(),link:exLinkHere("#commissioner")}};});}
+window.NBA_COMMISH={data:cmData,render:cmRender,dates:cmDates,load:function(){cmLoad(true);},
+ /* tests and tools hand log files in directly: {"2026-11-24": "<jsonl text>"} */ setLog:function(files){Object.keys(files).forEach(function(d){CM.days[d]={state:"ok",rows:cmParse(files[d]),t:Date.now()};});if(cmShown())cmRender();}};
+document.addEventListener("nba:live",function(){if(cmShown())cmRender();});
 function plText(F){
  var r=F.r,L=[r.n+" · "+[r.pos,r.nba].filter(Boolean).join(" · ")+" · "+F.t.short,"Salary now: "+r.c+(r.x?" (not counted)":" (counts)")];
  L.push(F.status.join(" · "));
