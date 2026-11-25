@@ -212,4 +212,33 @@ when its fact was read.
 | Under-floor checkpoint findings | `data/` checkpoints | checkpoint date |
 | Trades waiting, cooldowns, Yahoo changes not yet verified, unlinked player ids, unset violation points | page data and roster feed | |
 
-A lock record flagging a Doubtful player on IL is not shown (Doubtful is IL-eligible).
+## Lineup review (`scripts/lineup_review.py`)
+
+The live loop runs it after the lineup log and puts the result in `live.json` as `lineupReview`; the REVIEW tab, the LIVE lineup checks and My team show it.
+Owner rulings 2026-11-25; the numbers live in `config/roster_rules.json` (`lineupReview`). Status = as shown 1 hour before tip; slot = as it stood at lock.
+**fault** counts toward the weekly rule (2 days, 3 players or 2 stars), **il** is an injured-list rule item, **watch** is shown only, **cleared** is only counted.
+
+| # | Situation | Outcome |
+|---|---|---|
+| 1 | Starter healthy, uncertain, or without a game | nothing |
+| 2 | Starter listed Out later than the hour | cleared |
+| 3 | Out starter with a game; a healthy bench player with a game could cover | fault |
+| 4 / 5 | Out starter, no cover, IL slot free: out more than 2 days / 2 days or less | il / watch |
+| 6 | Out starter, no cover, IL full (or NA / SUSP) | cleared |
+| 7 / 8 | Empty starting slot with / without cover | fault / cleared |
+| 9 | Healthy top-50 benched who could start without benching another top-50 | fault |
+| 10 / 11 | Top-50 benched with no such slot / uncertain or first game back | cleared |
+| 12 / 13 | Other Out player off IL with a slot free: more than 2 days / within 2 days | il / watch |
+| 14 | On IL as Out, INJ, OFS or Doubtful | nothing |
+| 15 | On IL as Q / GTD / DTD, not played | watch |
+| 16 / 17 | On IL, cleared: first game since / after that | watch / fault |
+| 18 | On IL as NA / SUSP, or eligibility unknown | watch |
+| 19 | No read of the lineup an hour before tip (gap, old data) | watch, "unconfirmed" |
+
+One bench player covers one gap, and healthy starters may be rearranged to make room. A player picked up inside the hour is not judged. An open IL slot is used by
+one Out player (the longest out). Not automated: playoff teams are not charged, the late-season tank allowance, both sides forgetting or compensating benching,
+and long versus short injuries. The tip is taken from the first read showing the game on, so it is up to a few minutes late; Out streaks start no earlier than
+the first logged day.
+
+**Lineup-log history records:** `day_start` (every rostered player at the day's first read), `state` (each later change of team, slot, status or having a game;
+`slot: null` = left the roster) and `gap` (more than 30 minutes unread). With the lock records they answer what stood one hour before a tip-off.

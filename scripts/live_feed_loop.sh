@@ -22,22 +22,26 @@ lineup_log() {
       mkdir -p "$log_dir" && ( cd "$log_dir" && git init -q -b lineup-log && git remote add origin "$log_remote" ); }
     ( cd "$log_dir" && git config user.name "github-actions[bot]" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com" )
   fi
-  python3 scripts/lineup_log.py --feed live.json --log-dir "$log_dir" || { echo "lineup log failed"; return 0; }
+  python3 scripts/lineup_log.py --feed live.json --previous prev.json --log-dir "$log_dir" || { echo "lineup log failed"; return 0; }
   ( cd "$log_dir" && [ -n "$(git status --porcelain)" ] && git add -A && git commit -q -m "lineup log $(date -u +%Y-%m-%dT%H:%M:%SZ)" \
     && { git push -q origin lineup-log 2>/dev/null || { git pull -q --rebase origin lineup-log && git push -q origin lineup-log; }; } ) || true
 }
 # the last published feed carries the closed days' lineup evidence, so a new run does not capture those days again
 curl -sf --max-time 20 "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/live-data/live.json" -o live.json || rm -f live.json
+# who actually played, for the lineup review (an injured-list player who played is cleared); optional
+curl -sf --max-time 20 "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/stats-data/player_log.json" -o player-log.json || rm -f player-log.json
 while [ "$(date +%s)" -lt "$end" ]; do
   start=$(date +%s)
+  cp live.json prev.json 2>/dev/null || true      # the read before this one: each player's status from before the tip
   if python3 scripts/build_live_feed.py --out live.json --schedule-cache schedule-cache.json --day-cache day-cache.json --previous live.json; then
     fails=0
+    lineup_log                                                          # before publishing: the review below goes out with the feed
+    python3 scripts/lineup_review.py --log-dir "$log_dir" --feed live.json --player-log player-log.json || echo "lineup review failed"
     out="$(mktemp -d)"; cp live.json "$out/live.json"
     ( cd "$out" && git init -q -b live-data && git config user.name "github-actions[bot]" \
       && git config user.email "41898282+github-actions[bot]@users.noreply.github.com" && git add live.json \
       && git commit -q -m "live feed $(date -u +%Y-%m-%dT%H:%M:%SZ)" \
       && git push -q --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" live-data ) || echo "publish failed"
-    lineup_log
     wait_for="$(pick)"
   else
     fails=$((fails + 1)); echo "build failed ($fails in a row)"

@@ -72,7 +72,20 @@ function standings(){
   return box;}
 var KIND={out_starter:"Out player held a starting slot while an eligible bench player had a game",empty_slot:"Starting slot left empty while an eligible bench player had a game",star_benched:"Star (top 50) on the bench with a game"};
 function shortDate(iso){try{return new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"short",timeZone:"UTC"}).format(new Date(iso+"T12:00:00Z"));}catch(e){return iso;}}
+/* the reviewed version of the same check: faults only (scripts/lineup_review.py), the same counts as the REVIEW tab */
+function reviewed(R){
+  var box=h("section",{class:"lv-card lv-lc"},[h("div",{class:"lv-ct",text:"LINEUP CHECKS",title:"Faults only: what a manager could have avoided, judged one hour before tip. Evidence for review, not a verdict."}),
+    h("div",{class:"lv-cs",text:"Week "+R.week+". Rule count: "+R.rule.days+"+ days or "+R.rule.players+"+ players. Details in REVIEW."})]);
+  var ids=Object.keys(R.teams).filter(function(id){return R.teams[id].days>0;}).sort(function(a,b){return R.teams[b].days-R.teams[a].days||R.teams[b].players-R.teams[a].players;}),mt=me();
+  if(!ids.length){box.appendChild(h("div",{class:"lv-lc-none",text:"No faults this week."}));return box;}
+  ids.forEach(function(id){var t=R.teams[id],det=h("details",{class:"lv-lc-t"+(id===mt?" me":"")+(t.meets?" over":"")});
+    det.appendChild(h("summary",null,[chip(id),h("span",{class:"n",text:t.days+(t.days===1?" day":" days")+" · "+t.players+(t.players===1?" player":" players")}),t.meets?h("span",{class:"flag",text:"at the rule's count",title:"Meets the league's AFK count; the commissioner decides"}):null]));
+    var ul=h("ul");t.items.forEach(function(i){if(i.o!=="fault")return;ul.appendChild(h("li",null,[h("b",{text:i.dates.map(shortDate).join(", ")}),h("span",{text:" "+i.n+": "+i.what+(i.fact?" ("+i.fact+")":"")})]));});
+    det.appendChild(ul);box.appendChild(det);});
+  if(Object.keys(R.teams).length>ids.length)box.appendChild(h("div",{class:"lv-foot",text:(Object.keys(R.teams).length-ids.length)+(Object.keys(R.teams).length-ids.length===1?" team":" teams")+": no faults."}));
+  return box;}
 function lineups(){
+  if(FEED.lineupReview&&SRC==="live")return reviewed(FEED.lineupReview);
   var L=FEED.lineupChecks;if(!L||SRC!=="live")return null;
   var days=Object.keys(L.byDate||{}).sort(),rule=L.rule||{days:2,players:3,stars:2};
   var box=h("section",{class:"lv-card lv-lc"},[h("div",{class:"lv-ct",text:"LINEUP CHECKS",title:"What the league rules count as a misset lineup, from closed days. Evidence for review, not a verdict. A status is what Yahoo showed when the day was captured, so a late scratch can look like an out starter."}),
