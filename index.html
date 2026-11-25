@@ -1212,7 +1212,8 @@ body{background:var(--canvas);color:var(--text)}
 .com-i{padding:8px 10px;border-radius:10px;border-left:3px solid #d99a1b;background:#fffaf0;font:500 12.5px/1.45 "Inter",Arial,sans-serif;color:var(--ink);overflow-wrap:anywhere}.com-i.bad{border-left-color:#c0392b;background:#fdf6f6}
 .com-i b{display:block;font-weight:800}.com-i .com-f{display:block}.com-i ul{margin:4px 0;padding-left:18px}.com-i small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
 .com-k{font:700 10px/1 "Inter",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.com-ft{display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 11.5px/1.4 "Inter",Arial,sans-serif;color:var(--muted)}
+.com-i details summary{cursor:pointer;color:var(--muted);font-size:11.5px}.com-i details p{margin:4px 0}
+.com-ft{display:flex;justify-content:flex-end;align-items:center;gap:10px;font:600 11.5px/1.4 "Inter",Arial,sans-serif;color:var(--muted)}
 .com-clean{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px;font:600 12px/1.4 "Inter",Arial,sans-serif;color:var(--muted)}.com-more{margin-top:14px}
 .viol-tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;background:#fdecef;color:#a1233a;font:800 10.5px/1.2 "Inter",Arial,sans-serif;letter-spacing:.02em;white-space:nowrap}
 .viol{margin:0 0 4px;padding:10px 12px;border-radius:12px;background:#fdf3f5;border:1px solid #f4cdd5}.viol .tp-h{margin:0 0 6px;color:#a1233a}
@@ -5237,10 +5238,9 @@ function violNode(vs){
    Sources: the commissioner's own record (data), the current rosters (verified snapshot, or the roster feed when the page has it), the roster and cap
    rules computed at build time, the live feed's closed-day lineup checks, and the append-only lineup-lock log (one file per US game day). */
 var CM={url:"https://raw.githubusercontent.com/phamtienlong19/nba-talk-vn-dynasty/lineup-log/",span:7,days:{},busy:0,open:{}};
-var CM_FLAG={healthy_on_il:"On IL, not IL-eligible",out_starter:"Listed out, in a starting slot",star_benched:"Top-50 player on the bench with a game"};
-var CM_DAY={out_starter:"Out player in a starting slot while an eligible bench player had a game",empty_slot:"Starting slot empty while an eligible bench player had a game",star_benched:"Top-50 player on the bench with a game"};
-function cmTime(iso){if(!iso)return "time unknown";try{return new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Bangkok",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso))+" ICT";}catch(e){return iso;}}
-function cmDay(d){return shortDate(d)+" (US)";}
+var CM_FLAG={healthy_on_il:"on IL, not eligible",out_starter:"started while out",star_benched:"top-50 player benched"};
+var CM_OUT=["O","OUT","INJ","OFS","SUSP","NA"],CM_FITS={G:["PG","SG"],F:["SF","PF"],FC:["SF","PF","C"]};   /* as scripts/live_schedule.py OUT and live_lineups.FITS */
+function cmTime(iso){if(!iso)return "time unknown";try{return new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Bangkok",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(iso));}catch(e){return iso;}}
 function cmEnsure(){var sec=document.getElementById("com-page");if(sec)return sec;sec=h("section",{class:"page tab-off",id:"com-page"},[h("div",{class:"title",text:"COMMISSIONER"}),h("div",{id:"com-root"})]);
  var anchor=document.getElementById("me-page")||document.getElementById("live")||document.querySelector("main")||document.body.lastElementChild;anchor.parentNode.insertBefore(sec,anchor.nextSibling);return sec;}
 function cmShown(){var s=document.getElementById("com-page");return !!s&&!s.classList.contains("tab-off");}
@@ -5257,47 +5257,75 @@ function cmLoad(force){
   var c=window.AbortController?new AbortController():null,to=setTimeout(function(){if(c)c.abort();},10000);
   fetch(CM.url+d+".jsonl?t="+Math.floor(Date.now()/12e4),{cache:"no-store",signal:c?c.signal:undefined}).then(function(r){clearTimeout(to);if(r.status===404)return done("none",[]);if(!r.ok)throw 0;return r.text().then(function(x){done("ok",cmParse(x));});}).catch(function(){clearTimeout(to);done("error",have?have.rows:[]);});});
  if(CM.busy&&cmShown())cmRender();}
-/* one lock record's flags as items. A Doubtful player is IL-eligible (league settings): a flag written before that was fixed is not repeated here */
-function cmLockItems(rec){
- var ok=TKR.longTermInjured.ilEligibleStatuses||[];
- return (rec.flags||[]).filter(function(f){return CM_FLAG[f]&&!(f==="healthy_on_il"&&ok.indexOf(rec.st)>=0);}).map(function(f){
-  var when=rec.gs==="final"?"read after the game had ended":"read while the game was on";
-  return {kind:"lock",flag:f,sev:"bad",text:rec.n+" · "+CM_FLAG[f],date:rec.date,
-   fact:"Game day "+cmDay(rec.date)+" · slot "+rec.slot+" · "+(rec.st?"Yahoo status "+rec.st:"no Yahoo status")+(rec.game?" · "+rec.game:""),at:"Captured "+cmTime(rec.capturedAt)+", "+when};});}
+/* the status that counted: what Yahoo showed in the last read before the tip (`pre`, when the log has it), else the status at capture */
+function cmAtLock(r){return (r.pre?r.pre.st:r.st)||null;}
+/* an eligible, healthy bench player who also had a game that day (a lock record exists only for a player with a game), each used once */
+function cmBench(r,day,used,posOf){
+ var fits=function(b){return r.slot==="Util"||posOf(b).some(function(p){return p===r.slot||(CM_FITS[r.slot]||[]).indexOf(p)>=0;});};
+ for(var i=0;i<day.length;i++){var b=day[i];if(b.team===r.team&&b.slot==="BN"&&!used[b.k]&&CM_OUT.indexOf(cmAtLock(b))<0&&fits(b)){used[b.k]=1;return b;}}
+ return null;}
+/* the flags of one game day that still stand. A flag is dropped when the manager had no way to avoid it:
+     started while out   : no eligible healthy bench player had a game, or Yahoo listed him out only after the tip
+     on IL, not eligible : Yahoo listed him out (or Doubtful) in the last read before the tip. Doubtful is IL-eligible (league settings) */
+function cmDayFlags(day,posOf){
+ var ok=TKR.longTermInjured.ilEligibleStatuses||[],used={},out=[],cleared=0;
+ day.forEach(function(r){(r.flags||[]).forEach(function(f){if(!CM_FLAG[f])return;var rep=null,st=cmAtLock(r);
+  if(f==="healthy_on_il"&&(ok.indexOf(st)>=0||(r.pre&&CM_OUT.indexOf(st)>=0))){cleared++;return;}
+  if(f==="out_starter"&&((r.pre&&CM_OUT.indexOf(st)<0)||!(rep=cmBench(r,day,used,posOf)))){cleared++;return;}
+  out.push({flag:f,r:r,rep:rep&&rep.n});});});
+ return {flags:out,cleared:cleared};}
+/* one item per player and flag, however many days it happened */
+function cmLockItems(flags){
+ var by={},order=[];flags.forEach(function(x){var key=x.r.team+"|"+x.r.n+"|"+x.flag;if(!by[key]){by[key]=[];order.push(key);}by[key].push(x);});
+ return order.map(function(key){var g=by[key].sort(function(a,b){return a.r.date<b.r.date?1:-1;}),x=g[0],r=x.r,f=x.flag,fact=[g.map(function(y){return shortDate(y.r.date);}).join(", ")];
+  if(f==="healthy_on_il"){var st=cmAtLock(r);fact.push(st?"status "+st:"no status");}
+  if(f==="out_starter")fact.push(r.slot+(x.rep?", "+x.rep+" on bench":""));
+  return {team:r.team,item:{kind:"lock",sev:"bad",flag:f,name:r.n,text:r.n+": "+CM_FLAG[f],fact:fact.join(" · "),
+   at:"Read "+cmTime(r.capturedAt)+(r.pre?", status from before tip":r.gs==="final"?", after the game":", during the game")}};});}
 function cmData(){
  var base=D.scenarios[""].teams,feed=RF.feed,rosterAt=feed?new Date(rfOldest(feed)).toISOString():D.season.snapshot.verifiedAt,snapAt=D.season.snapshot.verifiedAt;
- var rosterSrc=(feed?"Yahoo rosters read ":"Verified roster snapshot ")+cmTime(rosterAt),snapSrc="Verified roster snapshot "+cmTime(snapAt);
+ var rosterSrc=(feed?"Live rosters ":"Snapshot ")+cmTime(rosterAt),snapSrc="Snapshot "+cmTime(snapAt);
  var teams={};D.teams.forEach(function(t){teams[t.id]={id:t.id,items:[],notes:[]};});
  /* the commissioner's own record */
- (D.violations||[]).forEach(function(v){if(teams[v.team])teams[v.team].items.push({kind:"record",sev:"bad",v:v,text:v.label+" · week "+v.week+" · "+v.summary,fact:v.points==null?(v.pointsNote||"Points not set."):"Points: "+v.points,at:"Recorded by the commissioner"});});
+ (D.violations||[]).forEach(function(v){if(teams[v.team])teams[v.team].items.push({kind:"record",sev:"bad",v:v,text:v.label+" W"+v.week+": "+v.summary,fact:v.points==null?"Points not set":"Points: "+v.points,at:"Recorded by commissioner"});});
  /* lineup-lock log */
- var days=cmDates(CM.span),latest="",loaded=0,failed=0,withFile=0;
- days.forEach(function(d){var x=CM.days[d];if(!x)return;if(x.state==="error")failed++;if(x.state==="ok"||x.state==="none")loaded++;if(x.state==="ok")withFile++;});
- Object.keys(CM.days).sort().reverse().forEach(function(d){if(days.indexOf(d)<0)return;CM.days[d].rows.forEach(function(r){if(r.capturedAt>latest)latest=r.capturedAt;if(r.kind==="lock"&&teams[r.team])cmLockItems(r).forEach(function(i){teams[r.team].items.push(i);});});});
- /* closed days of the current week, from the live feed */
+ var days=cmDates(CM.span),latest="",loaded=0,failed=0,withFile=0,cleared=0,flags=[],rosterPos={};
+ D.teams.forEach(function(t){base[t.id].roster.forEach(function(r){rosterPos[r.k]=r.pos||"";});});
+ var posOf=function(r){var p=r.pos||rosterPos[r.k]||"";return Array.isArray(p)?p:String(p).split(/[\/,]/).map(function(x){return x.trim();});};
+ days.forEach(function(d){var x=CM.days[d];if(!x)return;if(x.state==="error")failed++;if(x.state==="ok"||x.state==="none")loaded++;if(x.state==="ok")withFile++;
+  var locks=x.rows.filter(function(r){if(r.capturedAt>latest)latest=r.capturedAt;return r.kind==="lock";}),got=cmDayFlags(locks,posOf);cleared+=got.cleared;flags=flags.concat(got.flags);});
+ cmLockItems(flags).forEach(function(x){if(teams[x.team])teams[x.team].items.push(x.item);});
+ /* closed days of the current week, from the live feed; a start the lock log shows was listed out only after the tip is not counted */
  var F=window.NBA_LIVE&&NBA_LIVE.source()==="live"?NBA_LIVE.feed():null,LC=F&&F.lineupChecks;
- if(LC)(LC.teams||[]).forEach(function(t){var tm=teams[t.team];if(!tm||!t.missetDays)return;var rule=LC.rule||{days:2,players:3,stars:2},lines=[];
-  (t.days||[]).forEach(function(d){d.issues.forEach(function(i){lines.push(shortDate(d.date)+": "+(CM_DAY[i.k]||i.k)+": "+(i.k==="empty_slot"?i.s+" slot":(i.p||"?")+(i.s&&i.s!=="BN"?" ("+i.s+")":""))+(i.r?"; bench: "+i.r:""));});});
-  tm.items.push({kind:"week",sev:t.meetsCount?"bad":"warn",text:"Week "+LC.week+": "+t.missetDays+" day"+(t.missetDays>1?"s":"")+", "+t.players+" player"+(t.players>1?"s":"")+" misset"+(t.meetsCount?" · at the rule's count":""),
-   fact:"Rule count: "+rule.days+"+ days or "+rule.players+"+ players in a week, or "+rule.stars+" stars",lines:lines,at:"Closed days only, statuses read after each day ended · feed "+cmTime(F.asOf)});});
+ var lateOut=function(date,id){var x=CM.days[date];return !!x&&x.rows.some(function(r){return r.kind==="lock"&&r.k==="478.p."+id&&r.pre&&CM_OUT.indexOf(r.pre.st||null)<0;});};
+ if(LC)(LC.teams||[]).forEach(function(t){var tm=teams[t.team];if(!tm||!t.missetDays)return;var rule=LC.rule||{days:2,players:3,stars:2},lines=[],players={},stars={},n=0;
+  (t.days||[]).forEach(function(d){var left=d.issues.filter(function(i){return !(i.k==="out_starter"&&lateOut(d.date,i.id));});cleared+=d.issues.length-left.length;if(left.length)n++;
+   left.forEach(function(i){var key=i.id||i.p||i.s;players[key]=1;if(i.k==="star_benched")stars[key]=1;
+    lines.push(shortDate(d.date)+": "+(i.k==="empty_slot"?i.s+" empty":i.k==="star_benched"?i.p+" (top 50) benched":i.p+" out at "+i.s)+(i.r?", "+i.r+" on bench":""));});});
+  if(!n)return;var np=Object.keys(players).length,meets=n>=rule.days||np>=rule.players||Object.keys(stars).length>=rule.stars;
+  tm.items.push({kind:"week",sev:meets?"bad":"warn",text:"Week "+LC.week+": "+n+" misset day"+(n>1?"s":"")+", "+np+" player"+(np>1?"s":"")+(meets?" · meets rule count":""),
+   fact:"Rule: "+rule.days+" days, "+rule.players+" players or "+rule.stars+" stars",lines:lines,at:"Feed "+cmTime(F.asOf)+", closed days"});});
  /* the rosters as they are now */
  var YH=TKL.yahoo,spots=TKL.roster.spots;
  D.teams.forEach(function(t){var tm=base[t.id],items=teams[t.id].items,notes=teams[t.id].notes,onIl=tm.roster.filter(function(r){return r.s==="IL"||r.s==="IL+";});
   onIl.forEach(function(r){var k=ilKind(r);if(k==="out")return;
-   items.push({kind:"il",sev:k==="inel"?"bad":"warn",text:r.n+" · "+(k==="inel"?"On IL, not IL-eligible":"On IL, eligibility unverified"),fact:"Slot "+r.s+" · "+(r.st?"Yahoo status "+r.st:"no Yahoo status"),at:rosterSrc});});
-  if(onIl.length>YH.ilSlots)items.push({kind:"size",sev:"bad",text:onIl.length+" players on IL, "+YH.ilSlots+" IL slots",fact:"",at:rosterSrc});
-  if(tm.roster.length>spots)items.push({kind:"size",sev:"bad",text:tm.roster.length+" players, "+spots+" roster spots",fact:"",at:rosterSrc});
-  if(tm.status==="OVER_CEILING")items.push({kind:"cap",sev:"bad",text:"Payroll over the ceiling by "+(-tm.room),fact:"Payroll "+tm.cap+" · ceiling "+D.cap.ceiling,at:snapSrc});
-  if(tm.status==="UNDER_FLOOR")items.push({kind:"cap",sev:"bad",text:"Payroll under the floor by "+tm.toFloor,fact:"Payroll "+tm.cap+" · floor "+D.cap.floor,at:snapSrc});
+   var seen=k==="inel"&&items.filter(function(i){return i.kind==="lock"&&i.flag==="healthy_on_il"&&i.name===r.n;})[0];
+   if(seen){seen.fact+=" · still on IL ("+rosterSrc+")";return;}
+   items.push({kind:"il",sev:k==="inel"?"bad":"warn",text:r.n+": on IL, "+(k==="inel"?"not eligible":"eligibility unknown"),fact:r.st?"status "+r.st:"no status",at:rosterSrc});});
+  if(onIl.length>YH.ilSlots)items.push({kind:"size",sev:"bad",text:onIl.length+" players on IL (max "+YH.ilSlots+")",fact:"",at:rosterSrc});
+  if(tm.roster.length>spots)items.push({kind:"size",sev:"bad",text:tm.roster.length+" players (max "+spots+")",fact:"",at:rosterSrc});
+  if(tm.status==="OVER_CEILING")items.push({kind:"cap",sev:"bad",text:"Over cap ceiling by "+(-tm.room),fact:tm.cap+" / "+D.cap.ceiling,at:snapSrc});
+  if(tm.status==="UNDER_FLOOR")items.push({kind:"cap",sev:"bad",text:"Under cap floor by "+tm.toFloor,fact:tm.cap+" / "+D.cap.floor,at:snapSrc});
   var c=tm.checks;if(!c)return;
   var put=function(level,text,fact){(level==="over"?items:notes).push({kind:"roster",sev:level==="over"?"bad":"warn",text:text,fact:fact,at:snapSrc});};
-  if(c.injured.level!=="ok")put(c.injured.level,"Injured players "+c.injured.count+", limit "+c.injured.max,c.injured.players.join(", "));
-  if(c.singlePosition.level!=="ok")put(c.singlePosition.level,"Single-position players "+c.singlePosition.count+", limit "+c.singlePosition.max+" ("+c.singlePosition.maxWithCombo+" with combo tags)",c.singlePosition.players.join(", "));
-  var sh=(c.coverage.short||[]).map(function(p){return p+" "+c.coverage.byPosition[p]+" of "+c.coverage.min;}).concat((c.coverage.shortCombo||[]).map(function(p){return p+" "+c.coverage.byCombo[p]+" of "+c.coverage.comboMin;}));
-  if(sh.length)put("over","Too few healthy players at a position",sh.join(", "));
-  if(c.lineup.level!=="ok")put("over","Lineup cannot be filled: "+c.lineup.filled+" of "+c.lineup.slots+" slots","Empty: "+c.lineup.empty.join(", "));});
- (D.season.findings||[]).forEach(function(f){if(teams[f.franchiseId])teams[f.franchiseId].items.push({kind:"floor",sev:"warn",text:"Under the floor at the "+(f.checkpoint==="POST_DRAFT"?"post-draft":"post-trade-deadline")+" check",
-  fact:"Payroll then "+f.capAtCheckpoint+" · floor "+f.floor+" · now "+f.currentCap+" · "+(f.penalty?String(f.penalty):"no penalty recorded"),at:f.checkpointDate?"Checkpoint "+shortDate(f.checkpointDate):"Checkpoint"});});
+  if(c.injured.level!=="ok")put(c.injured.level,"Injured: "+c.injured.count+" (max "+c.injured.max+")",c.injured.players.join(", "));
+  if(c.singlePosition.level!=="ok")put(c.singlePosition.level,"Single-position: "+c.singlePosition.count+" (max "+c.singlePosition.max+", "+c.singlePosition.maxWithCombo+" with combos)",c.singlePosition.players.join(", "));
+  var sh=(c.coverage.short||[]).map(function(p){return {p:p,t:c.coverage.byPosition[p]+" of "+c.coverage.min};}).concat((c.coverage.shortCombo||[]).map(function(p){return {p:p,t:c.coverage.byCombo[p]+" of "+c.coverage.comboMin};}));
+  var empty=c.lineup.level!=="ok"?"only "+c.lineup.filled+" of "+c.lineup.slots+" slots can be filled":"";
+  if(sh.length)put("over","Short at "+sh.map(function(x){return x.p;}).join(", "),sh.map(function(x){return x.p+" "+x.t+" healthy";}).concat(empty?[empty]:[]).join(" · "));
+  else if(empty)put("over","Cannot fill "+c.lineup.empty.join(", "),empty);});
+ (D.season.findings||[]).forEach(function(f){if(teams[f.franchiseId])teams[f.franchiseId].items.push({kind:"floor",sev:"warn",text:"Under floor "+(f.checkpoint==="POST_DRAFT"?"after draft":"after deadline"),
+  fact:f.capAtCheckpoint+" / "+f.floor+", now "+f.currentCap+" · "+(f.penalty?String(f.penalty):"no penalty recorded"),at:f.checkpointDate?"Checkpoint "+shortDate(f.checkpointDate):"Checkpoint"});});
  /* league-wide */
  var nameOf={},ownerOf={};D.teams.forEach(function(t){base[t.id].roster.forEach(function(r){nameOf[r.k]=r.n;ownerOf[r.k]=t.id;});});
  var trades=D.trades.filter(function(x){return x.status!=="VOID"&&x.phase==="IN_SEASON"&&(x.status==="PROPOSED"||x.status==="AGREED"||x.pending);});
@@ -5305,53 +5333,54 @@ function cmData(){
  var pend=RF.pend,moves=[];if(pend){(pend.add||[]).forEach(function(x){moves.push({team:x.t,text:x.n+" added"});});(pend.drop||[]).forEach(function(x){moves.push({team:x.t,text:x.n+" dropped"});});(pend.moved||[]).forEach(function(x){moves.push({team:x.to||x.t,text:x.n+" changed team"});});}
  var unlinked=(D.season.provisional||[]).filter(function(k){return nameOf[k];}).map(function(k){return {n:nameOf[k],team:ownerOf[k]};});
  return {teams:D.teams.map(function(t){return teams[t.id];}),trades:trades,locks:locks,moves:moves,unlinked:unlinked,unreflected:D.season.appliedAfterSnapshot||[],
-  at:{roster:rosterSrc,snapshot:snapSrc,log:latest,live:F?F.asOf:null},log:{span:CM.span,loaded:loaded,failed:failed,files:withFile,busy:CM.busy}};}
+  at:{roster:rosterSrc,snapshot:snapSrc,log:latest,live:F?F.asOf:null},log:{span:CM.span,loaded:loaded,failed:failed,files:withFile,busy:CM.busy,cleared:cleared}};}
 function cmItemNode(i){
- if(i.kind==="record")return violNode([i.v]);
  var kids=[h("b",{text:i.text})];if(i.fact)kids.push(h("span",{class:"com-f",text:i.fact}));
  if(i.lines){kids.push(h("ul",{},i.lines.map(function(l){return h("li",{text:l});})));}
+ if(i.v)kids.push(h("details",{},[h("summary",{text:"Detail"}),h("p",{text:i.v.detail})]));
  kids.push(h("small",{text:i.at}));return h("div",{class:"com-i "+i.sev},kids);}
-var CM_KIND=[["record","recorded"],["lock","at lineup lock"],["week","week lineup check"],["il","IL now"],["size","roster size"],["cap","cap"],["roster","roster rule","roster rules"],["floor","floor check"]];
+var CM_KIND=[["record","recorded"],["lock","lineup"],["week","week"],["il","IL"],["size","size"],["cap","cap"],["roster","roster"],["floor","floor"]];
 function cmCounts(items){return CM_KIND.map(function(k){var n=items.filter(function(i){return i.kind===k[0];}).length;return n?{k:k[0],t:n+" "+(n>1&&k[2]||k[1]),bad:items.some(function(i){return i.kind===k[0]&&i.sev==="bad";})}:null;}).filter(Boolean);}
 function cmRender(){
  cmEnsure();var root=document.getElementById("com-root"),d=cmData(),me=getMe();root.textContent="";
- var logLine=d.log.busy?"loading…":!d.log.loaded&&!d.log.failed?"not loaded yet":(d.at.log?"last capture "+cmTime(d.at.log):"no capture")+" in the last "+d.log.span+" game days"+(d.log.failed?" · "+d.log.failed+" day"+(d.log.failed>1?"s":"")+" could not be read":"");
- root.appendChild(h("div",{class:"com-top"},[h("p",{text:"What the data shows, with the time each fact was read. Nothing here is a ruling: the commissioner decides."}),
-  h("dl",{},[["Rosters",d.at.roster],["Lineup-lock log",logLine],["Week lineup checks",d.at.live?"live feed "+cmTime(d.at.live):"the live feed has not loaded yet"],["Cap and roster rules",d.at.snapshot]].reduce(function(a,x){a.push(h("dt",{text:x[0]}),h("dd",{text:x[1]}));return a;},[]))]));
+ var logLine=d.log.busy?"loading…":!d.log.loaded&&!d.log.failed?"not loaded":(d.at.log?cmTime(d.at.log):"nothing in "+d.log.span+" days")+(d.log.failed?" · "+d.log.failed+" day"+(d.log.failed>1?"s":"")+" unread":"")+(d.log.cleared?" · "+d.log.cleared+" flag"+(d.log.cleared>1?"s":"")+" cleared (no bench option, or listed out after tip)":"");
+ root.appendChild(h("div",{class:"com-top"},[h("p",{text:"Facts only; the commissioner decides. Times are ICT."}),
+  h("dl",{},[["Rosters",d.at.roster],["Lock log",logLine],["Week checks",d.at.live?"Feed "+cmTime(d.at.live):"not loaded"],["Cap and rules",d.at.snapshot]].reduce(function(a,x){a.push(h("dt",{text:x[0]}),h("dd",{text:x[1]}));return a;},[]))]));
  var team=function(f){return tchip(f);};
  var row=function(f,text,tone){return h("div",{class:"me-r"+(tone?" "+tone:"")},[h("span",{class:"k"},f?[team(f)]:[]),h("span",{class:"v",text:text})]);};
  var grid=h("div",{class:"me-g com-lg"});
- grid.appendChild(meCard("Trades waiting",null,null,d.trades.length||d.unreflected.length?d.trades.map(function(x){return meRow(x.label,x.status+(x.pending?" · awaiting confirmation":"")+" · "+x.participants.map(function(f){return T[f]?T[f].short:f;}).join(" and "),"warn");}).concat(d.unreflected.map(function(id){return meRow(id,"recorded here, not yet on the verified Yahoo rosters","warn");})):[meRow("Trades","none waiting")]));
- grid.appendChild(meCard("Yahoo changes not yet verified",null,null,d.moves.length?d.moves.map(function(m){return row(m.team,m.text,"warn");}):[meRow("Rosters",RF.feed?"match the verified snapshot":"live roster read not loaded")]));
- grid.appendChild(meCard("Open record items",null,null,(d.unlinked.map(function(u){return row(u.team,u.n+": no Yahoo player id linked yet");})).concat((D.violations||[]).filter(function(v){return v.points==null;}).map(function(v){return row(v.team,v.label+" week "+v.week+": points not set","warn");})).concat(d.unlinked.length||(D.violations||[]).some(function(v){return v.points==null;})?[]:[meRow("Record","nothing open")])));
- var lockBox=h("details",{class:"com-cd"},[h("summary",{text:d.locks.length+" player"+(d.locks.length===1?"":"s")+" in a trade cooldown"})].concat(d.locks.map(function(x){return row(x.team,x.n+": until "+shortDate(x.l.end.slice(0,10)));})));
+ grid.appendChild(meCard("Trades waiting",null,null,d.trades.length||d.unreflected.length?d.trades.map(function(x){return meRow(x.label,x.status+(x.pending?" · unconfirmed":"")+" · "+x.participants.map(function(f){return T[f]?T[f].short:f;}).join(", "),"warn");}).concat(d.unreflected.map(function(id){return meRow(id,"not on Yahoo yet","warn");})):[meRow("Trades","none")]));
+ grid.appendChild(meCard("Unverified Yahoo moves",null,null,d.moves.length?d.moves.map(function(m){return row(m.team,m.text,"warn");}):[meRow("Rosters",RF.feed?"none":"not loaded")]));
+ var noPts=(D.violations||[]).filter(function(v){return v.points==null;}),open=d.unlinked.map(function(u){return row(u.team,u.n+": no Yahoo id");}).concat(noPts.map(function(v){return row(v.team,v.label+" W"+v.week+": no points","warn");}));
+ grid.appendChild(meCard("Open items",null,null,open.length?open:[meRow("Record","none")]));
+ var lockBox=h("details",{class:"com-cd"},[h("summary",{text:d.locks.length+" player"+(d.locks.length===1?"":"s")})].concat(d.locks.map(function(x){return row(x.team,x.n+": until "+shortDate(x.l.end.slice(0,10)));})));
  if(CM.open.locks)lockBox.open=true;lockBox.addEventListener("toggle",function(){CM.open.locks=lockBox.open;});
  grid.appendChild(meCard("Trade cooldowns",null,null,[lockBox]));
  root.appendChild(grid);
  var flagged=d.teams.filter(function(t){return t.items.length;}).sort(function(a,b){var bad=function(t){return t.items.filter(function(i){return i.sev==="bad";}).length;};return bad(b)-bad(a)||b.items.length-a.items.length;});
- root.appendChild(h("h3",{class:"com-h",text:flagged.length?flagged.length+" of "+d.teams.length+" teams have items":"No team has an open item"}));
+ root.appendChild(h("h3",{class:"com-h",text:flagged.length?flagged.length+" of "+d.teams.length+" teams":"No open items"}));
  var list=h("div",{class:"com-teams"});
  flagged.concat(d.teams.filter(function(t){return !t.items.length&&t.notes.length;})).forEach(function(t){
   var det=h("details",{class:"com-t"+(t.id===me?" me":""),"data-team":t.id});if(CM.open[t.id])det.open=true;
   det.addEventListener("toggle",function(){CM.open[t.id]=det.open;});
-  var chips=cmCounts(t.items).map(function(c){return h("span",{class:"com-c"+(c.bad?" bad":""),text:c.t});});if(!t.items.length)chips=[h("span",{class:"com-c mute",text:"at a limit"})];
+  var chips=cmCounts(t.items).map(function(c){return h("span",{class:"com-c"+(c.bad?" bad":""),text:c.t});});if(!t.items.length)chips=[h("span",{class:"com-c mute",text:"at limit"})];
   det.appendChild(h("summary",{},[team(t.id)].concat(chips)));
   var body=h("div",{class:"com-b"});
   CM_KIND.forEach(function(k){t.items.filter(function(i){return i.kind===k[0];}).forEach(function(i){body.appendChild(cmItemNode(i));});});
-  if(t.notes.length){body.appendChild(h("div",{class:"com-k",text:"At a limit, within the rules"}));t.notes.forEach(function(i){body.appendChild(cmItemNode(i));});}
-  var go=h("button",{type:"button",class:"me-go",text:"Open "+(T[t.id]?T[t.id].short:t.id)+" roster"});go.addEventListener("click",function(){goTeam(t.id);});
-  body.appendChild(h("div",{class:"com-ft"},[h("span",{text:"The commissioner decides."}),go]));det.appendChild(body);list.appendChild(det);});
+  if(t.notes.length){body.appendChild(h("div",{class:"com-k",text:"At limit, allowed"}));t.notes.forEach(function(i){body.appendChild(cmItemNode(i));});}
+  var go=h("button",{type:"button",class:"me-go",text:"Open roster"});go.addEventListener("click",function(){goTeam(t.id);});
+  body.appendChild(h("div",{class:"com-ft"},[go]));det.appendChild(body);list.appendChild(det);});
  root.appendChild(list);
  var clean=d.teams.filter(function(t){return !t.items.length&&!t.notes.length;});
- if(clean.length)root.appendChild(h("div",{class:"com-clean"},[h("span",{text:"Nothing found:"})].concat(clean.map(function(t){return team(t.id);}))));
- var more=h("button",{type:"button",class:"me-go com-more",text:"Show 7 earlier days of the lineup-lock log"});more.addEventListener("click",function(){CM.span+=7;cmLoad();cmRender();});
+ if(clean.length)root.appendChild(h("div",{class:"com-clean"},[h("span",{text:"Clear:"})].concat(clean.map(function(t){return team(t.id);}))));
+ var more=h("button",{type:"button",class:"me-go com-more",text:"Load 7 earlier days"});more.addEventListener("click",function(){CM.span+=7;cmLoad();cmRender();});
  if(CM.span<56)root.appendChild(more);
  monoDigits(root);}
 function cmExportPages(){
  var d=cmData(),cards=d.teams.filter(function(t){return t.items.length;}).map(function(t){var n=t.items.length;
-  return {team:t.id,head:String(n),sub:"item"+(n>1?"s":""),lines:t.items.slice(0,8).map(function(i){return {l:i.text+(i.date?" · "+shortDate(i.date):""),r:"",tone:i.sev==="bad"?"bad":""};}).concat(n>8?[{l:"+"+(n-8)+" more on the page",r:"",tone:"mute"}]:[])};});
- var sub=d.at.roster+(d.at.log?" · lock log "+cmTime(d.at.log):"")+" · the commissioner decides";
- if(!cards.length)cards=[{team:D.teams[0].id,head:"",sub:"",lines:[{l:"No team has an open item",r:""}]}];
+  return {team:t.id,head:String(n),sub:"item"+(n>1?"s":""),lines:t.items.slice(0,8).map(function(i){return {l:i.text,r:"",tone:i.sev==="bad"?"bad":""};}).concat(n>8?[{l:"+"+(n-8)+" more on the page",r:"",tone:"mute"}]:[])};});
+ var sub=d.at.roster+(d.at.log?" · lock log "+cmTime(d.at.log):"")+" ICT · the commissioner decides";
+ if(!cards.length)cards=[{team:D.teams[0].id,head:"",sub:"",lines:[{l:"No open items",r:""}]}];
  var pages=[];for(var i=0;i<cards.length;i+=6)pages.push(cards.slice(i,i+6));
  return pages.map(function(c,i){var part=pages.length>1?" "+(i+1)+" of "+pages.length:"";return {label:"Review"+part,name:"commissioner-"+(i+1)+".png",alt:"Commissioner review"+part,doc:{title:"Commissioner review"+(part?" ·"+part:""),sub:sub,blocks:[{t:"cards",cols:1,cards:c}],foot:exFoot(),link:exLinkHere("#commissioner")}};});}
 window.NBA_COMMISH={data:cmData,render:cmRender,dates:cmDates,load:function(){cmLoad(true);},

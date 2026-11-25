@@ -61,6 +61,38 @@ class TestRecords(unittest.TestCase):
         self.assertEqual(ll.records(f, set(), IL_MAP, RANKS, False, f["asOf"]), [])
 
 
+class TestStatusBeforeTip(unittest.TestCase):
+    def reads(self, minutes=4, before_gs="upcoming", before_day="2026-11-24"):
+        before = feed([row(6, "Late Scratch", "PG", "Q", before_gs)], day=before_day, asof=before_day + "T20:00:00Z")
+        after = feed([row(6, "Late Scratch", "PG", "O", "live")], asof="2026-11-24T20:%02d:00Z" % minutes)
+        return [r for r in ll.records(after, set(), IL_MAP, RANKS, True, after["asOf"], before) if r["kind"] == "lock"][0]
+
+    def test_the_status_shown_just_before_the_tip_is_kept_beside_the_status_at_capture(self):
+        r = self.reads()
+        self.assertEqual((r["st"], r["pre"], r["pos"]), ("O", {"st": "Q", "at": "2026-11-24T20:00:00Z"}, ["PG"]))
+
+    def test_an_old_or_already_locked_or_other_day_read_says_nothing_about_the_lock(self):
+        self.assertNotIn("pre", self.reads(minutes=ll.PRE_MAX_MINUTES + 1))
+        self.assertNotIn("pre", self.reads(before_gs="live"))
+        self.assertNotIn("pre", self.reads(before_day="2026-11-23"))
+        f = feed([row(6, "A", "PG", "O", "live")])
+        self.assertNotIn("pre", ll.records(f, set(), IL_MAP, RANKS, True, f["asOf"])[0])   # no earlier read at all
+
+    def test_the_command_reads_the_previous_feed_and_survives_a_torn_one(self):
+        with tempfile.TemporaryDirectory() as d:
+            now, prev, reg = (os.path.join(d, n) for n in ("live.json", "prev.json", "reg.json"))
+            for path, doc in ((now, feed([row(6, "A", "PG", "O", "live")], asof="2026-11-24T20:04:00Z")), (prev, feed([row(6, "A", "PG", "", "upcoming")])), (reg, {"players": []})):
+                with open(path, "w", encoding="utf-8") as fh:
+                    json.dump(doc, fh)
+            args = ["--feed", now, "--previous", prev, "--registry", reg, "--log-dir"]
+            self.assertEqual(ll.main(args + [os.path.join(d, "a")]), 0)
+            with open(os.path.join(d, "a", "2026-11-24.jsonl"), encoding="utf-8") as fh:
+                self.assertEqual(json.loads(fh.read().splitlines()[-1])["pre"]["st"], None)
+            with open(prev, "w", encoding="utf-8") as fh:
+                fh.write("{torn")
+            self.assertEqual(ll.main(args + [os.path.join(d, "b")]), 0)
+
+
 class TestAppendOnly(unittest.TestCase):
     def test_a_player_is_recorded_once_and_a_later_status_change_never_rewrites_it(self):
         with tempfile.TemporaryDirectory() as d:
@@ -99,6 +131,9 @@ class TestAppendOnly(unittest.TestCase):
 
     def test_the_loop_only_ever_pushes_the_log_normally_never_forced(self):
         loop = open(os.path.join(ROOT, "scripts", "live_feed_loop.sh"), encoding="utf-8").read()
+        self.assertIn("cp live.json prev.json", loop)
+        self.assertLess(loop.index("cp live.json prev.json"), loop.index("build_live_feed.py"))
+        self.assertIn("--previous prev.json --log-dir", loop)
         body = loop.split("lineup_log() {")[1].split("\n}\n")[0]
         self.assertIn("git push -q origin lineup-log", body)
         self.assertNotIn("--force", body)

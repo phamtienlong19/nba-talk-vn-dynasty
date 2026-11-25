@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-25T06:35:32Z
+Generated: 2026-11-25T06:56:06Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/commissioner-tab
-Commit: 51c291e
+Branch: feat/commissioner-smarter
+Commit: 26a9e71
 Base: main
 Working tree: dirty
 
@@ -40,8 +40,8 @@ Fingerprint: FRESH
  .github/workflows/validate.yml                     |   13 +-
  .gitignore                                         |    5 +
  CLAUDE.md                                          |   19 +-
- ai_exchange/IMPLEMENTATION_REPORT.md               |   11 +-
- ai_exchange/REVIEW_PACKET.md                       |  388 ++++--
+ ai_exchange/IMPLEMENTATION_REPORT.md               |   10 +-
+ ai_exchange/REVIEW_PACKET.md                       |  398 +++++--
  config/draft_lottery_rules.json                    |   25 +-
  config/roster_rules.json                           |    6 +-
  config/trade_rules.json                            |   14 +-
@@ -96,11 +96,11 @@ Fingerprint: FRESH
  docs/HEALING_CONFLICTS.md                          |   25 +
  docs/LEAGUE_RULES_MODEL.md                         |   11 +
  docs/LEAGUE_STATE_MODEL.md                         |    9 +
- docs/LIVE_DATA.md                                  |   73 ++
+ docs/LIVE_DATA.md                                  |   90 ++
  docs/SEASON_STATE_MODEL.md                         |    2 +-
  docs/YAHOO_DATA_SOURCE.md                          |    2 +-
  docs/YAHOO_ROSTER_WORKFLOW.md                      |    2 +-
- index.html                                         |  677 +++++++++--
+ index.html                                         |  826 +++++++++++--
  scripts/bot_pr.sh                                  |   44 +
  scripts/build_league_state.py                      |    4 +-
  scripts/build_live_feed.py                         |   12 +-
@@ -145,6 +145,7 @@ Fingerprint: FRESH
  tests/test_bot_prs.py                              |   42 +
  tests/test_build_site.py                           |   49 +
  tests/test_card_positions.py                       |   40 +
+ tests/test_commissioner_tab.py                     |  140 +++
  tests/test_consistency.py                          |   55 +
  tests/test_export.py                               |   50 +-
  tests/test_fa_draft_pool.py                        |    4 +-
@@ -192,12 +193,12 @@ Fingerprint: FRESH
  tools/yahoo-roto/roto-live.yml                     |   71 ++
  tools/yahoo-roto/tests/test_yahoo_roto.py          |  184 +++
  tools/yahoo-roto/yahoo_roto.py                     |  571 +++++++++
- 165 files changed, 49760 insertions(+), 682 deletions(-)
+ 166 files changed, 50073 insertions(+), 684 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
-- tests: PASS (full run, 986 ran, 2 skipped, at 51c291e with uncommitted changes)
+- tests: PASS (full run, 993 ran, 2 skipped, at 26a9e71 with uncommitted changes)
 - Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
 - live HTTP: OK
 
@@ -325,6 +326,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - tests/test_bot_prs.py
 - tests/test_build_site.py
 - tests/test_card_positions.py
+- tests/test_commissioner_tab.py
 - tests/test_consistency.py
 - tests/test_export.py
 - tests/test_fa_draft_pool.py
@@ -384,4 +386,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/commissioner-tab` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/commissioner-smarter` if not already done, then request human/ChatGPT review of this packet.

@@ -15,9 +15,12 @@ from _drive import drive_page  # noqa: E402
 from _phone import phone_run  # noqa: E402
 
 
-def lock(team, name, flags, slot="IL", st=None, gs="final", date="2026-11-24"):
-    return json.dumps({"kind": "lock", "date": date, "capturedAt": "2026-11-25T06:11:00Z", "team": team, "k": "478.p.1", "n": name,
-                       "slot": slot, "st": st, "il": None, "game": "W, 1-0 vs BOS", "gs": gs, "flags": flags})
+def lock(team, name, flags, slot="IL", st=None, gs="final", date="2026-11-24", pos=("PG",), pre=False):
+    rec = {"kind": "lock", "date": date, "capturedAt": "2026-11-25T06:11:00Z", "team": team, "k": "478.p." + name, "n": name,
+           "slot": slot, "st": st, "il": None, "game": "W, 1-0 vs BOS", "gs": gs, "pos": list(pos), "flags": flags}
+    if pre is not False:
+        rec["pre"] = {"st": pre, "at": "2026-11-25T00:00:00Z"}
+    return json.dumps(rec)
 
 
 LOG = "\n".join([
@@ -26,6 +29,17 @@ LOG = "\n".join([
     lock("franchise-01", "Zed Starter", ["out_starter"], slot="PG", st="O", gs="live"),
     lock("franchise-01", "Zed Doubtful", ["healthy_on_il"], st="D"),       # written before D counted as IL-eligible
     lock("franchise-01", "Zed Quiet", []),
+    lock("franchise-01", "Zed Bench", [], slot="BN"),                      # the one replacement for franchise-01
+    # franchise-02: nobody on the bench can play the slot (a centre, and a listed-out guard) -> not the manager's fault
+    lock("franchise-02", "No Cover", ["out_starter"], slot="PG", st="O"),
+    lock("franchise-02", "Bench Big", [], slot="BN", pos=("C",)),
+    lock("franchise-02", "Bench Hurt", [], slot="BN", st="O"),
+    # franchise-03: had a replacement, but one player was only questionable before the tip; the other was already Out
+    lock("franchise-03", "Late Scratch", ["out_starter"], slot="PG", st="O", pre="Q"),
+    lock("franchise-03", "Known Out", ["out_starter"], slot="G", st="O", pre="O"),
+    lock("franchise-03", "Second Out", ["out_starter"], slot="Util", st="O", pre="O"),
+    lock("franchise-03", "Only Bench", [], slot="BN", pos=("SG",)),
+    lock("franchise-04", "Out Before Tip", ["healthy_on_il"], st=None, pre="O"),
     "{not json",
 ])
 OPEN = "location.hash='#commissioner';window.dispatchEvent(new PopStateEvent('popstate'));"
@@ -40,6 +54,7 @@ class TestCommissionerTab(unittest.TestCase):
           var D=JSON.parse(document.getElementById('league-data').textContent),d=NBA_COMMISH.data(),root=document.getElementById('com-root');
           R.shown=!document.getElementById('com-page').classList.contains('tab-off')&&document.getElementById('rosters-a').classList.contains('tab-off');
           R.nav=document.querySelector('.navlink.on').textContent;
+          R.cleared=d.log.cleared;
           [].forEach.call(root.querySelectorAll('details'),function(e){e.open=true;});
           R.text=root.textContent;
           R.items={};d.teams.forEach(function(t){R.items[t.id]=t.items.map(function(i){return [i.kind,i.text,i.fact||'',i.at||''];});});
@@ -59,16 +74,30 @@ class TestCommissionerTab(unittest.TestCase):
         self.assertEqual(self.r["nav"], "REVIEW")
         self.assertEqual(self.r["cards"], self.r["withItems"])
 
-    def test_lock_log_flags_are_listed_with_the_capture_time_and_when_it_was_read(self):
-        got = self.kinds("franchise-01", "lock")
-        self.assertEqual([g[1] for g in got], ["Zed Idle · On IL, not IL-eligible", "Zed Starter · Listed out, in a starting slot"])
-        self.assertIn("no Yahoo status", got[0][2])
-        self.assertRegex(got[0][3], r"^Captured .*13:11 ICT, read after the game had ended$")
-        self.assertTrue(got[1][3].endswith("read while the game was on"))
+    def test_lock_log_flags_are_listed_with_what_happened_and_when_it_was_read(self):
+        got = {g[1]: g for g in self.kinds("franchise-01", "lock")}
+        self.assertEqual(sorted(got), ["Zed Idle: on IL, not eligible", "Zed Starter: started while out"])
+        self.assertEqual(got["Zed Idle: on IL, not eligible"][2], "NOV 24 · no status")
+        self.assertEqual(got["Zed Idle: on IL, not eligible"][3], "Read 25 Nov, 13:11, after the game")
+        self.assertEqual(got["Zed Starter: started while out"][2], "NOV 24 · PG, Zed Bench on bench")
+        self.assertTrue(got["Zed Starter: started while out"][3].endswith("during the game"))
 
     def test_a_doubtful_player_is_not_reported_for_sitting_on_il(self):
         self.assertNotIn("Zed Doubtful", self.r["text"])
         self.assertNotIn("Zed Quiet", self.r["text"])
+
+    def test_a_start_is_not_faulted_without_a_bench_option(self):
+        self.assertEqual(self.kinds("franchise-02", "lock"), [])
+
+    def test_a_late_scratch_is_not_faulted_and_a_bench_player_covers_only_one_start(self):
+        got = self.kinds("franchise-03", "lock")
+        self.assertEqual([g[1] for g in got], ["Known Out: started while out"])
+        self.assertEqual(got[0][2], "NOV 24 · G, Only Bench on bench")
+        self.assertTrue(got[0][3].endswith("status from before tip"))
+
+    def test_on_il_is_not_faulted_when_listed_out_before_the_tip(self):
+        self.assertEqual(self.kinds("franchise-04", "lock"), [])
+        self.assertGreaterEqual(self.r["cleared"], 5)
 
     def test_recorded_violations_and_cap_breaches_come_from_the_data(self):
         for team in self.r["violations"]:
@@ -79,14 +108,31 @@ class TestCommissionerTab(unittest.TestCase):
     def test_every_item_carries_the_time_it_was_read(self):
         for items in self.r["items"].values():
             for kind, text, _fact, at in items:
-                self.assertRegex(at, r"ICT|Recorded by the commissioner|Checkpoint", (kind, text))
+                self.assertRegex(at, r"^(Snapshot|Live rosters|Read|Feed|Checkpoint) |Recorded by commissioner", (kind, text))
 
     def test_it_states_facts_and_leaves_the_ruling_to_the_commissioner(self):
         text = self.r["text"]
         self.assertIn("the commissioner decides", text)
+        self.assertIn("Times are ICT", text)
         self.assertNotIn("$", text)
         self.assertIsNone(re.search(r"\b(should|consider|recommend|suggest)", text, re.I))
         self.assertNotIn("HEALTHY", text)
+
+    def test_the_week_check_drops_a_late_scratch_and_merges_repeats(self):
+        day = lambda d: lock("franchise-01", "Zed Idle", ["healthy_on_il"], date=d)  # noqa: E731
+        r = drive_page(OPEN + """
+          var d=NBA_COMMISH.dates(4),log={};log[d[1]]=%s.replace(/DAY/g,d[1]);log[d[2]]=%s.replace(/DAY/g,d[2]);NBA_COMMISH.setLog(log);
+          var real=window.NBA_LIVE;window.NBA_LIVE={source:function(){return 'live';},feed:function(){return {asOf:'2026-11-25T06:00:00Z',lineupChecks:{week:6,rule:{days:2,players:3,stars:2},teams:[
+            {team:'franchise-03',missetDays:2,days:[{date:d[1],issues:[{k:'out_starter',p:'Late Scratch',id:'77',s:'PG',r:'X'}]},{date:d[2],issues:[{k:'empty_slot',p:null,s:'C',r:'Y'}]}]}]}};},next:real&&real.next,exports:real&&real.exports};
+          var x=NBA_COMMISH.data();R.week=x.teams[2].items.filter(function(i){return i.kind==='week';}).map(function(i){return [i.text,i.lines];});
+          R.il=x.teams[0].items.filter(function(i){return i.kind==='lock';}).map(function(i){return i.fact;});R.days=[d[1],d[2]];
+        """ % (json.dumps(day("DAY") + "\n" + lock("franchise-03", "77", [], slot="PG", st="O", date="DAY", pre="Q")), json.dumps(day("DAY"))), qs="#teams", wait=1200)
+        self.assertEqual(len(r["week"]), 1)
+        self.assertEqual(r["week"][0][0], "Week 6: 1 misset day, 1 player")
+        self.assertEqual(len(r["week"][0][1]), 1)
+        self.assertIn("C empty, Y on bench", r["week"][0][1][0])
+        self.assertEqual(len(r["il"]), 1)                                   # two days, one item
+        self.assertEqual(r["il"][0].count(","), 1)
 
     def test_log_days_are_us_pacific_newest_first(self):
         self.assertEqual(self.r["dates"], ["2026-11-24", "2026-11-23", "2026-11-22"])
@@ -101,8 +147,8 @@ class TestCommissionerTab(unittest.TestCase):
           NBA_ROSTERS.set({schema:'roster-feed/1',asOf:'2026-11-26T03:00:00Z',teams:teams});
           var d=NBA_COMMISH.data();R.il=d.teams[0].items.filter(function(i){return i.kind==='il';}).map(function(i){return [i.text,i.fact,i.at];});R.page=document.getElementById('com-root').textContent;
         """, qs="#teams", wait=1500)
-        self.assertTrue(any("Yahoo status Q" in f and a.startswith("Yahoo rosters read") and "10:00 ICT" in a for _t, f, a in r["il"]), r["il"])
-        self.assertIn("Yahoo rosters read", r["page"])
+        self.assertTrue(any("status Q" == f and a.startswith("Live rosters") and "10:00" in a for _t, f, a in r["il"]), r["il"])
+        self.assertIn("Live rosters", r["page"])
 
     def test_a_direct_link_opens_the_tab(self):
         r = drive_page("""R.shown=!document.getElementById('com-page').classList.contains('tab-off');R.text=document.getElementById('com-root').textContent.slice(0,200);""", qs="#commissioner", wait=800)
@@ -120,7 +166,7 @@ class TestCommissionerTab(unittest.TestCase):
           setTimeout(function(){var x=NBA_COMMISH.data();R.asked=asked.length;R.log=x.log;R.n=x.teams[0].items.filter(function(i){return i.kind==='lock';}).length;R.text=document.getElementById('com-root').textContent;R.__done=1;},600);
         """ % json.dumps(LOG), qs="#teams", wait=5000)
         self.assertEqual((r["asked"], r["log"]["files"], r["log"]["failed"], r["log"]["busy"], r["n"]), (7, 1, 1, 0, 2))
-        self.assertIn("1 day could not be read", r["text"])
+        self.assertIn("1 day unread", r["text"])
 
     def test_it_fits_a_phone(self):
         r = phone_run("""document.querySelector('.navlink[data-tab=commissioner]').click();NBA_COMMISH.setLog({[NBA_COMMISH.dates(2)[1]]:%s});

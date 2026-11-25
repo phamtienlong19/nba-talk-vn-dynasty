@@ -212,4 +212,11 @@ when its fact was read.
 | Under-floor checkpoint findings | `data/` checkpoints | checkpoint date |
 | Trades waiting, cooldowns, Yahoo changes not yet verified, unlinked player ids, unset violation points | page data and roster feed | |
 
-A lock record flagging a Doubtful player on IL is not shown (Doubtful is IL-eligible).
+**Flags the tab clears** (`cmDayFlags`; the log itself keeps every flag):
+
+- *started while out*: no eligible healthy bench player had a game that day (each bench player covers one start), or the player was not listed out in the last read
+  before the tip (`pre`). Free IL slots play no part: an IL slot does not fill the lineup slot.
+- *on IL, not eligible*: the player was listed Out in the last read before the tip, or was Doubtful.
+- The week lineup check drops a start that `pre` shows was listed out only after the tip. The LIVE tab still shows the unfiltered count.
+
+Records written before `pre` / `pos` existed are judged on the status at capture and the positions on the current rosters.
