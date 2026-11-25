@@ -328,6 +328,46 @@
         }
       ],
       "effectiveAt": "2026-11-20T12:00:00Z"
+    },
+    {
+      "txnId": "PROP-2026-006",
+      "type": "TRADE",
+      "status": "AGREED",
+      "label": "LONG CON ↔ BZ",
+      "participants": [
+        "franchise-04",
+        "franchise-15"
+      ],
+      "assets": [
+        {
+          "type": "player",
+          "playerKey": "478.p.10278",
+          "name": "Ja'Kobe Walter",
+          "from": "franchise-04",
+          "to": "franchise-15"
+        },
+        {
+          "type": "player",
+          "playerKey": "478.p.6595",
+          "name": "Charles Bassey",
+          "from": "franchise-15",
+          "to": "franchise-04"
+        }
+      ],
+      "recordedAt": "2026-11-25T00:00:00Z",
+      "directionCheck": {
+        "status": "VERIFIED",
+        "described": "Walter to Bz; Bassey to LC",
+        "verified": "Roster snapshot RS-2026-11-25-e9bdd027 (2026-11-25T04:10:51Z) and the roster feed read of 2026-11-25T10:11:24Z: LC (franchise-04) owns Ja'Kobe Walter and Bz (franchise-15) owns Charles Bassey, so the described direction is executable."
+      },
+      "note": "Pending trade, shown in the Trade Lab only; nothing is applied until it is processed in Yahoo and recorded COMPLETED. Cap, roster and cooldown results are computed by the Trade Lab, not decided here.",
+      "source": "League owner in chat, 2026-11-25: 'log this pending trade on trade lab: ja'kobe walter to bz, bassey to lc'.",
+      "statusHistory": [
+        {
+          "status": "AGREED",
+          "at": "2026-11-25T00:00:00Z"
+        }
+      ]
     }
   ]
 }

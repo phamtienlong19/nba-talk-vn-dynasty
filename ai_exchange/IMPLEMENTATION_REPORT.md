@@ -1,6 +1,6 @@
 # Implementation Report
 
-Run: 2026-11-25 — game log spacing; players with a game stand out on LIVE
+Run: 2026-11-25 — pending trade PROP-2026-006 staged
 
-- Game log: centred columns with equal gaps, striped rows, box-score opponents (`PHI`, `@PHI`).
-- LIVE: rows with a game get a green edge and a game chip (to start / live / final); rows without one fade and say "no game"; card header counts starters who play.
+- LC ↔ Bz: Ja'Kobe Walter to Bz, Charles Bassey to LC, status AGREED (Trade Lab only; nothing applied).
+- Tests that assumed no open trade, or a fixed ledger, now read the ledger; baseline tests keep their original six transactions.
