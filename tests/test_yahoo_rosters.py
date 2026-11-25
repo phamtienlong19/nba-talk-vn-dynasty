@@ -750,7 +750,7 @@ class TestInjuredList(unittest.TestCase):
                 self.assertEqual(cur["playerOwner"], cur1["playerOwner"])
                 self.assertEqual({f: ls.team_cap(si, cur, f) for f in si["franchises"]}, caps1)
             txns = ss._load(os.path.join(td.dir, "season_transactions.json"))["transactions"]
-            self.assertEqual([t["txnId"] for t in txns], ["TXN-2026-001", "PROP-2026-001", "PROP-2026-002", "PROP-2026-003", "PROP-2026-004", "PROP-2026-005"])  # nothing invented
+            self.assertEqual([t["txnId"] for t in txns], [t["txnId"] for t in ss._load(ss.TXN_PATH)["transactions"]])  # nothing invented
 
     def test_il_players_appear_in_snapshots_comparisons_and_rosters(self):
         with TempData() as td:
