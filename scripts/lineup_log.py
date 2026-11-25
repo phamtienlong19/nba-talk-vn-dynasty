@@ -10,7 +10,9 @@ the lineup looked like when it counted. For every player whose game turns live o
   {"kind": "lock", "date", "capturedAt", "team": franchise, "teamName", "k": "478.p.<id>", "n", "slot", "st", "ie", "il", "game", "gs", "pos", "flags": [...],
    "pre": {"st", "at"}}      (pre: only when the read before, at most 30 minutes older, still showed the game ahead)
 
-plus one {"kind": "first_tip", ...} whole-league snapshot of every team's lineup the first time any game of the day is live. Flags are facts the rules
+plus one {"kind": "first_tip", ...} whole-league snapshot of every team's lineup the first time any game of the day is live, and the day's history:
+{"kind": "day_start", players: [...]} at the first read, {"kind": "state", ...} for every later change of team / slot / status / having a game (slot
+null: left the roster) and {"kind": "gap", from, to} where more than 30 minutes passed unread. scripts/lineup_review.py judges lineups from these. Flags are facts the rules
 already define, computed from what was on the page at that moment:
 
   healthy_on_il  in an IL slot but Yahoo says he is not IL-eligible (season_state.il_state), the evidence the commissioner needs for a violation
@@ -128,8 +130,55 @@ def records(feed, seen_players, il_map, ranks, first_tip_done, captured_at, prev
     return out
 
 
+def _entry(team, row):
+    return {"p": str(row.get("p")), "n": row.get("n"), "team": team, "slot": row.get("s"), "st": row.get("st") or None, "g": row.get("g"), "pos": row.get("pos")}
+
+
+def roster_now(feed):
+    """({playerId: entry}, {teams in this read}) for every named player on every team."""
+    out, teams = {}, set()
+    for m in feed.get("matchups", []):
+        for t in m.get("teams", []):
+            teams.add(t.get("team"))
+            for r in t.get("roster", []):
+                if r.get("n") and r.get("p"):
+                    out[str(r["p"])] = _entry(t.get("team"), r)
+    return out, teams
+
+
+def _mark(e):
+    """What a change is: the team, the slot, the status, or gaining / losing a game today (the game's text changes with the score)."""
+    return (e.get("team"), e.get("slot"), e.get("st"), bool(e.get("g")))
+
+
+def state_records(feed, state, previous, captured_at):
+    """The history the review needs to judge "what stood an hour before tip": one `day_start` with every rostered player, then a `state` record per
+    change (slot None = no longer on the roster). A `gap` record says that nobody read the lineups for more than PRE_MAX_MINUTES, so what stood in
+    between is unknown. `state` is the day file replayed (None before the day's first read), which is why a restarted loop carries on cleanly."""
+    date = game_date(feed)
+    now, teams = roster_now(feed)
+    if not now:
+        return []
+    if state is None:
+        return [{"kind": "day_start", "date": date, "capturedAt": captured_at, "players": list(now.values())}]
+    out = []
+    try:
+        if _at(feed["asOf"]) - _at(previous["asOf"]) > datetime.timedelta(minutes=PRE_MAX_MINUTES):
+            out.append({"kind": "gap", "date": date, "capturedAt": captured_at, "from": previous["asOf"], "to": feed["asOf"]})
+    except (ValueError, KeyError, TypeError):
+        out.append({"kind": "gap", "date": date, "capturedAt": captured_at, "from": None, "to": feed.get("asOf")})
+    for pid, e in now.items():
+        if pid not in state or _mark(state[pid]) != _mark(e):
+            out.append(dict({"kind": "state", "date": date, "capturedAt": captured_at}, **e))
+    for pid, e in state.items():
+        if pid not in now and e.get("slot") is not None and e.get("team") in teams:        # a team missing from the read says nothing
+            out.append(dict({"kind": "state", "date": date, "capturedAt": captured_at}, **dict(e, slot=None)))
+    return out
+
+
 def read_day(path):
-    seen, first = set(), False
+    """-> (playerIds with a lock record, first_tip written?, the roster state the file ends in or None before its day_start)."""
+    seen, first, state = set(), False, None
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             for line in f:
@@ -137,20 +186,25 @@ def read_day(path):
                 if not line:
                     continue
                 rec = json.loads(line)
-                if rec.get("kind") == "first_tip":
+                kind = rec.get("kind")
+                if kind == "first_tip":
                     first = True
-                elif rec.get("kind") == "lock" and rec.get("k"):
+                elif kind == "lock" and rec.get("k"):
                     seen.add(rec["k"].split(".p.")[-1])
-    return seen, first
+                elif kind == "day_start":
+                    state = {e["p"]: e for e in rec.get("players", [])}
+                elif kind == "state" and state is not None:
+                    state[rec["p"]] = rec
+    return seen, first, state
 
 
 def append(log_dir, feed, il_map, ranks, captured_at, previous=None):
-    """Append this feed's new lock records to <log_dir>/<Pacific game date>.jsonl. Returns the number of records written."""
+    """Append this feed's new records (state changes, then locks) to <log_dir>/<Pacific game date>.jsonl. Returns the number written."""
     date = game_date(feed)
     os.makedirs(log_dir, exist_ok=True)
     path = os.path.join(log_dir, date + ".jsonl")
-    seen, first = read_day(path)
-    new = records(feed, seen, il_map, ranks, first, captured_at, previous)
+    seen, first, state = read_day(path)
+    new = state_records(feed, state, previous, captured_at) + records(feed, seen, il_map, ranks, first, captured_at, previous)
     if new:
         with open(path, "a", encoding="utf-8") as f:                      # append mode: an existing line can never be changed
             for rec in new:

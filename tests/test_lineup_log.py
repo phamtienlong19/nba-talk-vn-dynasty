@@ -61,6 +61,40 @@ class TestRecords(unittest.TestCase):
         self.assertEqual(ll.records(f, set(), IL_MAP, RANKS, False, f["asOf"]), [])
 
 
+class TestDayHistory(unittest.TestCase):
+    def run_reads(self, *reads):
+        d = tempfile.mkdtemp()
+        previous = None
+        for f in reads:
+            ll.append(d, f, IL_MAP, RANKS, f["asOf"], previous)
+            previous = f
+        with open(os.path.join(d, "2026-11-24.jsonl"), encoding="utf-8") as fh:
+            return [json.loads(x) for x in fh.read().splitlines()]
+
+    def test_a_day_starts_with_every_player_and_then_records_only_changes(self):
+        at = lambda m: "2026-11-24T20:%02d:00Z" % m  # noqa: E731
+        a = feed([row(1, "A", "PG", "", "upcoming"), row(2, "B", "BN")], [row(7, "C", "SG")], asof=at(0))
+        b = feed([row(1, "A", "PG", "O", "upcoming"), row(2, "B", "BN")], [row(7, "C", "SG")], asof=at(4))
+        c = feed([row(1, "A", "BN", "O", "upcoming")], [row(7, "C", "SG")], asof=at(8))                      # A moved, B dropped
+        recs = self.run_reads(a, b, c)
+        self.assertEqual([r["kind"] for r in recs], ["day_start", "state", "state", "state"])
+        self.assertEqual(sorted(p["n"] for p in recs[0]["players"]), ["A", "B", "C"])
+        self.assertEqual([(r["n"], r["slot"], r["st"]) for r in recs[1:]], [("A", "PG", "O"), ("A", "BN", "O"), ("B", None, None)])
+
+    def test_a_long_silence_is_recorded_and_a_missing_team_drops_nobody(self):
+        a = feed([row(1, "A", "PG")], [row(7, "C", "SG")], asof="2026-11-24T18:00:00Z")
+        b = feed([row(1, "A", "PG")], [row(7, "C", "SG")], asof="2026-11-24T19:00:00Z")
+        b["matchups"][0]["teams"] = b["matchups"][0]["teams"][:1]
+        recs = self.run_reads(a, b)
+        self.assertEqual([r["kind"] for r in recs], ["day_start", "gap"])
+        self.assertEqual((recs[1]["from"], recs[1]["to"]), ("2026-11-24T18:00:00Z", "2026-11-24T19:00:00Z"))
+
+    def test_a_score_update_is_not_a_change(self):
+        a = feed([row(1, "A", "PG", "", "live", "10-8, 1st")], asof="2026-11-24T20:00:00Z")
+        b = feed([row(1, "A", "PG", "", "live", "20-18, 2nd")], asof="2026-11-24T20:04:00Z")
+        self.assertEqual([r["kind"] for r in self.run_reads(a, b)], ["day_start", "first_tip", "lock"])
+
+
 class TestStatusBeforeTip(unittest.TestCase):
     def reads(self, minutes=4, before_gs="upcoming", before_day="2026-11-24"):
         before = feed([row(6, "Late Scratch", "PG", "Q", before_gs)], day=before_day, asof=before_day + "T20:00:00Z")
@@ -97,18 +131,18 @@ class TestAppendOnly(unittest.TestCase):
     def test_a_player_is_recorded_once_and_a_later_status_change_never_rewrites_it(self):
         with tempfile.TemporaryDirectory() as d:
             f1 = feed([row(2, "Healthy On IL", "IL", "", "live")])
-            self.assertEqual(ll.append(d, f1, IL_MAP, RANKS, "2026-11-24T20:00:00Z"), 2)     # first_tip + the lock
+            self.assertEqual(ll.append(d, f1, IL_MAP, RANKS, "2026-11-24T20:00:00Z"), 3)     # day_start + first_tip + the lock
             path = os.path.join(d, "2026-11-24.jsonl")
             with open(path, "rb") as fh:
                 before = fh.read()
             f2 = feed([row(2, "Healthy On IL", "IL", "O", "final"), row(6, "Late Tip", "PG", "", "live")], asof="2026-11-24T23:00:00Z")   # now listed Out: the proof stays
-            self.assertEqual(ll.append(d, f2, IL_MAP, RANKS, "2026-11-24T23:00:00Z"), 1)      # only the new player
+            self.assertEqual(ll.append(d, f2, IL_MAP, RANKS, "2026-11-24T23:00:00Z", f1), 4)  # gap, two state changes, one new lock
             with open(path, "rb") as fh:
                 after = fh.read()
             self.assertTrue(after.startswith(before))                                          # existing bytes never change
-            first = json.loads(after.decode().splitlines()[1])
+            first = next(json.loads(x) for x in after.decode().splitlines() if '"kind":"lock"' in x)
             self.assertEqual((first["st"], first["flags"]), (None, ["healthy_on_il"]))
-            self.assertEqual(ll.append(d, f2, IL_MAP, RANKS, "x"), 0)                          # idempotent
+            self.assertEqual(ll.append(d, f2, IL_MAP, RANKS, "x", f2), 0)                      # idempotent
 
     def test_each_day_has_its_own_file_and_an_earlier_day_is_never_touched(self):
         with tempfile.TemporaryDirectory() as d:

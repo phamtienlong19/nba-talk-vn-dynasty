@@ -220,3 +220,6 @@ when its fact was read.
 - The week lineup check drops a start that `pre` shows was listed out only after the tip. The LIVE tab still shows the unfiltered count.
 
 Records written before `pre` / `pos` existed are judged on the status at capture and the positions on the current rosters.
+
+**Lineup-log history records:** `day_start` (every rostered player at the day's first read), `state` (each later change of team, slot, status or having a game;
+`slot: null` = left the roster) and `gap` (more than 30 minutes unread). With the lock records they answer what stood one hour before a tip-off.
