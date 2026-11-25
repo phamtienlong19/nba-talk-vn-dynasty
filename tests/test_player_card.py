@@ -44,40 +44,47 @@ class TestPlayerCard(unittest.TestCase):
         doc = _j.dumps({"capturedAt": "2026-11-13T09:40:00Z", "days": ["2026-11-12"], "p": {"10572": rows}})
         r = _phone.phone_run("""NBA_PLAYER.logSet(%s);var c=NBA_PLAYER.card('%s');document.body.appendChild(c);var sec=c.querySelector('.plc-log');
           R.shown=!sec.hidden;R.lines=[].map.call(sec.querySelectorAll('.plc-gl li'),function(x){return x.textContent});R.title=sec.querySelector('.plc-k').textContent;
+          var txt=function(q){return [].map.call(sec.querySelectorAll(q),function(x){return x.textContent});};R.cells=txt('.plc-gl li:first-child > *');R.head=txt('.plc-gh > *');
           R.off=sec.querySelectorAll('li.off').length;R.boxes=c.querySelectorAll('.plc-w').length;R.more=(sec.querySelector('.plc-more')||{}).textContent||'';
           sec.querySelector('.plc-more').click();R.all=sec.querySelectorAll('.plc-gl li').length;R.text=NBA_PLAYER.text('%s');R.total=/total/i.test(c.textContent);
           R.sw=document.documentElement.scrollWidth;R.cw=document.documentElement.clientWidth;""" % (doc, TRADED, TRADED), pre_js=PRE, wait_ms=2500)
         self.assertIsNone(r.get("error"), r)
         self.assertTrue(r["shown"])
         self.assertEqual(len(r["lines"]), 10)                                               # the last 10 games first
-        self.assertTrue(r["lines"][0].upper().startswith("NOV 12"), r["lines"][0])                  # newest first
-        self.assertIn("13-7-1-1-1", r["lines"][0])                                          # P-R-A-S-B
-        self.assertIn("5/7 FG", r["lines"][0])
-        self.assertIn("2 3PM", r["lines"][0])
-        self.assertIn("1/2 FT", r["lines"][0])
-        self.assertIn("3 TO", r["lines"][0])
-        self.assertIn("P-R-A-S-B", r["title"])
+        self.assertEqual(r["cells"], ["11/12", "vs TOR", "30", "13-7-1-1-1", "5/7", "2", "1/2", "3"])  # one line: the eight cells, newest first
+        self.assertEqual(r["head"], ["DATE", "OPP", "MIN", "P-R-A-S-B", "FG", "3PM", "FT", "TO"])
         self.assertEqual(r["off"], 1)                                                       # a bench game is dimmed and says BN
         self.assertEqual(r["boxes"], 0)                                                     # no stat boxes
         self.assertFalse(r["total"])                                                        # no totals anywhere
         self.assertIn("Show all 12", r["more"])
         self.assertEqual(r["all"], 12)
-        self.assertIn("NOV 12: 13-7-1-1-1 · 5/7 FG · 2 3PM · 1/2 FT · 3 TO · 30 min", r["text"])     # the share text carries the same lines
+        self.assertIn("NOV 12 vs TOR: 13-7-1-1-1 · 5/7 FG · 2 3PM · 1/2 FT · 3 TO · 30 min", r["text"])     # the share text carries the same lines
         self.assertEqual(sum(1 for x in r["text"].split("\n") if x.startswith("  NOV")), 5)
         self.assertNotIn("Next year", r["text"])                                            # the keeper rank is not in the share text
         self.assertLessEqual(r["sw"], r["cw"])
 
+    def test_todays_line_from_the_feed_carries_its_opponent(self):
+        r = _phone.phone_run("""var row={p:'10572',s:'PG',ds:'PG',st:'',dm:'30',dfg:[1,2],dft:[0,0],d:[0.5,null,0,2,1,1,0,0,0],l:[],g:'W, 100-90 vs TOR',gs:'final',gl:1};
+          window.NBA_LIVE={source:function(){return 'live';},feed:function(){return {week:6,dayDate:'2026-11-25',matchups:[{teams:[{team:'franchise-05',roster:[row]}]}]};}};
+          NBA_PLAYER.logSet({capturedAt:'x',days:[],p:{}});var c=NBA_PLAYER.card('%s');document.body.appendChild(c);
+          R.cells=[].map.call(c.querySelectorAll('.plc-gl li:first-child > *'),function(x){return x.textContent});""" % TRADED, pre_js=PRE, wait_ms=2500)
+        self.assertEqual(r["cells"][:3], ["11/25", "vs TOR", "30"])
+
     def test_a_game_line_fits_a_phone_without_widening_the_page(self):
         import json as _j
         rows = [["2026-11-%02d" % d, "PG", "@ DAL", "34", 12, 20, 10, 12, 4, 33, 12, 11, 2, 3, 5, 4] for d in range(12, 2, -1)]
+        rows[0] = ["2026-11-12", "IL+", "@ PHX", "44:59", 16, 29, 14, 16, 10, 55, 18, 12, 10, 3, 7, 0]       # the widest line there is
         doc = _j.dumps({"capturedAt": "2026-11-13T09:40:00Z", "days": [], "p": {"10572": rows}})
         r = _phone.phone_run("""NBA_PLAYER.logSet(%s);NBA_PLAYER.open('%s');var sec=document.querySelector('#pl-sheet .plc-log'),card=document.querySelector('#pl-sheet .plc');
           var cr=card.getBoundingClientRect();R.over=0;[].forEach.call(sec.querySelectorAll('.plc-gl li > *'),function(x){if(x.getBoundingClientRect().right>cr.right+1)R.over++;});
-          R.lines=sec.querySelectorAll('.plc-gl li').length;R.h=sec.querySelector('.plc-gl li').getBoundingClientRect().height;R.sw=document.documentElement.scrollWidth;R.cw=document.documentElement.clientWidth;""" % (doc, TRADED),
+          R.lines=sec.querySelectorAll('.plc-gl li').length;R.h=Math.max.apply(null,[].map.call(sec.querySelectorAll('.plc-gl li'),function(x){return x.getBoundingClientRect().height}));
+          R.cut=[].filter.call(sec.querySelectorAll('.plc-gl li > *, .plc-gh > *'),function(x){return x.scrollWidth>x.clientWidth+1}).map(function(x){return x.textContent});R.sw=document.documentElement.scrollWidth;R.cw=document.documentElement.clientWidth;""" % (doc, TRADED),
                              pre_js=PRE, wait_ms=2500)
         self.assertIsNone(r.get("error"), r)
         self.assertEqual(r["over"], 0)
         self.assertLessEqual(r["sw"], r["cw"])
+        self.assertLess(r["h"], 32)                                                         # one line per game
+        self.assertEqual(r["cut"], [])                                                      # and nothing is cut off in it
 
     def test_without_the_log_file_the_card_says_so_and_a_player_with_no_games_has_no_section(self):
         r = _phone.phone_run("""NBA_PLAYER.logSet(null);var c=NBA_PLAYER.card('%s');document.body.appendChild(c);var s=c.querySelector('.plc-log');R.failed=!s.hidden;R.msg=s.textContent;

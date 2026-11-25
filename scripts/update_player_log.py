@@ -38,6 +38,9 @@ def load(path):
 def run(cfg, fetcher, out_path, sleep=time.sleep, out=print, now=None) -> int:
     now = now or datetime.datetime.now(datetime.timezone.utc)
     doc = load(out_path)
+    dropped = pl.prune(doc)
+    if dropped:
+        out("dropped %d line(s) of games not played" % dropped)
     days = ld.Days(cfg, fetcher, sleep=sleep)
     todo = [d for d in pl.closed_dates(cfg, lsch.pacific_today(now)) if d.isoformat() not in doc["days"]][:MAX_NEW_DAYS]
     added, failed = 0, []
@@ -51,7 +54,7 @@ def run(cfg, fetcher, out_path, sleep=time.sleep, out=print, now=None) -> int:
         n = pl.add_day(doc, d.isoformat(), rows)
         added += 1
         out("%s: %d lines" % (d, n))
-    if not added:
+    if not added and not dropped:
         out("nothing new captured (%d days kept%s)" % (len(doc["days"]), ", %d failed" % len(failed) if failed else ""))
         return 1 if failed else 0
     doc["capturedAt"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")

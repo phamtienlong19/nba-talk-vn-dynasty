@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-25T07:54:39Z
+Generated: 2026-11-25T08:52:42Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/live-lineups-only
-Commit: ecd8ee8
+Branch: feat/game-log
+Commit: 3cfe913
 Base: main
 Working tree: dirty
 
@@ -31,7 +31,7 @@ Fingerprint: FRESH
  .github/workflows/heal-generated-conflicts.yml     |   41 +
  .github/workflows/nightly-tests.yml                |   49 +
  .github/workflows/pages.yml                        |   78 ++
- .github/workflows/update-live-data.yml             |    9 +
+ .github/workflows/update-live-data.yml             |   20 +-
  .github/workflows/update-player-metadata.yml       |   93 ++
  .github/workflows/update-player-stats.yml          |   66 ++
  .github/workflows/update-roster-feed.yml           |   49 +
@@ -40,8 +40,8 @@ Fingerprint: FRESH
  .github/workflows/validate.yml                     |   13 +-
  .gitignore                                         |    5 +
  CLAUDE.md                                          |   19 +-
- ai_exchange/IMPLEMENTATION_REPORT.md               |   10 +-
- ai_exchange/REVIEW_PACKET.md                       |  400 +++++--
+ ai_exchange/IMPLEMENTATION_REPORT.md               |   11 +-
+ ai_exchange/REVIEW_PACKET.md                       |  404 +++++--
  config/draft_lottery_rules.json                    |   25 +-
  config/roster_rules.json                           |   28 +-
  config/trade_rules.json                            |   14 +-
@@ -96,30 +96,33 @@ Fingerprint: FRESH
  docs/HEALING_CONFLICTS.md                          |   25 +
  docs/LEAGUE_RULES_MODEL.md                         |   11 +
  docs/LEAGUE_STATE_MODEL.md                         |    9 +
- docs/LIVE_DATA.md                                  |  119 ++
+ docs/LIVE_DATA.md                                  |  189 ++-
  docs/SEASON_STATE_MODEL.md                         |    2 +-
  docs/YAHOO_DATA_SOURCE.md                          |    2 +-
  docs/YAHOO_ROSTER_WORKFLOW.md                      |    2 +-
- index.html                                         |  812 +++++++++++--
+ index.html                                         |  821 +++++++++++--
  scripts/bot_pr.sh                                  |   44 +
  scripts/build_league_state.py                      |    4 +-
- scripts/build_live_feed.py                         |   12 +-
+ scripts/build_live_feed.py                         |   77 +-
  scripts/build_roster_feed.py                       |   95 ++
  scripts/build_site.py                              |   44 +
  scripts/handoff.sh                                 |   28 +-
  scripts/heal_open_prs.sh                           |   31 +
  scripts/lineup_log.py                              |  239 ++++
  scripts/lineup_review.py                           |  429 +++++++
- scripts/live.css                                   |   24 +
- scripts/live_app.js                                |   97 +-
+ scripts/live.css                                   |  215 +---
+ scripts/live_app.js                                |  406 ++-----
  scripts/live_days.py                               |   51 +-
  scripts/live_feed_loop.sh                          |   19 +
- scripts/live_page.py                               |   26 +-
+ scripts/live_page.py                               |   47 +-
+ scripts/live_roto.js                               |   36 -
+ scripts/live_standings.py                          |  146 ---
  scripts/lottery_order.py                           |    4 +-
  scripts/player_log.py                              |   67 ++
  scripts/refresh_card_positions.py                  |   68 ++
  scripts/resolve_generated_conflicts.py             |   48 +
  scripts/roster_feed_loop.sh                        |   29 +
+ scripts/roto.py                                    |    2 +-
  scripts/run_tests.py                               |  270 +++++
  scripts/season_state.py                            |   27 +
  scripts/trade_checker.py                           |   27 +-
@@ -148,7 +151,7 @@ Fingerprint: FRESH
  tests/test_card_positions.py                       |   40 +
  tests/test_commissioner_tab.py                     |  137 +++
  tests/test_consistency.py                          |   55 +
- tests/test_export.py                               |   50 +-
+ tests/test_export.py                               |   70 +-
  tests/test_fa_draft_pool.py                        |    4 +-
  tests/test_final_keeper_freeze.py                  |    4 +-
  tests/test_il_state.py                             |   93 ++
@@ -158,11 +161,14 @@ Fingerprint: FRESH
  tests/test_league_state_data.py                    |   14 +-
  tests/test_lineup_log.py                           |  182 +++
  tests/test_lineup_review.py                        |  256 ++++
+ tests/test_live_feed.py                            |   38 +-
  tests/test_live_moves.py                           |   63 +
- tests/test_live_tab.py                             |   92 +-
+ tests/test_live_standings.py                       |  220 ----
+ tests/test_live_tab.py                             |  462 +++-----
  tests/test_lottery_eligibility.py                  |    5 +-
  tests/test_lottery_order.py                        |   10 +-
  tests/test_lottery_sim.py                          |   10 +-
+ tests/test_matchup_capture.py                      |  118 ++
  tests/test_my_team.py                              |   67 ++
  tests/test_official_cap_policy.py                  |    4 +-
  tests/test_phone.py                                |   44 +
@@ -175,9 +181,10 @@ Fingerprint: FRESH
  tests/test_refresh_team_cap_summary.py             |    4 +-
  tests/test_resolve_generated_conflicts.py          |   91 ++
  tests/test_roster_feed.py                          |  174 +++
+ tests/test_roto.py                                 |   33 +-
  tests/test_run_tests.py                            |  110 ++
  tests/test_scenario_rendering.py                   |  101 +-
- tests/test_schedule.py                             |  143 +++
+ tests/test_schedule.py                             |  100 ++
  tests/test_season_ops.py                           |   22 +-
  tests/test_seattle_keeper_ceiling.py               |    4 +-
  tests/test_trade_checker.py                        |   52 +-
@@ -195,12 +202,12 @@ Fingerprint: FRESH
  tools/yahoo-roto/roto-live.yml                     |   71 ++
  tools/yahoo-roto/tests/test_yahoo_roto.py          |  184 +++
  tools/yahoo-roto/yahoo_roto.py                     |  571 +++++++++
- 168 files changed, 50982 insertions(+), 684 deletions(-)
+ 175 files changed, 51225 insertions(+), 2062 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
-- tests: PASS (full run, 992 ran, 2 skipped, at ecd8ee8 with uncommitted changes)
+- tests: PASS (named run, 29 ran, 0 skipped, at 3cfe913 with uncommitted changes)
 - Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
 - live HTTP: OK
 
@@ -298,11 +305,14 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - scripts/live_days.py
 - scripts/live_feed_loop.sh
 - scripts/live_page.py
+- scripts/live_roto.js
+- scripts/live_standings.py
 - scripts/lottery_order.py
 - scripts/player_log.py
 - scripts/refresh_card_positions.py
 - scripts/resolve_generated_conflicts.py
 - scripts/roster_feed_loop.sh
+- scripts/roto.py
 - scripts/run_tests.py
 - scripts/season_state.py
 - scripts/trade_checker.py
@@ -341,11 +351,14 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - tests/test_league_state_data.py
 - tests/test_lineup_log.py
 - tests/test_lineup_review.py
+- tests/test_live_feed.py
 - tests/test_live_moves.py
+- tests/test_live_standings.py
 - tests/test_live_tab.py
 - tests/test_lottery_eligibility.py
 - tests/test_lottery_order.py
 - tests/test_lottery_sim.py
+- tests/test_matchup_capture.py
 - tests/test_my_team.py
 - tests/test_official_cap_policy.py
 - tests/test_phone.py
@@ -358,6 +371,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - tests/test_refresh_team_cap_summary.py
 - tests/test_resolve_generated_conflicts.py
 - tests/test_roster_feed.py
+- tests/test_roto.py
 - tests/test_run_tests.py
 - tests/test_scenario_rendering.py
 - tests/test_schedule.py
@@ -390,4 +404,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/live-lineups-only` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/game-log` if not already done, then request human/ChatGPT review of this packet.

@@ -37,6 +37,36 @@ class TestBuild(unittest.TestCase):
         self.assertNotIn("6692", doc["p"])                                         # Chet Holmgren sat on IL: no line
         self.assertEqual(doc["p"]["6170"][0][1], "BN")                             # a bench game is kept and says so
 
+    def test_a_team_page_line_replaces_a_list_line_of_the_same_day(self):
+        doc = pl.empty()
+        doc["p"]["1"] = [["2026-11-03", None, "vs TOR", "30", 1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0]]
+        pl.add_day(doc, "2026-11-03", {8: [{"playerId": "1", "slot": "BN", "game": "W, 1-0 vs TOR", "min": "30:10", "fg": [1, 2], "ft": [0, 0], "line": {"pts": 2}}]})
+        self.assertEqual([(r[1], r[15]) for r in doc["p"]["1"]], [("BN", 8)])
+
+    def test_filling_adds_only_missing_days_of_the_wanted_players_in_date_order(self):
+        line = lambda d, slot: [d, slot, "vs TOR", "30", 1, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 8 if slot else 0]  # noqa: E731
+        doc, full = pl.empty(), pl.empty()
+        doc["p"]["1"] = [line("2026-11-03", "PG")]
+        full["p"] = {"1": [line("2026-11-02", None), line("2026-11-03", None), line("2026-11-04", None)], "2": [line("2026-11-02", None)], "3": [line("2026-11-02", None)]}
+        self.assertEqual(pl.fill(doc, full, ["1", "2"]), 3)
+        self.assertEqual([(r[0][-2:], r[1]) for r in doc["p"]["1"]], [("02", None), ("03", "PG"), ("04", None)])
+        self.assertEqual(sorted(doc["p"]), ["1", "2"])                                   # a player nobody holds is not published
+        self.assertEqual(pl.fill(doc, full, ["1", "2"]), 0)
+        self.assertTrue(pl.valid(doc))
+
+    def test_a_player_who_sat_out_has_no_line_and_old_ones_are_dropped(self):
+        zero = {"pts": 0, "reb": 0, "ast": 0, "st": 0, "blk": 0, "to": 0, "tpm": 0}
+        for minutes in (None, "0", "0:00"):
+            self.assertFalse(pl.played({"min": minutes, "fg": [0, 0], "ft": [0, 0], "line": zero}), minutes)
+        self.assertTrue(pl.played({"min": "0:45", "fg": [0, 0], "ft": [0, 0], "line": zero}))
+        self.assertTrue(pl.played({"min": "0", "fg": [0, 0], "ft": [1, 2], "line": zero}))
+        doc = pl.empty()
+        sat = ["2026-11-02", "IL", "vs TOR", "0"] + [0] * 11 + [8]
+        brief = ["2026-11-03", "BN", "vs TOR", "1"] + [0] * 11 + [8]
+        doc["p"] = {"1": [sat, brief], "2": [list(sat)]}
+        self.assertEqual(pl.prune(doc), 2)
+        self.assertEqual(doc["p"], {"1": [brief]})
+
     def test_a_day_is_kept_once(self):
         rows = ytd.parse_team_day(PAGE)
         doc = pl.empty()

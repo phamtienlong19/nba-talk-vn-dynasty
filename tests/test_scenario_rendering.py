@@ -111,11 +111,15 @@ def _chrome():
     return None
 
 
+OFFLINE_FEEDS = "--host-resolver-rules=MAP raw.githubusercontent.com ~NOTFOUND"
+
+
 def _chrome_run(args, timeout):
-    """Run headless Chrome; a cold CI runner occasionally stalls it past the limit, so retry once before failing."""
+    """Run headless Chrome; a cold CI runner occasionally stalls it past the limit, so retry once before failing. The page must never reach the real
+    data feeds (raw.githubusercontent.com): a test would then change with whatever the bots published that minute."""
     for attempt in (1, 2):
         try:
-            return subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox"] + args,
+            return subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", OFFLINE_FEEDS] + args,
                                   capture_output=True, text=True, timeout=timeout)
         except subprocess.TimeoutExpired:
             if attempt == 2:

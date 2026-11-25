@@ -363,11 +363,11 @@ class TestRenderedUi(unittest.TestCase):
         path = os.path.join(cls.tmp, "index.html")
         with open(path, "w", encoding="utf-8") as f:
             f.write(html.replace("</body>", HARNESS + "</body>"))
-        out = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--virtual-time-budget=6000",
+        out = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--host-resolver-rules=MAP raw.githubusercontent.com ~NOTFOUND", "--virtual-time-budget=6000",
                               "--dump-dom", "file://" + path], capture_output=True, text=True, timeout=120).stdout
         m = re.search(r"data-result='(.*?)'", out, re.S) or re.search(r'data-result="(.*?)"', out, re.S)
         cls.R = json.loads(html_lib.unescape(m.group(1)))
-        cls.dom_official = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--dump-dom",
+        cls.dom_official = subprocess.run([_chrome(), "--headless=new", "--disable-gpu", "--no-sandbox", "--host-resolver-rules=MAP raw.githubusercontent.com ~NOTFOUND", "--dump-dom",
                                            "file://" + INDEX], capture_output=True, text=True, timeout=90).stdout
 
     @classmethod

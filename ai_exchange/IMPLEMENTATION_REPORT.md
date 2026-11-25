@@ -1,8 +1,7 @@
 # Implementation Report
 
-Run: 2026-11-25 — LIVE tab reduced to lineups and checks (plan C phase 4)
+Run: 2026-11-25 — game log: one line per game, whole season for rostered players (plan C phase 5)
 
-- LIVE shows one lineup card per team with current-slot flags, the week's roster changes and the lineup checks; export of current lineups.
-- Removed: scores, standings, playoff picture, projected order, roto, raw stats, all-play, schedule, the TEAMS tab's live order and My team's score / rank / next opponents.
-- The feed no longer builds them and reads only the current week (plus closed days). `live_standings.py` and `live_roto.js` deleted; `roto.py` kept for `tools/yahoo-roto`.
-- The live workflow now restarts on changes to the lineup scripts and `config/roster_rules.json`.
+- Player card, export and share text: one line per game with aligned columns.
+- `scripts/yahoo_player_days.py` + `scripts/backfill_player_log.py` read Yahoo's public one-day player list; each day is checked against the team pages; `player_days.json` on `stats-data`.
+- The stats workflow runs the fill after the team-page log (max 20 days a run).
