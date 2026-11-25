@@ -190,7 +190,7 @@ def check_proposal(si, state, moves, now, rules=None, drops=(), ils=()) -> dict:
         if st in elig:
             rows.append(_row("il", "info", SRC_IL, f"{short[i['team']]} moves {name} to IL first.", short[i["team"]]))
         else:
-            rows.append(_row("il", "blocked", SRC_IL, f"{name} can't go on IL: Yahoo lists him as {st or 'healthy'}, and only injured players can be moved to IL.", short[i["team"]]))
+            rows.append(_row("il", "blocked", SRC_IL, f"{name} can't go on IL: {'Yahoo lists him as ' + st if st else 'Yahoo shows no injury status'}, and only injured players can be moved to IL.", short[i["team"]]))
     for f in teams:
         kept = ls.team_players(si, hyp, f)
         slot_of = lambda k: hyp["slots"].get(k)  # noqa: E731
@@ -210,7 +210,7 @@ def check_proposal(si, state, moves, now, rules=None, drops=(), ils=()) -> dict:
             rows.append(_row("slots", "blocked", SRC_SLOTS, f"{len(on_il)} players on IL, but only {yh['ilSlots']} IL slots.", short[f]))
         for k in kept:
             if slot_of(k) in ss.SLOTS_IL and k not in moved_il and k not in inc and status.get(k) not in elig:
-                rows.append(_row("il", "info", SRC_IL, f"{ls.player_name(si, k)} sits on IL but Yahoo lists him as {status.get(k) or 'healthy'}: he has to return to the lineup, and Yahoo may not process the trade until the roster is legal.", short[f]))
+                rows.append(_row("il", "info", SRC_IL, f"{ls.player_name(si, k)} sits on IL but {'Yahoo lists him as ' + status[k] if status.get(k) else 'Yahoo shows no injury status'}: he has to return to the lineup, and Yahoo may not process the trade until the roster is legal.", short[f]))
     dr = rules["drops"]
     pre_rank = preseason_ranks(si, dr["neverTopRanked"])
     for d in drops:

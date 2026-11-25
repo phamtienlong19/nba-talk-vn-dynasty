@@ -263,7 +263,7 @@ def il_state(slot, status, il_ok, rules=None):
 
     None            not in an IL slot
     "injured"       Yahoo lists him Out / INJ / OFS / Doubtful (all IL-eligible in the league settings), or (no status) the registry still shows him IL-eligible: a legitimate IL spot
-    "healthy_on_il" an ineligible status (P / Q / GTD / DTD), or no status and the registry says he is NOT IL-eligible: Yahoo no longer lets him
+    "healthy_on_il" (internal name, kept in lineup-log records; the page says "not IL-eligible") an ineligible status (P / Q / GTD / DTD), or no status and the registry says he is NOT IL-eligible: Yahoo no longer lets him
                     be there; evidence for the commissioner, never a verdict
     "unverified"    no status and no registry entry (provisional / unlisted player), or a status code that is neither out nor ineligible
 
