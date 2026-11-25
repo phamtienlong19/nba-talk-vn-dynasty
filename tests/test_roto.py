@@ -1,17 +1,14 @@
-"""Roto points, ranks and all-play: the reference math (scripts/roto.py), its JS port (scripts/live_roto.js) and the owner's week-2 report package."""
+"""Roto points, ranks and all-play: the reference math (scripts/roto.py) and the owner's week-2 report package."""
 import json
 import os
 import re
-import shutil
 import sys
-import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
 import roto  # noqa: E402
-import test_scenario_rendering as tsr  # noqa: E402
 
 with open(os.path.join(HERE, "fixtures", "roto_week2_package.json"), encoding="utf-8") as _f:
     PKG = json.load(_f)
@@ -73,34 +70,6 @@ class TestRules(unittest.TestCase):
     def test_head_to_head_counts_ties_and_margin(self):
         c = roto.head_to_head(team(pts=120, to=10), team(tpm=10, reb=50))
         self.assertEqual((c["w"], c["l"], c["t"], c["margin"]), (2, 0, 7, 2))
-
-
-@unittest.skipUnless(tsr._chrome(), "no Chrome")
-class TestJsPort(unittest.TestCase):
-    def test_the_page_math_gives_the_same_answers_as_the_reference(self):
-        with open(os.path.join(HERE, "..", "scripts", "live_roto.js"), encoding="utf-8") as f:
-            js = f.read()
-        data = json.dumps({str(k): v for k, v in STATS.items()})
-        page = ("<!doctype html><body><pre id=o></pre><script>" + js + "</script><script>var S=" + data + ";var st={};Object.keys(S).forEach(function(k){st[Number(k)]=S[k];});"
-                "var r=NBA_ROTO.roto(st),a=NBA_ROTO.allPlay(st),o={};Object.keys(r).forEach(function(t){var c=a.cells[t];o[t]={points:r[t].points,total:r[t].total,rank:r[t].rank,record:a.record[t],"
-                "cells:Object.keys(c).reduce(function(m,b){m[b]=[c[b].w,c[b].l,c[b].t,c[b].margin];return m;},{})};});"
-                "document.getElementById('o').textContent=JSON.stringify(o);</script>")
-        d = tempfile.mkdtemp()
-        try:
-            path = os.path.join(d, "p.html")
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(page)
-            out = tsr._chrome_run(["--virtual-time-budget=4000", "--dump-dom", "file://" + path], 60).stdout
-        finally:
-            shutil.rmtree(d)
-        got = json.loads(re.search(r'<pre id="o">(.*?)</pre>', out, re.S).group(1).replace("&quot;", '"'))
-        for t in PKG["teams"]:
-            e, g = t["expect"], got[str(t["id"])]
-            for k, v in e["points"].items():
-                self.assertAlmostEqual(g["points"][k], v, msg="%s %s" % (t["id"], k))
-            self.assertEqual((g["total"], g["rank"], g["record"]), (e["total"], e["rank"], e["allPlay"]))
-            for o, v in e["h2h"].items():
-                self.assertEqual(g["cells"][o], v)
 
 
 if __name__ == "__main__":

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Build the live feed (live.json): this week's matchups with 9-category scores and rosters, the standings if the week ended now,
-the playoff picture and the projected reverse order. Provisional by construction; read-only against Yahoo's public pages.
+"""Build the live feed (live.json): every team's current lineup (slots, statuses, today's games, games left), the week's roster changes and the
+closed days' lineup checks. Provisional by construction; read-only against Yahoo's public pages.
 
-    python3 scripts/build_live_feed.py --out live.json          # ~9 requests (current week) + 8 per finished week not yet stored
+    python3 scripts/build_live_feed.py --out live.json          # ~9 requests for the current week, plus each closed day once
 
-The feed never touches data/: finished weeks that are not stored yet are captured in memory only (the official copy goes through
-scripts/update_yahoo_matchups.py and a PR). Anything inconsistent (a pairing that does not cover every team, a page that fails
-validation) exits non-zero and writes nothing, so the previous feed stays up. Provisional numbers are labelled as such everywhere.
+The feed never touches data/. Anything inconsistent (a pairing that does not cover every team, a page that fails validation) exits non-zero and
+writes nothing, so the previous feed stays up.
 """
 from __future__ import annotations
 
@@ -19,7 +18,6 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import import_rosters as ir  # noqa: E402
-import live_standings as lst  # noqa: E402
 import season_state as ss  # noqa: E402
 import live_days as ldy  # noqa: E402
 import live_lineups as lln  # noqa: E402
@@ -27,9 +25,9 @@ import live_schedule as lsch  # noqa: E402
 import update_yahoo_matchups as um  # noqa: E402
 import yahoo_matchups as ym  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
-import yahoo_standings as ys  # noqa: E402
 
 SCHEMA = "live-feed/1"
+LABEL = "PROVISIONAL"
 STARTING = ("PG", "SG", "G", "SF", "PF", "F", "C", "FC", "Util")
 LINE_KEYS = ("fgPct", "ftPct", "tpm", "pts", "reb", "ast", "st", "blk", "to")         # the order managers know
 
@@ -109,15 +107,6 @@ def _games_left(rows, sched):
                if r["name"] is not None and r["slot"] in STARTING and r.get("status") not in lsch.OUT and r.get("nba"))
 
 
-def _day_result(p, day_rows, day_date):
-    """The matchup as played on the one day shown: category inputs and winners from the starters' lines (not Yahoo's number: Yahoo scores the week)."""
-    if not day_date:
-        return None
-    a, b = (ldy.team_stats(day_rows.get(t["teamId"], [])) for t in p["teams"])
-    res = ym.category_results(a, b)
-    return {"date": day_date.isoformat(), "stats": [a, b], "cats": res["cats"], "score": [res["a"], res["b"], res["t"]]}
-
-
 def _lineup_out(lineup, fid):
     if not lineup:
         return None
@@ -128,7 +117,7 @@ def _dt_of(iso):
     return datetime.datetime.strptime(iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
 
 
-def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=None, sleep=time.sleep, schedule_cache=None, previous=None, day_cache=None) -> dict:
+def build(cfg, fetcher, data_dir=ss.DATA_DIR, now=None, sleep=time.sleep, schedule_cache=None, previous=None, day_cache=None) -> dict:
     now = now or _utc()
     cur = um.current_week(cfg, fetcher)
     pages = um.walk_week(cfg, cur, fetcher, sleep=sleep)
@@ -148,50 +137,22 @@ def build(cfg, fetcher, data_dir=ss.DATA_DIR, matchup_dir=ym.MATCHUP_DIR, now=No
         sched = lsch.schedule(cfg, cur, pages, fetcher, _dt_of(now), schedule_cache, sleep)
     except OSError:
         sched = None                                                                # games left is a nicety: never fail the feed over it
-    stored = ym.load_weeks(matchup_dir)
-    finished, transient = {}, []
-    for w in range(1, cur):
-        if w in stored:
-            finished[w] = stored[w]
-        else:                                                                       # finished but not merged yet: in memory only
-            sleep(cfg.get("requestDelaySeconds", 1.5))
-            finished[w] = ym.build_week(um.walk_week(cfg, w, fetcher, sleep=sleep), w, cfg, now, "live feed (not stored)", cur)
-            transient.append(w)
     team_map, _ = ir.load_maps(data_dir)
     fid = lambda tid: yr.franchise_for(cfg, team_map, tid)  # noqa: E731
-    snap = ys.current_snapshot(os.path.join(data_dir, "standings"))
-    divisions = {t["teamId"]: t["division"] for t in (snap or {}).get("teams", [])}
-    official_order = [t["teamId"] for t in sorted((snap or {}).get("teams", []), key=lambda t: t["rank"])]
-    official = lst.tally(finished)
     started = any(v is not None for p in pages for t in p["teams"] for v in t["stats"].values())
-    live = lst.live_results(pages) if started else None
-    rows = lst.table(official, live, divisions)
-    pic = lst.playoff_picture(rows, cfg.get("playoffs"))
-    proj = lst.projected_snapshot(rows, official_order)
-    names = {t["teamId"]: t["name"] for p in pages for t in p["teams"]}
-    table = []
-    for r in rows:
-        table.append({"team": fid(r["teamId"]), "yahooId": r["teamId"], "name": names.get(r["teamId"]), "w": r["w"], "l": r["l"], "t": r["t"],
-                      "pct": r["pct"], "rank": r["rank"], "tied": r["tied"], "gb": r["gb"], "gbDivision": r["gbDivision"], "gbLine": pic["gbLine"].get(r["teamId"]), "division": r["division"],
-                      "officialRank": r["officialRank"], "officialRecord": r["officialRecord"], "moved": r["moved"],
-                      "playoff": pic["status"].get(r["teamId"]), "seed": pic["seeds"].get(r["teamId"])})
     matchups = []
     for p in sorted(pages, key=lambda p: min(t["teamId"] for t in p["teams"])):
-        res = ym.matchup_result(p)
         sides = []
-        for i, t in enumerate(p["teams"]):
+        for t in p["teams"]:
             rs = p["rosters"][t["teamId"]] if p.get("rosters") else []
-            sides.append({"team": fid(t["teamId"]), "yahooId": t["teamId"], "name": t["name"], "stats": t["stats"], "printed": t["printedWins"],
-                          "toPlay": _to_play(rs), "gamesLeft": _games_left(rs, sched),
+            sides.append({"team": fid(t["teamId"]), "yahooId": t["teamId"], "name": t["name"], "toPlay": _to_play(rs), "gamesLeft": _games_left(rs, sched),
                           "roster": _roster(rs, {(r.get("playerId") or r["name"]): r for r in day_rows.get(t["teamId"], [])}, sched, week_agg.get("p"),
                                             bool(day_date) and not day_closed)})
-        matchups.append({"teams": sides, "cats": res["cats"], "score": [res["a"], res["b"], res["t"]], "decided": res["decided"],
-                         "day": _day_result(p, day_rows, day_date)})
-    return {"schema": SCHEMA, "label": lst.LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date.isoformat() if day_date else None, "playerWeek": {k: v for k, v in week_agg.items()} if week_agg.get("through") is not None else None, "lineupChecks": _lineup_out(lineup, fid), "moves": _moves_out(week_agg, pages, today, fid), "gamesLeftComplete": bool(sched) and not sched["missing"], "lineKeys": list(LINE_KEYS),
-            "weekStatus": "LIVE" if started else "NOT_STARTED", "finishedWeeks": sorted(finished), "notStoredYet": transient,
-            "table": table, "playoff": {"spots": pic["spots"], "divisionTie": pic["divisionTie"], "linePct": pic["linePct"]},
-            "projectedReverse": [{"team": fid(t["teamId"]), "tied": t["tied"]} for t in reversed(proj["teams"])],
-            "tiedRanks": proj["tiedRanks"], "matchups": matchups}
+        matchups.append({"teams": sides})
+    return {"schema": SCHEMA, "label": LABEL, "asOf": now, "leagueId": str(cfg["leagueId"]), "week": cur, "dayDate": day_date.isoformat() if day_date else None,
+            "playerWeek": {k: v for k, v in week_agg.items()} if week_agg.get("through") is not None else None, "lineupChecks": _lineup_out(lineup, fid),
+            "moves": _moves_out(week_agg, pages, today, fid), "gamesLeftComplete": bool(sched) and not sched["missing"], "lineKeys": list(LINE_KEYS),
+            "weekStatus": "LIVE" if started else "NOT_STARTED", "matchups": matchups}
 
 
 def main(argv=None, fetcher=None) -> int:

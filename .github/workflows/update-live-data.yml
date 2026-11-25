@@ -1,7 +1,7 @@
 name: Update Live Data
 
-# The provisional live feed: this week's matchups, the standings if the week ended now, the playoff picture. Read-only GETs of Yahoo's
-# public matchup pages (no sign-in, no cookies), about 9 requests. It writes ONE file, live.json, to the `live-data` branch as a single
+# The provisional live feed: every team's current lineup, the week's roster changes and lineup checks. Read-only GETs of Yahoo's public
+# matchup pages (no sign-in, no cookies), about 9 requests. It writes live.json to the `live-data` branch as a single
 # orphan commit (force-pushed, so that branch never grows). It never pushes to main, never opens a PR and never touches data/.
 # The page fetches it from raw.githubusercontent.com and falls back to the embedded official weeks. Details: docs/LIVE_DATA.md
 #
@@ -25,7 +25,12 @@ on:
       - "scripts/build_live_feed.py"
       - "scripts/yahoo_matchups.py"
       - "scripts/update_yahoo_matchups.py"
-      - "scripts/live_standings.py"
+      - "scripts/live_days.py"
+      - "scripts/live_lineups.py"
+      - "scripts/live_schedule.py"
+      - "scripts/lineup_log.py"
+      - "scripts/lineup_review.py"
+      - "config/roster_rules.json"
   workflow_dispatch:
 
 permissions:

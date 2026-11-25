@@ -1,8 +1,8 @@
-# Live league data (matchups, live standings, race impact)
+# Live league data (lineups, lineup checks, official weekly results)
 
-Status: **phases 1-2** (parser, category math, official weekly results, standings math; tests). Nothing is fetched on a schedule yet and nothing is shown on the site. The
-full plan (live JSON off `main`, LIVE tab, lineup-integrity evidence) is phased as: parser → official weekly results → live feed and
-tab → evidence panel. Display-only; never touches rosters, salaries, the Trade Lab, the draft or the ledger.
+The site shows current lineups, roster changes and lineup checks, refreshed every few minutes. Display-only; it never touches rosters, salaries, the
+Trade Lab, the draft or the ledger. The LIVE tab's scores, standings, projected order, roto, all-play and schedule views were removed on 2026-11-25
+(owner: the tab is for lineups and rule checks).
 
 ## What a Yahoo matchup page gives (public, no sign-in; checked 2026-11-02 on league 85092)
 
@@ -29,7 +29,7 @@ use trimmed copies of real pages: all eight week-1 matchups reproduce Yahoo's sc
 
 ## Not yet verified
 Mid-week behaviour during live games, how often Yahoo tolerates requests, week start/end dates, and Yahoo's tie-break order for
-equal records (live standings will show ties as ties rather than guess).
+equal records.
 
 ## Official weekly results (phase 2)
 
@@ -41,29 +41,18 @@ scores. A stored week is never overwritten: a different capture is a CONFLICT (Y
 Golden check (2026-11-02): summed weeks 1-2 equal Yahoo's published standings for all 16 teams
 (`tests/fixtures/yahoo/standings_2026-11-02_after_week2.json`). Official standings are weekly: Yahoo's page updates after a week closes.
 
-## Standings math (`scripts/live_standings.py`)
+## Live feed and LIVE tab
 
-- Record from weekly results; a tie counts half (7-1-1 = .833). Games back is measured from the **division leader** (Yahoo prints "-" for
-  both division leaders).
-- Live table = official records + the week in progress (only categories already decided), always labelled PROVISIONAL, with rank movement.
-- **Ties:** equal records share a rank and are marked tied. Yahoo's regular-season tiebreaker is not in its settings, and its order inside
-  ties (3-way at 10-8, two 9-8-1, two 7-11) matches neither head-to-head nor total points, so none is invented. Re-check at each official
-  update.
-- **Playoffs** (Yahoo settings, 2026-11-02): 8 teams, weeks 18-20, regular season weeks 1-17, no reseeding, division winners advance but
-  seeding is by overall record. `playoff_picture` reserves one spot per division leader, fills the rest by record, and marks teams level
-  with the last spot "bubble" and tied division leaders "divisionTie".
-- `projected_snapshot` feeds `scripts/lottery_order.py` (ties ordered by the official order as a stand-in, listed in `tiedRanks`).
-
-## Live feed and LIVE tab (phase 3)
-
-- `scripts/build_live_feed.py` builds `live.json` (week in progress: scores, rosters, standings if the week ended now, playoff picture,
-  projected reverse order). `.github/workflows/update-live-data.yml` runs `scripts/live_feed_loop.sh` (a build and publish every 4 min in game hours, every 15 min otherwise, for ~115 min per run; an hourly-ish cron starts the next run, which queues behind the current one). GitHub's cron alone is too unreliable for a 5-minute cadence: scheduled runs start tens of minutes late or not at all. The page polls every 2 min while visible, bypassing the 5-min raw-file cache with a per-minute query, and flags a feed older than 30 min, hourly
-  otherwise, plus the Yahoo day/waiver rollover at 08:00 and 07:00 UTC) and force-pushes it as one orphan commit to the `live-data`
-  branch. It never touches main or `data/`.
-- The page (`scripts/live_page.py embed` -> LIVE block in index.html) fetches
-  `raw.githubusercontent.com/<repo>/live-data/live.json` (5-minute cache), shows its age in Bangkok time, flags a feed older than 75 min and
-  falls back to the embedded official finished weeks. The Teams tab gets a `LIVE ↓` order option once a feed has loaded.
-- Not in this phase: the Draft tab's lottery on the projected order, and the lineup-integrity evidence panel.
+- `scripts/build_live_feed.py` builds `live.json`: week in progress, every team's roster rows (slot, status, today's game, games left, day and week
+  lines), starters' games left, the week's roster changes (`moves`) and the closed days' checks (`lineupChecks`); the loop adds `lineupReview`.
+  No scores, standings or projections. `.github/workflows/update-live-data.yml` runs `scripts/live_feed_loop.sh` (a build and publish every 4 min in
+  game hours, every 15 min otherwise, ~115 min per run; each run queues the next) and force-pushes one orphan commit to the `live-data` branch. It
+  never touches main or `data/`.
+- The page (`scripts/live_page.py embed`; `scripts/live_app.js`) fetches that file every 2 min while visible, shows its age in Bangkok time and flags one
+  older than 30 min. Without a feed it shows no lineups and points to the TEAMS tab.
+- One card per team (mine first, then teams with something to check). Row flags are facts about the current slots, not rulings: **OUT IN LINEUP** (a
+  starting slot, listed out, game today), **EMPTY**, **IL !** (on IL, not IL-eligible). The judgement of what a manager could have avoided is the
+  lineup review below.
 
 ## Fetching notes (2026-11-03)
 - Yahoo's no-week matchup page (`/matchup`) and the in-progress week's default view (`Live`) do not contain the category table
@@ -102,34 +91,18 @@ The matchup page has only percentages per player, so day-level data comes from Y
 stats, 16 requests per day. `scripts/live_days.py` captures each closed day once (lineup evidence and the starters' week made/attempted, carried
 in the feed as `lineupChecks.byDate` and `playerWeek` and reused through `--previous`; a runner-local `--day-cache` serves the day shown) and
 the latest day with a started game fresh on every build. Feed fields: per player `wfg`/`wft` (week made/attempted, starting days only, as Yahoo
-scores), `d`/`dm`/`dfg`/`dft`/`ds` (that day's line, minutes, made/attempted, slot); per matchup `day` (the starters' category inputs and
-winners for that day, our arithmetic, not Yahoo's score). The page's Week totals / Day switch changes the category rows, the score and the rosters
-together and labels the card WEEK TOTALS or DAY. The first build after a deploy fetches every closed day of the week (up to ~100 requests, once).
+scores), `d`/`dm`/`dfg`/`dft`/`ds` (that day's line, minutes, made/attempted, slot). The player card shows them. The first build after a deploy fetches every closed day of the week (up to ~100 requests, once).
 
-## Roto, raw stats and all-play (built, week in progress)
-The LIVE tab has a view strip `Matchups | Roto | Raw stats | All-play`, shown once the week has numbers. They are descriptive only (the league is
-head-to-head; the standings are W-L-T) and are computed on the page from the feed's `matchups[].teams[].stats` of all 16 teams, so they refresh with the
-feed and add no Yahoo requests. Roto: each category ranks the 16 teams, 16 points for the best, 1 for the worst (fewer turnovers is better), level
-teams share the average (two at the bottom score 1.5); total = roto score, rank = competition rank. All-play: each team against every other,
-category by category. `scripts/roto.py` is the reference, `scripts/live_roto.js` the page's port, and `tests/test_roto.py` holds both to the
-owner's week-2 report package (`tests/fixtures/roto_week2_package.json`: stats and expected points, totals, ranks and every all-play cell).
-Yahoo corrects stats after a week closes (the stored week 2 differs from the package by five single-unit numbers), so roto points are as of the feed.
-
-## Quality-of-life pass on the LIVE tab (2026-11-03)
-Found by an adversarial review and fixed together: the tall sticky left column now scrolls inside itself (its lower cards were unreachable); a
-refresh keeps each table's sideways scroll and the focused cell; the all-play detail sits above the matrix and scrolls into view; one tab stop in
-the matrix with arrow keys; sortable roto / raw-stats columns that also reorder the matrix; closest matchups first after mine; "Day N of 7" and a
-fewer-turnovers note on the roto views; a phone list (team picker, 48px rows) instead of the 16 x 16 matrix; Standings as a pane on narrow screens
-(they used to sit above the matchups); roto, raw stats and all-play records in the export hub; text no smaller than 10.5px except the ribbon, and the
-faint grey darkened to 4.6:1 on white (test-enforced). The last pane chosen is remembered in `localStorage` (per device; no shareable URL, because
-the site's own router owns the hash and query). Not done: a roto-rank trend since yesterday (needs a daily history in the feed).
+## Roto math
+`scripts/roto.py` (roto points and all-play) is no longer shown on the site; it stays as the reference that `tools/yahoo-roto` is tested against,
+with the owner's week-2 package (`tests/fixtures/roto_week2_package.json`).
 
 ## Season schedule (`data/2026-27/schedule.json`)
 
 `python3 scripts/update_yahoo_matchups.py --schedule [--apply]` keeps the head-to-head pairings of the 17 regular-season weeks as plain
 pairs of Yahoo team ids (no stats, no ownership). Finished weeks come from the stored results, other weeks from one matchup-page walk
 each (8 requests, 1.5 s apart); a week already kept is never walked again. The playoff weeks (18-20) are seeded from the final
-standings and Yahoo lists no opponent for them yet, so they are not stored and the LIVE Schedule pane shows "seeded". Display data only.
+standings and Yahoo lists no opponent for them yet, so they are not stored. Display data only.
 
 ## Player averages (`stats-data` branch, `player_stats.json`)
 
@@ -159,8 +132,7 @@ first, with "Show all"; the feed's current day is added on top until the file ha
 Each closed day's rosters are compared with the day before (`live_days.moves_between`): who was added and who was dropped, by team and
 date, plus today against the last closed day. The latest closed day's rosters are kept in `playerWeek.last` as the baseline; a feed
 built before this existed is backfilled once from the day cache. A player whose slot reads `--` on the week-totals page (dropped or
-traded away, still counted in the totals) is listed apart on the matchup card as "Left this roster" and is not a roster member for
-today's comparison. Facts only: nothing here says whether a move was good, legal or disputed.
+traded away, still counted in the totals) is not shown in the lineup and is not a roster member for today's comparison. Facts only: nothing here says whether a move was good, legal or disputed.
 
 ## Keeping the feed continuous (2026-11-13)
 

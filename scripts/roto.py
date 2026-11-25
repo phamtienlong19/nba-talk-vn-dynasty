@@ -7,7 +7,7 @@ rank is a competition rank (two teams on 67.5 are both 11th). All-play: every te
 played them all that week. Percentages compare as exact fractions, so equal percentages tie.
 
 Input: {teamId: stats} with stats shaped like the live feed's: fg [made, att], ft [made, att], tpm, pts, reb, ast, st, blk, to.
-`scripts/live_roto.js` is the page's port of this file; tests/test_roto.py holds both to the same fixture.
+tests/test_roto.py holds it to the owner's fixture; tools/yahoo-roto is checked against it.
 """
 from __future__ import annotations
 

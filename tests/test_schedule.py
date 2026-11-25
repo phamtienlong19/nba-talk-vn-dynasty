@@ -1,4 +1,4 @@
-"""The season schedule: pairings kept as plain pairs of Yahoo ids, captured by walking matchup pages, shown as a LIVE pane."""
+"""The season schedule: pairings kept as plain pairs of Yahoo ids, captured by walking matchup pages."""
 import json
 import os
 import sys
@@ -8,9 +8,6 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "..", "scripts"))
-import _phone  # noqa: E402
-import live_page as lp  # noqa: E402
-import test_scenario_rendering as tsr  # noqa: E402
 import update_yahoo_matchups as um  # noqa: E402
 import yahoo_matchups as ym  # noqa: E402
 import yahoo_rosters as yr  # noqa: E402
@@ -97,46 +94,6 @@ class TestCapture(unittest.TestCase):
         um.walk_week = boom
         self.assertEqual(self.run_it(), 1)
         self.assertFalse(os.path.exists(self.path))
-
-
-class TestPayload(unittest.TestCase):
-    def test_games_are_by_franchise_with_the_result_of_finished_weeks(self):
-        block = lp.schedule_block()
-        if not block:
-            self.skipTest("no schedule captured yet")
-        self.assertEqual([w["week"] for w in block], list(range(1, 18)))
-        wk1 = block[0]["games"]
-        self.assertEqual(len(wk1), 8)
-        self.assertTrue(all(g["a"] and g["b"] and g["score"] and len(g["score"]) == 3 for g in wk1))
-        self.assertTrue(all(g["score"] is None for g in block[-1]["games"]))
-
-
-@unittest.skipUnless(tsr._chrome(), "no Chrome")
-class TestPane(unittest.TestCase):
-    JS = ("var b=[].filter.call(document.querySelectorAll('#live-root .lv-views button'),function(x){return x.getAttribute('data-pane')==='schedule';})[0];R.has=!!b;"
-          "if(b){b.click();var t=document.querySelector('#live-root table.lv-sc');R.rows=t?t.querySelectorAll('tbody tr').length:0;"
-          "R.cols=t?t.querySelectorAll('thead th').length:0;R.cur=document.querySelectorAll('#live-root .lv-sc td.cur').length;R.done=document.querySelectorAll('#live-root .lv-sc td.w,#live-root .lv-sc td.l,#live-root .lv-sc td.t').length;"
-          "R.first=(document.querySelector('#live-root .lv-sc tbody tr th')||{}).textContent;"
-          "var me=document.querySelector('#live-root .lv-sc tr.me');R.me=!!me;R.overflow=document.documentElement.scrollWidth>document.documentElement.clientWidth;}")
-
-    def test_the_pane_lists_16_teams_by_20_weeks_with_the_playoffs_unfilled_without_widening_the_page_on_a_phone(self):
-        if not sched.load():
-            self.skipTest("no schedule captured yet")
-        r = _phone.phone_run(self.JS, wait_ms=3500)
-        self.assertIsNone(r.get("error"), r)
-        self.assertTrue(r["has"])
-        self.assertEqual((r["rows"], r["cols"]), (16, 21))
-        self.assertFalse(r["overflow"], "the schedule must scroll inside its box, not widen the page")
-
-    def test_my_team_lists_the_next_three_opponents(self):
-        if not sched.load():
-            self.skipTest("no schedule captured yet")
-        r = _phone.phone_run("var n=window.NBA_LIVE.next(window.NBA_ME&&NBA_ME()||Object.keys(NBA_ROTO?{}:{})[0]||'',3);var ids=Object.keys(JSON.parse(document.getElementById('live-data').textContent).teams.reduce(function(a,t){a[t.id]=1;return a;},{}));"
-                             "R.n=window.NBA_LIVE.next(ids[0],3);R.weeks=R.n.map(function(x){return x.week;});", wait_ms=3000)
-        self.assertIsNone(r.get("error"), r)
-        self.assertEqual(len(r["n"]), 3)
-        self.assertEqual(r["weeks"], sorted(r["weeks"]))
-        self.assertTrue(all(x["opp"] for x in r["n"]))
 
 
 if __name__ == "__main__":
