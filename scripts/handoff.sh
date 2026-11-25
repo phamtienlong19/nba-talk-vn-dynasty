@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Regenerate ai_exchange/REVIEW_PACKET.md from current repo state.
 #
-# Usage: ./handoff.sh   (root wrapper) or scripts/handoff.sh directly.
+# Usage: ./handoff.sh [--run-tests]   (root wrapper) or scripts/handoff.sh directly.
 #
 # Read-only with respect to canonical league state: never modifies
 # data/, index.html, or docs/. Only writes ai_exchange/REVIEW_PACKET.md.
@@ -15,6 +15,9 @@
 # up, per CLAUDE.md's "regenerated, not hand-authored" rule).
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+RUN_TESTS=0
+[ "${1:-}" = "--run-tests" ] && RUN_TESTS=1
 
 OUT="ai_exchange/REVIEW_PACKET.md"
 BASE_BRANCH="main"
@@ -113,14 +116,23 @@ if ./validate.sh >/tmp/dynasty_handoff_validate.log 2>&1; then
   SITE_VALIDATION="PASS"
 fi
 
-TEST_RESULT="FAIL"
-TEST_SUMMARY=""
-if TEST_OUT="$(python3 -m unittest discover -s tests 2>&1)"; then
-  TEST_RESULT="PASS"
-else
-  TEST_RESULT="FAIL"
+# The suite is not re-run here (CI is the gate, and it takes minutes): report what scripts/run_tests.py last recorded. --run-tests runs it first.
+if [ "$RUN_TESTS" = 1 ]; then
+  python3 scripts/run_tests.py >/tmp/dynasty_handoff_tests.log 2>&1 || true
 fi
-TEST_SUMMARY="$(echo "$TEST_OUT" | tail -1)"
+TEST_LINE="$(HEAD_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)" python3 -c "
+import json, os
+try:
+    r = json.load(open('ai_exchange/.last_test_run'))
+    note = [r['mode'] + ' run', str(r['ran']) + ' ran', str(r['skipped']) + ' skipped', 'at ' + r['head'] + (' with uncommitted changes' if r['dirty'] else '')]
+    if r['head'] != os.environ['HEAD_SHA']:
+        note.append('NOT this commit')
+    print(r['result'] + '|' + ', '.join(note))
+except (OSError, ValueError, KeyError):
+    print('NOT RUN|no recorded run of scripts/run_tests.py')
+" 2>/dev/null || echo 'NOT RUN|no recorded run of scripts/run_tests.py')"
+TEST_RESULT="${TEST_LINE%%|*}"
+TEST_SUMMARY="${TEST_LINE#*|}"
 
 YAHOO_REFRESH="not run this session"
 LAST_YAHOO_FILE="$(ls -t local_data/yahoo/draft_analysis_*.json 2>/dev/null | head -1 || true)"

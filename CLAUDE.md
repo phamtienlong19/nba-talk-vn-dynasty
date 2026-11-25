@@ -114,12 +114,22 @@ Avoid four files repeating the same essay.
 
 ```bash
 ./validate.sh                             # site validation
-python3 -m unittest discover -s tests     # cap model, Yahoo normalization, roster baseline, workflow scripts
+python3 scripts/run_tests.py              # every test, in parallel (~2 min; plain `python3 -m unittest discover -s tests` takes ~7)
+python3 scripts/run_tests.py --changed    # only the tests the current diff can reach (can still be most of them)
+python3 scripts/run_tests.py test_il_state test_trade_checker   # named files: seconds
 ./status.sh                               # current project state (one screen)
-./handoff.sh                              # regenerate ai_exchange/REVIEW_PACKET.md
+./handoff.sh                              # regenerate ai_exchange/REVIEW_PACKET.md; reports the last recorded test run (--run-tests to run it)
 ./work-issue.sh <issue-number>            # start implementation on a GitHub Issue
 ./sync-after-merge.sh [PR-number]         # normalize local state after a human merges a PR
 ```
+
+## Test effort
+
+Match the run to the change; CI runs everything on every PR.
+
+- Iterating, small fixes and updates to an open PR: the touched test files by name (or `--changed`) plus `./validate.sh`.
+- Opening a PR for a larger or shared-code change: one full `scripts/run_tests.py`, in the background if the tool call would time out.
+- Always say in the PR what was and was not run.
 
 ## No hidden context dependency
 
