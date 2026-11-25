@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-25T10:21:34Z
+Generated: 2026-11-25T15:38:02Z
 
 ## Task
 Active Task
@@ -9,8 +9,8 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: data/trade-2026-11-25
-Commit: fe3f314
+Branch: fix/my-team-highlight-flake
+Commit: ee8239f
 Base: main
 Working tree: dirty
 
@@ -32,7 +32,7 @@ Fingerprint: FRESH
 
 ## Validation
 - site validation: PASS
-- tests: PASS (full run, 1007 ran, 2 skipped, at fe3f314 with uncommitted changes)
+- tests: PASS (named run, 58 ran, 2 skipped, at ee8239f with uncommitted changes)
 - Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
 - live HTTP: OK
 
@@ -55,4 +55,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `data/trade-2026-11-25` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `fix/my-team-highlight-flake` if not already done, then request human/ChatGPT review of this packet.

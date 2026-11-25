@@ -4235,7 +4235,7 @@ function markMine(root){
   if(!names[chipText(c.textContent)])return;
   c.classList.add("mine-chip");var u=c.closest(MINE_UNITS);if(u)u.classList.add("mine");});}
 var mineTimer=0;
-function scheduleMine(){if(mineTimer)return;var run=function(){mineTimer=0;markMine(document);};mineTimer=window.requestAnimationFrame?window.requestAnimationFrame(run):setTimeout(run,16);}
+function scheduleMine(){if(mineTimer)return;mineTimer=setTimeout(function(){mineTimer=0;markMine(document);},16);}   /* a timer, not a frame: it also runs when nothing is being drawn */
 function teamChip(t,cls,fn){var me=getMe()===t.id,c=h("button",{type:"button",class:cls+(me?" mine":""),style:"--team-color:"+t.color},[h("i"),(me?"★ ":"")+t.short]);c.addEventListener("click",fn);return c;}
 function navIndex(){
  var v=view(),own={},players=[],fa=[];

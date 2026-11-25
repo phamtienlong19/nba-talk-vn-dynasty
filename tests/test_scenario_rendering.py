@@ -638,6 +638,7 @@ class TestRenderedCards(unittest.TestCase):
 
     def test_my_team_is_highlighted_across_cap_draft_and_synthetic_views(self):
         r = self._drive("""
+          window.requestAnimationFrame=function(){return 1;};   /* headless Chrome may draw no frame in time: the highlight must not wait for one */
           var t=D.teams[0];NBA_NAV.setMe(t.id);
           var host=document.createElement('div');host.id='synth';
           host.innerHTML='<table class="cmp"><tr><td>'+t.short+'</td></tr><tr><td>Nobody FC</td></tr></table>'
