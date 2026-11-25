@@ -1,7 +1,7 @@
 # Implementation Report
 
-Run: 2026-11-25 — fairer, shorter Commissioner review
+Run: 2026-11-25 — lineup review: fault only what a manager could have avoided
 
-- Lock-log flags are cleared when unavoidable: a start while out with no eligible healthy bench player with a game, or listed out only after the tip; IL flags when listed out before the tip. The week lineup check drops late scratches.
-- The lock log now records positions and the status from the read before the tip (`pre`); the loop passes the previous feed.
-- Review wording cut down; repeated days merge into one item, and a flagged player still on IL is one item.
+- The lineup log keeps the day's history (`day_start`, `state`, `gap`).
+- `scripts/lineup_review.py` applies the owner's 19-case table and publishes `lineupReview` in the live feed; rules in `config/roster_rules.json`.
+- REVIEW tab, LIVE lineup checks and My team show the same faults; the in-page judging and log fetch are gone.

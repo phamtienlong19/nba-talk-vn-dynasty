@@ -172,7 +172,10 @@ class TestAppendOnly(unittest.TestCase):
         self.assertIn("git push -q origin lineup-log", body)
         self.assertNotIn("--force", body)
         self.assertNotIn("-f ", body)
-        self.assertIn("lineup_log\n    wait_for", loop)                                         # runs after every successful build, before the wait
+        # runs after a successful build and before the publish, so the review of the new log goes out with that feed; neither can stop the loop
+        order = [loop.index(x) for x in ("build_live_feed.py", "\n    lineup_log ", "scripts/lineup_review.py", "push -q --force")]
+        self.assertEqual(order, sorted(order))
+        self.assertIn('--player-log player-log.json || echo "lineup review failed"', loop)
 
 
 if __name__ == "__main__":

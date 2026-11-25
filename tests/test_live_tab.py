@@ -285,6 +285,19 @@ class TestLiveTab(unittest.TestCase):
         self.assertTrue(r["detailFirst"])                                          # the detail sits above the matrix, in view when a cell is tapped
         self.assertEqual(r["tabstops"], 1)                                         # one tab stop, arrow keys do the rest
 
+    def test_reviewed_lineup_checks_show_faults_only(self):
+        item = lambda o, n: {"o": o, "case": 3, "n": n, "p": n, "what": "started while out", "fact": "PG", "dates": ["2026-11-25"], "at": "2026-11-25T20:00:00Z"}  # noqa: E731
+        review = {"week": 6, "rule": {"days": 2, "players": 3, "stars": 2}, "cleared": 3, "since": "2026-11-25", "teams": {
+            "franchise-01": {"items": [item("fault", "Real Fault"), item("watch", "Only Watch")], "days": 1, "players": 1, "stars": 0, "meets": False},
+            "franchise-02": {"items": [item("watch", "Other Watch")], "days": 0, "players": 0, "stars": 0, "meets": False}}}
+        r = self.drive(self.feed_js(lineupReview=review) + """
+          NBA_LIVE.set(FEED);document.querySelector('.navlink[data-tab=live]').click();
+          var b=document.querySelector('#live-root .lv-lc');R.teams=b.querySelectorAll('.lv-lc-t').length;b.querySelector('details').open=true;R.text=b.textContent;""", wait=2000)
+        self.assertEqual(r["teams"], 1)
+        self.assertIn("Real Fault: started while out (PG)", r["text"])
+        self.assertNotIn("Watch", r["text"])
+        self.assertIn("1 team: no faults.", r["text"])
+
     def test_the_roto_views_are_hidden_without_a_live_week(self):
         r = self.drive("""
           document.querySelector('.navlink[data-tab=live]').click();
