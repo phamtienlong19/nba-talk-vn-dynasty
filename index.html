@@ -875,14 +875,16 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .plc-fm tbody tr+tr th,.plc-fm tbody tr+tr td{border-top:1px solid #eef1f7}
 .plc-s{padding:12px 14px 4px}.plc-k{font:800 10.5px/1.3 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#2c3796;margin-bottom:8px}
 .plc-log[hidden]{display:none}.plc-gl{list-style:none;margin:0;padding:0}
-.plc-log{container-type:inline-size}.plc-gl,.plc-gh{--gf:clamp(8.5px,calc((100vw - 100px)/27),11px)}
-@supports (width:1cqw){.plc-gl,.plc-gh{--gf:clamp(8px,calc(100cqw / 27.5),11px)}}   /* the line's type size follows the card, so all eight columns always fit, scrollbar or not */
-.plc-gl li,.plc-gh{display:grid;grid-template-columns:calc(var(--gf)*3.05) calc(var(--gf)*4.4) calc(var(--gf)*1.5) minmax(calc(var(--gf)*7.9),1fr) calc(var(--gf)*3.05) calc(var(--gf)*1.7) calc(var(--gf)*3.05) calc(var(--gf)*1.3);align-items:baseline;column-gap:2px;white-space:nowrap}
-.plc-gl li{padding:6px 0;border-top:1px solid #eef1f7;font:600 var(--gf)/1.35 "Roboto Mono",ui-monospace,Menlo,monospace;color:#12264d}
-.plc-gh{position:sticky;top:0;z-index:1;padding:0 0 5px;background:#fff;border-bottom:1px solid #d9deea;font:800 calc(var(--gf)*.72)/1 "Inter",Arial,sans-serif;color:#66748d}
-.plc-gl li:first-child{border-top:0}.plc-gl li>span,.plc-gl li>b,.plc-gh>span{min-width:0;overflow:hidden}.plc-gl .n,.plc-gh .n{text-align:right}
-.plc-gl .gd{color:#66748d}.plc-gl .go{color:#44546f;font-size:calc(var(--gf)*.82)}.plc-gl .go i{margin-left:2px;padding:0 1px;border-radius:3px;background:#eef1f7;font:700 calc(var(--gf)*.66)/1.5 "Inter",Arial,sans-serif;font-style:normal}
-.plc-gl .gm{font-weight:800}.plc-gl li.off{opacity:.6}.plc-gl li.live .gd{color:#0f8a47;font-weight:800}
+.plc-log{container-type:inline-size}.plc-gl,.plc-gh{--gf:clamp(8.5px,calc((100vw - 106px)/25.4),11px)}
+@supports (width:1cqw){.plc-gl,.plc-gh{--gf:clamp(8px,calc((100cqw - 46px) / 25.4),11px)}}   /* the type follows the card: all eight columns fit with a visible gap between them */
+/* every column is as wide as its widest value and centred; the room left over is shared equally between the columns, in every row alike */
+.plc-gl li,.plc-gh{display:grid;grid-template-columns:calc(var(--gf)*3.05) calc(var(--gf)*4) calc(var(--gf)*1.5) calc(var(--gf)*7.9) calc(var(--gf)*3.05) calc(var(--gf)*1.7) calc(var(--gf)*3.05) calc(var(--gf)*1.4);justify-content:space-between;align-items:center;white-space:nowrap}
+.plc-gl li{margin:0 -4px;padding:6px 4px;border-radius:5px;font:600 var(--gf)/1.4 "Roboto Mono",ui-monospace,Menlo,monospace;color:#12264d}
+.plc-gl li:nth-child(even){background:#f5f7fb}
+.plc-gh{position:sticky;top:0;z-index:1;padding:0 0 5px;margin-bottom:2px;background:#fff;border-bottom:1px solid #d9deea;font:800 calc(var(--gf)*.72)/1 "Inter",Arial,sans-serif;color:#66748d}
+.plc-gl li>span,.plc-gl li>b,.plc-gh>span{min-width:0;overflow:hidden;text-align:center}.plc-gl li>:nth-child(-n+2),.plc-gh>:nth-child(-n+2){text-align:left}
+.plc-gl .gd{color:#66748d}.plc-gl .go{color:#44546f}.plc-gl .go i{margin-left:2px;padding:0 1px;border-radius:3px;background:#e4e9f3;font:700 calc(var(--gf)*.66)/1.5 "Inter",Arial,sans-serif;font-style:normal}
+.plc-gl .gm{font-weight:800}.plc-gl li.off>*{opacity:.55}.plc-gl li.live .gd{color:#0f8a47;font-weight:800}
 .plc-more{margin:6px 0 2px;padding:6px 12px;border:1px solid #d9deea;border-radius:999px;background:#fff;font:700 12px "Inter",Arial,sans-serif;color:#2c3796;cursor:pointer}
 .plc-keep{margin:10px 14px 0;font:600 11.5px/1.3 "Inter",Arial,sans-serif;color:#8a95ab}
 .plc-tl{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid #dfe5f1}.plc-tl li{position:relative;display:grid;grid-template-columns:56px 1fr;gap:8px;padding:5px 0}
@@ -5218,7 +5220,7 @@ function plDay(iso){return iso?(+iso.slice(5,7))+"/"+iso.slice(8,10):"";}
 function plOff(g){return g.slot==="BN"||g.slot==="IL"||g.slot==="IL+";}
 /* one game as the eight cells of its line: date, opponent, minutes, P-R-A-S-B, FG, 3PM, FT, TO */
 function plGameCells(g){var n=function(x){return x==null?0:x;},m=/^(\d+)/.exec(g.min||"");
- return [plDay(g.date),g.opp||"",m?m[1]:"",plGameBits(g).main,n(g.fg&&g.fg[0])+"/"+n(g.fg&&g.fg[1]),String(n(g.tpm)),n(g.ft&&g.ft[0])+"/"+n(g.ft&&g.ft[1]),String(n(g.to))];}
+ return [plDay(g.date),String(g.opp||"").replace(/^vs\s*/,"").replace(/^@\s*/,"@"),m?m[1]:"",plGameBits(g).main,n(g.fg&&g.fg[0])+"/"+n(g.fg&&g.fg[1]),String(n(g.tpm)),n(g.ft&&g.ft[0])+"/"+n(g.ft&&g.ft[1]),String(n(g.to))];}
 var PL_HEAD=["DATE","OPP","MIN","P-R-A-S-B","FG","3PM","FT","TO"],PL_NUM=[0,0,1,0,1,1,1,1];
 function plGameBits(g){   /* 13-7-1-1-1 (P R A S B), 5/7 FG, 2 3PM, 1/2 FT, 3 TO */
  var n=function(x){return x==null?0:x;};
@@ -5229,12 +5231,12 @@ function plLogFill(sec,k,lv,all){   /* the day-by-day section: one plain line pe
  if(!rows.length){if(PG.state==="failed"){sec.hidden=false;sec.appendChild(h("div",{class:"plc-k",text:"GAME LOG"}));sec.appendChild(h("div",{class:"plc-none",text:"Daily lines are published each morning; none loaded."}));}else sec.hidden=true;return;}
  sec.hidden=false;var shown=all?rows:rows.slice(0,PG_SHOW);
  sec.appendChild(h("div",{class:"plc-k",text:"GAME LOG"+(left!=null?" · "+left+" GAME"+(left===1?"":"S")+" LEFT THIS WEEK":"")}));
- sec.appendChild(h("div",{class:"plc-gh","aria-hidden":"true"},PL_HEAD.map(function(x,i){return h("span",{class:PL_NUM[i]?"n":"",text:x});})));
+ sec.appendChild(h("div",{class:"plc-gh","aria-hidden":"true"},PL_HEAD.map(function(x){return h("span",{text:x});})));
  var ul=h("ol",{class:"plc-gl"});
  shown.forEach(function(g){var c=plGameCells(g),off=plOff(g);
   ul.appendChild(h("li",{class:(off?"off":"")+(g.live?" live":""),"aria-label":plGameText(g),title:g.live?"Today's game, from the live feed":""},c.map(function(x,i){
    if(i===1)return h("span",{class:"go"},[x,off?h("i",{text:g.slot}):null]);
-   return h(i===3?"b":"span",{class:(i===0?"gd":i===3?"gm":"")+(PL_NUM[i]?" n":""),text:x});})));});
+   return h(i===3?"b":"span",{class:i===0?"gd":i===3?"gm":"",text:x});})));});
  sec.appendChild(ul);
  if(rows.length>PG_SHOW){var more=h("button",{type:"button",class:"plc-more",text:all?"Show the last "+PG_SHOW:"Show all "+rows.length+" games"});more.addEventListener("click",function(){plLogFill(sec,k,lv,!all);});sec.appendChild(more);}
  monoDigits(sec);}

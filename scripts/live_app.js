@@ -31,6 +31,14 @@ function rowFlag(r){
   if(r.s==="IL"||r.s==="IL+"){var k=ilKindOf(r);if(k==="inel")return {t:"IL !",c:"warn",title:"On IL, not IL-eligible"+(r.st?": Yahoo status "+r.st:": no Yahoo status")};}
   return null;}
 function sides(){var out=[];(FEED?FEED.matchups:[]).forEach(function(m){m.teams.forEach(function(s){out.push(s);});});return out;}
+/* does this player have a game on the day shown? (the feed gives its text: a start time, a live score or a result) */
+function hasGame(r){return r.n!=null&&!!r.g;}
+function startersPlaying(side){var s=side.roster.filter(function(r){return STARTING[r.s];});return {n:s.filter(hasGame).length,of:s.length};}
+function gameChip(r){
+  if(r.n==null)return null;
+  if(!r.g)return h("span",{class:"lv-g none",text:"no game"});
+  var state=r.gs||"upcoming",text=String(r.g).replace(/^([WL]),\s*/,"$1 ");
+  return h("span",{class:"lv-g "+state,title:state==="live"?"Game in progress":state==="final"?"Game over":"Game still to start (Yahoo's time)",text:text});}
 function flagsOf(side){return side.roster.filter(function(r){return r.s!=="--";}).map(function(r){var f=rowFlag(r);return f?{r:r,f:f}:null;}).filter(Boolean);}
 function faultDays(fid){var R=FEED&&FEED.lineupReview,t=R&&R.teams[fid];return t?t.days:0;}
 function ordered(){var mt=me();return sides().sort(function(a,b){return (b.team===mt)-(a.team===mt)||flagsOf(b).length-flagsOf(a).length||faultDays(b.team)-faultDays(a.team)||a.yahooId-b.yahooId;});}
@@ -88,14 +96,14 @@ function rosterTable(side){
     var mine=rows.filter(g[1]);if(!mine.length)return;
     tb.appendChild(h("tr",{class:"gh"},[h("td",{colspan:"3"},[h("b",{text:g[0]})])]));
     mine.forEach(function(r){var rk=r.n!=null&&r.p&&RK[r.p],flag=rowFlag(r);
-      var tr=h("tr",{class:(r.n==null?"empty ":"")+(STARTING[r.s]?"":"off ")+(rk?"rk ":"")+(flag?"flag "+flag.c:"")});
+      var tr=h("tr",{class:(r.n==null?"empty ":hasGame(r)?"plays ":"nogame ")+(STARTING[r.s]?"":"off ")+(rk?"rk ":"")+(flag?"flag "+flag.c:"")});
       tr.appendChild(h("td",{class:"sl",text:r.s}));
       var nm=h("td",{class:"nm"},[h("b",{text:r.n==null?"(empty)":r.n})]);
       if(r.p&&window.NBA_PLAYER){nm.classList.add("pl");nm.setAttribute("tabindex","0");nm.setAttribute("role","button");var op=function(){NBA_PLAYER.open(NBA_PLAYER.keyOf(r.p));};nm.addEventListener("click",op);nm.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();op();}});}
       if(rk){var rm=window.NBA_RK&&window.NBA_PLAYER?NBA_RK.mark(NBA_PLAYER.keyOf(r.p)):null;nm.appendChild(rm||h("span",{class:"lv-rk",title:"2026 rookie",text:"R"}));}
-      if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st"+(OUT[r.st]?" out":""),text:r.st}));nm.appendChild(h("small",{class:r.gs||"",text:(r.t?r.t+" · ":"")+(r.g||"no game today")+(r.gl!=null?" · "+r.gl+" left":"")}));}
+      if(r.n!=null){if(r.st)nm.appendChild(h("span",{class:"lv-st"+(OUT[r.st]?" out":""),text:r.st}));nm.appendChild(h("small",{text:(r.t||"")+(r.gl!=null?(r.t?" · ":"")+r.gl+" left":"")}));}
       tr.appendChild(nm);
-      tr.appendChild(h("td",{class:"fl"},flag?[h("span",{class:"lv-f "+flag.c,title:flag.title,text:flag.t})]:[]));
+      tr.appendChild(h("td",{class:"fl"},[flag?h("span",{class:"lv-f "+flag.c,title:flag.title,text:flag.t}):null,gameChip(r)]));
       tb.appendChild(tr);});});
   return t;}
 function movesOf(fid){return (FEED.moves||[]).filter(function(m){return m.team===fid;});}
@@ -113,11 +121,11 @@ function teamCard(side){
   var mine=side.team===me(),flags=flagsOf(side),days=faultDays(side.team);
   var open=OPEN[side.team]!=null?OPEN[side.team]:mine;
   var card=h("details",{class:"lv-card lv-team"+(mine?" me":""),"data-team":side.team});if(open)card.open=true;
-  var tp=side.toPlay?side.toPlay.upcoming+side.toPlay.live:0;
+  var sp=startersPlaying(side);
   card.appendChild(h("summary",null,[chip(side.team),
     flags.length?h("span",{class:"lv-n "+(flags.some(function(x){return x.f.c==="bad";})?"bad":"warn"),text:flags.length+" to check",title:flags.map(function(x){return (x.r.n||x.r.s)+": "+x.f.t;}).join(", ")}):null,
     days?h("span",{class:"lv-n bad",text:days+" fault day"+(days>1?"s":""),title:"This week, from the lineup checks"}):null,
-    h("small",{text:tp+" to play today"+(side.gamesLeft==null?"":" · "+(FEED.gamesLeftComplete===false?"~":"")+side.gamesLeft+" games left")})]));
+    h("small",null,[h("b",{class:sp.n?"on":"",text:sp.n+" of "+sp.of+" starters play"}),side.gamesLeft==null?null:" · "+(FEED.gamesLeftComplete===false?"~":"")+side.gamesLeft+" games left"])]));
   card.addEventListener("toggle",function(){OPEN[side.team]=card.open;});
   var body=h("div",{class:"lv-body"},[movesNode(side.team),rosterTable(side)]);card.appendChild(body);return card;}
 
