@@ -196,3 +196,20 @@ registry IL token, IL state, flags `healthy_on_il` / `out_starter` / `star_bench
 branch** (ordinary commits, never force-pushed; the live feed branch is force-pushed and keeps no history), plus one `first_tip` snapshot of every team's
 lineup per day. A player is recorded once per day and an existing line is never rewritten. Precision is the polling interval (4 minutes in game hours).
 Tank intent, AFK verdicts and points stay with the commissioner (`data/2026-27/violations.json`).
+
+## Commissioner review (the REVIEW tab, `#commissioner`)
+
+One compiled list per team plus league items, built in the page (`cmData` / `cmRender` in `index.html`); it writes nothing and rules on nothing. Every item says
+when its fact was read.
+
+| Item | Source | Time shown |
+|---|---|---|
+| Recorded violations | `data/2026-27/violations.json` | recorded by the commissioner |
+| Flags at lineup lock | `lineup-log` branch, one file per US game day, last 7 days (more on demand) | capture time, and whether the game was on or over |
+| Week lineup checks (rule count) | live feed `lineupChecks` (closed days) | feed time |
+| IL not eligible / unverified, IL and roster size | rosters in the page: the roster feed when loaded, else the verified snapshot | that read's time |
+| Payroll over / under, roster rules | verified snapshot (build time) | snapshot time |
+| Under-floor checkpoint findings | `data/` checkpoints | checkpoint date |
+| Trades waiting, cooldowns, Yahoo changes not yet verified, unlinked player ids, unset violation points | page data and roster feed | |
+
+A lock record flagging a Doubtful player on IL is not shown (Doubtful is IL-eligible).
