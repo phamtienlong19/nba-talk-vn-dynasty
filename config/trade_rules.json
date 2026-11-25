@@ -47,7 +47,8 @@
       "OUT",
       "INJ",
       "OFS",
-      "SUSP"
+      "SUSP",
+      "D"
     ],
     "tradeEndDate": "2027-02-18",
     "tankCutoffDays": 14,

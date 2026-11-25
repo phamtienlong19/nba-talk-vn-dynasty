@@ -392,13 +392,13 @@ class TestRenderedCards(unittest.TestCase):
             card = _card(self.official, self.si["shorts"][fid])
             rows = [r for r in rows if owner.get(r.get("playerKey")) == fid]    # a completed trade Yahoo has not shown yet moves him
             chips = {html_lib.unescape(n).strip(): c for c, n in
-                     re.findall(r'<span class="st-chip (?:st-[a-z]+|il(?: inel(?: healthy| unk)?)?)"[^>]*>([^<]*)</span>([^<]*)', card)}
+                     re.findall(r'<span class="st-chip (?:st-[a-z]+|il(?: inel| unk)?)"[^>]*>([^<]*)</span>([^<]*)', card)}
             for r in rows:
                 if r.get("status") in want:
                     if r.get("slot") in ss.SLOTS_IL:
                         elig = ls.player_meta(self.si, r["playerKey"]).get("eligiblePositions") or []
                         st = ss.il_state(r["slot"], r["status"], ("IL" in elig) if elig else None)
-                        exp = {"injured": r["slot"], "healthy_on_il": "HEALTHY", "unverified": "IL ?"}[st]   # IL / IL+ when legitimate; HEALTHY when Yahoo says he cannot be there
+                        exp = {"injured": r["slot"], "healthy_on_il": "IL !", "unverified": "IL ?"}[st]   # IL / IL+ when legitimate; IL ! when Yahoo says he cannot be there
                     else:
                         exp = want[r["status"]]
                     self.assertEqual(chips.get(r["name"]), exp, (r["name"], r["status"]))
@@ -457,9 +457,9 @@ class TestRenderedCards(unittest.TestCase):
                 elig = ls.player_meta(self.si, r["playerKey"]).get("eligiblePositions") or []
                 st = ss.il_state(r["slot"], r.get("status"), ("IL" in elig) if elig else None)
                 kind = {"injured": "out", "healthy_on_il": "inel", "unverified": "unk"}[st]
-                self.assertRegex(row, r'<span class="st-chip il( inel( healthy| unk)?)?"', r["name"])
-                self.assertEqual('st-chip il inel healthy' in row, kind == "inel", (r["name"], r.get("status")))   # HEALTHY on IL: its own solid chip
-                self.assertEqual('st-chip il inel unk' in row, kind == "unk", (r["name"], r.get("status")))        # unverified: grey dashed "IL ?"
+                self.assertRegex(row, r'<span class="st-chip il( inel| unk)?"', r["name"])
+                self.assertEqual('st-chip il inel"' in row, kind == "inel", (r["name"], r.get("status")))           # not IL-eligible: its own "IL !" chip
+                self.assertEqual('st-chip il unk"' in row, kind == "unk", (r["name"], r.get("status")))        # unverified: grey dashed "IL ?"
                 self.assertEqual('st-chip il"' in row, kind == "out", (r["name"], r.get("status")))                # a legitimate IL spot keeps the plain IL chip
                 self.assertEqual('st-after' in row, kind != "out" and bool(r.get("status")), (r["name"], r.get("status")))   # and Yahoo's status (when there is one) sits beside the name
 

@@ -187,8 +187,8 @@ snapshot's date when it is more than 3 hours old or cannot be fetched. A page op
 
 **IL states** (`season_state.il_state`, mirrored by `ilKind` on the page): a player in an IL slot is `injured` (Yahoo lists him Out / INJ / OFS, or no status and the
 registry still shows the IL token), `healthy_on_il` (an ineligible status P / Q / GTD / DTD (Doubtful is IL-eligible per the league settings), or no status and the registry says he is not IL-eligible) or
-`unverified` (no registry entry, or an unknown status code). The page shows three different chips ("IL", a solid red "HEALTHY", a grey "IL ?") and a per-team
-"N injured · N HEALTHY" count. Team rows carry `ie` (1 / 0, the registry's IL token; absent when unknown). The registry refreshes every 4 hours.
+`unverified` (no registry entry, or an unknown status code). The page shows three different chips ("IL", an amber "IL !", a grey "IL ?") and a per-team
+"N injured · N not IL-eligible" count. The page never calls such a player healthy (a Questionable player may well be hurt): `healthy_on_il` is only the internal name, kept because lineup-log records use it. Team rows carry `ie` (1 / 0, the registry's IL token; absent when unknown). The registry refreshes every 4 hours.
 
 **Lineup log** (`scripts/lineup_log.py`, called by `scripts/live_feed_loop.sh` after every build): a Yahoo lineup locks per player at tip-off, so a status that
 changes afterwards used to erase the proof of what counted. For every player whose game turns live or final the loop appends one lock record (slot, status,

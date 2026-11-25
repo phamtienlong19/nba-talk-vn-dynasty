@@ -64,7 +64,7 @@ class TestIlState(unittest.TestCase):
 
 @unittest.skipUnless(tsr._chrome(), "no Chrome")
 class TestIlOnThePage(unittest.TestCase):
-    def test_the_page_counts_match_the_python_rule_and_healthy_chips_are_distinct(self):
+    def test_the_page_counts_match_the_python_rule_and_the_chip_clears_the_name(self):
         with open(_site.INDEX, encoding="utf-8") as f:
             data = json.loads(re.search(r'id="league-data">(.*?)</script>', f.read(), re.S).group(1).replace("<\\/", "</"))
         want = {"injured": 0, "healthy_on_il": 0, "unverified": 0}
@@ -76,13 +76,17 @@ class TestIlOnThePage(unittest.TestCase):
         r = drive_page("""
           var host=document.body,n={injured:0,healthy:0,unk:0};
           [].forEach.call(host.querySelectorAll('.il-head .il-inel-n'),function(e){var t=e.textContent,m;
-            if(m=/(\\d+) injured/.exec(t))n.injured+=+m[1];if(m=/(\\d+) HEALTHY/.exec(t))n.healthy+=+m[1];if(m=/(\\d+) unverified/.exec(t))n.unk+=+m[1];});
-          R.n=n;R.cls=[].map.call(document.querySelectorAll('#rosters-a .st-chip.il, #rosters-b .st-chip.il'),function(e){return e.className;});""", qs="#teams", wait=2500, start=600, size="1000,1400", budget=20000)
+            if(m=/(\\d+) injured/.exec(t))n.injured+=+m[1];if(m=/(\\d+) not IL-eligible/.exec(t))n.healthy+=+m[1];if(m=/(\\d+) unverified/.exec(t))n.unk+=+m[1];});
+          R.n=n;R.cls=[].map.call(document.querySelectorAll('#rosters-a .st-chip.il, #rosters-b .st-chip.il'),function(e){return e.className;});
+          R.words=document.body.querySelector('#rosters-a').textContent+document.body.querySelector('#rosters-b').textContent;
+          R.over=[];[].forEach.call(document.querySelectorAll('.players.has-st .pname .st-chip.il'),function(c){var t=c.nextSibling;if(!t||!c.offsetWidth)return;
+            var g=document.createRange();g.selectNodeContents(t);var a=c.getBoundingClientRect(),b=g.getBoundingClientRect();if(a.right>b.left+0.5)R.over.push(c.textContent+' '+t.textContent+' '+(a.right-b.left));});""", qs="#teams", wait=2500, start=600, size="1000,1400", budget=20000)
         self.assertEqual(r["n"]["healthy"], want["healthy_on_il"])
         self.assertEqual(r["n"]["unk"], want["unverified"])
         if want["healthy_on_il"]:
-            self.assertTrue(any("healthy" in c for c in r["cls"]))                          # a distinct chip, not the injured one
-        self.assertTrue(all("healthy" not in c or "inel" in c for c in r["cls"]))
+            self.assertTrue(any("inel" in c for c in r["cls"]))                          # a distinct chip, not the injured one
+        self.assertNotIn("HEALTHY", r["words"])
+        self.assertEqual(r["over"], [])                                                    # the chip stays in its gutter, never over the name
 
 
 if __name__ == "__main__":
