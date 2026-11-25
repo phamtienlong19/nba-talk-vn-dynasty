@@ -37,7 +37,7 @@ function startersPlaying(side){var s=side.roster.filter(function(r){return START
 function gameChip(r){
   if(r.n==null)return null;
   if(!r.g)return h("span",{class:"lv-g none",text:"no game"});
-  var state=r.gs||"upcoming",text=String(r.g).replace(/^([WL]),\s*/,"$1 ");
+  var state=r.gs||"upcoming",text=String(r.g).replace(/^([WL]),\s*/,function(all,wl){return wl+" ";});
   return h("span",{class:"lv-g "+state,title:state==="live"?"Game in progress":state==="final"?"Game over":"Game still to start (Yahoo's time)",text:text});}
 function flagsOf(side){return side.roster.filter(function(r){return r.s!=="--";}).map(function(r){var f=rowFlag(r);return f?{r:r,f:f}:null;}).filter(Boolean);}
 function faultDays(fid){var R=FEED&&FEED.lineupReview,t=R&&R.teams[fid];return t?t.days:0;}
