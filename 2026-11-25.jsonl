@@ -64,3 +64,6 @@
 {"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T20:34:47Z","p":"5185","n":"Giannis Antetokounmpo","team":"franchise-03","slot":"Util","st":"P","g":"5:00 pm @ PHI","pos":["PF","C"]}
 {"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T20:49:47Z","p":"5324","n":"Zach LaVine","team":"franchise-02","slot":"SF","st":"Q","g":"10:00 pm @ GSW","pos":["PG","SG","SF"]}
 {"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T21:19:47Z","p":"5185","n":"Giannis Antetokounmpo","team":"franchise-03","slot":"Util","st":null,"g":"5:00 pm @ PHI","pos":["PF","C"]}
+{"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T21:49:47Z","p":"6218","n":"Kevin Porter Jr.","team":"franchise-10","slot":"Util","st":null,"g":null,"pos":["PG","SG"]}
+{"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T21:49:47Z","p":"4472","n":"Brook Lopez","team":"franchise-10","slot":"--","st":null,"g":"8:00 pm @ MEM","pos":["C"]}
+{"kind":"state","date":"2026-11-25","capturedAt":"2026-11-25T21:49:47Z","p":"6044","n":"Jalen Brunson","team":"franchise-06","slot":"PG","st":"P","g":"7:30 pm vs CLE","pos":["PG"]}
