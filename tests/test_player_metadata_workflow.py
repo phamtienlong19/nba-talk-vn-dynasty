@@ -1,4 +1,4 @@
-"""The player-metadata workflow: daily, PR-only, read-only GETs, and it may only change the metadata files and the generated page."""
+"""The player-metadata workflow: every 4 hours, PR-only, read-only GETs, and it may only change the metadata files and the generated page."""
 import os
 import unittest
 
@@ -9,7 +9,7 @@ YML = open(os.path.join(ROOT, ".github", "workflows", "update-player-metadata.ym
 class TestPlayerMetadataWorkflow(unittest.TestCase):
     def test_it_runs_daily_and_on_demand_only(self):
         head = YML.split("jobs:")[0]
-        self.assertRegex(head, r"\non:\n  schedule:\n    - cron: \"25 9 \* \* \*\"")
+        self.assertRegex(head, r"\non:\n  schedule:\n    - cron: \"25 1,5,9,13,17,21 \* \* \*\"")
         self.assertIn("workflow_dispatch:", head)
         for trigger in ("push:", "pull_request:", "pull_request_target:"):
             self.assertNotIn("\n  " + trigger, head, trigger)

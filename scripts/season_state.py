@@ -258,6 +258,30 @@ def ranked_roster(si, state, fid) -> list:
     return rank_roster(si, rows, injured_keys(state, [r["k"] for r in rows]))
 
 
+def il_state(slot, status, il_ok, rules=None):
+    """What a player's IL slot means, for the roster views, the lineup log and the commissioner list.
+
+    None            not in an IL slot
+    "injured"       Yahoo lists him Out / INJ / OFS / Doubtful (all IL-eligible in the league settings), or (no status) the registry still shows him IL-eligible: a legitimate IL spot
+    "healthy_on_il" an ineligible status (P / Q / GTD / DTD), or no status and the registry says he is NOT IL-eligible: Yahoo no longer lets him
+                    be there; evidence for the commissioner, never a verdict
+    "unverified"    no status and no registry entry (provisional / unlisted player), or a status code that is neither out nor ineligible
+
+    `il_ok` is the registry's own IL token (True / False; None = unknown). The registry can lag a day, so a player Yahoo shows as Out is injured whatever
+    it says (the same rule as update_yahoo_rosters.double_checks)."""
+    if slot not in SLOTS_IL:
+        return None
+    rules = rules or _load(RULES_PATH)["longTermInjured"]
+    st = (status or "").upper() or None
+    if st in rules["outStatuses"] or st in rules.get("ilEligibleStatuses", ()):
+        return "injured"
+    if st in rules["ineligibleStatuses"]:
+        return "healthy_on_il"
+    if st:
+        return "unverified"
+    return "injured" if il_ok else "healthy_on_il" if il_ok is False else "unverified"
+
+
 def team_view(si, state, fid, base) -> dict:
     rep = ls.team_report(si, state, fid, base)
     rep["fold"] = ls.fold_team(si, state, fid)
@@ -269,6 +293,9 @@ def team_view(si, state, fid, base) -> dict:
             r["st"] = status[r["k"]]  # Yahoo player status as observed (P, Q, D, O, INJ, OFS, ...)
         meta = ls.player_meta(si, r["k"])  # display data for players the original board does not list (in-season adds)
         r["pos"], r["nba"] = (meta.get("displayPosition") or "").replace(",", "/"), meta.get("nbaTeam") or ""
+        elig = meta.get("eligiblePositions") or []
+        if elig:
+            r["ie"] = 1 if "IL" in elig else 0  # Yahoo's own IL eligibility (the registry's IL token); omitted when unknown (provisional / unlisted)
     rep["il"] = sum(1 for r in rep["roster"] if r["s"] in SLOTS_IL)
     # Injured = an IL slot OR a long-term Yahoo status (Out / INJ / OFS) even if the manager has not moved him to IL.
     # Everyone competes for the counted nine on salary alone; when salaries tie at the boundary a healthy player is shown

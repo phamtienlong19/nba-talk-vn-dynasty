@@ -392,10 +392,15 @@ class TestRenderedCards(unittest.TestCase):
             card = _card(self.official, self.si["shorts"][fid])
             rows = [r for r in rows if owner.get(r.get("playerKey")) == fid]    # a completed trade Yahoo has not shown yet moves him
             chips = {html_lib.unescape(n).strip(): c for c, n in
-                     re.findall(r'<span class="st-chip (?:st-[a-z]+|il(?: inel)?)"[^>]*>([^<]*)</span>([^<]*)', card)}
+                     re.findall(r'<span class="st-chip (?:st-[a-z]+|il(?: inel(?: healthy| unk)?)?)"[^>]*>([^<]*)</span>([^<]*)', card)}
             for r in rows:
                 if r.get("status") in want:
-                    exp = r["slot"] if r.get("slot") in ss.SLOTS_IL else want[r["status"]]      # IL slot players always show IL / IL+
+                    if r.get("slot") in ss.SLOTS_IL:
+                        elig = ls.player_meta(self.si, r["playerKey"]).get("eligiblePositions") or []
+                        st = ss.il_state(r["slot"], r["status"], ("IL" in elig) if elig else None)
+                        exp = {"injured": r["slot"], "healthy_on_il": "HEALTHY", "unverified": "IL ?"}[st]   # IL / IL+ when legitimate; HEALTHY when Yahoo says he cannot be there
+                    else:
+                        exp = want[r["status"]]
                     self.assertEqual(chips.get(r["name"]), exp, (r["name"], r["status"]))
                     seen.add(r["status"])
         self.assertTrue(seen, "the snapshot carries no statuses to check")
@@ -449,11 +454,14 @@ class TestRenderedCards(unittest.TestCase):
                     continue
                 m = re.search(r'<div class="player-row[^"]*il-row[^"]*"[^>]*>.*?<div class="nba">', card, re.S)
                 row = next(x for x in re.findall(r'<div class="player-row[^"]*il-row.*?<div class="nba">', card, re.S) if html_lib.unescape(r["name"]) in html_lib.unescape(x))
-                kind = "out" if (not r.get("status") or r.get("status") in out) else "inel" if r.get("status") in soft else "other"
-                self.assertRegex(row, r'<span class="st-chip il( inel)?"', r["name"])
-                self.assertEqual('st-chip il inel' in row, kind != "out", (r["name"], r.get("status")))      # in an IL slot with an IL-ineligible status: dashed chip
-                self.assertEqual('st-after' in row, kind != "out", (r["name"], r.get("status")))               # and Yahoo's status (or HEALTHY) sits beside the name
-                self.assertNotIn("HEALTHY", row)                                                                  # no status on IL = presumed hurt
+                elig = ls.player_meta(self.si, r["playerKey"]).get("eligiblePositions") or []
+                st = ss.il_state(r["slot"], r.get("status"), ("IL" in elig) if elig else None)
+                kind = {"injured": "out", "healthy_on_il": "inel", "unverified": "unk"}[st]
+                self.assertRegex(row, r'<span class="st-chip il( inel( healthy| unk)?)?"', r["name"])
+                self.assertEqual('st-chip il inel healthy' in row, kind == "inel", (r["name"], r.get("status")))   # HEALTHY on IL: its own solid chip
+                self.assertEqual('st-chip il inel unk' in row, kind == "unk", (r["name"], r.get("status")))        # unverified: grey dashed "IL ?"
+                self.assertEqual('st-chip il"' in row, kind == "out", (r["name"], r.get("status")))                # a legitimate IL spot keeps the plain IL chip
+                self.assertEqual('st-after' in row, kind != "out" and bool(r.get("status")), (r["name"], r.get("status")))   # and Yahoo's status (when there is one) sits beside the name
 
     def test_a_rookie_on_another_roster_keeps_the_rookie_tag(self):
         """A drafted rookie who is no longer with the drafting team (traded or picked up) still wears the purple name AND the R tag."""
