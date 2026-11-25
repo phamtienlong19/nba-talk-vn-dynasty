@@ -1,6 +1,6 @@
 # Review Packet
 
-Generated: 2026-11-25T07:32:48Z
+Generated: 2026-11-25T07:54:39Z
 
 ## Task
 Active Task
@@ -9,16 +9,16 @@ Active Task
 READY_FOR_REVIEW
 
 ## Git
-Branch: feat/commissioner-smarter
-Commit: 9fe7eda
+Branch: feat/live-lineups-only
+Commit: ecd8ee8
 Base: main
 Working tree: dirty
 
 ## GitHub
 Repository: https://github.com/phamtienlong19/nba-talk-vn-dynasty
 GitHub CLI: available
-PR: https://github.com/phamtienlong19/nba-talk-vn-dynasty/pull/243 (OPEN)
-CI: validate: completed/success
+PR: none
+CI: no runs found for this branch
 
 ## Deployment
 Public URL: https://phamtienlong19.github.io/nba-talk-vn-dynasty/
@@ -43,7 +43,7 @@ Fingerprint: FRESH
  ai_exchange/IMPLEMENTATION_REPORT.md               |   10 +-
  ai_exchange/REVIEW_PACKET.md                       |  400 +++++--
  config/draft_lottery_rules.json                    |   25 +-
- config/roster_rules.json                           |    6 +-
+ config/roster_rules.json                           |   28 +-
  config/trade_rules.json                            |   14 +-
  data/2026-27/rosters/index.json                    |  299 ++++-
  .../rosters/snapshots/RS-2026-11-04-184c2108.json  | 1210 +++++++++++++++++++
@@ -96,11 +96,11 @@ Fingerprint: FRESH
  docs/HEALING_CONFLICTS.md                          |   25 +
  docs/LEAGUE_RULES_MODEL.md                         |   11 +
  docs/LEAGUE_STATE_MODEL.md                         |    9 +
- docs/LIVE_DATA.md                                  |  100 ++
+ docs/LIVE_DATA.md                                  |  119 ++
  docs/SEASON_STATE_MODEL.md                         |    2 +-
  docs/YAHOO_DATA_SOURCE.md                          |    2 +-
  docs/YAHOO_ROSTER_WORKFLOW.md                      |    2 +-
- index.html                                         |  855 ++++++++++++--
+ index.html                                         |  812 +++++++++++--
  scripts/bot_pr.sh                                  |   44 +
  scripts/build_league_state.py                      |    4 +-
  scripts/build_live_feed.py                         |   12 +-
@@ -109,10 +109,11 @@ Fingerprint: FRESH
  scripts/handoff.sh                                 |   28 +-
  scripts/heal_open_prs.sh                           |   31 +
  scripts/lineup_log.py                              |  239 ++++
+ scripts/lineup_review.py                           |  429 +++++++
  scripts/live.css                                   |   24 +
- scripts/live_app.js                                |   84 +-
+ scripts/live_app.js                                |   97 +-
  scripts/live_days.py                               |   51 +-
- scripts/live_feed_loop.sh                          |   16 +
+ scripts/live_feed_loop.sh                          |   19 +
  scripts/live_page.py                               |   26 +-
  scripts/lottery_order.py                           |    4 +-
  scripts/player_log.py                              |   67 ++
@@ -145,7 +146,7 @@ Fingerprint: FRESH
  tests/test_bot_prs.py                              |   42 +
  tests/test_build_site.py                           |   49 +
  tests/test_card_positions.py                       |   40 +
- tests/test_commissioner_tab.py                     |  186 +++
+ tests/test_commissioner_tab.py                     |  137 +++
  tests/test_consistency.py                          |   55 +
  tests/test_export.py                               |   50 +-
  tests/test_fa_draft_pool.py                        |    4 +-
@@ -155,9 +156,10 @@ Fingerprint: FRESH
  tests/test_keeper_overrides.py                     |    4 +-
  tests/test_league_state_builders.py                |    6 +-
  tests/test_league_state_data.py                    |   14 +-
- tests/test_lineup_log.py                           |  179 +++
+ tests/test_lineup_log.py                           |  182 +++
+ tests/test_lineup_review.py                        |  256 ++++
  tests/test_live_moves.py                           |   63 +
- tests/test_live_tab.py                             |   79 +-
+ tests/test_live_tab.py                             |   92 +-
  tests/test_lottery_eligibility.py                  |    5 +-
  tests/test_lottery_order.py                        |   10 +-
  tests/test_lottery_sim.py                          |   10 +-
@@ -193,12 +195,12 @@ Fingerprint: FRESH
  tools/yahoo-roto/roto-live.yml                     |   71 ++
  tools/yahoo-roto/tests/test_yahoo_roto.py          |  184 +++
  tools/yahoo-roto/yahoo_roto.py                     |  571 +++++++++
- 166 files changed, 50316 insertions(+), 684 deletions(-)
+ 168 files changed, 50982 insertions(+), 684 deletions(-)
 ```
 
 ## Validation
 - site validation: PASS
-- tests: PASS (full run, 1019 ran, 2 skipped, at 9fe7eda with uncommitted changes)
+- tests: PASS (full run, 992 ran, 2 skipped, at ecd8ee8 with uncommitted changes)
 - Yahoo refresh: last local snapshot: draft_analysis_2026-10-05T032730Z.json
 - live HTTP: OK
 
@@ -290,6 +292,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - scripts/handoff.sh
 - scripts/heal_open_prs.sh
 - scripts/lineup_log.py
+- scripts/lineup_review.py
 - scripts/live.css
 - scripts/live_app.js
 - scripts/live_days.py
@@ -337,6 +340,7 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - tests/test_league_state_builders.py
 - tests/test_league_state_data.py
 - tests/test_lineup_log.py
+- tests/test_lineup_review.py
 - tests/test_live_moves.py
 - tests/test_live_tab.py
 - tests/test_lottery_eligibility.py
@@ -386,4 +390,4 @@ Yahoo source timestamp: 2026-10-05T03:27:30Z
 - Set the secret and repo settings (docs/YAHOO_ROSTER_WORKFLOW.md), then run the workflow once from main.
 
 ## Suggested Next Step
-Open/update the PR from `feat/commissioner-smarter` if not already done, then request human/ChatGPT review of this packet.
+Open/update the PR from `feat/live-lineups-only` if not already done, then request human/ChatGPT review of this packet.

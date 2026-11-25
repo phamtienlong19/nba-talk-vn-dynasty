@@ -1287,7 +1287,7 @@ body{background:var(--canvas);color:var(--text)}
 <a class="navlink" href="#cap" data-tab="cap">CAP</a>
 <a class="navlink" href="#trade-lab" data-tab="trade-lab">TRADE LAB</a>
 <a class="navlink" href="#draft" data-tab="draft">DRAFT</a>
-<a class="navlink navlive" href="#live" data-tab="live" title="This week's matchups and the standings if the week ended now">LIVE</a>
+<a class="navlink navlive" href="#live" data-tab="live" title="Every team's current lineup and the week's lineup checks">LIVE</a>
 <a class="navlink navkeep" href="#keepers" data-tab="keepers" title="Opens What If: re-rank players and preview next year's keepers (your assumption, not official)">KEEPERS</a>
 <a class="navlink navcom" href="#commissioner" data-tab="commissioner" title="Commissioner review: everything waiting, with the time each fact was read">REVIEW</a>
 <div class="modeswitch" role="group" aria-label="State mode"><button type="button" data-mode="OFFICIAL" class="on" title="The league as it stands now">OFFICIAL</button><button type="button" data-mode="SCENARIO" title="Apply the recorded trade proposals to see the league after them">SCENARIO</button><button type="button" data-mode="WHATIF" title="Simulations (Giả định): next year's keepers and what-if history. Not official.">WHAT IF</button></div>
@@ -3945,6 +3945,8 @@ function ilKind(r){var o=TKR.longTermInjured;if(r.st&&(o.outStatuses.indexOf(r.s
 function ilWord(k){return k==="out"?"IL":k==="inel"?"IL !":"IL ?";}
 function ilTitle(r,k,slot){var sn=(STATUS[r.st]||[])[1]||r.st;
  return (slot||"Injured list")+(k==="out"?(r.st?" · Yahoo lists him out":" · no Yahoo status, but still IL-eligible in Yahoo's list: a legitimate IL spot"):k==="inel"?(r.st?" · On IL, not IL-eligible: Yahoo status "+sn+" (Yahoo allows Out / Injured / Out for season / Doubtful)":" · On IL, not IL-eligible: no Yahoo injury status, and Yahoo's list does not show IL eligibility"):" · unverified: "+(r.st?"Yahoo status "+r.st+" is neither Out nor a known ineligible status":"no status and no Yahoo eligibility on file for him yet"));}
+window.NBA_IL=function(pid,st){var row=null;Object.keys(D.scenarios[""].teams).forEach(function(f){D.scenarios[""].teams[f].roster.forEach(function(r){if(String(r.k).split(".p.")[1]===String(pid))row=r;});});
+ return ilKind({st:st||null,ie:row?row.ie:undefined});};   /* the LIVE tab asks what an IL slot means for a player */
 function statusChip(code){if(!code)return null;var s=STATUS[code]||[code,"Yahoo status "+code,"na"];
  return h("span",{class:"st-chip st-"+s[2],title:s[1]+" (Yahoo)","aria-label":s[1],text:s[0]});}
 /* My team first in the cap grid */
@@ -4137,7 +4139,7 @@ function lotReveal(id,btn){var b=document.querySelectorAll("#lottery-sim .lot-ba
 function gbOverall(ST_,s){var top=null;Object.keys(ST_.teams).forEach(function(k){var t=ST_.teams[k];if(!top||t.rank<top.rank)top=t;});
  var g=top?((top.w-s.w)+(s.l-top.l))/2:null;return g==null||g===0?"–":String(g);}
 function renderStandings(){
- var LV=S.order==="live"&&window.NBA_LIVE?window.NBA_LIVE.standings():null,ST_=LV||D.standings,live=!!(ST_&&ST_.started&&ST_.worstFirst),byStand=live&&S.order!=="team";
+ var ST_=D.standings,live=!!(ST_&&ST_.started&&ST_.worstFirst),byStand=live&&S.order!=="team";
  var secs=[document.getElementById("rosters-a"),document.getElementById("rosters-b")];if(!secs[0]||!secs[1])return;
  var cards=[].slice.call(document.querySelectorAll("#rosters-a section.team-card,#rosters-b section.team-card"));
  var byShort={};cards.forEach(function(c){var t=c.querySelector(".identity-tag");if(t)byShort[t.textContent.trim()]=c;});
@@ -4153,13 +4155,12 @@ function renderStandings(){
  secs.forEach(function(sec){var strip=sec.querySelector(".meta-strip");if(!strip)return;var p=strip.querySelector(".stand-pill");if(p)p.remove();if(!ST_)return;
   if(!live){strip.appendChild(h("span",{class:"meta-pill stand-pill off",title:"Cards switch to standings order (worst record first) once games are played"},[h("span",{class:"pill-k",text:"STANDINGS"}),h("span",{class:"pill-v",text:"AFTER WEEK 1"})]));return;}
   var seg=h("span",{class:"meta-pill stand-pill",title:"Yahoo standings as of "+shortDate((ST_.sourceUpdatedAt||ST_.capturedAt||"").slice(0,10))},[h("span",{class:"pill-k",text:"ORDER"})]);
-  [["standings","STANDINGS ↓"]].concat(window.NBA_LIVE&&window.NBA_LIVE.standings()?[["live","LIVE ↓"]]:[]).concat([["team","TEAM #"]]).forEach(function(o){var b=h("button",{type:"button",class:"so"+((S.order||"standings")===o[0]?" on":""),text:o[1]});
+  [["standings","STANDINGS ↓"],["team","TEAM #"]].forEach(function(o){var b=h("button",{type:"button",class:"so"+((S.order||"standings")===o[0]?" on":""),text:o[1]});
    b.addEventListener("click",function(){S.order=o[0];renderStandings();syncUrl();});seg.appendChild(b);});
   strip.appendChild(seg);});
 }
-document.addEventListener("nba:live",function(){try{renderStandings();}catch(e){}});
 function syncUrl(){try{var ks=key();var q=S.mode==="SCENARIO"?"?mode=scenario"+(ks?"&trades="+ks:""):S.mode==="WHATIF"&&window.NBA_WHATIF?window.NBA_WHATIF.query():location.pathname;
- if((S.order==="team"||S.order==="live")&&S.mode!=="WHATIF")q+=(q.indexOf("?")>=0?"&":"?")+"order="+S.order;history.replaceState(null,"",q+location.hash);}catch(e){}chkUrl();}
+ if(S.order==="team"&&S.mode!=="WHATIF")q+=(q.indexOf("?")>=0?"&":"?")+"order="+S.order;history.replaceState(null,"",q+location.hash);}catch(e){}chkUrl();}
 /* ---------- tabs: TEAMS / CAP / TRADE LAB / DRAFT show one view at a time; the Draft Archive has a tab per round ---------- */
 var TABS=[{id:"teams",sec:["rosters-a","rosters-b"]},{id:"cap",sec:["cap"]},{id:"trade-lab",sec:["trade-lab"]},{id:"draft",sec:["draft-order"]},{id:"live",sec:["live"]},{id:"me",sec:["me-page"]},{id:"commissioner",sec:["com-page"]}];
 var TAB_ALIAS={"rosters-a":"teams","rosters-b":"teams","draft-order":"draft","draft-pool":"draft"};  /* old anchors keep working */
@@ -5120,15 +5121,11 @@ function renderMePage(){
  grid.appendChild(meCard("Trades and cooldowns",function(){goTab("trade-lab","");},"Open Trade Lab",kids));
  /* live */
  var F=window.NBA_LIVE&&NBA_LIVE.source()==="live"?NBA_LIVE.feed():null,lk=[];
- if(F){var m=F.matchups.filter(function(x){return x.teams.some(function(s){return s.team===f;});})[0];
-  if(m){var i=m.teams[0].team===f?0:1,o=m.teams[1-i];lk.push(meRow("Week "+F.week,m.score[i]+"–"+m.score[1-i]+(m.score[2]?"–"+m.score[2]:"")+" vs "+(T[o.team]?T[o.team].short:o.name),m.score[i]>m.score[1-i]?"ok":m.score[i]<m.score[1-i]?"bad":""));
-   var row=F.table.filter(function(r){return r.team===f;})[0];if(row)lk.push(meRow("If the week ended now",(row.tied?"T-":"")+"#"+row.rank+" · "+row.w+"-"+row.l+(row.t?"-"+row.t:"")+" · "+(row.playoff==="in"?"in":row.playoff==="bubble"?"bubble":"out")));
-   lk.push(meRow("Games left (starters)",m.teams[i].gamesLeft==null?"–":String(m.teams[i].gamesLeft)));}
+ if(F){var side=null;F.matchups.forEach(function(m){m.teams.forEach(function(x){if(x.team===f)side=x;});});
+  if(side)lk.push(meRow("Games left (starters)",side.gamesLeft==null?"–":String(side.gamesLeft)));
   var RVm=F.lineupReview,L=RVm?RVm.teams[f]:(F.lineupChecks&&F.lineupChecks.teams?F.lineupChecks.teams.filter(function(x){return x.team===f;})[0]:null),Ln=L?(RVm?L.days:L.missetDays):0;
   lk.push(meRow("Lineup checks",Ln?Ln+" day"+(Ln>1?"s":"")+(RVm?" with a fault":" with a flag"):"nothing found",L&&(RVm?L.meets:L.meetsCount)?"warn":""));}
  else lk.push(meRow("Live","the live feed has not loaded yet"));
- var nx=window.NBA_LIVE&&NBA_LIVE.next?NBA_LIVE.next(f,3):[];
- if(nx.length)lk.push(meRow("Next opponents",nx.map(function(x){return "W"+x.week+" "+(T[x.opp]?T[x.opp].short:x.opp);}).join(" · ")));
  grid.appendChild(meCard("This week",function(){goTab("live","");},"Open LIVE",lk));
  /* draft */
  var lot=D.lottery&&D.lottery.teams?D.lottery.teams.filter(function(x){return x.franchiseId===f;})[0]:null,dk=[meRow("Picks held",(tm.picks||[]).length?tm.picks.join(", "):"none")];
@@ -5538,7 +5535,7 @@ function init(){
   initTabs();initNav();
   if(qs.get("mode")==="whatif"&&window.NBA_WHATIF){S.mode="WHATIF";window.NBA_WHATIF.restore(qs);}
   else if(location.hash==="#keepers"&&window.NBA_WHATIF&&window.NBA_WHATIF.openKeepers())S.mode="WHATIF";
-  if(qs.get("order")==="team"||qs.get("order")==="live")S.order=qs.get("order");
+  if(qs.get("order")==="team")S.order="team";
   if(qs.get("mode")==="scenario"){S.mode="SCENARIO";(qs.get("trades")||"").split(",").forEach(function(k){if(TR[k])S.sel[k]=true;});}
  initChecker(qs);renderAvail();renderAll();rfLoad();
  var want=qs.get("player")||(/^#player\//.test(location.hash)?location.hash.slice(8):"");if(want)setTimeout(function(){plSheet(NBA_PLAYER.keyOf(want));},200);
