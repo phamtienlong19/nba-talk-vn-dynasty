@@ -70,18 +70,24 @@ class TestPlayerCard(unittest.TestCase):
           R.cells=[].map.call(c.querySelectorAll('.plc-gl li:first-child > *'),function(x){return x.textContent});""" % TRADED, pre_js=PRE, wait_ms=2500)
         self.assertEqual(r["cells"][:3], ["11/25", "vs TOR", "30"])
 
-    def test_a_game_line_fits_a_phone_without_widening_the_page(self):
+    def test_a_game_line_fits_every_phone_width_without_widening_the_page(self):
+        for width, bar in ((320, 0), (360, 0), (390, 0), (430, 0), (360, 15), (390, 15)):   # 15 = the classic scrollbar headless Linux draws (CI)
+            with self.subTest(width=width, scrollbar=bar):
+                self.fits(width, bar)
+
+    def fits(self, width, bar):
         import json as _j
         rows = [["2026-11-%02d" % d, "PG", "@ DAL", "34", 12, 20, 10, 12, 4, 33, 12, 11, 2, 3, 5, 4] for d in range(12, 2, -1)]
         rows[0] = ["2026-11-12", "IL+", "@ PHX", "44:59", 16, 29, 14, 16, 10, 55, 18, 12, 10, 3, 7, 0]       # the widest line there is
         doc = _j.dumps({"capturedAt": "2026-11-13T09:40:00Z", "days": [], "p": {"10572": rows}})
-        r = _phone.phone_run("""NBA_PLAYER.logSet(%s);NBA_PLAYER.open('%s');var sec=document.querySelector('#pl-sheet .plc-log'),card=document.querySelector('#pl-sheet .plc');
+        r = _phone.phone_run("""if(%d){var st=document.createElement('style');st.textContent='::-webkit-scrollbar{width:%dpx}';document.head.appendChild(st);}
+          NBA_PLAYER.logSet(%s);NBA_PLAYER.open('%s');var sec=document.querySelector('#pl-sheet .plc-log'),card=document.querySelector('#pl-sheet .plc');
           var cr=card.getBoundingClientRect();R.over=0;[].forEach.call(sec.querySelectorAll('.plc-gl li > *'),function(x){if(x.getBoundingClientRect().right>cr.right+1)R.over++;});
           R.lines=sec.querySelectorAll('.plc-gl li').length;R.h=Math.max.apply(null,[].map.call(sec.querySelectorAll('.plc-gl li'),function(x){return x.getBoundingClientRect().height}));
-          R.cut=[].filter.call(sec.querySelectorAll('.plc-gl li > *, .plc-gh > *'),function(x){return x.scrollWidth>x.clientWidth+1}).map(function(x){return x.textContent});R.sw=document.documentElement.scrollWidth;R.cw=document.documentElement.clientWidth;""" % (doc, TRADED),
-                             pre_js=PRE, wait_ms=2500)
+          R.cut=[].filter.call(sec.querySelectorAll('.plc-gl li > *, .plc-gh > *'),function(x){return x.scrollWidth>x.clientWidth+1}).map(function(x){return x.textContent});R.sw=document.documentElement.scrollWidth;R.cw=document.documentElement.clientWidth;""" % (bar, bar, doc, TRADED),
+                             pre_js=PRE, wait_ms=2500, width=width)
         self.assertIsNone(r.get("error"), r)
-        self.assertEqual(r["over"], 0)
+        self.assertEqual(r["over"], 0, r)
         self.assertLessEqual(r["sw"], r["cw"])
         self.assertLess(r["h"], 32)                                                         # one line per game
         self.assertEqual(r["cut"], [])                                                      # and nothing is cut off in it

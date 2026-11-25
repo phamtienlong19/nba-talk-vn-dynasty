@@ -875,11 +875,13 @@ button.tpill:not(.on):hover{background:#e8eef7;color:#12264d}
 .plc-fm tbody tr+tr th,.plc-fm tbody tr+tr td{border-top:1px solid #eef1f7}
 .plc-s{padding:12px 14px 4px}.plc-k{font:800 10.5px/1.3 "Inter",Arial,sans-serif;letter-spacing:.1em;color:#2c3796;margin-bottom:8px}
 .plc-log[hidden]{display:none}.plc-gl{list-style:none;margin:0;padding:0}
-.plc-gl li,.plc-gh{display:grid;grid-template-columns:34px 54px 20px minmax(96px,1fr) 34px 20px 34px 16px;align-items:baseline;column-gap:3px;white-space:nowrap}
-.plc-gl li{padding:6px 0;border-top:1px solid #eef1f7;font:600 11px/1.35 "Roboto Mono",ui-monospace,Menlo,monospace;color:#12264d}
-.plc-gh{position:sticky;top:0;z-index:1;padding:0 0 5px;background:#fff;border-bottom:1px solid #d9deea;font:800 9px/1 "Inter",Arial,sans-serif;letter-spacing:.02em;color:#66748d}
+.plc-log{container-type:inline-size}.plc-gl,.plc-gh{--gf:clamp(8.5px,calc((100vw - 100px)/27),11px)}
+@supports (width:1cqw){.plc-gl,.plc-gh{--gf:clamp(8px,calc(100cqw / 27.5),11px)}}   /* the line's type size follows the card, so all eight columns always fit, scrollbar or not */
+.plc-gl li,.plc-gh{display:grid;grid-template-columns:calc(var(--gf)*3.05) calc(var(--gf)*4.4) calc(var(--gf)*1.5) minmax(calc(var(--gf)*7.9),1fr) calc(var(--gf)*3.05) calc(var(--gf)*1.7) calc(var(--gf)*3.05) calc(var(--gf)*1.3);align-items:baseline;column-gap:2px;white-space:nowrap}
+.plc-gl li{padding:6px 0;border-top:1px solid #eef1f7;font:600 var(--gf)/1.35 "Roboto Mono",ui-monospace,Menlo,monospace;color:#12264d}
+.plc-gh{position:sticky;top:0;z-index:1;padding:0 0 5px;background:#fff;border-bottom:1px solid #d9deea;font:800 calc(var(--gf)*.72)/1 "Inter",Arial,sans-serif;color:#66748d}
 .plc-gl li:first-child{border-top:0}.plc-gl li>span,.plc-gl li>b,.plc-gh>span{min-width:0;overflow:hidden}.plc-gl .n,.plc-gh .n{text-align:right}
-.plc-gl .gd{color:#66748d}.plc-gl .go{color:#44546f;font-size:10px}.plc-gl .go i{margin-left:2px;padding:0 2px;border-radius:4px;background:#eef1f7;font:700 8.5px/1.5 "Inter",Arial,sans-serif;font-style:normal}
+.plc-gl .gd{color:#66748d}.plc-gl .go{color:#44546f;font-size:calc(var(--gf)*.82)}.plc-gl .go i{margin-left:2px;padding:0 1px;border-radius:3px;background:#eef1f7;font:700 calc(var(--gf)*.66)/1.5 "Inter",Arial,sans-serif;font-style:normal}
 .plc-gl .gm{font-weight:800}.plc-gl li.off{opacity:.6}.plc-gl li.live .gd{color:#0f8a47;font-weight:800}
 .plc-more{margin:6px 0 2px;padding:6px 12px;border:1px solid #d9deea;border-radius:999px;background:#fff;font:700 12px "Inter",Arial,sans-serif;color:#2c3796;cursor:pointer}
 .plc-keep{margin:10px 14px 0;font:600 11.5px/1.3 "Inter",Arial,sans-serif;color:#8a95ab}
