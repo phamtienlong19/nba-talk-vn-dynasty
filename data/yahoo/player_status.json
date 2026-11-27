@@ -1,5 +1,5 @@
 {
- "capturedAt": "2026-11-27T01:03:58Z",
+ "capturedAt": "2026-11-27T09:45:30Z",
  "source": "Yahoo public draft-analysis endpoint (config/yahoo_source.json registryUrl)",
  "note": "Yahoo player status as observed for the 600-player registry (O, Q, P, D, DTD, INJ, OFS, NA ...); healthy players have no entry. Display / evidence only. Rostered players' status on the cards comes from the verified roster snapshot.",
  "statuses": {
