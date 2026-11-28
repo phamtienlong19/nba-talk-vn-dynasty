@@ -8,3 +8,13 @@
 {"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:15:27Z","p":"5295","n":"Aaron Gordon","team":"franchise-07","slot":"BN","st":null,"g":null,"pos":["PF","C"]}
 {"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:15:27Z","p":"6402","n":"Jalen Smith","team":"franchise-07","slot":"PF","st":"P","g":"8:00 pm vs IND","pos":["PF","C"]}
 {"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:15:27Z","p":"10051","n":"Sidy Cissoko","team":"franchise-04","slot":null,"st":null,"g":null,"pos":["SF","PF"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"10575","n":"Christian Anderson","team":"franchise-15","slot":"PG","st":null,"g":"6:00 pm vs BKN","pos":["PG"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"10288","n":"Reed Sheppard","team":"franchise-15","slot":"SG","st":null,"g":"8:30 pm vs PHI","pos":["PG","SG"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"5842","n":"Derrick White","team":"franchise-15","slot":"BN","st":null,"g":null,"pos":["PG","SG"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"6698","n":"Dyson Daniels","team":"franchise-15","slot":"BN","st":null,"g":null,"pos":["SG","SF"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"10573","n":"Bennett Stirtz","team":"franchise-01","slot":"PG","st":null,"g":"8:00 pm @ MIL","pos":["PG"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"5638","n":"Jamal Murray","team":"franchise-01","slot":"BN","st":null,"g":null,"pos":["PG"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"10617","n":"Meleek Thomas","team":"franchise-01","slot":"--","st":null,"g":null,"pos":["SG"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"3704","n":"LeBron James","team":"franchise-14","slot":"PF","st":"O","g":"8:30 pm @ HOU","pos":["SF","PF"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"5754","n":"Alex Caruso","team":"franchise-14","slot":"F","st":null,"g":"8:00 pm @ MIL","pos":["SG","SF"]}
+{"kind":"state","date":"2026-11-28","capturedAt":"2026-11-28T08:30:27Z","p":"6256","n":"Dean Wade","team":"franchise-14","slot":"IL","st":"O","g":"8:30 pm @ HOU","pos":["SF","PF"]}
