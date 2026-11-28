@@ -257,3 +257,6 @@
 {"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T05:43:21Z","p":"3704","n":"LeBron James","team":"franchise-14","slot":"F","st":"O","g":"W, 111-87 @ IND","pos":["SF","PF"]}
 {"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T05:43:21Z","p":"6275","n":"Caleb Martin","team":"franchise-14","slot":"FC","st":"Q","g":"W, 113-109 @ PHX","pos":["SF","PF"]}
 {"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T05:43:21Z","p":"5294","n":"Joel Embiid","team":"franchise-07","slot":"C","st":"O","g":"W, 111-87 @ IND","pos":["C"]}
+{"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T05:47:20Z","p":"6035","n":"Anfernee Simons","team":"franchise-11","slot":"BN","st":null,"g":"W, 111-87 @ IND","pos":["PG","SG"]}
+{"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T05:47:20Z","p":"6267","n":"Max Strus","team":"franchise-11","slot":"--","st":null,"g":"L, 104-105 vs NOP","pos":["SF","PF"]}
+{"kind":"lock","date":"2026-11-27","capturedAt":"2026-11-28T05:47:20Z","team":"franchise-11","teamName":"Thịnh | Seattle SuperSonics","k":"478.p.6035","n":"Anfernee Simons","slot":"BN","st":null,"il":null,"game":"W, 111-87 @ IND","gs":"final","pos":["PG","SG"],"flags":[],"ie":0}
