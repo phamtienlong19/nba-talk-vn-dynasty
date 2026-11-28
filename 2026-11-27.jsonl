@@ -166,3 +166,5 @@
 {"kind":"lock","date":"2026-11-27","capturedAt":"2026-11-28T01:41:15Z","team":"franchise-12","teamName":"sup fam | Crashed for Caleb","k":"478.p.10460","n":"Joan Beringer","slot":"PF","st":null,"il":null,"game":"Q1 11:35, 0-0 vs MEM","gs":"live","pos":["PF","C"],"flags":[],"pre":{"st":null,"at":"2026-11-28T01:37:15Z"},"ie":0}
 {"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T01:45:15Z","p":"6017","n":"Mo Bamba","team":"franchise-01","slot":"BN","st":"O","g":"9:30 pm vs DEN","pos":["C"]}
 {"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T01:53:15Z","p":"10467","n":"Dylan Harper","team":"franchise-01","slot":"FC","st":"O","g":"9:30 pm vs LAL","pos":["PG","SG","SF"]}
+{"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T01:57:15Z","p":"5767","n":"De'Aaron Fox","team":"franchise-09","slot":"BN","st":null,"g":"9:30 pm vs LAL","pos":["PG"]}
+{"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T01:57:15Z","p":"10467","n":"Dylan Harper","team":"franchise-01","slot":"FC","st":null,"g":"9:30 pm vs LAL","pos":["PG","SG","SF"]}
