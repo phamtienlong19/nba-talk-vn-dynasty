@@ -260,3 +260,4 @@
 {"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T05:47:20Z","p":"6035","n":"Anfernee Simons","team":"franchise-11","slot":"BN","st":null,"g":"W, 111-87 @ IND","pos":["PG","SG"]}
 {"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T05:47:20Z","p":"6267","n":"Max Strus","team":"franchise-11","slot":"--","st":null,"g":"L, 104-105 vs NOP","pos":["SF","PF"]}
 {"kind":"lock","date":"2026-11-27","capturedAt":"2026-11-28T05:47:20Z","team":"franchise-11","teamName":"Thịnh | Seattle SuperSonics","k":"478.p.6035","n":"Anfernee Simons","slot":"BN","st":null,"il":null,"game":"W, 111-87 @ IND","gs":"final","pos":["PG","SG"],"flags":[],"ie":0}
+{"kind":"state","date":"2026-11-27","capturedAt":"2026-11-28T07:52:27Z","p":"6408","n":"Isaiah Stewart","team":"franchise-15","slot":"--","st":"O","g":"W, 114-109 @ MIN","pos":["PF","C"]}
